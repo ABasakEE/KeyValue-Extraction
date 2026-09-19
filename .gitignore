@@ -1,0 +1,44 @@
+# datasets are large and redistributable only under their own licenses — never commit.
+# Leading slash anchors this to the repo root: a bare "data/" would also swallow
+# src/data/, which is source code.
+/data/
+*.pdf
+*.png
+*.jpg
+*.tif
+!slides/figures/*.png
+!slides/figures/*.pdf
+
+# model artifacts
+*.ckpt
+*.safetensors
+*.bin
+checkpoints/
+runs/
+wandb/
+
+# results: commit the metrics JSON and plots, not the raw prediction dumps
+results/**/predictions/
+results/**/*.npz
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+.ipynb_checkpoints/
+
+# latex build products (Overleaf rebuilds these)
+slides/*.aux
+slides/*.bbl
+slides/*.bcf
+slides/*.blg
+slides/*.log
+slides/*.nav
+slides/*.out
+slides/*.run.xml
+slides/*.snm
+slides/*.toc
+slides/*.synctex.gz
+slides/main.pdf

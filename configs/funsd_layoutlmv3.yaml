@@ -1,0 +1,21 @@
+# Track A variant — the stronger multimodal baseline.
+#
+# LayoutLMv3 is CC-BY-NC-SA-4.0 (non-commercial). Fine for a course project;
+# state the license explicitly in the report and on the models slide.
+#
+# Published reference: FUNSD F1 90.29 (base), Huang et al., ACM MM 2022,
+# https://arxiv.org/abs/2204.08387
+
+backbone: layoutlmv3
+dataset: funsd
+data_root: data/funsd/dataset
+
+epochs: 20
+batch_size: 2          # ViT patches add memory pressure vs LiLT
+lr: 3.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/funsd_layoutlmv3

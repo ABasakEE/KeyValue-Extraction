@@ -1,0 +1,20 @@
+# Track A — pipeline sanity check.
+#
+# Target: entity F1 around 0.88 on FUNSD's standard 149/50 split, matching the
+# published LiLT community checkpoints. This number validates tokenization, box
+# normalization, subword alignment and the metric. It is NOT evidence of
+# cross-template generalization and must be labelled as such on the slide.
+
+backbone: lilt
+dataset: funsd
+data_root: data/funsd/dataset   # extracted FUNSD release; see README
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/funsd_lilt
