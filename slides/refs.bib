@@ -1,0 +1,279 @@
+% Machine-readable reference record for the IE 643 project.
+%
+% NOTE: the deck's reference frames in main.tex are hand-formatted to match the
+% course's mandated citation format exactly:
+%     Authors. Title, Venue, Year. URL
+% No stock biblatex style produces that shape, and instruction 17 penalises
+% deviation, so main.tex does not \printbibliography. This file exists for the
+% final stage-wise report and for anyone who wants to import the set.
+%
+% Every entry below was verified against its arXiv abstract page or the ACL
+% Anthology. Entries flagged UNVERIFIED still need a primary-source check before
+% they may appear on a slide.
+
+% ---------------------------------------------------------------- benchmarks --
+@inproceedings{wang2023vrdu,
+  author    = {Zilong Wang and Yichao Zhou and Wei Wei and Chen-Yu Lee and Sandeep Tata},
+  title     = {{VRDU}: A Benchmark for Visually-rich Document Understanding},
+  booktitle = {KDD},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2211.15421},
+  note      = {Author list and venue verified against the arXiv abstract page.}
+}
+
+@inproceedings{jaume2019funsd,
+  author    = {Guillaume Jaume and Hazim Kemal Ekenel and Jean-Philippe Thiran},
+  title     = {{FUNSD}: A Dataset for Form Understanding in Noisy Scanned Documents},
+  booktitle = {ICDAR-OST},
+  year      = {2019},
+  url       = {https://arxiv.org/abs/1905.13538}
+}
+
+@inproceedings{simsa2023docile,
+  author    = {{\v S}t{\v e}p{\'a}n {\v S}imsa and Milan {\v S}ulc and Michal U{\v r}i{\v c}{\'a}{\v r} and Yash Patel and Ahmed Hamdi and Mat{\v e}j Koci{\'a}n and Maty{\'a}{\v s} Skalick{\'y} and Ji{\v r}{\'i} Matas and Antoine Doucet and Micka{\"e}l Coustaty and Dimosthenis Karatzas},
+  title     = {{DocILE} Benchmark for Document Information Localization and Extraction},
+  booktitle = {ICDAR},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2302.05658},
+  note      = {UNVERIFIED: exact zero-shot vs seen-layout numbers not yet read from the PDF tables.}
+}
+
+@inproceedings{naparstek2024kvp10k,
+  author    = {Oshri Naparstek and Roi Pony and Inbar Shapira and Foad Abo Dahood and Ophir Azulai and Yevgeny Yaroker and Nadav Rubinstein and Maksym Lysak and Peter Staar and Ahmed Nassar and Nikolaos Livathinos and Christoph Auer and Elad Amrani and Idan Friedman and Orit Prince and Yevgeny Burshtein and Adi Raz Goldfarb and Udi Barzelay},
+  title     = {{KVP10k}: A Comprehensive Dataset for Key-Value Pair Extraction in Business Documents},
+  booktitle = {ICDAR},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2405.00505}
+}
+
+@misc{barrow2025commonforms,
+  author = {Joe Barrow and others},
+  title  = {{CommonForms}: A Large, Diverse Dataset for Form Field Detection},
+  year   = {2025},
+  url    = {https://arxiv.org/abs/2509.16506}
+}
+
+% ------------------------------------------- benchmark integrity / diagnosis --
+@inproceedings{laatiri2023redundancy,
+  author    = {Seif Laatiri and Pirashanth Ratnamogan and Joel Tang and Laurent Lam and William Vanhuffel and Fabien Caspani},
+  title     = {Information Redundancy and Biases in Public Document Information Extraction Benchmarks},
+  booktitle = {ICDAR},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2304.14936}
+}
+
+@inproceedings{he2023dogood,
+  author    = {Jiabang He and Yi Hu and Lei Wang and Xing Xu and Ning Liu and Hui Liu and Heng Tao Shen},
+  title     = {{Do-GOOD}: Towards Distribution Shift Evaluation for Pre-Trained Visual Document Understanding Models},
+  booktitle = {SIGIR},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2306.02623}
+}
+
+@misc{zhang2024ecfunsd,
+  author = {Ning Zhang and Hongfeng Zhao and Yue Xie and others},
+  title  = {Unveiling the Deficiencies of Pre-trained Text-and-Layout Models in Real-world Visually-rich Document Information Extraction},
+  year   = {2024},
+  url    = {https://arxiv.org/abs/2402.02379}
+}
+
+@inproceedings{lin2024peneo,
+  author    = {Zening Lin and Jiapeng Wang and Teng Li and Wenhui Liao and Dayi Huang and Longfei Xiong and Lianwen Jin},
+  title     = {{PEneo}: Unifying Line Extraction, Line Grouping, and Entity Linking for End-to-end Document Pair Extraction},
+  booktitle = {ACM Multimedia},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2401.03472}
+}
+
+% -------------------------------------------------------------- architectures --
+@inproceedings{xu2020layoutlm,
+  author    = {Yiheng Xu and Minghao Li and Lei Cui and Shaohan Huang and Furu Wei and Ming Zhou},
+  title     = {{LayoutLM}: Pre-training of Text and Layout for Document Image Understanding},
+  booktitle = {KDD},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/1912.13318}
+}
+
+@inproceedings{xu2021layoutlmv2,
+  author    = {Yang Xu and Yiheng Xu and Tengchao Lv and Lei Cui and Furu Wei and Guoxin Wang and Yijuan Lu and Dinei Florencio and Cha Zhang and Wanxiang Che and Min Zhang and Lidong Zhou},
+  title     = {{LayoutLMv2}: Multi-modal Pre-training for Visually-rich Document Understanding},
+  booktitle = {ACL},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2012.14740}
+}
+
+@inproceedings{huang2022layoutlmv3,
+  author    = {Yupan Huang and Tengchao Lv and Lei Cui and Yutong Lu and Furu Wei},
+  title     = {{LayoutLMv3}: Pre-training for Document AI with Unified Text and Image Masking},
+  booktitle = {ACM Multimedia},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2204.08387}
+}
+
+@inproceedings{wang2022lilt,
+  author    = {Jiapeng Wang and Lianwen Jin and Kai Ding},
+  title     = {{LiLT}: A Simple yet Effective Language-Independent Layout Transformer for Structured Document Understanding},
+  booktitle = {ACL},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2202.13669}
+}
+
+@inproceedings{hong2022bros,
+  author    = {Teakgyu Hong and Donghyun Kim and Mingi Ji and Wonseok Hwang and Daehyun Nam and Sungrae Park},
+  title     = {{BROS}: A Pre-trained Language Model Focusing on Text and Layout for Better Key Information Extraction from Documents},
+  booktitle = {AAAI},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2108.04539},
+  note      = {UNVERIFIED: the commonly cited FUNSD entity-linking F1 of 71.46 was not confirmed against the paper.}
+}
+
+@inproceedings{hwang2021spade,
+  author    = {Wonseok Hwang and Jinyeong Yim and Seunghyun Park and Sohee Yang and Minjoon Seo},
+  title     = {Spatial Dependency Parsing for Semi-Structured Document Information Extraction},
+  booktitle = {Findings of ACL},
+  year      = {2021},
+  url       = {https://arxiv.org/abs/2005.00642}
+}
+
+@inproceedings{lee2022formnet,
+  author    = {Chen-Yu Lee and Chun-Liang Li and Timothy Dozat and Vincent Perot and Guolong Su and Nan Hua and Joshua Ainslie and Renshen Wang and Yasuhisa Fujii and Tomas Pfister},
+  title     = {{FormNet}: Structural Encoding beyond Sequential Modeling in Form Document Information Extraction},
+  booktitle = {ACL},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2203.08411}
+}
+
+@inproceedings{lee2023formnetv2,
+  author    = {Chen-Yu Lee and Chun-Liang Li and Hao Zhang and Timothy Dozat and Vincent Perot and Guolong Su and Xiang Zhang and Kihyuk Sohn and Nikolay Glushnev and Renshen Wang and Joshua Ainslie and Shangbang Long and Siyang Qin and Yasuhisa Fujii and Nan Hua and Tomas Pfister},
+  title     = {{FormNetV2}: Multimodal Graph Contrastive Learning for Form Document Information Extraction},
+  booktitle = {ACL},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2305.02549}
+}
+
+@inproceedings{luo2023geolayoutlm,
+  author    = {Chuwei Luo and Changxu Cheng and Qi Zheng and Cong Yao},
+  title     = {{GeoLayoutLM}: Geometric Pre-training for Visual Information Extraction},
+  booktitle = {CVPR},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2304.10759}
+}
+
+@inproceedings{gemelli2022doc2graph,
+  author    = {Andrea Gemelli and Sanket Biswas and Enrico Civitelli and Josep Llad{\'o}s and Simone Marinai},
+  title     = {{Doc2Graph}: A Task Agnostic Document Understanding Framework Based on Graph Neural Networks},
+  booktitle = {ECCV Workshops},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2208.11168}
+}
+
+@inproceedings{yu2020pick,
+  author    = {Wenwen Yu and Ning Lu and Xianbiao Qi and Ping Gong and Rong Xiao},
+  title     = {{PICK}: Processing Key Information Extraction from Documents using Improved Graph Learning-Convolutional Networks},
+  booktitle = {ICPR},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2004.07464}
+}
+
+@misc{sun2021sdmgr,
+  author = {Hongbin Sun and Zhanghui Kuang and Xiaoyu Yue and Chenhao Lin and Wayne Zhang},
+  title  = {Spatial Dual-Modality Graph Reasoning for Key Information Extraction},
+  year   = {2021},
+  url    = {https://arxiv.org/abs/2103.14470}
+}
+
+@inproceedings{kim2022donut,
+  author    = {Geewook Kim and Teakgyu Hong and Moonbin Yim and JeongYeon Nam and Jinyoung Park and Jinyeong Yim and Wonseok Hwang and Sangdoo Yun and Dongyoon Han and Seunghyun Park},
+  title     = {{OCR}-free Document Understanding Transformer},
+  booktitle = {ECCV},
+  year      = {2022},
+  url       = {https://arxiv.org/abs/2111.15664}
+}
+
+@inproceedings{wang2024docllm,
+  author    = {Dongsheng Wang and Natraj Raman and Mathieu Sibue and Zhiqiang Ma and Petr Babkin and Simerjot Kaur and Yulong Pei and Armineh Nourbakhsh and Xiaomo Liu},
+  title     = {{DocLLM}: A Layout-Aware Generative Language Model for Multimodal Document Understanding},
+  booktitle = {ACL},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2401.00908}
+}
+
+@inproceedings{luo2024layoutllm,
+  author    = {Chuwei Luo and Yufan Shen and Zhaoqing Zhu and Qi Zheng and Zhi Yu and Cong Yao},
+  title     = {{LayoutLLM}: Layout Instruction Tuning with Large Language Models for Document Understanding},
+  booktitle = {CVPR},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2404.05225}
+}
+
+% ------------------------------------------------- generalization and transfer --
+@misc{dong2024knnformer,
+  author = {Yanfei Dong and Lambert Deng and Jiazheng Zhang and Xiaodong Yu and Ting Lin and Francesco Gelli and Soujanya Poria and Wee Sun Lee},
+  title  = {Lightweight Spatial Modeling for Combinatorial Information Extraction From Documents},
+  year   = {2024},
+  url    = {https://arxiv.org/abs/2405.06701},
+  note   = {The model is called KNN-Former; the name does not appear in the title. Title and authors verified against the arXiv abstract page.}
+}
+
+@misc{perot2023lmdx,
+  author = {Vincent Perot and Kai Kang and Florian Luisier and Guolong Su and Xiaoyu Sun and Ramya Sree Boppana and Zilong Wang and Zifeng Wang and Jiaqi Mu and Hao Zhang and Chen-Yu Lee and Nan Hua},
+  title  = {{LMDX}: Language Model-based Document Information Extraction and Localization},
+  year   = {2023},
+  url    = {https://arxiv.org/abs/2309.10952}
+}
+
+@inproceedings{colakoglu2025layiellm,
+  author    = {Gaye Colakoglu and G{\"u}rkan Solmaz and Jonathan F{\"u}rst},
+  title     = {Problem Solved? Information Extraction Design Space for Layout-Rich Documents using LLMs},
+  booktitle = {EMNLP},
+  year      = {2025},
+  url       = {https://arxiv.org/abs/2502.18179}
+}
+
+@inproceedings{lockard2020zeroshotceres,
+  author    = {Colin Lockard and Prashant Shiralkar and Xin Luna Dong and Hannaneh Hajishirzi},
+  title     = {{ZeroShotCeres}: Zero-Shot Relation Extraction from Semi-Structured Webpages},
+  booktitle = {ACL},
+  year      = {2020},
+  url       = {https://arxiv.org/abs/2005.07105}
+}
+
+@inproceedings{majumder2020representation,
+  author    = {Bodhisattwa Prasad Majumder and Navneet Potti and Sandeep Tata and James B. Wendt and Qi Zhao and Marc Najork},
+  title     = {Representation Learning for Information Extraction from Form-like Documents},
+  booktitle = {ACL},
+  year      = {2020},
+  url       = {https://aclanthology.org/2020.acl-main.580/}
+}
+
+@inproceedings{nguyen2024vrdsynth,
+  author    = {Thanh-Dat Nguyen and Tung Do-Viet and Hung Nguyen-Duy and Tuan-Hai Luu and Hung Le and Bach Le and Patanamon Thongtanunam},
+  title     = {{VRDSynth}: Synthesizing Programs for Multilingual Visually Rich Document Information Extraction},
+  booktitle = {ISSTA},
+  year      = {2024},
+  url       = {https://arxiv.org/abs/2407.06826}
+}
+
+@inproceedings{gurbuz2026identify,
+  author    = {Said G{\"u}rb{\"u}z and Ahmed Nassar and Christoph Auer and Maksym Lysak and others},
+  title     = {Identify, Locate, Link: End-to-End Key-Value Extraction from Document Images},
+  booktitle = {ICDAR},
+  year      = {2026},
+  url       = {https://arxiv.org/abs/2608.20868}
+}
+
+% ------------------------------------------------------------------- tooling --
+@inproceedings{groleau2023augraphy,
+  author    = {Alexander Groleau and Kok Wei Chee and Stefan Larson and Samay Maini and Jonathan Boarman},
+  title     = {Augraphy: A Data Augmentation Library for Document Images},
+  booktitle = {ICDAR},
+  year      = {2023},
+  url       = {https://arxiv.org/abs/2208.14558}
+}
+
+@misc{bai2025qwen25vl,
+  author = {Shuai Bai and Keqin Chen and Xuejing Liu and others},
+  title  = {{Qwen2.5-VL} Technical Report},
+  year   = {2025},
+  url    = {https://arxiv.org/abs/2502.13923}
+}
