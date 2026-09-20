@@ -51,6 +51,7 @@ class TrainConfig:
     warmup_ratio: float = 0.1
     max_length: int = 512
     seeds: tuple[int, ...] = (13, 21, 42)
+    subcorpus: str = "registration-form"
     n_train: int | None = None
     output_dir: str = "results/run"
 
@@ -187,10 +188,40 @@ def load_dataset(config: TrainConfig):
         n_val = max(1, int(0.15 * len(shuffled)))
         return shuffled[n_val:], shuffled[:n_val], test, LABEL_LIST, ID2LABEL
 
-    raise NotImplementedError(
-        f"Dataset {config.dataset!r} not wired up yet. VRDU support lands with "
-        "src/data/vrdu_loader.py in Track B."
-    )
+    if config.dataset == "vrdu":
+        from data.vrdu_loader import (
+            assert_no_template_leakage as vrdu_leak_check,
+            load_splits,
+            load_vrdu,
+            summarize as vrdu_summarize,
+            verify_template_recovery,
+        )
+
+        root = Path(config.data_root)
+        examples, label_list, id2label = load_vrdu(root, config.subcorpus)
+        print("VRDU:", json.dumps(vrdu_summarize(examples)))
+
+        splits_dir = root / config.subcorpus / "few_shot-splits"
+        print(verify_template_recovery(splits_dir))
+
+        # For the "standard" protocol path, use the first official UTL split
+        # as a convenience default.  The "matched" protocol path in main()
+        # handles the full MTL-vs-UTL comparison via splits.matched_size_protocol.
+        n = config.n_train or 200
+        official = load_splits(
+            examples, splits_dir, regime="UTL", n_train=n, seed=0, protocol="strict",
+        )
+        if not official:
+            raise FileNotFoundError(
+                f"No UTL split files found in {splits_dir} with n_train={n}, seed=0. "
+                f"Check that the VRDU few_shot-splits directory is populated."
+            )
+        split = official[0]
+        print(split.describe())
+        print(vrdu_leak_check(split))
+        return split.train, split.val, split.test, label_list, id2label
+
+    raise NotImplementedError(f"Unknown dataset {config.dataset!r}. Supported: 'funsd', 'vrdu'.")
 
 
 def main() -> None:
@@ -236,11 +267,72 @@ def main() -> None:
         out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
         print(f"\nmean test F1 {summary['mean_f1']:.4f} +/- {summary['std_f1']:.4f}  ->  {out}")
     else:
-        raise NotImplementedError(
-            "The matched MTL/UTL protocol needs template ids, which arrive with "
-            "src/data/vrdu_loader.py. src/data/splits.py already implements and "
-            "verifies the split itself."
-        )
+        # --protocol matched: the headline experiment.
+        # Train under both MTL and UTL at identical training-set size, measure
+        # the generalization gap.
+        if config.dataset != "vrdu":
+            raise ValueError(
+                f"--protocol matched requires a template-aware dataset (vrdu), "
+                f"got {config.dataset!r}."
+            )
+
+        from data.splits import assert_no_template_leakage, matched_size_protocol
+        from data.vrdu_loader import load_vrdu, summarize as vrdu_summarize
+
+        root = Path(config.data_root)
+        examples, label_list, id2label = load_vrdu(root, config.subcorpus)
+        print("VRDU:", json.dumps(vrdu_summarize(examples)))
+
+        n = config.n_train or 200
+        protocol = matched_size_protocol(examples, n_train=n, seed=config.seeds[0])
+
+        all_results: dict[str, list[dict]] = {"MTL": [], "UTL": []}
+
+        for regime in ("MTL", "UTL"):
+            folds = protocol[regime]
+            for fold_idx, split in enumerate(folds):
+                proof = assert_no_template_leakage(split)
+                print(f"\n{proof}")
+
+                for seed in config.seeds:
+                    tag = f"{regime}/fold{fold_idx}/seed{seed}"
+                    print(f"\n=== {tag} ===")
+                    print(split.describe())
+                    set_seed(seed)
+
+                    classifier = TokenClassifier(
+                        config.backbone, len(label_list), id2label, config.max_length
+                    )
+                    result = train_one(
+                        classifier, split.train, split.val, split.test, config, device,
+                    )
+                    result["seed"] = seed
+                    result["fold"] = fold_idx
+                    result["regime"] = regime
+                    result["held_out"] = list(split.held_out_templates)
+                    print(result["cross_check"])
+                    print(f"  test F1 {result['test']['f1']:.4f}")
+                    all_results[regime].append(result)
+
+        mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
+        utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
+        gap = generalization_gap(mtl_f1s, utl_f1s)
+
+        summary = {
+            "config": vars(config) | {"seeds": list(config.seeds)},
+            "protocol": "matched",
+            "n_train": n,
+            "MTL": all_results["MTL"],
+            "UTL": all_results["UTL"],
+            "gap": gap,
+        }
+        out = output_dir / "metrics.json"
+        out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        print(f"\n{'=' * 60}")
+        print(f"MTL mean F1: {gap['mtl_mean_f1']:.4f} +/- {gap['mtl_std']:.4f}")
+        print(f"UTL mean F1: {gap['utl_mean_f1']:.4f} +/- {gap['utl_std']:.4f}")
+        print(f"GAP (MTL - UTL): {gap['gap_f1']:.4f}  ({gap['relative_drop_pct']:.1f}% relative drop)")
+        print(f"-> {out}")
 
 
 if __name__ == "__main__":
