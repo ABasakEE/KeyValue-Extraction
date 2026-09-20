@@ -30,6 +30,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from evaluate import cross_check, entity_f1, generalization_gap, malformed_tag_rate
 from models.token_clf import TokenClassifier
+from tqdm.auto import tqdm
 
 
 def set_seed(seed: int) -> None:
@@ -94,12 +95,18 @@ def make_collator(classifier: TokenClassifier):
 
 
 @torch.no_grad()
-def predict(classifier: TokenClassifier, loader: DataLoader, device: torch.device):
+def predict(
+    classifier: TokenClassifier,
+    loader: DataLoader,
+    device: torch.device,
+    desc: str | None = None,
+):
     classifier.model.eval()
     predictions: list[list[int]] = []
     references: list[list[int]] = []
 
-    for encoded, batch in loader:
+    it = tqdm(loader, desc=desc, leave=False) if desc else loader
+    for encoded, batch in it:
         inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
         logits = classifier.model(**inputs).logits.cpu()
         for i, example in enumerate(batch):
@@ -134,10 +141,12 @@ def train_one(
 
     best_val_f1, best_state, history = -1.0, None, []
 
-    for epoch in range(config.epochs):
+    epoch_pbar = tqdm(range(config.epochs), desc="Training epochs", unit="epoch")
+    for epoch in epoch_pbar:
         classifier.model.train()
         epoch_loss = 0.0
-        for encoded, _ in train_loader:
+        step_pbar = tqdm(train_loader, desc=f"Ep {epoch+1}/{config.epochs}", leave=False, unit="batch")
+        for encoded, _ in step_pbar:
             inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
             loss = classifier.model(**inputs).loss
             loss.backward()
@@ -146,10 +155,13 @@ def train_one(
             scheduler.step()
             optimizer.zero_grad()
             epoch_loss += loss.item()
+            step_pbar.set_postfix(loss=f"{loss.item():.4f}")
 
-        val_pred, val_ref = predict(classifier, val_loader, device)
+        avg_loss = epoch_loss / max(1, len(train_loader))
+        val_pred, val_ref = predict(classifier, val_loader, device, desc=f"Val ep {epoch+1}")
         val_f1 = entity_f1(val_pred, val_ref, classifier.model.config.id2label).f1
-        history.append({"epoch": epoch, "train_loss": round(epoch_loss / max(1, len(train_loader)), 4), "val_f1": round(val_f1, 4)})
+        history.append({"epoch": epoch, "train_loss": round(avg_loss, 4), "val_f1": round(val_f1, 4)})
+        epoch_pbar.set_postfix(train_loss=f"{avg_loss:.4f}", val_f1=f"{val_f1:.4f}", best_val=f"{max(best_val_f1, val_f1):.4f}")
         print(f"  epoch {epoch:>2}  loss {history[-1]['train_loss']:.4f}  val_f1 {val_f1:.4f}")
 
         if val_f1 > best_val_f1:
@@ -159,7 +171,7 @@ def train_one(
     if best_state is not None:
         classifier.model.load_state_dict(best_state)
 
-    test_pred, test_ref = predict(classifier, test_loader, device)
+    test_pred, test_ref = predict(classifier, test_loader, device, desc="Evaluating test")
     id2label = classifier.model.config.id2label
     scores = entity_f1(test_pred, test_ref, id2label)
 
@@ -246,7 +258,7 @@ def main() -> None:
             train_ex = train_ex[: config.n_train]
 
         runs = []
-        for seed in config.seeds:
+        for seed in tqdm(config.seeds, desc="Seeds"):
             print(f"\n=== seed {seed} ===")
             set_seed(seed)
             classifier = TokenClassifier(config.backbone, len(label_list), id2label, config.max_length)
@@ -290,11 +302,11 @@ def main() -> None:
 
         for regime in ("MTL", "UTL"):
             folds = protocol[regime]
-            for fold_idx, split in enumerate(folds):
+            for fold_idx, split in enumerate(tqdm(folds, desc=f"{regime} Folds")):
                 proof = assert_no_template_leakage(split)
                 print(f"\n{proof}")
 
-                for seed in config.seeds:
+                for seed in tqdm(config.seeds, desc=f"{regime} fold {fold_idx} seeds", leave=False):
                     tag = f"{regime}/fold{fold_idx}/seed{seed}"
                     print(f"\n=== {tag} ===")
                     print(split.describe())
