@@ -83,15 +83,28 @@ class TokenClassifier:
             if len(words) != len(boxes):
                 raise ValueError(f"{len(words)} words but {len(boxes)} boxes — these must correspond 1:1")
 
-        encoding = self.tokenizer(
-            words_batch,
-            boxes=boxes_batch,
-            is_split_into_words=True,
-            padding="max_length",
-            truncation=True,
-            max_length=self.max_length,
-            return_tensors="pt",
-        )
+        tokenize_kwargs = {
+            "padding": "max_length",
+            "truncation": True,
+            "max_length": self.max_length,
+            "return_tensors": "pt",
+        }
+        if boxes_batch is not None:
+            tokenize_kwargs["boxes"] = boxes_batch
+
+        # LayoutLMv3Tokenizer natively accepts list[list[str]] when boxes is provided and
+        # raises TypeError if is_split_into_words is passed. Other tokenizers (e.g. BROS) require it.
+        try:
+            encoding = self.tokenizer(
+                words_batch,
+                is_split_into_words=True,
+                **tokenize_kwargs,
+            )
+        except TypeError:
+            encoding = self.tokenizer(
+                words_batch,
+                **tokenize_kwargs,
+            )
 
         all_word_ids: list[list[int | None]] = []
         aligned_labels: list[list[int]] = []
