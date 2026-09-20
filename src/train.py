@@ -28,9 +28,17 @@ import torch
 import yaml
 from torch.utils.data import DataLoader, Dataset
 
+import sys
+
 from evaluate import cross_check, entity_f1, generalization_gap, malformed_tag_rate
 from models.token_clf import TokenClassifier
 from tqdm.auto import tqdm
+
+TQDM_KWARGS = {
+    "file": sys.stdout,
+    "ncols": 88,
+    "mininterval": 0.2,
+}
 
 
 def set_seed(seed: int) -> None:
@@ -105,7 +113,7 @@ def predict(
     predictions: list[list[int]] = []
     references: list[list[int]] = []
 
-    it = tqdm(loader, desc=desc, leave=False) if desc else loader
+    it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
     for encoded, batch in it:
         inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
         logits = classifier.model(**inputs).logits.cpu()
@@ -141,12 +149,17 @@ def train_one(
 
     best_val_f1, best_state, history = -1.0, None, []
 
-    epoch_pbar = tqdm(range(config.epochs), desc="Training epochs", unit="epoch")
-    for epoch in epoch_pbar:
+    for epoch in range(config.epochs):
         classifier.model.train()
         epoch_loss = 0.0
-        step_pbar = tqdm(train_loader, desc=f"Ep {epoch+1}/{config.epochs}", leave=False, unit="batch")
-        for encoded, _ in step_pbar:
+        pbar = tqdm(
+            train_loader,
+            desc=f"Epoch {epoch+1:>2}/{config.epochs}",
+            leave=True,
+            unit="b",
+            **TQDM_KWARGS,
+        )
+        for encoded, _ in pbar:
             inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
             loss = classifier.model(**inputs).loss
             loss.backward()
@@ -155,23 +168,24 @@ def train_one(
             scheduler.step()
             optimizer.zero_grad()
             epoch_loss += loss.item()
-            step_pbar.set_postfix(loss=f"{loss.item():.4f}")
+            pbar.set_postfix(loss=f"{loss.item():.3f}")
 
         avg_loss = epoch_loss / max(1, len(train_loader))
-        val_pred, val_ref = predict(classifier, val_loader, device, desc=f"Val ep {epoch+1}")
+        val_pred, val_ref = predict(classifier, val_loader, device)
         val_f1 = entity_f1(val_pred, val_ref, classifier.model.config.id2label).f1
         history.append({"epoch": epoch, "train_loss": round(avg_loss, 4), "val_f1": round(val_f1, 4)})
-        epoch_pbar.set_postfix(train_loss=f"{avg_loss:.4f}", val_f1=f"{val_f1:.4f}", best_val=f"{max(best_val_f1, val_f1):.4f}")
-        print(f"  epoch {epoch:>2}  loss {history[-1]['train_loss']:.4f}  val_f1 {val_f1:.4f}")
 
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
             best_state = {k: v.detach().cpu().clone() for k, v in classifier.model.state_dict().items()}
 
+        pbar.set_postfix(loss=f"{avg_loss:.3f}", val_f1=f"{val_f1:.3f}", best=f"{best_val_f1:.3f}")
+        pbar.close()
+
     if best_state is not None:
         classifier.model.load_state_dict(best_state)
 
-    test_pred, test_ref = predict(classifier, test_loader, device, desc="Evaluating test")
+    test_pred, test_ref = predict(classifier, test_loader, device, desc="Test eval")
     id2label = classifier.model.config.id2label
     scores = entity_f1(test_pred, test_ref, id2label)
 
@@ -258,14 +272,13 @@ def main() -> None:
             train_ex = train_ex[: config.n_train]
 
         runs = []
-        for seed in tqdm(config.seeds, desc="Seeds"):
-            print(f"\n=== seed {seed} ===")
+        for seed in config.seeds:
+            print(f"\n=== Seed {seed} ===", flush=True)
             set_seed(seed)
             classifier = TokenClassifier(config.backbone, len(label_list), id2label, config.max_length)
             result = train_one(classifier, train_ex, val_ex, test_ex, config, device)
             result["seed"] = seed
-            print(result["cross_check"])
-            print(f"  test F1 {result['test']['f1']:.4f}")
+            print(f"Seed {seed} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
             runs.append(result)
 
         f1s = [r["test"]["f1"] for r in runs]
@@ -302,14 +315,14 @@ def main() -> None:
 
         for regime in ("MTL", "UTL"):
             folds = protocol[regime]
-            for fold_idx, split in enumerate(tqdm(folds, desc=f"{regime} Folds")):
+            for fold_idx, split in enumerate(folds):
                 proof = assert_no_template_leakage(split)
-                print(f"\n{proof}")
+                print(f"\n{proof}", flush=True)
 
-                for seed in tqdm(config.seeds, desc=f"{regime} fold {fold_idx} seeds", leave=False):
+                for seed in config.seeds:
                     tag = f"{regime}/fold{fold_idx}/seed{seed}"
-                    print(f"\n=== {tag} ===")
-                    print(split.describe())
+                    print(f"\n=== {tag} ===", flush=True)
+                    print(split.describe(), flush=True)
                     set_seed(seed)
 
                     classifier = TokenClassifier(
@@ -322,8 +335,7 @@ def main() -> None:
                     result["fold"] = fold_idx
                     result["regime"] = regime
                     result["held_out"] = list(split.held_out_templates)
-                    print(result["cross_check"])
-                    print(f"  test F1 {result['test']['f1']:.4f}")
+                    print(f"{tag} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
                     all_results[regime].append(result)
 
         mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
