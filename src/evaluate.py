@@ -32,12 +32,20 @@ class EntityScores:
 
     def as_dict(self) -> dict:
         return {
-            "precision": round(self.precision, 4),
-            "recall": round(self.recall, 4),
-            "f1": round(self.f1, 4),
-            "support": self.support,
-            "truncated_words": self.truncated_words,
-            "per_type": self.per_type,
+            "precision": round(float(self.precision), 4),
+            "recall": round(float(self.recall), 4),
+            "f1": round(float(self.f1), 4),
+            "support": int(self.support),
+            "truncated_words": int(self.truncated_words),
+            "per_type": {
+                k: {
+                    "precision": round(float(v["precision"]), 4),
+                    "recall": round(float(v["recall"]), 4),
+                    "f1": round(float(v["f1"]), 4),
+                    "support": int(v["support"]),
+                }
+                for k, v in self.per_type.items()
+            },
         }
 
 
@@ -82,22 +90,22 @@ def entity_f1(
     )
     per_type = {
         key: {
-            "precision": round(value["precision"], 4),
-            "recall": round(value["recall"], 4),
-            "f1": round(value["f1-score"], 4),
-            "support": value["support"],
+            "precision": round(float(value["precision"]), 4),
+            "recall": round(float(value["recall"]), 4),
+            "f1": round(float(value["f1-score"]), 4),
+            "support": int(value["support"]),
         }
         for key, value in report.items()
         if key not in {"micro avg", "macro avg", "weighted avg"}
     }
 
     return EntityScores(
-        precision=precision_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0),
-        recall=recall_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0),
-        f1=f1_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0),
-        support=sum(len(row) for row in ref_tags),
+        precision=float(precision_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0)),
+        recall=float(recall_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0)),
+        f1=float(f1_score(ref_tags, pred_tags, scheme=IOB2, mode="strict", zero_division=0)),
+        support=int(sum(len(row) for row in ref_tags)),
         per_type=per_type,
-        truncated_words=count_truncated(predictions),
+        truncated_words=int(count_truncated(predictions)),
     )
 
 

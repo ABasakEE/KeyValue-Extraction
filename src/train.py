@@ -41,6 +41,19 @@ TQDM_KWARGS = {
 }
 
 
+def json_serializable(obj):
+    """Fallback serializer for json.dumps to handle numpy/torch scalars."""
+    if isinstance(obj, (np.integer,)):
+        return int(obj)
+    if isinstance(obj, (np.floating,)):
+        return float(obj)
+    if isinstance(obj, (np.ndarray,)):
+        return obj.tolist()
+    if hasattr(obj, "item"):
+        return obj.item()
+    return str(obj)
+
+
 def set_seed(seed: int) -> None:
     random.seed(seed)
     np.random.seed(seed)
@@ -133,6 +146,7 @@ def train_one(
     test_examples: list,
     config: TrainConfig,
     device: torch.device,
+    checkpoint_dir: Path | None = None,
 ) -> dict:
     """Fine-tune once and return test metrics for the best-validation checkpoint."""
     collate = make_collator(classifier)
@@ -148,6 +162,8 @@ def train_one(
     )
 
     best_val_f1, best_state, history = -1.0, None, []
+    if checkpoint_dir is not None:
+        checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(config.epochs):
         classifier.model.train()
@@ -178,6 +194,16 @@ def train_one(
         if val_f1 > best_val_f1:
             best_val_f1 = val_f1
             best_state = {k: v.detach().cpu().clone() for k, v in classifier.model.state_dict().items()}
+            if checkpoint_dir is not None:
+                torch.save(best_state, checkpoint_dir / "best_model.pt")
+                meta = {
+                    "epoch": epoch,
+                    "best_val_f1": round(best_val_f1, 4),
+                    "train_loss": round(avg_loss, 4),
+                }
+                (checkpoint_dir / "best_meta.json").write_text(
+                    json.dumps(meta, indent=2, default=json_serializable), encoding="utf-8"
+                )
 
         pbar.set_postfix(loss=f"{avg_loss:.3f}", val_f1=f"{val_f1:.3f}", best=f"{best_val_f1:.3f}")
         pbar.close()
@@ -189,13 +215,23 @@ def train_one(
     id2label = classifier.model.config.id2label
     scores = entity_f1(test_pred, test_ref, id2label)
 
-    return {
+    res = {
         "test": scores.as_dict(),
         "best_val_f1": round(best_val_f1, 4),
         "history": history,
         "malformed_tags": malformed_tag_rate(test_pred, id2label),
         "cross_check": cross_check(test_pred, test_ref, id2label),
     }
+
+    if checkpoint_dir is not None:
+        (checkpoint_dir / "result.json").write_text(
+            json.dumps(res, indent=2, default=json_serializable), encoding="utf-8"
+        )
+        (checkpoint_dir / "history.json").write_text(
+            json.dumps(history, indent=2, default=json_serializable), encoding="utf-8"
+        )
+
+    return res
 
 
 def load_dataset(config: TrainConfig):
@@ -273,23 +309,47 @@ def main() -> None:
 
         runs = []
         for seed in config.seeds:
+            run_dir = output_dir / f"seed_{seed}"
+            result_file = run_dir / "result.json"
+
+            if result_file.exists():
+                print(f"\n=== Seed {seed} (resuming from checkpoint: {result_file}) ===", flush=True)
+                try:
+                    cached = json.loads(result_file.read_text(encoding="utf-8"))
+                    print(f"  Loaded existing result: Test F1 {cached['test']['f1']:.4f}", flush=True)
+                    runs.append(cached)
+                    continue
+                except Exception as e:
+                    print(f"  Warning: Failed reading {result_file} ({e}), re-running Seed {seed}...", flush=True)
+
             print(f"\n=== Seed {seed} ===", flush=True)
             set_seed(seed)
             classifier = TokenClassifier(config.backbone, len(label_list), id2label, config.max_length)
-            result = train_one(classifier, train_ex, val_ex, test_ex, config, device)
+            result = train_one(classifier, train_ex, val_ex, test_ex, config, device, checkpoint_dir=run_dir)
             result["seed"] = seed
             print(f"Seed {seed} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
             runs.append(result)
+
+            # Incremental checkpoint of metrics.json after each seed completes
+            f1s = [r["test"]["f1"] for r in runs]
+            summary = {
+                "config": vars(config) | {"seeds": list(config.seeds)},
+                "runs": runs,
+                "mean_f1": round(sum(f1s) / len(f1s), 4),
+                "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4) if len(f1s) > 1 else 0.0,
+            }
+            out = output_dir / "metrics.json"
+            out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
 
         f1s = [r["test"]["f1"] for r in runs]
         summary = {
             "config": vars(config) | {"seeds": list(config.seeds)},
             "runs": runs,
             "mean_f1": round(sum(f1s) / len(f1s), 4),
-            "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4),
+            "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4) if len(f1s) > 1 else 0.0,
         }
         out = output_dir / "metrics.json"
-        out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
         print(f"\nmean test F1 {summary['mean_f1']:.4f} +/- {summary['std_f1']:.4f}  ->  {out}")
     else:
         # --protocol matched: the headline experiment.
@@ -321,6 +381,19 @@ def main() -> None:
 
                 for seed in config.seeds:
                     tag = f"{regime}/fold{fold_idx}/seed{seed}"
+                    run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
+                    result_file = run_dir / "result.json"
+
+                    if result_file.exists():
+                        print(f"\n=== {tag} (resuming from checkpoint: {result_file}) ===", flush=True)
+                        try:
+                            cached = json.loads(result_file.read_text(encoding="utf-8"))
+                            print(f"  Loaded existing result: Test F1 {cached['test']['f1']:.4f}", flush=True)
+                            all_results[regime].append(cached)
+                            continue
+                        except Exception as e:
+                            print(f"  Warning: Failed reading {result_file} ({e}), re-running {tag}...", flush=True)
+
                     print(f"\n=== {tag} ===", flush=True)
                     print(split.describe(), flush=True)
                     set_seed(seed)
@@ -329,7 +402,7 @@ def main() -> None:
                         config.backbone, len(label_list), id2label, config.max_length
                     )
                     result = train_one(
-                        classifier, split.train, split.val, split.test, config, device,
+                        classifier, split.train, split.val, split.test, config, device, checkpoint_dir=run_dir
                     )
                     result["seed"] = seed
                     result["fold"] = fold_idx
@@ -337,6 +410,22 @@ def main() -> None:
                     result["held_out"] = list(split.held_out_templates)
                     print(f"{tag} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
                     all_results[regime].append(result)
+
+                    # Incremental checkpoint of metrics.json after each fold/seed completes
+                    mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
+                    utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
+                    gap = generalization_gap(mtl_f1s, utl_f1s) if (mtl_f1s and utl_f1s) else {}
+
+                    summary = {
+                        "config": vars(config) | {"seeds": list(config.seeds)},
+                        "protocol": "matched",
+                        "n_train": n,
+                        "MTL": all_results["MTL"],
+                        "UTL": all_results["UTL"],
+                        "gap": gap,
+                    }
+                    out = output_dir / "metrics.json"
+                    out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
 
         mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
         utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
@@ -351,7 +440,7 @@ def main() -> None:
             "gap": gap,
         }
         out = output_dir / "metrics.json"
-        out.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+        out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
         print(f"\n{'=' * 60}")
         print(f"MTL mean F1: {gap['mtl_mean_f1']:.4f} +/- {gap['mtl_std']:.4f}")
         print(f"UTL mean F1: {gap['utl_mean_f1']:.4f} +/- {gap['utl_std']:.4f}")

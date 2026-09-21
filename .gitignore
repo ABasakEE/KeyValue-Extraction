@@ -13,6 +13,7 @@
 *.ckpt
 *.safetensors
 *.bin
+*.pt
 checkpoints/
 runs/
 wandb/
