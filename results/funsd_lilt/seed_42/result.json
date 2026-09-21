@@ -1,0 +1,138 @@
+{
+  "test": {
+    "precision": 0.8014,
+    "recall": 0.8079,
+    "f1": 0.8046,
+    "support": 8356,
+    "truncated_words": 351,
+    "per_type": {
+      "ANSWER": {
+        "precision": 0.7701,
+        "recall": 0.8075,
+        "f1": 0.7884,
+        "support": 805
+      },
+      "HEADER": {
+        "precision": 0.5234,
+        "recall": 0.4706,
+        "f1": 0.4956,
+        "support": 119
+      },
+      "QUESTION": {
+        "precision": 0.8555,
+        "recall": 0.8465,
+        "f1": 0.851,
+        "support": 1049
+      }
+    }
+  },
+  "best_val_f1": 0.7593,
+  "history": [
+    {
+      "epoch": 0,
+      "train_loss": 1.762,
+      "val_f1": 0.3798
+    },
+    {
+      "epoch": 1,
+      "train_loss": 1.1615,
+      "val_f1": 0.6149
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.7585,
+      "val_f1": 0.6453
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.5529,
+      "val_f1": 0.7195
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.384,
+      "val_f1": 0.7216
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.2687,
+      "val_f1": 0.7141
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.2257,
+      "val_f1": 0.7356
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.1734,
+      "val_f1": 0.7168
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.1267,
+      "val_f1": 0.742
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.1048,
+      "val_f1": 0.729
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0865,
+      "val_f1": 0.7516
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0695,
+      "val_f1": 0.7317
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0574,
+      "val_f1": 0.7547
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0499,
+      "val_f1": 0.7448
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0327,
+      "val_f1": 0.748
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0288,
+      "val_f1": 0.7395
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0233,
+      "val_f1": 0.7473
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.018,
+      "val_f1": 0.7482
+    },
+    {
+      "epoch": 18,
+      "train_loss": 0.0156,
+      "val_f1": 0.7564
+    },
+    {
+      "epoch": 19,
+      "train_loss": 0.0157,
+      "val_f1": 0.7593
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 88,
+    "total_i_tags": 4089,
+    "rate": 0.0215
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8046 == independent F1=0.8046 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7891 (spread 0.0155)\n  malformed I- tags: 88/4089 (2.1%)"
+}

@@ -1,0 +1,442 @@
+{
+  "config": {
+    "backbone": "lilt",
+    "dataset": "funsd",
+    "data_root": "data/funsd/dataset",
+    "epochs": 20,
+    "batch_size": 4,
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 512,
+    "seeds": [
+      13,
+      21,
+      42
+    ],
+    "subcorpus": "registration-form",
+    "n_train": null,
+    "output_dir": "results/funsd_lilt"
+  },
+  "runs": [
+    {
+      "test": {
+        "precision": 0.7704,
+        "recall": 0.7856,
+        "f1": 0.7779,
+        "support": 8356,
+        "truncated_words": 351,
+        "per_type": {
+          "ANSWER": {
+            "precision": 0.7213,
+            "recall": 0.7652,
+            "f1": 0.7426,
+            "support": 805
+          },
+          "HEADER": {
+            "precision": 0.5567,
+            "recall": 0.4538,
+            "f1": 0.5,
+            "support": 119
+          },
+          "QUESTION": {
+            "precision": 0.8294,
+            "recall": 0.8389,
+            "f1": 0.8341,
+            "support": 1049
+          }
+        }
+      },
+      "best_val_f1": 0.7595,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1.7474,
+          "val_f1": 0.3308
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1.1705,
+          "val_f1": 0.607
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.7758,
+          "val_f1": 0.675
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.5861,
+          "val_f1": 0.6764
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.4392,
+          "val_f1": 0.6919
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.3264,
+          "val_f1": 0.729
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.2535,
+          "val_f1": 0.7192
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1826,
+          "val_f1": 0.7168
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1371,
+          "val_f1": 0.7237
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1208,
+          "val_f1": 0.7294
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0854,
+          "val_f1": 0.7206
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0591,
+          "val_f1": 0.7399
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0537,
+          "val_f1": 0.7393
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0374,
+          "val_f1": 0.7234
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0395,
+          "val_f1": 0.7312
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.0287,
+          "val_f1": 0.7595
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0249,
+          "val_f1": 0.7501
+        },
+        {
+          "epoch": 17,
+          "train_loss": 0.0198,
+          "val_f1": 0.748
+        },
+        {
+          "epoch": 18,
+          "train_loss": 0.0175,
+          "val_f1": 0.7432
+        },
+        {
+          "epoch": 19,
+          "train_loss": 0.0174,
+          "val_f1": 0.7478
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 97,
+        "total_i_tags": 4094,
+        "rate": 0.0237
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.7779 == independent F1=0.7779 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7614 (spread 0.0165)\n  malformed I- tags: 97/4094 (2.4%)",
+      "seed": 13
+    },
+    {
+      "test": {
+        "precision": 0.788,
+        "recall": 0.8044,
+        "f1": 0.7961,
+        "support": 8356,
+        "truncated_words": 351,
+        "per_type": {
+          "ANSWER": {
+            "precision": 0.7573,
+            "recall": 0.8099,
+            "f1": 0.7827,
+            "support": 805
+          },
+          "HEADER": {
+            "precision": 0.5304,
+            "recall": 0.5126,
+            "f1": 0.5214,
+            "support": 119
+          },
+          "QUESTION": {
+            "precision": 0.842,
+            "recall": 0.8332,
+            "f1": 0.8376,
+            "support": 1049
+          }
+        }
+      },
+      "best_val_f1": 0.7652,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1.7477,
+          "val_f1": 0.3594
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1.1571,
+          "val_f1": 0.6121
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.7657,
+          "val_f1": 0.6534
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.5362,
+          "val_f1": 0.6659
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.4215,
+          "val_f1": 0.7036
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.2944,
+          "val_f1": 0.7379
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.2207,
+          "val_f1": 0.7335
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1811,
+          "val_f1": 0.7123
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1296,
+          "val_f1": 0.7357
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1098,
+          "val_f1": 0.7286
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0905,
+          "val_f1": 0.7509
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0566,
+          "val_f1": 0.7552
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0443,
+          "val_f1": 0.7596
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0391,
+          "val_f1": 0.7617
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0332,
+          "val_f1": 0.7395
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.0273,
+          "val_f1": 0.7493
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0209,
+          "val_f1": 0.7598
+        },
+        {
+          "epoch": 17,
+          "train_loss": 0.0161,
+          "val_f1": 0.7652
+        },
+        {
+          "epoch": 18,
+          "train_loss": 0.0148,
+          "val_f1": 0.7612
+        },
+        {
+          "epoch": 19,
+          "train_loss": 0.0142,
+          "val_f1": 0.7634
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 91,
+        "total_i_tags": 4015,
+        "rate": 0.0227
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.7961 == independent F1=0.7961 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7793 (spread 0.0168)\n  malformed I- tags: 91/4015 (2.3%)",
+      "seed": 21
+    },
+    {
+      "test": {
+        "precision": 0.8014,
+        "recall": 0.8079,
+        "f1": 0.8046,
+        "support": 8356,
+        "truncated_words": 351,
+        "per_type": {
+          "ANSWER": {
+            "precision": 0.7701,
+            "recall": 0.8075,
+            "f1": 0.7884,
+            "support": 805
+          },
+          "HEADER": {
+            "precision": 0.5234,
+            "recall": 0.4706,
+            "f1": 0.4956,
+            "support": 119
+          },
+          "QUESTION": {
+            "precision": 0.8555,
+            "recall": 0.8465,
+            "f1": 0.851,
+            "support": 1049
+          }
+        }
+      },
+      "best_val_f1": 0.7593,
+      "history": [
+        {
+          "epoch": 0,
+          "train_loss": 1.762,
+          "val_f1": 0.3798
+        },
+        {
+          "epoch": 1,
+          "train_loss": 1.1615,
+          "val_f1": 0.6149
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.7585,
+          "val_f1": 0.6453
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.5529,
+          "val_f1": 0.7195
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.384,
+          "val_f1": 0.7216
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.2687,
+          "val_f1": 0.7141
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.2257,
+          "val_f1": 0.7356
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1734,
+          "val_f1": 0.7168
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1267,
+          "val_f1": 0.742
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1048,
+          "val_f1": 0.729
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0865,
+          "val_f1": 0.7516
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0695,
+          "val_f1": 0.7317
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0574,
+          "val_f1": 0.7547
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0499,
+          "val_f1": 0.7448
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0327,
+          "val_f1": 0.748
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.0288,
+          "val_f1": 0.7395
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0233,
+          "val_f1": 0.7473
+        },
+        {
+          "epoch": 17,
+          "train_loss": 0.018,
+          "val_f1": 0.7482
+        },
+        {
+          "epoch": 18,
+          "train_loss": 0.0156,
+          "val_f1": 0.7564
+        },
+        {
+          "epoch": 19,
+          "train_loss": 0.0157,
+          "val_f1": 0.7593
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 88,
+        "total_i_tags": 4089,
+        "rate": 0.0215
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8046 == independent F1=0.8046 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7891 (spread 0.0155)\n  malformed I- tags: 88/4089 (2.1%)",
+      "seed": 42
+    }
+  ],
+  "mean_f1": 0.7929,
+  "std_f1": 0.0136
+}

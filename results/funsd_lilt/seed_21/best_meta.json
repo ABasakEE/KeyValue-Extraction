@@ -1,0 +1,5 @@
+{
+  "epoch": 17,
+  "best_val_f1": 0.7652,
+  "train_loss": 0.0161
+}
