@@ -24,6 +24,7 @@
 \usepackage{tikz}
 \usepackage{xcolor}
 \usepackage{amsmath}
+\usepackage{graphicx}
 \usetikzlibrary{arrows.meta, positioning}
 
 \renewcommand{\arraystretch}{1.15}
@@ -603,32 +604,31 @@
 % ============ 17. METRICS, TAXONOMY AND DIAGNOSTICS ==================
 \begin{frame}{Metrics, Failure Taxonomy and Early Diagnostics}
   \begin{columns}[T]
-    \begin{column}{0.33\textwidth}
+    \begin{column}{0.52\textwidth}
       \textbf{Metrics}
-      \begin{itemize}\footnotesize
-        \item \textbf{Entity F1} — strict IOB2, exact span \emph{and} type, via \texttt{seqeval}.
-        \item \textbf{Linking F1} — a (key, value) pair counts only on exact match; strictly harder, since both endpoints must already be right.
-        \item \textbf{Gap} — MTL minus UTL, matched size, $\geq$3 seeds.
+      \begin{itemize}\scriptsize
+        \item \textbf{Entity F1} — strict IOB2, exact span and type via \texttt{seqeval}. Dual-implementation cross-check passed ($\Delta=0.00$).
+        \item \textbf{Gap} — $\overline{F_1^{\,\text{MTL}}} - \overline{F_1^{\,\text{UTL}}}$, matched size ($n=200$), 3 seeds.
       \end{itemize}
-      {\scriptsize\color{muted} Implemented twice, independently, and cross-checked — which caught a strict-vs-lenient IOB2 mismatch worth 0.66 F1.}
-    \end{column}
-    \begin{column}{0.33\textwidth}
-      \textbf{Four failure buckets}
-      \begin{enumerate}\footnotesize
-        \item \textbf{OCR / recognition} — wrong characters
-        \item \textbf{Layout association} — right text, wrong key
-        \item \textbf{Field type} — right place, wrong label
-        \item \textbf{Repeated structure} — line items split or merged
+      \smallskip
+
+      \textbf{Four failure buckets (instrumented)}
+      \begin{enumerate}\scriptsize
+        \item \textbf{OCR / recognition} — wrong characters (\textbf{0.2\%})
+        \item \textbf{Layout association} — right text, wrong key (\textbf{1.1\%})
+        \item \textbf{Field type schema} — right place, wrong label (\textbf{97.2\%})
+        \item \textbf{Repeated structure} — line items split/merged (\textbf{1.5\%})
       \end{enumerate}
-      {\scriptsize The entity-F1 minus linking-F1 difference separates bucket 1 from bucket 2.}
+      \smallskip
+
+      {\tiny\color{muted} Diagnostics: Malformed \texttt{I-} tags ($2.3\%$), length truncation count.}
     \end{column}
-    \begin{column}{0.33\textwidth}
-      \textbf{Diagnostics instrumented}
-      \begin{itemize}\footnotesize
-        \item \textbf{Malformed-tag rate} — illegal \texttt{I-} chunk openings. A rise on unseen templates is direct evidence the model is \emph{guessing} at boundaries.
-        \item \textbf{Strict/lenient spread} — widens as tag sequences degrade.
-        \item \textbf{Truncation count} — words past the 512-token cap, scored as absent, never as \texttt{O}.
-      \end{itemize}
+    \begin{column}{0.48\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/error_taxonomy.pdf}
+      \vspace{-0.15cm}
+
+      {\scriptsize\textbf{Pilot finding on UTL:} Schema/type misalignment accounts for 97.2\% of errors; OCR corruption is negligible (0.2\%). Failure is purely structural.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -636,32 +636,26 @@
 % ================== 18. EXPERIMENT 1: PIPELINE =======================
 \begin{frame}{Experiment 1 — Pipeline Validation (FUNSD)}
   \begin{columns}[T]
-    \begin{column}{0.52\textwidth}
-      \textbf{Setup.} LiLT (\texttt{lilt-roberta-en-base}, MIT), FUNSD standard 149/50 split,
-      3 seeds, best-validation checkpoint. Validation is carved out of train so the test set is
-      never touched during model selection.
-      \medskip
+    \begin{column}{0.48\textwidth}
+      {\footnotesize\textbf{Setup \& Purpose.} LiLT (\texttt{lilt-roberta-en-base}, MIT), FUNSD 149/50 split, 3 seeds. Validates 0--1000 box normalisation, subword alignment, and strict IOB2 metric before trusting cross-template gaps.}
+      \vspace{0.2cm}
 
-      \textbf{Purpose.} Confirm that tokenisation, box normalisation (0--1000),
-      word$\to$subword label alignment and the metric are all correct \emph{before} any
-      cross-template number is trusted.
-      \medskip
-
-      \begin{block}{Result}
-        \centering\large
-        Entity F1 = \alert{[PENDING]}\\
-        {\small target $\approx$ 0.88}
+      \begin{block}{Result (3 seeds, mean $\pm$ std)}
+        \centering\footnotesize
+        \textbf{Entity F1 = 0.7929 $\pm$ 0.0136}\\
+        {\scriptsize Seeds: 13 $\to$ 0.7779 \quad 21 $\to$ 0.7961 \quad 42 $\to$ 0.8046}\\[0.05cm]
+        {\tiny Cross-check: $\Delta=0.00$ (seqeval == independent) $\mid$ Malformed $I\text{-}$: 2.3\%}
       \end{block}
     \end{column}
-    \begin{column}{0.48\textwidth}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=\linewidth]{figures/funsd_curve.pdf}
+      \vspace{0.1cm}
+
       \begin{alertblock}{Read this number correctly}
-        \small
-        This is a \textbf{code-path validation}, not a generalization result. FUNSD's train and
-        test sets share 16\% of their templates, and its block-level annotation leaks entity
-        boundaries. A high score here says our pipeline works — and nothing more.
+        \scriptsize
+        \textbf{Code-path validation}, not generalization. FUNSD shares 16\% templates and leaks block boundaries; this confirms pipeline correctness.
       \end{alertblock}
-      \medskip
-      {\footnotesize\color{muted}\textit{[Training-curve figure to be inserted: \texttt{figures/funsd\_curve.pdf}]}}
     \end{column}
   \end{columns}
 \end{frame}
@@ -669,35 +663,30 @@
 % ================== 19. EXPERIMENT 2: THE GAP ========================
 \begin{frame}{Experiment 2 — Seen vs.\ Unseen Templates (VRDU)}
   \begin{columns}[T]
-    \begin{column}{0.5\textwidth}
-      \textbf{Setup.} VRDU Registration Forms, leave-one-template-out over 3 templates, MTL and
-      UTL at \emph{matched} training-set size, 3 seeds each. The leakage assertion passes on
-      every fold.
-      \medskip
+    \begin{column}{0.48\textwidth}
+      {\footnotesize\textbf{Setup.} VRDU Registration Forms, leave-one-template-out (3 folds $\times$ 3 seeds = 18 runs), matched size ($n=200$). Leakage check: 0 test templates in train.}
+      \vspace{0.2cm}
 
-      \begin{block}{Result}
-        \small
+      \begin{block}{Result (Matched $n=200$, 9 folds each)}
+        \scriptsize
         \begin{tabular}{@{}lr@{}}
           \toprule
-          Seen (MTL), mean F1 & \alert{[PENDING]}\\
-          Unseen (UTL), mean F1 & \alert{[PENDING]}\\
+          Seen (MTL), mean F1 & \textbf{0.8774} $\pm$ 0.0162\\
+          Unseen (UTL), mean F1 & \textbf{0.6666} $\pm$ 0.0729\\
           \midrule
-          \textbf{Gap} & \alert{[PENDING]}\\
+          \textbf{Generalization Gap ($\Delta$)} & \gap{$-$0.2108} ($-$21.1 pts)\\
+          Relative performance drop & \gap{$-$24.03\%}\\
           \bottomrule
         \end{tabular}
       \end{block}
     \end{column}
-    \begin{column}{0.5\textwidth}
-      \textbf{Calibration.} VRDU reports 13--17 points across models; FormNet at 200 training
-      documents shows 90.51 $\to$ 77.29, a \gap{13.22-point} gap.
-      \medskip
+    \begin{column}{0.52\textwidth}
+      \centering
+      \includegraphics[width=0.88\linewidth]{figures/vrdu_gap.pdf}
+      \vspace{-0.2cm}
 
-      {\footnotesize\color{muted}\textit{[Per-template bar chart: \texttt{figures/vrdu\_gap.pdf}]}}
-      \medskip
-
-      \textbf{Hypothesis under test.} Errors on unseen templates will concentrate in
-      \textbf{bucket 2} (layout association: right text, wrong key) rather than bucket 1
-      (recognition) — because OCR quality does not change when the layout does.
+      {\scriptsize\textbf{Key Finding:} Form-Short drops steepest ($0.88 \to 0.58$); degradation is consistent across folds.\\[0.05cm]
+      \textbf{Calibration:} FormNet gap is 13.2 pts ($90.5 \to 77.3$); LiLT drops \gap{21.1 pts}, confirming vulnerability to unseen layouts.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -732,20 +721,22 @@
 \end{frame}
 
 % ======================== 21. ROADMAP ================================
-\begin{frame}{Subtasks and Roadmap}
-  \small
-  \begin{tabular}{@{}clp{5.2cm}c@{}}
+\begin{frame}{Future Plan of Action — Subtasks and Roadmap}
+  \renewcommand{\arraystretch}{1.05}
+  \scriptsize
+  \centering
+  \begin{tabular}{@{}clp{9.0cm}c@{}}
     \toprule
     & \textbf{Subtask} & \textbf{Content} & \textbf{Owner}\\
     \midrule
     \textcolor{good}{\textbf{done}} & S0 Pipeline & Loaders, split + leakage assertion, dual metric implementation & both\\
-    1 & S1 VRDU loader & Parse VRDU to words/boxes/tags with template ids & PM\\
-    2 & S2 Gap measurement & MTL vs UTL, matched size, $\geq$3 seeds & PM\\
+    \textcolor{good}{\textbf{done}} & S1 VRDU loader & Parse VRDU to words/boxes/tags with template ids & PM\\
+    \textcolor{good}{\textbf{done}} & S2 Gap measurement & MTL vs UTL, matched size, 3 seeds ($\Delta = 21.1$ pt gap verified) & PM\\
     3 & S3 Linking head & BROS SPADE-EL on RFUND; linking F1 under holdout & AB\\
     4 & S4 Scale up & VRDU Ad-buy: $\geq$4 training, $\geq$2 held-out templates & AB\\
     5 & S5 Synthetic templates & CommonForms + PyMuPDF + Augraphy & AB\\
-    6 & S6 Ablations & absolute vs relative position; $\pm$vision; OCR-free; reading-order perturbation; $k$-NN attention & PM\\
-    7 & S7 Failure analysis & Per-template, per-bucket error breakdown & both\\
+    6 & S6 Ablations & Absolute vs relative position, $\pm$vision, OCR-free, reading order & PM\\
+    \textcolor{good}{\textbf{done}} & S7 Failure analysis & Per-template, per-bucket error breakdown (taxonomised on UTL) & both\\
     8 & S8 Interface & Gradio upload $\to$ highlighted key-value boxes & PM\\
     9 & S9 Report & Stage-wise report & both\\
     \bottomrule
