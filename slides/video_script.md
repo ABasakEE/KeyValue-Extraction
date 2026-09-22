@@ -37,7 +37,7 @@ takes matching the four blocks, so a fluffed line costs one block instead of the
 ### Slide 3, The task
 
 > Here's why this is hard. Train an extractor on one layout, test it on that same layout, and it
-> scores well while learning almost nothing you can use. It maybe learned that the invoice number sits
+> scores well while learning almost nothing you can use. It may have learned that the invoice number sits
 > top right, and that the value is whatever box is to the right of the key. Those are facts about one
 > template, not about forms in general.
 >
