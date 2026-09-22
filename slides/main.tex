@@ -35,6 +35,8 @@
 % NOTE: do not name this \cite — beamer already defines it.
 \newcommand{\srcnote}[1]{{\scriptsize\color{muted}[#1]}}
 \newcommand{\gap}[1]{{\color{warn}\textbf{#1}}}
+% Smaller than \tiny, used only on the three dense reference frames.
+\newcommand{\reffont}{\fontsize{4.6}{5.2}\selectfont}
 
 \title{Cross-Template Key-Value Field Extraction from Scanned Forms}
 \date{}
@@ -269,19 +271,21 @@
       \textbf{nodes} are text regions (tagging = node classification), \textbf{edges} are
       candidate key-value relations (linking = \textbf{edge} classification). No reading
       order assumed.
-      \smallskip
+      \vspace{2pt}
 
+      {\setlength{\itemsep}{1pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
       \begin{itemize}\footnotesize
         \item \textbf{SPADE} — extraction as \emph{dependency parsing}; each token points to a parent across multiple graph layers. \gap{+37.3\% relative} linking F1 over serialisation-based baselines.
         \item \textbf{Doc2Graph} — one GNN backbone across form KIE, invoice layout and table detection.
         \item \textbf{PICK} — \emph{learns} a soft adjacency matrix instead of a fixed $k$-NN graph. SROIE 96.12.
         \item \textbf{SDMG-R} — dual-modality fusion; introduced WildReceipt to stress-test unseen templates.
         \item \textbf{FormNet} — \textbf{Rich Attention} (2D distance/direction term in attention) plus \textbf{Super-Tokens} (a GCN pooling spatial neighbours \emph{before} the transformer). V2 adds a multimodal graph-contrastive loss: FUNSD \textbf{86.35}.
-      \end{itemize}
+      \end{itemize}}
     \end{column}
     \begin{column}{0.47\textwidth}
       \begin{block}{FormNet ablation on FUNSD}
         \small
+        {\renewcommand{\arraystretch}{1.0}
         \begin{tabular}{@{}lr@{}}
           \toprule
           Configuration & F1 \\
@@ -291,12 +295,13 @@
           \quad + GCN Super-Tokens & 79.37 \\
           \quad + \textbf{both} & \textbf{84.53} \\
           \bottomrule
-        \end{tabular}
+        \end{tabular}}
       \end{block}
+      \vspace{2pt}
       {\footnotesize\color{muted} Structural encoding is worth $+18.6$ F1 over a plain long-sequence transformer — the clearest single piece of evidence that sequence order is the wrong prior for forms.}
-      \smallskip
+      \vspace{2pt}
 
-      {\footnotesize\color{warn}\textbf{Shared weakness.} The graph is built \emph{before} the GNN runs, so bad OCR boxes corrupt everything downstream — a failure mode sequence taggers do not have in the same form.}
+      {\scriptsize\color{warn}\textbf{Shared weakness.} The graph is built \emph{before} the GNN runs, so bad OCR boxes corrupt everything downstream — a failure mode sequence taggers do not have in the same form.}
     \end{column}
   \end{columns}
 \end{frame}
@@ -305,6 +310,7 @@
 \begin{frame}{Family 4 — OCR-Free and Generative}
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
+      \small
       \textbf{Donut} — Swin encoder $\to$ BART decoder generates structured JSON directly.
       No OCR, no boxes, no graph: extraction and linking collapse into one decode.
       \smallskip
@@ -377,45 +383,48 @@
 
 % ================= 11. MEASURED EVIDENCE ON SHIFT ====================
 \begin{frame}{What Is Actually \emph{Measured} About Template Shift}
-  \small
+  \footnotesize
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
       \textbf{1. The gap is real and large.}\\
       VRDU, Registration Forms, 200 training documents:
-      \smallskip
+      \vspace{2pt}
 
+      {\renewcommand{\arraystretch}{1.0}
       \begin{tabular}{@{}lrr@{}}
         \toprule
         & Seen (MTL) & Unseen (UTL)\\
         \midrule
         FormNet & 90.51 & \gap{77.29}\\
         \bottomrule
-      \end{tabular}
-      \smallskip
+      \end{tabular}}
+      \vspace{2pt}
 
       A \gap{13.22-point} gap; 13--17 points across models.
-      \medskip
+      \smallskip
 
       \textbf{2. Relative encoding is no guarantee.}\\
       MIDV2020, unseen-template country split:
-      \smallskip
+      \vspace{2pt}
 
+      {\renewcommand{\arraystretch}{1.0}
       \begin{tabular}{@{}lr@{}}
         \toprule
         KNN-Former & 87.88\\
         LayoutLM-base & 47.65\\
         \textbf{BROS} & \gap{23.31}\\
         \bottomrule
-      \end{tabular}
-      \smallskip
+      \end{tabular}}
+      \vspace{2pt}
 
       {\color{warn} BROS degrades \emph{worst}, despite being designed around relative position encoding.}
     \end{column}
     \begin{column}{0.48\textwidth}
       \textbf{3. "Unseen template" is not mainly geometry.}\\
       Do-GOOD decomposes the shift for LayoutLMv3 on FUNSD (in-distribution 90.29):
-      \smallskip
+      \vspace{2pt}
 
+      {\renewcommand{\arraystretch}{1.0}
       \begin{tabular}{@{}lrr@{}}
         \toprule
         Shift type & F1 & Drop\\
@@ -425,10 +434,10 @@
         Human-intervened & 73.25 & 17.04\\
         \textbf{Real-world} & 57.88 & \gap{32.41}\\
         \bottomrule
-      \end{tabular}
-      \smallskip
+      \end{tabular}}
+      \vspace{2pt}
 
-      \begin{alertblock}{\small Design consequence}
+      \begin{alertblock}{\footnotesize Design consequence}
         \scriptsize Pure layout novelty is the \emph{smallest} component. Optimising only the
         positional encoding targets 5 points of a 32-point problem.
       \end{alertblock}
@@ -478,9 +487,9 @@
     \bottomrule
   \end{tabular}
 
-  \medskip
+  \smallskip
   \begin{alertblock}{The structural problem}
-    \small The dataset with an official unseen-template protocol (\textbf{VRDU}) has \textbf{no
+    \footnotesize The dataset with an official unseen-template protocol (\textbf{VRDU}) has \textbf{no
     linking annotation}. The datasets with linking annotation (\textbf{FUNSD}, \textbf{XFUND},
     \textbf{KVP10k}) have \textbf{no template split}. This is the shape of the field, not an
     oversight in our search — and it is what makes our question worth asking.
@@ -693,15 +702,15 @@
 
 % ====================== 20. THE GAP WE CLAIM =========================
 \begin{frame}{The Research Gap We Are Addressing}
-  \begin{alertblock}{Observation from our review}
-    Entity extraction \emph{has} been measured under template shift — VRDU, DocILE and Do-GOOD
-    all do it. Key-value \textbf{linking} has not. Every strong linking number we found comes
-    from a split where train and test share templates.
-  \end{alertblock}
+  \footnotesize
+  {\color{warn}\textbf{Observation from our review.}} Entity extraction \emph{has} been measured
+  under template shift — VRDU, DocILE and Do-GOOD all do it. Key-value \textbf{linking} has not.
+  Every strong linking number we found comes from a split where train and test share templates.
 
-  \medskip
-  \small
-  \begin{tabular}{@{}lp{4.2cm}p{3.7cm}@{}}
+  \vspace{1pt}
+  \scriptsize
+  {\renewcommand{\arraystretch}{0.95}
+  \begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.4cm}>{\raggedright\arraybackslash}p{5.3cm}>{\raggedright\arraybackslash}p{4.6cm}@{}}
     \toprule
     \textbf{Work} & \textbf{Linking result} & \textbf{Split}\\
     \midrule
@@ -709,15 +718,14 @@
     BROS (SPADE-EL) & FUNSD entity linking & same-template \\
     KVPFormer & +7.2\% FUNSD, +13.2\% XFUND & same-template \\
     PEneo & +19.9--22.9\% on RFUND-EN & same-template \\
-    \midrule
     ZeroShotCeres & zero-shot relations, unseen templates & \textcolor{good}{template-disjoint} — but \textbf{webpages}\\
     Majumder et al. & unseen invoice templates & \textcolor{good}{template-disjoint} — but \textbf{field typing}, not linking\\
     \bottomrule
-  \end{tabular}
+  \end{tabular}}
 
-  \medskip
-  \centering\textbf{Our contribution: measure tagging \emph{and} linking under one template-disjoint protocol.}\\
-  {\footnotesize\color{muted} Stated as "to our knowledge" — we have not exhaustively verified DocILE's task structure.}
+  \vspace{1pt}
+  \footnotesize\centering\textbf{Our contribution: measure tagging \emph{and} linking under one template-disjoint protocol.}\\
+  {\scriptsize\color{muted} Stated as "to our knowledge" — we have not exhaustively verified DocILE's task structure.}
 \end{frame}
 
 % ======================== 21. ROADMAP ================================
@@ -751,7 +759,7 @@
       \smallskip
 
       \scriptsize
-      \begin{tabular}{@{}llp{2.1cm}@{}}
+      \begin{tabular}{@{}>{\raggedright\arraybackslash}p{2.3cm}l>{\raggedright\arraybackslash}p{2.0cm}@{}}
         \toprule
         Model & Licence & Role\\
         \midrule
@@ -793,8 +801,9 @@
 
 % ==================== 23-25. REFERENCES ==============================
 \begin{frame}{References — Benchmarks, Datasets and Benchmark Integrity}
-  \tiny
-  \begin{enumerate}\itemsep1.5pt
+  \reffont
+  {\setlength{\itemsep}{0pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
+  \begin{enumerate}
     \item Zilong Wang, Yichao Zhou, Wei Wei, Chen-Yu Lee and Sandeep Tata. VRDU: A Benchmark for Visually-rich Document Understanding, KDD, 2023. https://arxiv.org/abs/2211.15421
     \item Guillaume Jaume, Hazim Kemal Ekenel and Jean-Philippe Thiran. FUNSD: A Dataset for Form Understanding in Noisy Scanned Documents, ICDAR-OST, 2019. https://arxiv.org/abs/1905.13538
     \item Štěpán Šimsa, Milan Šulc, Michal Uřičář, Yash Patel, Ahmed Hamdi, Matěj Kocián, Matyáš Skalický, Jiří Matas, Antoine Doucet, Mickaël Coustaty and Dimosthenis Karatzas. DocILE Benchmark for Document Information Localization and Extraction, ICDAR, 2023. https://arxiv.org/abs/2302.05658
@@ -806,12 +815,13 @@
     \item Jiabang He, Yi Hu, Lei Wang, Xing Xu, Ning Liu, Hui Liu and Heng Tao Shen. Do-GOOD: Towards Distribution Shift Evaluation for Pre-Trained Visual Document Understanding Models, SIGIR, 2023. https://arxiv.org/abs/2306.02623
     \item Ning Zhang, Hongfeng Zhao, Yue Xie et al. Unveiling the Deficiencies of Pre-trained Text-and-Layout Models in Real-world Visually-rich Document Information Extraction, arXiv preprint, 2024. https://arxiv.org/abs/2402.02379
     \item Zening Lin, Jiapeng Wang, Teng Li, Wenhui Liao, Dayi Huang, Longfei Xiong and Lianwen Jin. PEneo: Unifying Line Extraction, Line Grouping, and Entity Linking for End-to-end Document Pair Extraction, ACM Multimedia, 2024. https://arxiv.org/abs/2401.03472
-  \end{enumerate}
+  \end{enumerate}}
 \end{frame}
 
 \begin{frame}{References — Architectures}
-  \tiny
-  \begin{enumerate}\setcounter{enumi}{11}\itemsep1.5pt
+  \reffont
+  {\setlength{\itemsep}{0pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
+  \begin{enumerate}\setcounter{enumi}{11}
     \item Yiheng Xu, Minghao Li, Lei Cui, Shaohan Huang, Furu Wei and Ming Zhou. LayoutLM: Pre-training of Text and Layout for Document Image Understanding, KDD, 2020. https://arxiv.org/abs/1912.13318
     \item Yang Xu, Yiheng Xu, Tengchao Lv, Lei Cui, Furu Wei, Guoxin Wang, Yijuan Lu, Dinei Florencio, Cha Zhang, Wanxiang Che, Min Zhang and Lidong Zhou. LayoutLMv2: Multi-modal Pre-training for Visually-rich Document Understanding, ACL, 2021. https://arxiv.org/abs/2012.14740
     \item Yupan Huang, Tengchao Lv, Lei Cui, Yutong Lu and Furu Wei. LayoutLMv3: Pre-training for Document AI with Unified Text and Image Masking, ACM Multimedia, 2022. https://arxiv.org/abs/2204.08387
@@ -827,12 +837,13 @@
     \item Geewook Kim, Teakgyu Hong, Moonbin Yim, JeongYeon Nam, Jinyoung Park, Jinyeong Yim, Wonseok Hwang, Sangdoo Yun, Dongyoon Han and Seunghyun Park. OCR-free Document Understanding Transformer, ECCV, 2022. https://arxiv.org/abs/2111.15664
     \item Dongsheng Wang, Natraj Raman, Mathieu Sibue, Zhiqiang Ma, Petr Babkin, Simerjot Kaur, Yulong Pei, Armineh Nourbakhsh and Xiaomo Liu. DocLLM: A Layout-Aware Generative Language Model for Multimodal Document Understanding, ACL, 2024. https://arxiv.org/abs/2401.00908
     \item Zhenrong Hu, Ziyang Wu, Zhichao Zhong, Bin Lin, Lei Sun and Qiang Huo. A Question-Answering Approach to Key Value Pair Extraction from Form-like Document Images, AAAI, 2023. https://arxiv.org/abs/2304.07957
-  \end{enumerate}
+  \end{enumerate}}
 \end{frame}
 
 \begin{frame}{References — Generalization, Tooling and Websites}
-  \tiny
-  \begin{enumerate}\setcounter{enumi}{26}\itemsep1.5pt
+  \reffont
+  {\setlength{\itemsep}{0pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
+  \begin{enumerate}\setcounter{enumi}{26}
     \item Yanfei Dong, Lambert Deng, Jiazheng Zhang, Xiaodong Yu, Ting Lin, Francesco Gelli, Soujanya Poria and Wee Sun Lee. Lightweight Spatial Modeling for Combinatorial Information Extraction From Documents, arXiv preprint, 2024. https://arxiv.org/abs/2405.06701
     \item Vincent Perot, Kai Kang, Florian Luisier, Guolong Su, Xiaoyu Sun, Ramya Sree Boppana, Zilong Wang, Zifeng Wang, Jiaqi Mu, Hao Zhang, Chen-Yu Lee and Nan Hua. LMDX: Language Model-based Document Information Extraction and Localization, arXiv preprint, 2023. https://arxiv.org/abs/2309.10952
     \item Gaye Colakoglu, Gürkan Solmaz and Jonathan Fürst. Problem Solved? Information Extraction Design Space for Layout-Rich Documents using LLMs, EMNLP, 2025. https://arxiv.org/abs/2502.18179
@@ -842,15 +853,16 @@
     \item Said Gürbüz, Ahmed Nassar, Christoph Auer, Maksym Lysak, Nikolaos Livathinos and Peter Staar. Identify, Locate, Link: End-to-End Key-Value Extraction from Document Images, ICDAR, 2026. https://arxiv.org/abs/2608.20868
     \item Alexander Groleau, Kok Wei Chee, Stefan Larson, Samay Maini and Jonathan Boarman. Augraphy: A Data Augmentation Library for Document Images, ICDAR, 2023. https://arxiv.org/abs/2208.14558
     \item Shuai Bai, Keqin Chen, Xuejing Liu et al. Qwen2.5-VL Technical Report, arXiv preprint, 2025. https://arxiv.org/abs/2502.13923
-  \end{enumerate}
+  \end{enumerate}}
 
-  \smallskip
+  \vspace{2pt}
   \textbf{Websites}
-  \begin{enumerate}\setcounter{enumi}{35}\itemsep1.5pt
+  {\setlength{\itemsep}{0pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
+  \begin{enumerate}\setcounter{enumi}{35}
     \item Google Research. https://github.com/google-research-datasets/vrdu. Accessed on: 19th September, 2026.
     \item Guillaume Jaume. https://guillaumejaume.github.io/FUNSD/. Accessed on: 19th September, 2026.
     \item SCUT-DLVCLab. https://huggingface.co/SCUT-DLVCLab/lilt-roberta-en-base. Accessed on: 19th September, 2026.
-  \end{enumerate}
+  \end{enumerate}}
 \end{frame}
 
 \end{document}
