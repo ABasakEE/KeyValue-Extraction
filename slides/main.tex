@@ -220,19 +220,46 @@
 
   \medskip
   \begin{columns}[T]
-    \begin{column}{0.55\textwidth}
+    \begin{column}{0.52\textwidth}
+      \centering
+      \begin{tikzpicture}[
+          tk/.style={draw, fill=black!8, rounded corners=1pt, minimum width=0.8cm,
+                     minimum height=0.28cm, font=\tiny, inner sep=1pt},
+          ar/.style={-{Stealth[length=1.4mm]}}
+        ]
+        \draw[muted, rounded corners=2pt] (0,0.45) rectangle (5.1,1.55);
+        \node[font=\tiny, muted, anchor=north west] at (0.06,1.52) {template A};
+        \node[tk] (k1) at (1.1,1.02) {Name};
+        \node[tk] (v1) at (2.9,1.02) {Alice};
+        \draw[ar, good] (k1) -- node[above=-1.5pt, font=\tiny, good] {$\Delta x{=}300$} (v1);
+        \node[font=\tiny, anchor=north] at (1.1,0.86) {$x{=}120$};
+        \node[font=\tiny, anchor=north] at (2.9,0.86) {$x{=}420$};
+
+        \draw[muted, rounded corners=2pt] (0,-0.95) rectangle (5.1,0.15);
+        \node[font=\tiny, muted, anchor=north west] at (0.06,0.12) {template B};
+        \node[tk] (k2) at (2.1,-0.38) {Name};
+        \node[tk] (v2) at (3.9,-0.38) {Alice};
+        \draw[ar, good] (k2) -- node[above=-1.5pt, font=\tiny, good] {$\Delta x{=}300$} (v2);
+        \node[font=\tiny, anchor=north] at (2.1,-0.54) {$x{=}540$};
+        \node[font=\tiny, anchor=north] at (3.9,-0.54) {$x{=}840$};
+      \end{tikzpicture}
+
+      \smallskip
+      {\tiny\color{warn} Absolute coordinates change with the template. The relative offset does not.}
+    \end{column}
+    \begin{column}{0.48\textwidth}
+      {\footnotesize
       \textbf{The trajectory:} absolute $\to$ relative position encoding, and CNN region
       features $\to$ ViT patches at the same granularity as text tokens.
-    \end{column}
-    \begin{column}{0.45\textwidth}
-      {\footnotesize
+      \smallskip
+
       \textbf{Ablation (LayoutLMv3).} MLM+MIM alone 89.19; adding word-patch alignment 89.78.
-      \color{muted} A $+0.59$ gain — real, but small.}
+      {\color{muted} A $+0.59$ gain — real, but small.}}
+      \smallskip
+
+      \srcnote{Xu et al., KDD 2020 \textbullet\ Xu et al., ACL 2021 \textbullet\ Huang et al., ACM MM 2022}
     \end{column}
   \end{columns}
-
-  \medskip
-  \srcnote{Xu et al., KDD 2020 \textbullet\ Xu et al., ACL 2021 \textbullet\ Huang et al., ACM MM 2022}
 \end{frame}
 
 % ================= 7. FAMILY 2: DECOUPLING & RELATIVE ================
@@ -240,25 +267,47 @@
   \begin{columns}[T]
     \begin{column}{0.5\textwidth}
       \textbf{LiLT} \hfill {\footnotesize MIT}
-      \begin{itemize}\small
-        \item Two streams: a swappable text tower and a layout tower.
-        \item Coupled at every layer by \textbf{BiACM}; the layout$\to$text gradient is \textbf{detached} during pretraining.
+      \begin{itemize}\footnotesize
+        \item Swappable text tower + layout tower, coupled at every layer by \textbf{BiACM}.
         \item Rationale: layout is language-agnostic, so do not let it entangle with one vocabulary.
-        \item FUNSD SER F1 \textbf{88.41}. Pretrained on English, transfers to 7 unseen languages on XFUND.
+        \item FUNSD SER F1 \textbf{88.41}; English pretraining transfers to 7 unseen languages on XFUND.
       \end{itemize}
     \end{column}
     \begin{column}{0.5\textwidth}
       \textbf{BROS} \hfill {\footnotesize Apache-2.0}
-      \begin{itemize}\small
-        \item \textbf{No visual features at all.}
-        \item Relative 2D encoding: attention bias from the offset between box pairs.
+      \begin{itemize}\footnotesize
+        \item \textbf{No visual features at all}; relative 2D encoding gives an attention bias from the offset between box pairs.
         \item \textbf{Area-masked LM} — masks contiguous 2D regions, forcing layout use.
-        \item SPADE-style graph decoder for linking, avoiding reading-order dependence.
         \item FUNSD F1 \textbf{83.05} — beating LayoutLMv2's 82.76 \emph{with no image}.
       \end{itemize}
     \end{column}
   \end{columns}
-  \medskip
+
+  \vspace{0.15cm}
+  \begin{center}
+  \begin{tikzpicture}[
+      b/.style={draw, rounded corners=2pt, align=center, font=\tiny,
+                minimum width=1.7cm, minimum height=0.52cm, inner sep=2pt},
+      ar/.style={-{Stealth[length=1.6mm]}}
+    ]
+    \node[b, fill=black!5] (tin) at (0,1.45)  {text tokens};
+    \node[b, fill=black!5] (lin) at (0,0)     {boxes (0--1000)};
+    \node[b]               (tt)  at (2.6,1.45) {text tower};
+    \node[b]               (lt)  at (2.6,0)    {layout tower};
+    \node[b, fill=good!18] (out) at (5.6,0.72) {fused\\per-token};
+
+    \draw[ar] (tin) -- (tt);
+    \draw[ar] (lin) -- (lt);
+    \draw[ar] (tt) -- (out);
+    \draw[ar] (lt) -- (out);
+
+    \draw[ar, good]           (2.6,1.19) -- node[right=1pt, font=\tiny, good] {text $\to$ layout} (2.6,0.26);
+    \draw[ar, warn, dashed]   (2.3,0.26) -- node[left=1pt, font=\tiny, warn, align=right] {layout $\to$ text\\\textbf{stop-grad}} (2.3,1.19);
+    \node[font=\tiny, muted] at (2.6,-0.52) {BiACM, at every layer};
+  \end{tikzpicture}
+  \end{center}
+
+  \vspace{-0.1cm}
   \srcnote{Wang et al., ACL 2022 \textbullet\ Hong et al., AAAI 2022}
 \end{frame}
 
@@ -267,11 +316,29 @@
   \begin{columns}[T]
     \begin{column}{0.53\textwidth}
       \small
-      \textbf{The idea.} Linking is \emph{relational}. Model the document as a graph:
-      \textbf{nodes} are text regions (tagging = node classification), \textbf{edges} are
-      candidate key-value relations (linking = \textbf{edge} classification). No reading
-      order assumed.
-      \vspace{2pt}
+      \textbf{The idea.} Linking is \emph{relational}, so model the document as a graph —
+      no reading order assumed anywhere.
+      \vspace{1pt}
+
+      \begin{center}
+      \begin{tikzpicture}[
+          n/.style={draw, circle, minimum size=0.36cm, inner sep=0pt, font=\tiny},
+          ar/.style={-{Stealth[length=1.3mm]}}
+        ]
+        \node[n, fill=good!30] (k1) at (0,0.78) {K};
+        \node[n, fill=black!10] (v1) at (1.45,0.78) {V};
+        \node[n, fill=good!30] (k2) at (0,0) {K};
+        \node[n, fill=black!10] (v2) at (1.45,0) {V};
+        \draw[muted, dashed] (k1) -- (v2);
+        \draw[muted, dashed] (k2) -- (v1);
+        \draw[ar, warn, thick] (k1) -- (v1);
+        \draw[ar, warn, thick] (k2) -- (v2);
+        \node[font=\tiny, anchor=west] at (1.95,0.78) {\textbf{node} label $=$ tagging};
+        \node[font=\tiny, anchor=west] at (1.95,0.22) {\textcolor{warn}{\textbf{edge}} $=$ linking};
+        \node[font=\tiny, anchor=west, muted] at (1.95,-0.3) {dashed $=$ candidate, rejected};
+      \end{tikzpicture}
+      \end{center}
+      \vspace{1pt}
 
       {\setlength{\itemsep}{1pt}\setlength{\topsep}{1pt}\setlength{\parsep}{0pt}
       \begin{itemize}\footnotesize
@@ -663,7 +730,10 @@
 
       \begin{alertblock}{Read this number correctly}
         \scriptsize
-        \textbf{Code-path validation}, not generalization. FUNSD shares 16\% templates and leaks block boundaries; this confirms pipeline correctness.
+        \gap{Gate not met.} We pre-registered ``within a couple of points of the published 88.41''.
+        We are \gap{9 points short}. Metric strictness is \emph{excluded} (lenient IOB2 scores
+        \emph{lower}: 0.7614/0.7793/0.7891). Open suspects: training length, and HEADER collapsing
+        to 0.50 F1. \textbf{Fixing this is our next action.}
       \end{alertblock}
     \end{column}
   \end{columns}
@@ -673,10 +743,10 @@
 \begin{frame}{Experiment 2 — Seen vs.\ Unseen Templates (VRDU)}
   \begin{columns}[T]
     \begin{column}{0.48\textwidth}
-      {\footnotesize\textbf{Setup.} VRDU Registration Forms, leave-one-template-out (3 folds $\times$ 3 seeds = 18 runs), matched size ($n=200$). Leakage check: 0 test templates in train.}
+      {\footnotesize\textbf{Setup.} VRDU Registration Forms, leave-one-template-out (3 folds $\times$ 3 seeds $=$ 9 runs \emph{per regime}, 18 in total), matched size ($n=200$). Leakage check: 0 test templates in train.}
       \vspace{0.2cm}
 
-      \begin{block}{Result (Matched $n=200$, 9 folds each)}
+      \begin{block}{Result (matched $n=200$, 9 runs per regime)}
         \scriptsize
         \begin{tabular}{@{}lr@{}}
           \toprule
@@ -695,7 +765,10 @@
       \vspace{-0.2cm}
 
       {\scriptsize\textbf{Key Finding:} Form-Short drops steepest ($0.88 \to 0.58$); degradation is consistent across folds.\\[0.05cm]
-      \textbf{Calibration:} FormNet gap is 13.2 pts ($90.5 \to 77.3$); LiLT drops \gap{21.1 pts}, confirming vulnerability to unseen layouts.}
+      \textbf{Validity:} both regimes share identical code, data handling and metric, so the
+      \emph{gap} is a sound within-study comparison even though Slide 18's absolute level is low.
+      We therefore do \emph{not} yet set our 21.1 pts against FormNet's 13.2 ($90.5 \to 77.3$) —
+      a depressed baseline inflates a gap. That comparison waits on the Slide 18 fix.}
     \end{column}
   \end{columns}
 \end{frame}
