@@ -2,19 +2,21 @@
 
 **Team: Unemployed and Unsupervised** · Param Mehta (23b2439), Arjoe Basak (23b1295)
 
-Target runtime **13:25**, hard cap 15:00 (instruction 15 penalises overrun).
-Both presenters speak. Facecam on throughout. **Do not read the slides** — the slides
-carry the numbers, the speaker carries the argument.
+**Measured length: see the Timing table at the foot of this file.** Hard cap 15:00 —
+instruction 15 penalises overrun. Both presenters speak. Facecam on throughout.
+**Do not read the slides** — the slides carry the numbers, the speaker carries the argument.
+
+Paragraphs marked **[CUT IF LONG]** are droppable whole, without losing a claim. Drop all four if
+your timed rehearsal comes in over 13:30.
 
 **Speaker split.** PM opens and owns the empirical half; AB owns the literature half and closes.
-Three handoffs, each spoken aloud so the cut is obvious to the viewer.
 
-| Block | Slides | Speaker | Budget |
-|---|---|---|---|
-| Problem and contract | 1–4 | **PM** | 2:10 |
-| Background and literature | 5–12 | **AB** | 5:05 |
-| Data, protocol, experiments | 13–19 | **PM** | 4:25 |
-| Gap, roadmap, close | 20–25 | **AB** | 1:45 |
+| Block | Slides | Speaker |
+|---|---|---|
+| Problem and contract | 1–4 | **PM** |
+| Background and literature | 5–12 | **AB** |
+| Data, protocol, experiments | 13–19 | **PM** |
+| Gap, roadmap, close | 20–25 | **AB** |
 
 Recording notes: OBS, 1080p, slides as window capture with facecam bottom-right.
 Record in four takes matching the four blocks — a fluffed line costs one block, not the whole video.
@@ -23,54 +25,41 @@ Record in four takes matching the four blocks — a fluffed line costs one block
 
 ## BLOCK 1 — PM
 
-### Slide 1 · Title — 0:25
+### Slide 1 · Title
 
-> Hi, I'm Param Mehta, and I'm here with Arjoe Basak. We're team Unemployed and Unsupervised, and
-> this is our prep presentation for the IE 643 course project.
+> Hi, I'm Param Mehta, with Arjoe Basak. We're team Unemployed and Unsupervised, and this is our
+> prep presentation for IE 643.
 >
-> Our allotted topic is cross-template key-value field extraction from scanned forms. The hard part
-> is in the subtitle: we have to generalise to form templates for which we have **zero** training
-> data. Not a few examples — none.
+> Our topic is cross-template key-value extraction from scanned forms. The hard part is in the
+> subtitle: we have to generalise to form templates we have zero training data for. Not a few
+> examples — none.
 
-*Delivery: say the team name with a straight face and move on. Don't linger on the title.*
+### Slide 2 · Outline
 
-### Slide 2 · Outline — 0:20
+> Quick map. Arjoe takes the background reading and where the literature disagrees. I come back for
+> our datasets, our split protocol, and the two experiments we've run. Arjoe closes with the gap
+> we're claiming and the roadmap.
 
-> Quick map of the next thirteen minutes. Arjoe takes the background reading and what the
-> literature actually agrees and disagrees on. I'll come back for our datasets, the split protocol
-> we bind ourselves to, and the two experiments we've already run. Then Arjoe closes with the
-> research gap we're claiming and the roadmap.
+*Delivery: gesture at the two columns. Do not read the eight headings.*
 
-*Delivery: gesture at the two columns, don't read the eight headings.*
+### Slide 3 · The Task
 
-### Slide 3 · The Task — 0:40
-
-> Here's the intuition for why this is hard.
+> Why this is hard. Train an extractor on one layout and test it on the same layout, and it scores
+> well while learning almost nothing useful. It has learned that the invoice number sits top-right,
+> and that the value is the box to the right of the key — facts about *that template*, not about
+> forms.
 >
-> If you train a form extractor on one layout and test it on the same layout, it will score very
-> well — and it will have learned almost nothing useful. It has learned that the invoice number
-> lives in the top-right corner. It has learned that the value is whatever box sits to the right of
-> the key. Those are facts about *that template*, not facts about forms.
->
-> Change the template and all three of these priors break at the same time: the absolute position
-> prior, the reading-order assumption, and the spatial key-value convention. That simultaneity is
-> what makes this a genuinely different problem from ordinary fine-tuning.
+> Change the template and three priors break at once: absolute position, reading order, and the
+> spatial key-value convention. That simultaneity is what separates this from ordinary fine-tuning.
 
-### Slide 4 · The Zero-Data Contract — 0:45
+### Slide 4 · The Zero-Data Contract
 
-> Before any modelling, we had to pin down what "zero same-template data" actually forbids, because
-> it's stricter than it first sounds.
+> "Zero same-template data" is stricter than it sounds. No labelled examples of the held-out
+> template, obviously. But also **no unlabelled examples**, which rules out most of domain
+> adaptation. And the one people get wrong: **no validation use**. Pick your checkpoint by scoring
+> on the held-out template and you have leaked, even though no gradient ever flowed.
 >
-> No labelled examples of the held-out template — obviously. But also **no unlabelled examples**,
-> which quietly rules out most of the domain-adaptation literature, because almost all of it assumes
-> you have unlabelled target data sitting around.
->
-> And the one people get wrong: **no validation use**. If you pick your best checkpoint by scoring
-> on the held-out template, you have leaked — even though no gradient ever flowed from it. That one
-> turns out to matter in practice, and I'll come back to it on the protocol slide.
->
-> This isn't a promise in a document. It's an assertion in our code that prints on every run, and we
-> tested it with a negative control that deliberately poisons a split, to confirm the check actually fires.
+> This is an assertion in our code, printed every run, tested with a negative control.
 
 > **Handoff:** Over to Arjoe for what we read.
 
@@ -78,129 +67,106 @@ Record in four takes matching the four blocks — a fluffed line costs one block
 
 ## BLOCK 2 — AB
 
-### Slide 5 · The Standard Pipeline — 0:35
+### Slide 5 · The Standard Pipeline
 
-> Thanks Param. Let me set up the machinery everything else sits on.
+> Thanks Param. The classical pipeline runs along the top: scan, OCR — giving words *and* boxes — a
+> layout-aware encoder, per-token tags, then key-value links.
 >
-> The classical pipeline runs left to right along the top: scan, OCR — which gives you words *and*
-> bounding boxes — then a layout-aware encoder, then per-token tags, then links between keys and values.
->
-> Two things to hold onto. First, three modalities: what a token says, where it sits, and what it
-> looks like. Every architectural disagreement we're about to see is about how to fuse those three.
-> Second, and this becomes our whole project: **tagging and linking are different problems**. Tagging
-> is per-token classification. Linking is relational. The literature measures them under very
-> different conditions.
+> Two things to hold onto. Three modalities: what a token says, where it sits, how it looks. Every
+> architectural fight we're about to see is about fusing those. And **tagging and linking are
+> different problems** — one is per-token classification, the other is relational. The literature
+> measures them under very different conditions.
 
-### Slide 6 · Family 1 — Layout-Aware Encoders — 0:40
+### Slide 6 · Family 1 — Layout-Aware Encoders
 
-> Family one is the LayoutLM line, and it's a clean two-part trajectory.
+> Family one, the LayoutLM line.
 >
-> Version one bolts *absolute* two-D position embeddings onto BERT — the model is told "this token
-> sits at x equals four hundred". Version two replaces that with *relative* encoding: the attention
-> score between two tokens picks up a bias computed from the offset between their boxes. The diagram
-> shows why that matters for us. Shift the whole form and every absolute coordinate changes, but
-> every relative offset survives.
+> Version one bolts *absolute* 2D position embeddings onto BERT — this token is at x equals four
+> hundred. Version two makes it *relative*: the attention score between two tokens picks up a bias
+> from the offset between their boxes. The diagram shows why that matters. Shift the form, and every
+> absolute coordinate changes while every relative offset survives.
 >
-> The second axis is vision: CNN region features in v2, versus ViT patches at the same granularity as
-> text tokens in v3. v3 gets ninety-point-three on FUNSD, the strongest published encoder number.
->
-> One thing worth flagging: the ablation on the right shows word-patch alignment, which is v3's
-> headline contribution, is worth zero-point-five-nine F1. Real, but small.
+> **[CUT IF LONG]** The second axis is vision — CNN regions in v2, ViT patches at token granularity
+> in v3, which reaches ninety-point-three on FUNSD.
 
-### Slide 7 · Family 2 — Decoupling and Relative Encoding — 0:40
+### Slide 7 · Family 2 — Decoupling and Relative Encoding
 
-> Family two pushes relative encoding in two different directions.
+> Family two pushes that further, in two directions.
 >
-> **LiLT** — our primary model — splits into two towers, one for text and one for layout, coupled at
-> every layer by a module called BiACM. The critical detail is in the diagram: during pretraining the
-> gradient flowing from layout back into text is **detached**. The argument is that layout is
-> language-agnostic, so you shouldn't let it entangle with one vocabulary. They demonstrate it by
-> swapping in a different language's text tower and transferring to seven unseen languages.
+> **LiLT**, our primary model, splits into a text tower and a layout tower, coupled by BiACM. The
+> critical detail is in the diagram: the gradient from layout back into text is **detached**. The
+> argument is that layout is language-agnostic, so don't entangle it with one vocabulary. They prove
+> it by swapping the text tower and transferring to seven unseen languages.
 >
-> Here's our honest caveat, and we'd rather say it up front: that is evidence about *cross-lingual*
-> transfer. We are betting the same decoupling helps with *cross-template* transfer. That's an
-> extrapolation, and testing it is part of what we're contributing.
+> Our honest caveat: that is *cross-lingual* evidence. We're betting it helps *cross-template*.
+> That's an extrapolation, and testing it is part of the contribution.
 >
-> **BROS** goes the other way — no image at all — and still gets eighty-three-point-oh-five on FUNSD,
-> beating LayoutLMv2 *with* an image. Hold that thought; it comes back in two slides.
+> **BROS** goes the other way — no image at all — and still beats LayoutLMv2, which has one.
 
-### Slide 8 · Family 3 — Graphs and Parsing — 0:40
+### Slide 8 · Family 3 — Graphs and Parsing
 
 > Family three says: if linking is relational, stop pretending the document is a sentence.
 >
-> Model it as a graph instead. Nodes are text regions, so tagging becomes node classification. Edges
-> are candidate key-value relations, so linking becomes **edge** classification. No reading order is
-> assumed anywhere — and reading order is exactly the assumption that breaks on a new template.
+> Model it as a graph. Nodes are text regions, so tagging is node classification. Edges are candidate
+> relations, so linking is **edge** classification. No reading order anywhere — and reading order is
+> exactly what breaks on a new template.
 >
-> The number I'd point to is the FormNet ablation. A plain long-sequence transformer gets
-> sixty-five-point-nine. Add Rich Attention — a distance and direction term inside attention — and it
-> jumps to eighty-two. Add the graph pooling as well, eighty-four-point-five. That's **eighteen and a
-> half F1** from structural encoding alone. It's the clearest single piece of evidence we found that
-> sequence order is the wrong prior for forms.
+> The number I'd point to: a plain long-sequence transformer gets sixty-six. Add Rich Attention and
+> graph pooling, eighty-four and a half. **Eighteen points** from structural encoding alone — the
+> clearest evidence we found that sequence order is the wrong prior for forms.
+
+### Slide 9 · Family 4 — OCR-Free and Generative
+
+> Family four throws the pipeline out. Donut goes image straight to JSON. DocLLM keeps boxes but
+> splits attention four ways.
 >
-> Shared weakness: the graph is built *before* the network runs, so one bad OCR box corrupts
-> everything downstream.
+> The cost is on the right. DocLLM's own FUNSD number is **fifty-one-point-eight**, against
+> eighty-three to ninety-three for the discriminative encoders, with far more parameters. Free
+> generation gives no structural guarantee of a well-formed span.
 
-### Slide 9 · Family 4 — OCR-Free and Generative — 0:30
+### Slide 10 · Where the Literature Disagrees
 
-> Family four throws the pipeline out entirely. Donut goes straight from image to JSON — no OCR, no
-> boxes. DocLLM keeps boxes but splits attention into four text-and-spatial matrices.
+> Two questions we expected settled answers to.
 >
-> The cost is on the right. DocLLM's own reported FUNSD number is **fifty-one-point-eight**, against
-> eighty-three to ninety-three for the discriminative encoders, with far more parameters. Free-form
-> generation gives you no structural guarantee of a well-formed span, the way a tagging head or a
-> graph head does.
-
-### Slide 10 · Where the Literature Disagrees — 0:35
-
-> Two questions we expected to have settled answers to, and don't.
+> Does vision help? BROS says no, and beats an image-using model without one. LayoutLMv3 and
+> FormNetV2 say yes, but only fused at token granularity. Nobody has run the controlled ablation, so
+> both sides argue from confounded comparisons.
 >
-> Does vision help? BROS says no — it beats an image-using model without one, and argues serialisation
-> was the real bottleneck all along. LayoutLMv3 and FormNetV2 say yes, but only when vision is fused
-> at token granularity. Nobody has run the controlled ablation holding backbone size and pretraining
-> corpus fixed, so both camps are arguing from confounded comparisons.
->
-> Do generative models win? LMDX drops under five F1 going from seen to unseen templates, where
-> LayoutLMv2 drops nineteen to twenty-seven. That's a big claim for generation. But DocLLM's
-> fifty-one-point-eight says the opposite. Reading both charitably: generative models may generalise
-> better while being worse at exact span boundaries. Different quantities — never measured in one
-> experiment.
+> Do generative models win? LMDX drops under five F1 seen-to-unseen, where LayoutLMv2 drops nineteen
+> to twenty-seven. DocLLM says the opposite. They may generalise better while being worse at exact
+> span boundaries — never tested in one experiment.
 
-### Slide 11 · What Is Actually Measured — 0:50
+### Slide 11 · What Is Actually Measured
 
-> This is the most important slide in my half. Three measured results that changed our plan.
+> My most important slide. Three results that changed our plan.
 >
-> **One** — the gap is real. On VRDU, FormNet scores ninety-point-five on seen templates and
-> seventy-seven-point-three on unseen. Thirteen points, and it's thirteen to seventeen across models.
-> That's our calibration target.
+> **One** — the gap is real. FormNet on VRDU: ninety-point-five seen, seventy-seven-point-three
+> unseen. Thirteen points, and thirteen to seventeen across models. That's our calibration target.
 >
-> **Two** — and this one cost us a design decision. We had originally justified using BROS on the
-> grounds that relative position encoding should help on new templates. Then we found KNN-Former's
-> unseen-template split, where BROS scores **twenty-three** — worse than plain LayoutLM at
-> forty-seven. The architectural argument we had made was simply wrong. BROS stays in our plan, but
-> now for its linking head, which is a capability argument, not a generalisation one.
+> **Two**, and this cost us a design decision. We had justified BROS on the grounds that relative
+> encoding should help on new templates. Then we found KNN-Former's unseen-template split, where BROS
+> scores **twenty-three** — worse than plain LayoutLM at forty-seven. Our argument was simply wrong.
+> BROS stays, but for its linking head.
 >
-> **Three** — Do-GOOD decomposes the shift, and pure layout novelty costs about five F1 out of a
-> thirty-two-point real-world drop. So if you spend the whole project tuning positional encodings, you
-> are optimising five points of a thirty-two point problem. That genuinely reframed what we're looking for.
+> **Three** — Do-GOOD decomposes the shift, and pure layout novelty is five F1 of a thirty-two point
+> drop. Tune positional encodings all semester and you optimise five points of a thirty-two point
+> problem.
 
-*Delivery: slow down here. This is the slide that shows we read critically rather than collected citations.*
+*Delivery: slow down here. This slide shows we read critically rather than collected citations.*
 
-### Slide 12 · Benchmark Integrity — 0:35
+### Slide 12 · Benchmark Integrity
 
 > And a warning about the numbers themselves.
 >
-> Someone went and measured template duplication between train and test in the standard benchmarks.
-> SROIE is **seventy-five percent** duplicated. So published SROIE generalisation numbers are, to a
-> large extent, measuring memorisation.
+> Someone measured template duplication between train and test. SROIE is **seventy-five percent**
+> duplicated, so those generalisation numbers are largely measuring memorisation.
 >
-> FUNSD is sixteen percent, which is better, but FUNSD has its own problem: block-level annotation
-> gives every token inside an entity identical coordinates, so models learn "block boundary equals
-> entity boundary" as a shortcut. And its linking ground truth was noisy enough that a separate group
-> re-annotated the whole thing into RFUND.
+> FUNSD is sixteen percent, but has its own flaw: block-level annotation gives every token in an
+> entity identical coordinates, so models learn "block boundary equals entity boundary" as a shortcut.
 >
-> The consequence for us is the line at the bottom: FUNSD can validate our **code**. It cannot
-> validate our **claim**. Param is about to show you exactly that distinction being used.
+> **[CUT IF LONG]** Its linking labels were noisy enough that another group re-annotated the whole thing.
+>
+> So FUNSD validates our **code**. It cannot validate our **claim**.
 
 > **Handoff:** Back to Param.
 
@@ -208,158 +174,135 @@ Record in four takes matching the four blocks — a fluffed line costs one block
 
 ## BLOCK 3 — PM
 
-### Slide 13 · Dataset Survey — 0:30
+### Slide 13 · Dataset Survey
 
-> So we surveyed what's available, and ran straight into a wall.
+> We surveyed what's available and hit a wall. Look at the last two columns.
 >
-> Look at the last two columns. The dataset with an official unseen-template protocol — VRDU — has
-> **no linking annotation**. The datasets with linking annotation — FUNSD, XFUND, KVP10k — have **no
-> template split**. There is no single dataset that lets you ask our question directly.
+> The dataset with an official unseen-template protocol — VRDU — has no linking annotation. The
+> datasets with linking annotation have no template split. No single dataset lets us ask our question
+> directly. That's not a gap in our search; that's the shape of the field, and it's why the question
+> is worth asking.
+
+### Slide 14 · Datasets We Will Use
+
+> So, three sources. VRDU primary — the only ready-made unseen-template protocol, and its published
+> gap calibrates ours. FUNSD through the corrected RFUND annotation, for the linking half only, never
+> as generalisation evidence. And our own synthetic data, which is the next slide.
+
+### Slide 15 · Our Split Protocol
+
+> The contract from slide four, made concrete. Top row, seen: A, B and C in training and in test.
+> Bottom row, unseen: train on B and C, test on A alone. One fold per held-out template.
 >
-> That's not a gap in our search. That's the shape of the field, and it's a large part of why the
-> question is worth asking at all.
-
-### Slide 14 · Datasets We Will Use — 0:30
-
-> So we use three things. VRDU as primary, because it's the only ready-made unseen-template protocol
-> and its published gap calibrates ours. FUNSD through the corrected RFUND annotation, for the linking
-> half only — never as generalisation evidence on its own, for the reasons Arjoe just gave.
+> **Matched training size** matters — if the two regimes see different numbers of documents, you
+> haven't measured a generalisation gap, you've measured a sample-efficiency curve. Our code errors
+> out rather than report one.
 >
-> And third, we curate our own, which is the next slide but one.
+> And something we didn't expect. When we audited **VRDU's own official unseen-template splits**, the
+> held-out template shows up in *validation* on all three folds — in one case, a hundred documents
+> out of a hundred. So we implemented both: theirs for comparability, and a strict one. Everything I
+> show next uses the strict one.
 
-### Slide 15 · Our Split Protocol — 0:40
+*Delivery: this is our strongest "we did real work" moment. Land it, don't rush past it.*
 
-> This is the contract from slide four, made concrete.
+### Slide 16 · Data Curation Pipeline
+
+> Our own data, left to right. Real blank fillable PDFs — about fifty-five thousand, plus IRS forms —
+> filled programmatically. Because *we* wrote the values in, we get the box, the label and the link as
+> exact ground truth for free. Then degrade with Augraphy so it looks scanned. The payoff: we can vary
+> one factor at a time — same template, different noise.
 >
-> Top row, seen templates: A, B and C in training, A, B and C in test. Bottom row, unseen: train on B
-> and C only, test on A alone. One fold per held-out template.
+> **[CUT IF LONG]** Open risk, stated honestly — whether synthetic diversity transfers to *real*
+> unseen templates isn't cleanly measured anywhere we found. We treat it as a hypothesis.
+
+### Slide 17 · Metrics and Failure Taxonomy
+
+> Metrics: strict entity F1, exact span and type, implemented twice independently — they agree to
+> zero.
 >
-> Two details that are easy to get wrong. **Matched training size** — if the seen and unseen regimes
-> train on different numbers of documents, what you've measured isn't a generalisation gap, it's a
-> sample-efficiency curve. Our code raises an error rather than reporting a gap in that case.
+> The interesting part is the error breakdown on unseen templates. We expected a spread across four
+> buckets. We got OCR at zero-point-two percent, layout association at one percent, and
+> **ninety-seven percent field-type and schema errors**.
 >
-> And here's something we didn't expect. When we audited **VRDU's own official unseen-template
-> splits**, the held-out template shows up in the *validation* set on all three folds — in one case a
-> hundred out of a hundred validation documents. So we implemented both: their official protocol, for
-> comparability with published numbers, and a strict protocol where validation is rebuilt from
-> training templates only. Everything I'm about to show uses the strict one.
+> That's the most informative thing we have. The model finds the right text in the right place, then
+> assigns the wrong field type. It isn't failing to *read* the form. It's failing to know *what the
+> form is asking for* — semantic, not geometric. That points our ablations away from positional
+> encoding.
 
-*Delivery: this is our strongest "we did real work" moment. Land it clearly, don't rush past it.*
+### Slide 18 · Experiment 1 — Pipeline Validation
 
-### Slide 16 · Data Curation Pipeline — 0:30
-
-> Our own data, left to right. Take real blank fillable PDFs — there's a public corpus of about
-> fifty-five thousand, plus IRS forms — fill the form widgets programmatically with fake but plausible
-> values, and because *we* wrote the values in, we get the box, the label and the key-value link as
-> exact ground truth for free. Then degrade it with Augraphy so it looks like it came off a scanner.
->
-> The payoff is the third bullet: we can vary exactly one factor at a time. Same template, different
-> degradation. That's the Do-GOOD decomposition, but under our control instead of someone else's.
->
-> Open risk, stated honestly: whether synthetic template diversity actually transfers to *real* unseen
-> templates isn't cleanly measured anywhere we found. We treat it as a hypothesis, not an assumption.
-
-### Slide 17 · Metrics and Failure Taxonomy — 0:35
-
-> Metrics: strict entity F1 — exact span, exact type, no partial credit. We implemented it twice,
-> independently, and cross-checked; the two agree to zero.
->
-> The interesting part is the error breakdown on the right, run on the unseen-template predictions. We
-> expected a spread across four buckets. What we got was OCR errors at zero-point-two percent, layout
-> association at one percent, and **ninety-seven percent field-type and schema errors**.
->
-> Read that carefully, because it's the most informative thing we've found so far. On a new template
-> the model is locating the right text in the right place, and then assigning it the wrong field type.
-> It isn't failing to *read* the form. It's failing to know *what the form is asking for*. That's a
-> semantic failure, not a geometric one — which lines up with Do-GOOD, and it points our ablations
-> somewhere quite different from positional encoding.
-
-### Slide 18 · Experiment 1 — Pipeline Validation — 0:45
-
-> First experiment: LiLT on standard FUNSD, three seeds. Its only purpose is to prove our training and
+> First experiment: LiLT on standard FUNSD, three seeds. Its only job is to prove our training and
 > evaluation loop is correct before we trust any cross-template number.
 >
-> We got **seventy-nine-point-three**. The published number for this model is eighty-eight-point-four.
+> We got **seventy-nine-point-three**. The published number is eighty-eight-point-four.
 >
-> We want to be straight about this, because it's a nine-point shortfall and we'd rather flag it than
-> have it found. We had pre-registered a gate in our plan saying this needed to land near eighty-eight,
-> or something was wrong with our box normalisation or our label alignment. It didn't land there.
+> We'd rather flag that than have it found. We pre-registered a gate saying this had to land near
+> eighty-eight, or our box normalisation or label alignment was wrong. It didn't.
 >
-> We have ruled out one explanation: we checked whether we were simply scoring more strictly than the
-> papers do, and the lenient score is actually *lower*, so that isn't it. Our remaining suspects are
-> training length and the HEADER class, which collapses to point-five F1 on very few examples. That's
-> the first thing we fix.
->
-> What this does **not** invalidate is the next slide, and I'll say why.
+> We have ruled out one explanation: we checked whether we were scoring more strictly than the
+> papers, and the lenient score is actually *lower*. Remaining suspects are training length and the
+> HEADER class, which collapses to point-five F1. That's our next action.
 
-*Delivery: don't apologise, don't rush. Owning a missed gate is worth more than hiding it, and a TA will spot the 88.41 anyway.*
+*Delivery: don't apologise, don't rush. A TA will spot the 88.41 anyway — owning it beats hiding it.*
 
-### Slide 19 · Experiment 2 — Seen vs Unseen — 0:55
+### Slide 19 · Experiment 2 — Seen vs Unseen
 
-> This is the headline experiment. VRDU Registration Forms, leave-one-template-out, three folds by
-> three seeds, matched training size at two hundred documents, leakage check passing on every run.
+> The headline. VRDU Registration Forms, leave-one-template-out, three folds by three seeds, matched
+> training size at two hundred documents, leakage check passing on every run.
 >
-> Seen templates: **eighty-eight F1**. Unseen: **sixty-seven**. A **twenty-one point** gap — a
-> twenty-four percent relative drop.
+> Seen templates: **eighty-eight F1**. Unseen: **sixty-seven**. A **twenty-one point** gap.
 >
-> Now, back to the previous slide. Both arms here run through identical code, identical data handling,
-> identical metric. The only thing that differs is whether the test template was in training. So even
-> with our absolute level depressed, the *gap* is a valid within-study comparison.
+> Back to the previous slide. Both arms run identical code, data handling and metric. The only thing
+> that differs is whether the test template was in training. So even with our absolute level low, the
+> *gap* is a valid within-study comparison.
 >
-> What we should *not* do is put our twenty-one points next to FormNet's thirteen and conclude LiLT is
-> worse — our baseline is low, so a larger gap is partly expected. We'll make that comparison once
-> experiment one passes its gate.
+> What we should *not* do is set our twenty-one against FormNet's thirteen and conclude LiLT is worse
+> — a depressed baseline inflates a gap. That waits on the previous slide's fix.
 >
-> One more thing worth following: the per-template chart shows the short form degrading steepest,
-> eighty-eight down to fifty-eight. Degradation isn't uniform across templates, and that's a lead.
+> **[CUT IF LONG]** The short form degrades steepest, eighty-eight to fifty-eight. Degradation isn't
+> uniform across templates, and that's a lead.
 
-> **Handoff:** Arjoe will take us through what we're claiming and what's next.
+> **Handoff:** Arjoe takes us through what we're claiming and what's next.
 
 ---
 
 ## BLOCK 4 — AB
 
-### Slide 20 · The Research Gap — 0:40
+### Slide 20 · The Research Gap
 
-> So here's the gap we're claiming, and it came directly out of the reading rather than being chosen
-> first.
+> Here's the gap we're claiming, and it came out of the reading rather than being chosen first.
 >
-> Entity extraction **has** been measured under template shift — VRDU, DocILE and Do-GOOD all do it.
-> Key-value **linking** has not. Every strong linking result in this table — GeoLayoutLM at
-> eighty-nine-point-four, KVPFormer, PEneo — comes from a split where train and test share templates.
+> Entity extraction *has* been measured under template shift — VRDU, DocILE, Do-GOOD. Key-value
+> **linking** has not. Every strong result in this table comes from a split where train and test share
+> templates. The two template-disjoint entries are in the wrong setting: one is webpages, the other
+> does field typing.
 >
-> The two entries that *are* template-disjoint are in the wrong setting: one is on webpages, the other
-> does field typing rather than linking.
+> So we measure tagging **and** linking under one template-disjoint protocol. We say "to our
+> knowledge" deliberately.
+
+### Slide 21 · Roadmap
+
+> Where we are. The loaders, the leakage assertion, the dual metric, the gap measurement and the
+> failure analysis are done.
 >
-> So our contribution is to measure tagging **and** linking under one template-disjoint protocol. We
-> phrase that as "to our knowledge" deliberately — we haven't exhaustively verified every benchmark's
-> task structure, and we'd rather be precise than sweeping.
+> Next: I take the linking head on RFUND — the subtask that actually tests the claim we just made —
+> plus scaling to VRDU Ad-buy for four training and two held-out templates, and the synthetic
+> pipeline. Param takes the ablations and the demo interface.
 
-### Slide 21 · Roadmap — 0:30
+### Slide 22 · Models, Interface and Risks
 
-> Where we are. The first three subtasks and the failure analysis are done — the loaders, the leakage
-> assertion, the dual metric implementation, and the gap measurement Param just showed you.
+> Four models, licences declared — LayoutLMv3 is non-commercial, fine for coursework, but we'd rather
+> state it. The encoders pretrain on IIT-CDIP, about eleven million scanned pages.
 >
-> Next: I take the linking head on RFUND, which is the subtask that actually tests the claim we just
-> made, plus scaling to VRDU Ad-buy to get four training and two held-out templates, and the synthetic
-> pipeline. Param takes the ablations and the demo interface. The report is joint.
-
-### Slide 22 · Models, Interface and Risks — 0:25
-
-> Four models, licences declared — note LayoutLMv3 is non-commercial, which is perfectly fine for
-> coursework but we'd rather state it than not. All the encoders pretrain on IIT-CDIP, about eleven
-> million scanned pages.
+> The interface will be a Gradio app: upload a form, see predicted key-value pairs highlighted.
 >
-> The interface will be a Gradio app: upload a form, see the predicted key-value pairs highlighted on
-> the page.
->
-> Biggest risk is the top one — VRDU Registration only has three templates, which is thin for a claim
-> about generalisation. That's exactly why Ad-buy and the synthetic families are on the roadmap.
+> Biggest risk is the top one — VRDU Registration has only three templates. That's exactly why Ad-buy
+> and the synthetic families are on the roadmap.
 
-### Slides 23–25 · References — 0:10
+### Slides 23–25 · References
 
-> Our references are on the last three slides in the format the course requires. A few are still
-> flagged unverified in our repository, pending a primary-source check before the final report.
+> References are on the last three slides in the required format. A few are still flagged unverified
+> in our repository, pending a primary-source check before the final report.
 >
 > That's us — thank you.
 
@@ -367,10 +310,25 @@ Record in four takes matching the four blocks — a fluffed line costs one block
 
 ---
 
+## Timing
+
+Measured on the spoken lines only, excluding delivery notes and handoff cues.
+
+Full script: **1860 spoken words**. With all four **[CUT IF LONG]** paragraphs dropped: **1771**.
+
+| Delivery rate | Full script | After cuts |
+|---|---|---|
+| 130 wpm (slow, deliberate) | 14:18 | 13:37 |
+| 150 wpm (normal) | 12:24 | 11:48 |
+| 160 wpm (brisk) | 11:38 | 11:04 |
+
+Rehearse once with a stopwatch. If the rehearsal passes 13:30, drop the four **[CUT IF LONG]**
+paragraphs and re-run.
+
 ## Pre-flight checklist
 
 - [ ] Compiled PDF last page reads **25**
 - [ ] Facecam visible for **both** presenters, inside their own blocks
-- [ ] Full rehearsal timed under **14:00** before the real take
+- [ ] Timed rehearsal under **14:00**
 - [ ] Audio levels checked on both mics
 - [ ] Upload to `Unemployed and Unsupervised_IE643_CourseProject_Prep`, verify access from a second account
