@@ -1,0 +1,23 @@
+# Track A+ — Joint Entity Tagging and Key-Value Linking on FUNSD.
+#
+# Jointly optimizes token classification (Entity F1) and spatial biaffine
+# key-value relation linking (Linking F1).
+
+backbone: lilt
+dataset: funsd
+data_root: data/funsd/dataset
+
+task: joint
+linking_loss_weight: 1.0
+pos_weight: 10.0
+use_spatial_relations: true
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/funsd_joint_lilt
