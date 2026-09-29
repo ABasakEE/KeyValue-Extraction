@@ -1,0 +1,24 @@
+# Synthetic Multi-Template Form Dataset Training Configuration
+#
+# Jointly train LiLT on programmatically synthesized diverse form templates
+# (Invoices, Medical Intake, FCC Ad-Buy, FARA Registration) with Augraphy
+# physical scanner degradation to evaluate zero-shot layout invariance.
+
+backbone: lilt
+dataset: funsd
+data_root: data/synthetic/dataset
+
+task: joint
+linking_loss_weight: 1.0
+pos_weight: 10.0
+use_spatial_relations: true
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/synthetic_joint_lilt
