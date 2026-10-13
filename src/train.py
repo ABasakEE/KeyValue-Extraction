@@ -79,8 +79,14 @@ class TrainConfig:
     k_neighbors: int = 0                  # 0 = all O(N^2) pairs, > 0 = KNN spatial filtering
     fallback_top_k: int = 0
     curriculum: bool = False              # True = 3-stage decoupled warmup
-    phase1_epochs: int = 8                # Phase 1: Tagging warmup (lambda_link = 0)
-    phase2_epochs: int = 6                # Phase 2: Teacher-forced relation head warmup
+    patience_tolerance: int = 3           # Early stopping patience (epochs without validation improvement)
+    min_delta: float = 0.001              # Minimum improvement threshold to reset patience
+    phase1_epochs: int = 10               # Phase 1: Tagging warmup (lambda_link = 0)
+    phase2_epochs: int = 8                # Phase 2: Teacher-forced relation head warmup
+    phase3_epochs: int = 10               # Phase 3: Joint fine-tuning
+    max_phase1_epochs: int = 10           # Alias/cap for Phase 1
+    max_phase2_epochs: int = 8            # Alias/cap for Phase 2
+    max_phase3_epochs: int = 10           # Alias/cap for Phase 3
     epochs: int = 20
     batch_size: int = 4
     lr: float = 5e-5
@@ -193,6 +199,64 @@ def predict_joint(
     return predictions, references, all_pred_links, all_gold_links
 
 
+@torch.no_grad()
+def predict_phase1_tagging(
+    model: JointFormExtractor,
+    loader: DataLoader,
+    device: torch.device,
+    desc: str | None = None,
+):
+    """Phase 1 validation: ONLY evaluate token classification (tagging).
+
+    Does not compute pairwise biaffine relation matrices or spatial edge features,
+    strictly validating entity tagging quality before relation head learning.
+    """
+    model.eval()
+    predictions: list[list[int]] = []
+    references: list[list[int]] = []
+    it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
+    for batch_data in it:
+        encoded, batch = batch_data[0], batch_data[1]
+        inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
+        logits = model.encoder(**inputs).logits.cpu()
+        for i, example in enumerate(batch):
+            predictions.append(
+                model.first_subword_predictions(logits[i], encoded.word_ids[i], len(example.words))
+            )
+            references.append(example.ner_tags)
+    return predictions, references
+
+
+@torch.no_grad()
+def predict_phase2_linking(
+    model: JointFormExtractor,
+    loader: DataLoader,
+    device: torch.device,
+    desc: str | None = None,
+):
+    """Phase 2 validation: ONLY evaluate key-value linking under Teacher Forcing.
+
+    Evaluates relation linking performance with ground-truth entity spans/types
+    without re-evaluating the frozen token encoder.
+    """
+    model.eval()
+    all_pred_links: list[set[tuple[int, int]]] = []
+    all_gold_links: list[set[tuple[int, int]]] = []
+    it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
+    for encoded, batch, entity_spans, gold_links, entity_types in it:
+        inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
+        outputs = model(
+            inputs=inputs,
+            entity_spans=entity_spans,
+            gold_links=None,
+            entity_types=entity_types,
+        )
+        all_pred_links.extend(outputs.predicted_links)
+        for g_links in gold_links:
+            all_gold_links.append(set(g_links))
+    return all_pred_links, all_gold_links
+
+
 def train_one(
     model: TokenClassifier | JointFormExtractor,
     train_examples: list,
@@ -211,118 +275,308 @@ def train_one(
 
     model_to_optimize = model if is_joint else model.model
     model_to_optimize.to(device)
-    optimizer = torch.optim.AdamW(model_to_optimize.parameters(), lr=config.lr, weight_decay=config.weight_decay)
-    total_steps = max(1, len(train_loader) * config.epochs)
-    scheduler = torch.optim.lr_scheduler.OneCycleLR(
-        optimizer, max_lr=config.lr, total_steps=total_steps, pct_start=config.warmup_ratio, anneal_strategy="linear"
-    )
 
     best_val_score, best_state, history = -1.0, None, []
     if checkpoint_dir is not None:
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
-    for epoch in range(config.epochs):
-        # Curriculum learning: decouple token classification and relation head optimization
-        if is_joint and getattr(config, "curriculum", False):
-            p1_end = getattr(config, "phase1_epochs", 8)
-            p2_end = p1_end + getattr(config, "phase2_epochs", 6)
-            if epoch < p1_end:
-                # Phase 1: Train LiLT backbone + token classification only (lambda_linking = 0)
-                model.linking_loss_weight = 0.0
-                for p in model.encoder.parameters():
-                    p.requires_grad = True
-                for p in model.relation_head.parameters():
-                    p.requires_grad = False
-            elif epoch < p2_end:
-                # Phase 2: Warm up relation head with Teacher Forcing (freeze LiLT backbone)
-                model.linking_loss_weight = config.linking_loss_weight
-                for p in model.encoder.parameters():
-                    p.requires_grad = False
-                for p in model.relation_head.parameters():
-                    p.requires_grad = True
-            else:
-                # Phase 3: Unfreeze all parameters for joint end-to-end fine-tuning
-                model.linking_loss_weight = config.linking_loss_weight
-                for p in model.encoder.parameters():
-                    p.requires_grad = True
-                for p in model.relation_head.parameters():
-                    p.requires_grad = True
+    patience = getattr(config, "patience_tolerance", 3)
+    min_delta = getattr(config, "min_delta", 0.001)
 
-        model_to_optimize.train()
-        epoch_loss = 0.0
-        pbar = tqdm(
-            train_loader,
-            desc=f"Epoch {epoch+1:>2}/{config.epochs}",
-            leave=True,
-            unit="b",
-            **TQDM_KWARGS,
+    if is_joint and getattr(config, "curriculum", False):
+        # =========================================================================
+        # DECOUPLED 3-STAGE CURRICULUM WITH PER-PHASE VALIDATION & EARLY STOPPING
+        # =========================================================================
+
+        # -------------------------------------------------------------------------
+        # Phase 1: Pure Token Classification Warmup (lambda_linking = 0.0)
+        # Validation subset: ONLY Entity Tagging (predict_phase1_tagging)
+        # -------------------------------------------------------------------------
+        max_p1 = getattr(config, "max_phase1_epochs", getattr(config, "phase1_epochs", 10))
+        print(f"\n{'='*70}", flush=True)
+        print(f"[*] [Phase 1/3] Token Classification Warmup (max {max_p1} eps, patience={patience})", flush=True)
+        print(f"[*] Validating strictly on Entity F1 (no relation linking)", flush=True)
+        print(f"{'='*70}", flush=True)
+
+        model.linking_loss_weight = 0.0
+        for p in model.encoder.parameters():
+            p.requires_grad = True
+        for p in model.relation_head.parameters():
+            p.requires_grad = False
+
+        opt_p1 = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=config.lr, weight_decay=config.weight_decay)
+        sched_p1 = torch.optim.lr_scheduler.OneCycleLR(
+            opt_p1, max_lr=config.lr, total_steps=max(1, len(train_loader) * max_p1), pct_start=config.warmup_ratio, anneal_strategy="linear"
         )
-        for batch_data in pbar:
-            if is_joint:
+
+        best_p1_ent_f1, best_p1_state, p1_patience = -1.0, None, 0
+        for ep in range(max_p1):
+            model.train()
+            ep_loss = 0.0
+            pbar = tqdm(train_loader, desc=f"Phase 1 Epoch {ep+1:>2}/{max_p1}", leave=True, unit="b", **TQDM_KWARGS)
+            for batch_data in pbar:
                 encoded, _, spans, gold_links, entity_types = batch_data
                 inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
-                output = model(
-                    inputs=inputs,
-                    entity_spans=spans,
-                    gold_links=gold_links,
-                    entity_types=entity_types,
-                )
-                loss = output.total_loss
+                out = model(inputs=inputs, entity_spans=spans, gold_links=gold_links, entity_types=entity_types)
+                loss = out.tagging_loss if out.tagging_loss is not None else out.total_loss
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                opt_p1.step()
+                sched_p1.step()
+                opt_p1.zero_grad()
+                ep_loss += loss.item()
+                pbar.set_postfix(tag_loss=f"{loss.item():.3f}")
+            pbar.close()
+
+            # Validation: ONLY evaluate Entity Tagging
+            val_pred, val_ref = predict_phase1_tagging(model, val_loader, device)
+            val_ent_f1 = entity_f1(val_pred, val_ref, model.id2label).f1
+            avg_loss = ep_loss / max(1, len(train_loader))
+            print(f"  [Phase 1 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Entity F1: {val_ent_f1:.4f} (best: {max(best_p1_ent_f1, val_ent_f1):.4f})", flush=True)
+
+            history.append({
+                "phase": 1,
+                "epoch": ep + 1,
+                "train_loss": round(avg_loss, 4),
+                "val_entity_f1": round(val_ent_f1, 4),
+            })
+
+            if val_ent_f1 > best_p1_ent_f1 + min_delta:
+                best_p1_ent_f1 = val_ent_f1
+                best_p1_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                p1_patience = 0
             else:
-                encoded, _ = batch_data
+                p1_patience += 1
+                if p1_patience >= patience:
+                    print(f"  [Phase 1 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 2 with best Val Entity F1={best_p1_ent_f1:.4f}\n", flush=True)
+                    break
+
+        # Restore peak Phase 1 weights before Phase 2
+        if best_p1_state is not None:
+            model.load_state_dict(best_p1_state)
+
+        # -------------------------------------------------------------------------
+        # Phase 2: Teacher-Forced Relation Head Warmup (Frozen LiLT Backbone)
+        # Validation subset: ONLY Key-Value Linking (predict_phase2_linking)
+        # -------------------------------------------------------------------------
+        max_p2 = getattr(config, "max_phase2_epochs", getattr(config, "phase2_epochs", 8))
+        print(f"\n{'='*70}", flush=True)
+        print(f"[*] [Phase 2/3] Spatial Relation Head Warmup (max {max_p2} eps, patience={patience})", flush=True)
+        print(f"[*] Backbone frozen. Validating strictly on Linking F1 under Teacher Forcing", flush=True)
+        print(f"{'='*70}", flush=True)
+
+        model.linking_loss_weight = config.linking_loss_weight
+        for p in model.encoder.parameters():
+            p.requires_grad = False
+        for p in model.relation_head.parameters():
+            p.requires_grad = True
+
+        opt_p2 = torch.optim.AdamW(filter(lambda p: p.requires_grad, model.parameters()), lr=config.lr, weight_decay=config.weight_decay)
+        sched_p2 = torch.optim.lr_scheduler.OneCycleLR(
+            opt_p2, max_lr=config.lr, total_steps=max(1, len(train_loader) * max_p2), pct_start=config.warmup_ratio, anneal_strategy="linear"
+        )
+
+        best_p2_link_f1, best_p2_state, p2_patience = -1.0, None, 0
+        for ep in range(max_p2):
+            model.train()
+            ep_loss = 0.0
+            pbar = tqdm(train_loader, desc=f"Phase 2 Epoch {ep+1:>2}/{max_p2}", leave=True, unit="b", **TQDM_KWARGS)
+            for batch_data in pbar:
+                encoded, _, spans, gold_links, entity_types = batch_data
                 inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
-                loss = model.model(**inputs).loss
+                out = model(inputs=inputs, entity_spans=spans, gold_links=gold_links, entity_types=entity_types)
+                loss = out.linking_loss if out.linking_loss is not None else out.total_loss
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.relation_head.parameters(), 1.0)
+                opt_p2.step()
+                sched_p2.step()
+                opt_p2.zero_grad()
+                ep_loss += loss.item()
+                pbar.set_postfix(link_loss=f"{loss.item():.3f}")
+            pbar.close()
 
-            loss.backward()
-            torch.nn.utils.clip_grad_norm_(model_to_optimize.parameters(), 1.0)
-            optimizer.step()
-            scheduler.step()
-            optimizer.zero_grad()
-            epoch_loss += loss.item()
-            pbar.set_postfix(loss=f"{loss.item():.3f}")
+            # Validation: ONLY evaluate Key-Value Linking
+            val_pred_links, val_gold_links = predict_phase2_linking(model, val_loader, device)
+            val_link_scores = linking_f1(val_pred_links, val_gold_links)
+            val_link_f1 = val_link_scores["f1"]
+            avg_loss = ep_loss / max(1, len(train_loader))
+            print(f"  [Phase 2 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Linking F1: {val_link_f1:.4f} (best: {max(best_p2_link_f1, val_link_f1):.4f})", flush=True)
 
-        avg_loss = epoch_loss / max(1, len(train_loader))
+            history.append({
+                "phase": 2,
+                "epoch": ep + 1,
+                "train_loss": round(avg_loss, 4),
+                "val_linking_f1": round(val_link_f1, 4),
+            })
 
-        if is_joint:
+            if val_link_f1 > best_p2_link_f1 + min_delta:
+                best_p2_link_f1 = val_link_f1
+                best_p2_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                p2_patience = 0
+            else:
+                p2_patience += 1
+                if p2_patience >= patience:
+                    print(f"  [Phase 2 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 3 with best Val Linking F1={best_p2_link_f1:.4f}\n", flush=True)
+                    break
+
+        # Restore peak Phase 2 weights before Phase 3
+        if best_p2_state is not None:
+            model.load_state_dict(best_p2_state)
+
+        # -------------------------------------------------------------------------
+        # Phase 3: Joint End-to-End Fine-Tuning
+        # Validation: FULL Joint Evaluation (Entity F1 + Linking F1)
+        # -------------------------------------------------------------------------
+        max_p3 = getattr(config, "max_phase3_epochs", getattr(config, "phase3_epochs", 10))
+        print(f"\n{'='*70}", flush=True)
+        print(f"[*] [Phase 3/3] Joint End-to-End Fine-Tuning (max {max_p3} eps, patience={patience})", flush=True)
+        print(f"[*] All weights unfrozen. Validating on Joint Score = 0.5 * (Entity F1 + Linking F1)", flush=True)
+        print(f"{'='*70}", flush=True)
+
+        model.linking_loss_weight = config.linking_loss_weight
+        for p in model.parameters():
+            p.requires_grad = True
+
+        opt_p3 = torch.optim.AdamW(
+            [
+                {"params": model.encoder.parameters(), "lr": config.lr * 0.2},
+                {"params": model.relation_head.parameters(), "lr": config.lr},
+            ],
+            weight_decay=config.weight_decay,
+        )
+        sched_p3 = torch.optim.lr_scheduler.OneCycleLR(
+            opt_p3,
+            max_lr=[config.lr * 0.2, config.lr],
+            total_steps=max(1, len(train_loader) * max_p3),
+            pct_start=config.warmup_ratio,
+            anneal_strategy="linear",
+        )
+
+        best_val_score, best_state, p3_patience = -1.0, None, 0
+        for ep in range(max_p3):
+            model.train()
+            ep_loss = 0.0
+            pbar = tqdm(train_loader, desc=f"Phase 3 Epoch {ep+1:>2}/{max_p3}", leave=True, unit="b", **TQDM_KWARGS)
+            for batch_data in pbar:
+                encoded, _, spans, gold_links, entity_types = batch_data
+                inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
+                out = model(inputs=inputs, entity_spans=spans, gold_links=gold_links, entity_types=entity_types)
+                loss = out.total_loss
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+                opt_p3.step()
+                sched_p3.step()
+                opt_p3.zero_grad()
+                ep_loss += loss.item()
+                pbar.set_postfix(total_loss=f"{loss.item():.3f}")
+            pbar.close()
+
+            # Validation: FULL Joint Evaluation
             val_pred, val_ref, val_pred_links, val_gold_links = predict_joint(model, val_loader, device)
             val_ent_f1 = entity_f1(val_pred, val_ref, model.id2label).f1
             val_link_scores = linking_f1(val_pred_links, val_gold_links)
             val_link_f1 = val_link_scores["f1"]
             val_score = 0.5 * (val_ent_f1 + val_link_f1)
+            avg_loss = ep_loss / max(1, len(train_loader))
+            print(f"  [Phase 3 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Ent F1: {val_ent_f1:.4f} | Val Link F1: {val_link_f1:.4f} | Joint Val: {val_score:.4f} (best: {max(best_val_score, val_score):.4f})", flush=True)
+
             history.append({
-                "epoch": epoch,
+                "phase": 3,
+                "epoch": ep + 1,
                 "train_loss": round(avg_loss, 4),
                 "val_entity_f1": round(val_ent_f1, 4),
                 "val_linking_f1": round(val_link_f1, 4),
                 "val_score": round(val_score, 4),
             })
-            pbar.set_postfix(
-                loss=f"{avg_loss:.3f}",
-                ent=f"{val_ent_f1:.3f}",
-                link=f"{val_link_f1:.3f}",
-                best=f"{best_val_score:.3f}",
-            )
-        else:
-            val_pred, val_ref = predict(model, val_loader, device)
-            val_score = entity_f1(val_pred, val_ref, model.model.config.id2label).f1
-            history.append({"epoch": epoch, "train_loss": round(avg_loss, 4), "val_f1": round(val_score, 4)})
-            pbar.set_postfix(loss=f"{avg_loss:.3f}", val_f1=f"{val_score:.3f}", best=f"{best_val_score:.3f}")
 
-        if val_score > best_val_score:
-            best_val_score = val_score
-            best_state = {k: v.detach().cpu().clone() for k, v in model_to_optimize.state_dict().items()}
-            if checkpoint_dir is not None:
-                torch.save(best_state, checkpoint_dir / "best_model.pt")
-                meta = {
-                    "epoch": epoch,
-                    "best_val_score": round(best_val_score, 4),
+            if val_score > best_val_score + min_delta:
+                best_val_score = val_score
+                best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
+                if checkpoint_dir is not None:
+                    torch.save(best_state, checkpoint_dir / "best_model.pt")
+                    meta = {
+                        "phase": 3,
+                        "epoch": ep + 1,
+                        "best_val_score": round(best_val_score, 4),
+                        "val_entity_f1": round(val_ent_f1, 4),
+                        "val_linking_f1": round(val_link_f1, 4),
+                        "train_loss": round(avg_loss, 4),
+                    }
+                    (checkpoint_dir / "best_meta.json").write_text(
+                        json.dumps(meta, indent=2, default=json_serializable), encoding="utf-8"
+                    )
+                p3_patience = 0
+            else:
+                p3_patience += 1
+                if p3_patience >= patience:
+                    print(f"  [Phase 3 Early Stop] Plateau reached ({patience} eps without gain). Concluding training with best Joint Val={best_val_score:.4f}\n", flush=True)
+                    break
+
+    else:
+        # =========================================================================
+        # STANDARD SINGLE-STAGE TRAINING WITH PATIENCE EARLY STOPPING
+        # =========================================================================
+        optimizer = torch.optim.AdamW(model_to_optimize.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+        total_steps = max(1, len(train_loader) * config.epochs)
+        scheduler = torch.optim.lr_scheduler.OneCycleLR(
+            optimizer, max_lr=config.lr, total_steps=total_steps, pct_start=config.warmup_ratio, anneal_strategy="linear"
+        )
+        patience_cnt = 0
+        for epoch in range(config.epochs):
+            model_to_optimize.train()
+            epoch_loss = 0.0
+            pbar = tqdm(train_loader, desc=f"Epoch {epoch+1:>2}/{config.epochs}", leave=True, unit="b", **TQDM_KWARGS)
+            for batch_data in pbar:
+                if is_joint:
+                    encoded, _, spans, gold_links, entity_types = batch_data
+                    inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
+                    output = model(inputs=inputs, entity_spans=spans, gold_links=gold_links, entity_types=entity_types)
+                    loss = output.total_loss
+                else:
+                    encoded, _ = batch_data
+                    inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
+                    loss = model.model(**inputs).loss
+
+                loss.backward()
+                torch.nn.utils.clip_grad_norm_(model_to_optimize.parameters(), 1.0)
+                optimizer.step()
+                scheduler.step()
+                optimizer.zero_grad()
+                epoch_loss += loss.item()
+                pbar.set_postfix(loss=f"{loss.item():.3f}")
+
+            avg_loss = epoch_loss / max(1, len(train_loader))
+            if is_joint:
+                val_pred, val_ref, val_pred_links, val_gold_links = predict_joint(model, val_loader, device)
+                val_ent_f1 = entity_f1(val_pred, val_ref, model.id2label).f1
+                val_link_scores = linking_f1(val_pred_links, val_gold_links)
+                val_link_f1 = val_link_scores["f1"]
+                val_score = 0.5 * (val_ent_f1 + val_link_f1)
+                history.append({
+                    "epoch": epoch + 1,
                     "train_loss": round(avg_loss, 4),
-                }
-                (checkpoint_dir / "best_meta.json").write_text(
-                    json.dumps(meta, indent=2, default=json_serializable), encoding="utf-8"
-                )
+                    "val_entity_f1": round(val_ent_f1, 4),
+                    "val_linking_f1": round(val_link_f1, 4),
+                    "val_score": round(val_score, 4),
+                })
+            else:
+                val_pred, val_ref = predict(model, val_loader, device)
+                val_score = entity_f1(val_pred, val_ref, model.model.config.id2label).f1
+                history.append({"epoch": epoch + 1, "train_loss": round(avg_loss, 4), "val_f1": round(val_score, 4)})
 
-        pbar.close()
+            pbar.close()
+
+            if val_score > best_val_score + min_delta:
+                best_val_score = val_score
+                best_state = {k: v.detach().cpu().clone() for k, v in model_to_optimize.state_dict().items()}
+                if checkpoint_dir is not None:
+                    torch.save(best_state, checkpoint_dir / "best_model.pt")
+                patience_cnt = 0
+            else:
+                patience_cnt += 1
+                if patience_cnt >= patience:
+                    print(f"  [Early Stop] Early stopping triggered after {patience} epochs without improvement.")
+                    break
 
     if best_state is not None:
         model_to_optimize.load_state_dict(best_state)

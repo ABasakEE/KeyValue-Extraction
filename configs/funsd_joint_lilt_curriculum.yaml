@@ -24,11 +24,14 @@ masking_mode: soft
 k_neighbors: 8
 fallback_top_k: 3
 
-# Decoupled Curriculum Warmup Schedule
+# Dynamic Decoupled Curriculum Schedule with Early Stopping
 curriculum: true
-phase1_epochs: 8
-phase2_epochs: 6
-epochs: 20
+patience_tolerance: 3
+min_delta: 0.001
+max_phase1_epochs: 10
+max_phase2_epochs: 8
+max_phase3_epochs: 10
+epochs: 28
 
 batch_size: 4
 lr: 5.0e-5
