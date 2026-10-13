@@ -1,0 +1,32 @@
+{
+  "backbone": "lilt",
+  "model_checkpoint": "SCUT-DLVCLab/lilt-roberta-en-base",
+  "tokenizer_checkpoint": "microsoft/layoutlmv3-base",
+  "num_labels": 7,
+  "id2label": {
+    "0": "O",
+    "1": "B-HEADER",
+    "2": "I-HEADER",
+    "3": "B-QUESTION",
+    "4": "I-QUESTION",
+    "5": "B-ANSWER",
+    "6": "I-ANSWER"
+  },
+  "label2id": {
+    "O": 0,
+    "B-HEADER": 1,
+    "I-HEADER": 2,
+    "B-QUESTION": 3,
+    "I-QUESTION": 4,
+    "B-ANSWER": 5,
+    "I-ANSWER": 6
+  },
+  "spatial_in_features": 10,
+  "hidden_dim": 768,
+  "relation_proj_dim": 128,
+  "relation_geo_dim": 64,
+  "max_length": 512,
+  "linking_loss_weight": 1.0,
+  "pos_weight": 10.0,
+  "use_spatial_relations": true
+}

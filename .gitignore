@@ -9,14 +9,18 @@
 !slides/figures/*.png
 !slides/figures/*.pdf
 
-# model artifacts
+# model artifacts and archives
 *.ckpt
 *.safetensors
 *.bin
 *.pt
+*.zip
+*.tar.gz
 checkpoints/
 runs/
 wandb/
+kaggle_output/
+augraphy_cache/
 
 # results: commit the metrics JSON and plots, not the raw prediction dumps
 results/**/predictions/

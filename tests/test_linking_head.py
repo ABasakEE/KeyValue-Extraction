@@ -154,3 +154,65 @@ def test_pool_entity_representations():
     # Check bounding box union for entity 0: x0 should be 0, x1 should be 150
     assert entity_boxes[0, 0].item() == 0
     assert entity_boxes[0, 2].item() == 150
+
+
+def test_extended_spatial_features_12d():
+    boxes_a = torch.tensor([[100, 100, 200, 150]])
+    boxes_b = torch.tensor([[250, 100, 350, 150]])
+    features = compute_spatial_features(boxes_a, boxes_b, feature_dim=12)
+    assert features.shape == (1, 1, 12)
+    # IoU_y for horizontally aligned boxes should be 1.0
+    iou_y = features[0, 0, 10].item()
+    assert abs(iou_y - 1.0) < 1e-3
+
+
+def test_soft_type_priors():
+    from src.models.linking_head import build_soft_type_priors_from_labels
+    types = ["question", "answer", "header"]
+    priors = build_soft_type_priors_from_labels(types, penalty_mismatch=-5.0)
+    assert priors.shape == (3, 3)
+    # (question, answer) is allowed -> prior = 0.0
+    assert priors[0, 1].item() == 0.0
+    # (answer, question) is disallowed -> prior = -5.0
+    assert priors[1, 0].item() == -5.0
+
+
+def test_knn_spatial_candidate_mask():
+    from src.models.linking_head import build_knn_spatial_candidate_mask
+    boxes = torch.tensor([
+        [100, 100, 200, 140],
+        [220, 100, 320, 140],
+        [100, 200, 200, 240],
+        [220, 200, 320, 240],
+    ])
+    gold_links = {(0, 1), (2, 3)}
+    mask = build_knn_spatial_candidate_mask(boxes, k_neighbors=2, gold_links=gold_links)
+    assert mask.shape == (4, 4)
+    # Gold links must always be in candidate mask
+    assert mask[0, 1].item() is True
+    assert mask[2, 3].item() is True
+
+
+def test_focal_loss_vs_bce():
+    logits = torch.randn(4, 4)
+    gold_links = {(0, 1)}
+    loss_focal = BiaffineRelationClassifier.compute_loss(logits, gold_links, loss_type="focal")
+    loss_bce = BiaffineRelationClassifier.compute_loss(logits, gold_links, loss_type="bce")
+    assert loss_focal.item() > 0.0
+    assert loss_bce.item() > 0.0
+
+
+def test_fallback_top_k_decoding():
+    # Logits all below threshold 0.5 (sigmoid(-2.0) ~ 0.12, sigmoid(-3.0) ~ 0.05)
+    logits = torch.tensor([
+        [-1e9, -2.0, -5.0],
+        [-1e9, -1e9, -5.0],
+        [-1e9, -5.0, -1e9],
+    ])
+    # Standard threshold returns empty set
+    preds_standard = BiaffineRelationClassifier.decode_predictions(logits, threshold=0.5, fallback_top_k=0)
+    assert len(preds_standard) == 0
+
+    # Fallback decoding returns top-1 candidate (0, 1)
+    preds_fallback = BiaffineRelationClassifier.decode_predictions(logits, threshold=0.5, fallback_top_k=1)
+    assert (0, 1) in preds_fallback

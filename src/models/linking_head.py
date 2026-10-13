@@ -39,6 +39,9 @@ def compute_spatial_features(
     boxes_a: torch.Tensor,
     boxes_b: torch.Tensor,
     norm_scale: float = 1000.0,
+    feature_dim: int = 10,
+    indices_a: torch.Tensor | None = None,
+    indices_b: torch.Tensor | None = None,
 ) -> torch.Tensor:
     """Compute pairwise geometric spatial edge features between two sets of bounding boxes.
 
@@ -46,11 +49,14 @@ def compute_spatial_features(
         boxes_a: Tensor of shape (M, 4) with coordinates [x0, y0, x1, y1] in range [0, norm_scale].
         boxes_b: Tensor of shape (N, 4) with coordinates [x0, y0, x1, y1] in range [0, norm_scale].
         norm_scale: Coordinate normalization denominator (default: 1000.0).
+        feature_dim: 10 for standard features, 12 for extended features (with IoU_y and order delta).
+        indices_a: Optional sequence order indices for entities A (shape M).
+        indices_b: Optional sequence order indices for entities B (shape N).
 
     Returns:
-        Tensor of shape (M, N, 10) containing normalized spatial features:
-        - [0] Normalized horizontal gap: (x0_b - x1_a) / scale
-        - [1] Normalized vertical gap:   (y0_b - y1_a) / scale
+        Tensor of shape (M, N, feature_dim) containing normalized spatial features:
+        - [0] Signed horizontal gap:     (x0_b - x1_a) / scale
+        - [1] Signed vertical gap:       (y0_b - y1_a) / scale
         - [2] Centroid x-delta:          (cx_b - cx_a) / scale
         - [3] Centroid y-delta:          (cy_b - cy_a) / scale
         - [4] Euclidean centroid dist:   sqrt(dx^2 + dy^2)
@@ -59,6 +65,9 @@ def compute_spatial_features(
         - [7] Log width ratio:           log((w_b + 1) / (w_a + 1))
         - [8] Log height ratio:          log((h_b + 1) / (h_a + 1))
         - [9] Log area ratio:            log((area_b + 1) / (area_a + 1))
+        If feature_dim == 12:
+        - [10] 1D Vertical line IoU:     inter_y / min(h_a, h_b)
+        - [11] Reading-order step delta: tanh((idx_b - idx_a) / 10.0)
     """
     # boxes_a: (M, 1, 4), boxes_b: (1, N, 4)
     a = boxes_a.unsqueeze(1).float()
@@ -80,6 +89,7 @@ def compute_spatial_features(
     cx_b = (x0_b + x1_b) / 2.0
     cy_b = (y0_b + y1_b) / 2.0
 
+    # Retain strictly signed directional gaps (negative values encode horizontal/vertical overlap)
     dx_gap = (x0_b - x1_a) / norm_scale
     dy_gap = (y0_b - y1_a) / norm_scale
 
@@ -95,22 +105,36 @@ def compute_spatial_features(
     log_h_ratio = torch.log(h_b / h_a)
     log_area_ratio = torch.log(area_b / area_a)
 
-    features = torch.stack(
-        [
-            dx_gap,
-            dy_gap,
-            dx_c,
-            dy_c,
-            dist_c,
-            cos_theta,
-            sin_theta,
-            log_w_ratio,
-            log_h_ratio,
-            log_area_ratio,
-        ],
-        dim=-1,
-    )
-    return features
+    feat_list = [
+        dx_gap,
+        dy_gap,
+        dx_c,
+        dy_c,
+        dist_c,
+        cos_theta,
+        sin_theta,
+        log_w_ratio,
+        log_h_ratio,
+        log_area_ratio,
+    ]
+
+    if feature_dim >= 12:
+        # 1D Vertical line overlap: Key-value pairs typically share horizontal baselines
+        inter_y = torch.clamp(torch.min(y1_a, y1_b) - torch.max(y0_a, y0_b), min=0.0)
+        min_h = torch.min(h_a, h_b)
+        iou_y = inter_y / min_h
+
+        # Reading-order sequence delta
+        if indices_a is not None and indices_b is not None:
+            delta_order = torch.tanh((indices_b.unsqueeze(0) - indices_a.unsqueeze(1)).float() / 10.0)
+        else:
+            idx_a = torch.arange(boxes_a.size(0), device=boxes_a.device).unsqueeze(1)
+            idx_b = torch.arange(boxes_b.size(0), device=boxes_b.device).unsqueeze(0)
+            delta_order = torch.tanh((idx_b - idx_a).float() / 10.0)
+
+        feat_list.extend([iou_y, delta_order])
+
+    return torch.stack(feat_list, dim=-1)
 
 
 class SpatialEdgeEncoder(nn.Module):
@@ -145,6 +169,7 @@ class BiaffineRelationClassifier(nn.Module):
         hidden_dim: int,
         proj_dim: int = 128,
         geo_dim: int = 64,
+        spatial_in_features: int = 10,
         dropout: float = 0.1,
         use_spatial: bool = True,
     ):
@@ -153,6 +178,7 @@ class BiaffineRelationClassifier(nn.Module):
         self.proj_dim = proj_dim
         self.geo_dim = geo_dim if use_spatial else 0
         self.use_spatial = use_spatial
+        self.spatial_in_features = spatial_in_features
 
         # Head (Key / Subject) and Tail (Value / Object) projections
         self.head_mlp = nn.Sequential(
@@ -169,7 +195,9 @@ class BiaffineRelationClassifier(nn.Module):
         )
 
         if self.use_spatial:
-            self.spatial_encoder = SpatialEdgeEncoder(in_features=10, geo_dim=geo_dim, dropout=dropout)
+            self.spatial_encoder = SpatialEdgeEncoder(
+                in_features=spatial_in_features, geo_dim=geo_dim, dropout=dropout
+            )
 
         # Bilinear weight matrix: (proj_dim, proj_dim)
         self.bilinear = nn.Bilinear(proj_dim, proj_dim, 1, bias=False)
@@ -183,6 +211,8 @@ class BiaffineRelationClassifier(nn.Module):
         entity_reps: torch.Tensor,
         entity_boxes: torch.Tensor,
         type_mask: torch.Tensor | None = None,
+        soft_priors: torch.Tensor | None = None,
+        spatial_indices: torch.Tensor | None = None,
     ) -> torch.Tensor:
         """Compute relation logits for all entity pairs.
 
@@ -190,7 +220,10 @@ class BiaffineRelationClassifier(nn.Module):
             entity_reps: Tensor of shape (M, hidden_dim) representing M entity embeddings.
             entity_boxes: Tensor of shape (M, 4) with bounding box coordinates [x0, y0, x1, y1].
             type_mask: Optional boolean tensor of shape (M, M) where True allows a link
-                       and False forbids it (e.g. self-loops or incompatible entity types).
+                       and False forbids it (hard -1e9 masking).
+            soft_priors: Optional float tensor of shape (M, M) containing log-prior probability
+                         offsets: S_ij_final = S_ij + soft_priors.
+            spatial_indices: Optional sequence order indices for entities.
 
         Returns:
             Tensor of shape (M, M) with unnormalized relation logits.
@@ -217,8 +250,14 @@ class BiaffineRelationClassifier(nn.Module):
 
         # 2. Linear combination of features
         if self.use_spatial:
-            spatial_feats = compute_spatial_features(entity_boxes, entity_boxes)  # (M, M, 10)
-            spatial_emb = self.spatial_encoder(spatial_feats)                     # (M, M, geo_dim)
+            spatial_feats = compute_spatial_features(
+                entity_boxes,
+                entity_boxes,
+                feature_dim=self.spatial_in_features,
+                indices_a=spatial_indices,
+                indices_b=spatial_indices,
+            )
+            spatial_emb = self.spatial_encoder(spatial_feats)
             combined_feats = torch.cat([heads_exp, tails_exp, spatial_emb], dim=-1)
         else:
             combined_feats = torch.cat([heads_exp, tails_exp], dim=-1)
@@ -230,6 +269,10 @@ class BiaffineRelationClassifier(nn.Module):
         # Disallow self-loops (an entity cannot be linked to itself)
         eye_mask = torch.eye(num_entities, dtype=torch.bool, device=logits.device)
         logits = logits.masked_fill(eye_mask, -1e9)
+
+        # Apply soft log-priors if provided: S_ij_final = S_ij + log P(y_i = Q) + log P(y_j = A)
+        if soft_priors is not None:
+            logits = logits + soft_priors
 
         # Apply domain/type compatibility mask if provided
         if type_mask is not None:
@@ -243,17 +286,23 @@ class BiaffineRelationClassifier(nn.Module):
         gold_links: set[tuple[int, int]] | list[tuple[int, int]],
         pos_weight: float = 10.0,
         valid_mask: torch.Tensor | None = None,
+        loss_type: str = "focal",
+        focal_gamma: float = 2.0,
+        focal_alpha: float = 0.75,
     ) -> torch.Tensor:
-        """Compute Binary Cross-Entropy loss with positive class weighting.
+        """Compute Binary Cross-Entropy or Sigmoid Focal loss.
 
-        Link matrices in forms are heavily sparse (< 2% positive links). A positive weight
-        prevents the model from collapsing to predicting no links.
+        Link matrices in forms are heavily sparse (< 2% positive links). Focal loss
+        dynamically downweights easy negative pairs, concentrating gradients on hard links.
 
         Args:
             logits: Predicted logits of shape (M, M).
             gold_links: Ground truth directed links as pairs (src_idx, dst_idx).
-            pos_weight: Loss weight multiplier for positive links.
+            pos_weight: Loss weight multiplier for positive links when loss_type='bce'.
             valid_mask: Optional boolean mask of shape (M, M) indicating pairs to include in loss.
+            loss_type: 'focal' for Sigmoid Focal Loss (default) or 'bce' for Weighted BCE.
+            focal_gamma: Focusing parameter gamma for focal loss (default: 2.0).
+            focal_alpha: Balancing parameter alpha for positive links (default: 0.75).
         """
         num_entities = logits.size(0)
         if num_entities == 0:
@@ -263,10 +312,6 @@ class BiaffineRelationClassifier(nn.Module):
         for s, d in gold_links:
             if 0 <= s < num_entities and 0 <= d < num_entities and s != d:
                 target[s, d] = 1.0
-
-        weight_tensor = torch.tensor([pos_weight], device=logits.device, dtype=logits.dtype)
-        criterion = nn.BCEWithLogitsLoss(pos_weight=weight_tensor, reduction="none")
-        loss_matrix = criterion(logits, target)
 
         # Exclude self-loops
         eye_mask = torch.eye(num_entities, dtype=torch.bool, device=logits.device)
@@ -278,6 +323,19 @@ class BiaffineRelationClassifier(nn.Module):
         if denom == 0:
             return torch.tensor(0.0, device=logits.device, requires_grad=True)
 
+        if loss_type == "focal":
+            # Numerically stable Sigmoid Focal Loss
+            bce_loss = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
+            probs = torch.sigmoid(logits)
+            p_t = target * probs + (1.0 - target) * (1.0 - probs)
+            alpha_t = target * focal_alpha + (1.0 - target) * (1.0 - focal_alpha)
+            focal_weight = alpha_t * ((1.0 - p_t) ** focal_gamma)
+            loss_matrix = focal_weight * bce_loss
+        else:
+            weight_tensor = torch.tensor([pos_weight], device=logits.device, dtype=logits.dtype)
+            criterion = nn.BCEWithLogitsLoss(pos_weight=weight_tensor, reduction="none")
+            loss_matrix = criterion(logits, target)
+
         return (loss_matrix * loss_mask.float()).sum() / denom
 
     @staticmethod
@@ -285,6 +343,7 @@ class BiaffineRelationClassifier(nn.Module):
         logits: torch.Tensor,
         threshold: float = 0.5,
         one_to_one: bool = False,
+        fallback_top_k: int = 0,
     ) -> set[tuple[int, int]]:
         """Decode predicted logits into a set of directed (head, tail) link pairs.
 
@@ -293,6 +352,8 @@ class BiaffineRelationClassifier(nn.Module):
             threshold: Probability decision threshold (default: 0.5).
             one_to_one: If True, each tail (value) entity can be linked to at most one
                         highest-scoring head (key).
+            fallback_top_k: If > 0 and no pairs pass threshold, fallback to top-k unmasked scores
+                            for diagnostic introspection.
 
         Returns:
             Set of (head_idx, tail_idx) tuples.
@@ -312,6 +373,19 @@ class BiaffineRelationClassifier(nn.Module):
             for pair in indices:
                 i, j = pair[0].item(), pair[1].item()
                 if i != j:
+                    predicted.add((i, j))
+
+        # Diagnostic fallback: if no link passes threshold, retain top-k unmasked scores
+        if len(predicted) == 0 and fallback_top_k > 0 and num_entities > 1:
+            flat_probs = probs.clone()
+            eye_mask = torch.eye(num_entities, dtype=torch.bool, device=logits.device)
+            flat_probs.masked_fill_(eye_mask, 0.0)
+            k_eff = min(fallback_top_k, num_entities * (num_entities - 1))
+            flat_vals, flat_indices = torch.topk(flat_probs.view(-1), k=k_eff)
+            for val, idx in zip(flat_vals, flat_indices):
+                if val.item() > 0.05:  # filter negligible noise floor
+                    i = (idx // num_entities).item()
+                    j = (idx % num_entities).item()
                     predicted.add((i, j))
 
         return predicted
@@ -401,5 +475,99 @@ def build_type_compatibility_mask(
         for j, t_j in enumerate(entity_types):
             if i != j and (t_i.lower(), t_j.lower()) in allowed_set:
                 mask[i, j] = True
+
+    return mask
+
+
+def build_soft_type_priors(
+    entity_probs: torch.Tensor,
+    id2label: dict[int, str],
+    eps: float = 1e-4,
+) -> torch.Tensor:
+    """Build soft log-prior matrix for question -> answer compatibility.
+
+    Computes:
+        log_prior(i, j) = log(P(y_i in QUESTION) + eps) + log(P(y_j in ANSWER) + eps)
+
+    Args:
+        entity_probs: Tensor of shape (M, num_labels) with predicted class probabilities.
+        id2label: Mapping from class ID to label name.
+        eps: Epsilon smoothing factor to avoid log(0).
+
+    Returns:
+        Tensor of shape (M, M) with log prior offsets to add to relation logits.
+    """
+    q_indices = [idx for idx, lab in id2label.items() if "QUESTION" in lab.upper()]
+    a_indices = [idx for idx, lab in id2label.items() if "ANSWER" in lab.upper()]
+
+    p_q = entity_probs[:, q_indices].sum(dim=-1).clamp(min=eps, max=1.0)
+    p_a = entity_probs[:, a_indices].sum(dim=-1).clamp(min=eps, max=1.0)
+
+    log_p_q = torch.log(p_q)
+    log_p_a = torch.log(p_a)
+
+    return log_p_q.unsqueeze(1) + log_p_a.unsqueeze(0)
+
+
+def build_soft_type_priors_from_labels(
+    entity_types: list[str],
+    penalty_mismatch: float = -5.0,
+) -> torch.Tensor:
+    """Build soft log-prior matrix from categorical labels with finite penalty for invalid pairs.
+
+    Unlike hard -1e9 masking, this applies a finite log-space penalty (-5.0), allowing high-confidence
+    biaffine links to survive slight label noise.
+    """
+    num_entities = len(entity_types)
+    priors = torch.zeros((num_entities, num_entities), dtype=torch.float32)
+    allowed = {("question", "answer"), ("header", "question"), ("header", "answer")}
+
+    for i, t_i in enumerate(entity_types):
+        for j, t_j in enumerate(entity_types):
+            if i != j:
+                pair = (t_i.lower(), t_j.lower())
+                if pair not in allowed:
+                    priors[i, j] = penalty_mismatch
+    return priors
+
+
+def build_knn_spatial_candidate_mask(
+    boxes: torch.Tensor,
+    k_neighbors: int = 8,
+    gold_links: set[tuple[int, int]] | list[tuple[int, int]] | None = None,
+) -> torch.Tensor:
+    """Construct a candidate mask restricting candidates to top-K nearest spatial neighbors.
+
+    Filters the O(N^2) combination space down by ~85%, drastically balancing positive
+    and negative candidate pairs. All gold links are preserved in the mask.
+
+    Args:
+        boxes: Tensor of shape (M, 4) with entity bounding boxes.
+        k_neighbors: Number of nearest spatial neighbors to retain for each entity.
+        gold_links: Optional ground-truth link pairs to ensure 100% positive retention.
+
+    Returns:
+        Boolean tensor of shape (M, M) where True indicates a pair to evaluate.
+    """
+    num_entities = boxes.size(0)
+    if num_entities <= k_neighbors or k_neighbors <= 0:
+        mask = torch.ones((num_entities, num_entities), dtype=torch.bool, device=boxes.device)
+    else:
+        cx = (boxes[:, 0] + boxes[:, 2]) / 2.0
+        cy = (boxes[:, 1] + boxes[:, 3]) / 2.0
+        dx = cx.unsqueeze(0) - cx.unsqueeze(1)
+        dy = cy.unsqueeze(0) - cy.unsqueeze(1)
+        dist = torch.sqrt(dx**2 + dy**2 + 1e-6)
+
+        dist.fill_diagonal_(float("inf"))
+
+        _, topk_indices = torch.topk(dist, k=min(k_neighbors, num_entities - 1), largest=False, dim=-1)
+        mask = torch.zeros((num_entities, num_entities), dtype=torch.bool, device=boxes.device)
+        mask.scatter_(dim=1, index=topk_indices, value=True)
+
+    if gold_links:
+        for s, d in gold_links:
+            if 0 <= s < num_entities and 0 <= d < num_entities:
+                mask[s, d] = True
 
     return mask

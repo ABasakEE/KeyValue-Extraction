@@ -21,6 +21,8 @@ from transformers import AutoConfig, AutoModelForTokenClassification, AutoTokeni
 try:
     from models.linking_head import (
         BiaffineRelationClassifier,
+        build_knn_spatial_candidate_mask,
+        build_soft_type_priors_from_labels,
         build_type_compatibility_mask,
         pool_entity_representations,
     )
@@ -28,6 +30,8 @@ try:
 except ImportError:
     from src.models.linking_head import (
         BiaffineRelationClassifier,
+        build_knn_spatial_candidate_mask,
+        build_soft_type_priors_from_labels,
         build_type_compatibility_mask,
         pool_entity_representations,
     )
@@ -58,8 +62,15 @@ class JointFormExtractor(nn.Module):
         hidden_dim: int = 768,
         relation_proj_dim: int = 128,
         relation_geo_dim: int = 64,
+        spatial_in_features: int = 10,
         linking_loss_weight: float = 1.0,
         pos_weight: float = 10.0,
+        loss_type: str = "focal",
+        focal_gamma: float = 2.0,
+        focal_alpha: float = 0.75,
+        masking_mode: str = "soft",
+        k_neighbors: int = 0,
+        fallback_top_k: int = 0,
         use_spatial_relations: bool = True,
         dropout: float = 0.1,
     ):
@@ -75,6 +86,13 @@ class JointFormExtractor(nn.Module):
         self.max_length = max_length
         self.linking_loss_weight = linking_loss_weight
         self.pos_weight = pos_weight
+        self.loss_type = loss_type
+        self.focal_gamma = focal_gamma
+        self.focal_alpha = focal_alpha
+        self.masking_mode = masking_mode
+        self.k_neighbors = k_neighbors
+        self.fallback_top_k = fallback_top_k
+        self.spatial_in_features = spatial_in_features
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_checkpoint, use_fast=True)
 
@@ -94,6 +112,7 @@ class JointFormExtractor(nn.Module):
             hidden_dim=hidden_dim,
             proj_dim=relation_proj_dim,
             geo_dim=relation_geo_dim,
+            spatial_in_features=spatial_in_features,
             dropout=dropout,
             use_spatial=use_spatial_relations,
         )
@@ -155,26 +174,46 @@ class JointFormExtractor(nn.Module):
                     doc_hidden, doc_boxes, doc_spans
                 )
 
-                # Optional type compatibility mask
+                # Domain compatibility masking / soft log-priors
                 type_mask = None
+                soft_priors = None
                 if entity_types is not None and b < len(entity_types) and entity_types[b]:
-                    type_mask = build_type_compatibility_mask(entity_types[b]).to(hidden_states.device)
+                    if self.masking_mode == "hard":
+                        type_mask = build_type_compatibility_mask(entity_types[b]).to(hidden_states.device)
+                    elif self.masking_mode == "soft":
+                        soft_priors = build_soft_type_priors_from_labels(entity_types[b]).to(hidden_states.device)
 
                 # Compute pairwise relation logits
-                rel_logits = self.relation_head(entity_reps, entity_boxes, type_mask=type_mask)
+                rel_logits = self.relation_head(
+                    entity_reps,
+                    entity_boxes,
+                    type_mask=type_mask,
+                    soft_priors=soft_priors,
+                )
                 relation_logits_list.append(rel_logits)
 
-                # Decode link predictions
+                # Decode link predictions (with optional fallback top-k)
                 preds = BiaffineRelationClassifier.decode_predictions(
-                    rel_logits, threshold=link_threshold
+                    rel_logits, threshold=link_threshold, fallback_top_k=self.fallback_top_k
                 )
                 predicted_links_list.append(preds)
 
                 # Compute relation extraction loss if gold links are provided
                 if gold_links is not None and b < len(gold_links):
                     doc_gold = gold_links[b]
+                    valid_mask = None
+                    if self.k_neighbors > 0:
+                        valid_mask = build_knn_spatial_candidate_mask(
+                            entity_boxes, k_neighbors=self.k_neighbors, gold_links=doc_gold
+                        )
                     link_loss = BiaffineRelationClassifier.compute_loss(
-                        rel_logits, doc_gold, pos_weight=self.pos_weight
+                        rel_logits,
+                        doc_gold,
+                        pos_weight=self.pos_weight,
+                        valid_mask=valid_mask,
+                        loss_type=self.loss_type,
+                        focal_gamma=self.focal_gamma,
+                        focal_alpha=self.focal_alpha,
                     )
                     linking_losses.append(link_loss)
 

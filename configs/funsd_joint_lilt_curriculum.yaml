@@ -1,0 +1,40 @@
+# Track A+ (Upgraded) — Joint Key-Value Extraction on FUNSD
+#
+# Key Features:
+# 1. Decoupled 3-Stage Curriculum:
+#    - Phase 1 (Epochs 1-8): Pure Token Classification warmup (lambda_linking = 0)
+#    - Phase 2 (Epochs 9-14): Teacher Forcing on Biaffine Relation Head (frozen LiLT encoder)
+#    - Phase 3 (Epochs 15-20): Joint end-to-end fine-tuning of all weights
+# 2. Pairwise Sigmoid Focal Loss (gamma=2.0, alpha=0.75) addressing O(N^2) link sparsity
+# 3. 12-D Geometric Spatial Inductive Bias (Signed gaps, 1D vertical IoU, sequence order delta)
+# 4. Soft Marginal Masking using entity type log-priors
+
+backbone: lilt
+dataset: funsd
+data_root: data/funsd/dataset
+
+task: joint
+linking_loss_weight: 1.0
+use_spatial_relations: true
+spatial_in_features: 12
+loss_type: focal
+focal_gamma: 2.0
+focal_alpha: 0.75
+masking_mode: soft
+k_neighbors: 8
+fallback_top_k: 3
+
+# Decoupled Curriculum Warmup Schedule
+curriculum: true
+phase1_epochs: 8
+phase2_epochs: 6
+epochs: 20
+
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/funsd_joint_lilt_curriculum

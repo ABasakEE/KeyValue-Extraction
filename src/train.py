@@ -71,6 +71,16 @@ class TrainConfig:
     linking_loss_weight: float = 1.0
     pos_weight: float = 10.0
     use_spatial_relations: bool = True
+    spatial_in_features: int = 10
+    loss_type: str = "focal"              # "focal" or "bce"
+    focal_gamma: float = 2.0
+    focal_alpha: float = 0.75
+    masking_mode: str = "soft"            # "soft", "hard", or "none"
+    k_neighbors: int = 0                  # 0 = all O(N^2) pairs, > 0 = KNN spatial filtering
+    fallback_top_k: int = 0
+    curriculum: bool = False              # True = 3-stage decoupled warmup
+    phase1_epochs: int = 8                # Phase 1: Tagging warmup (lambda_link = 0)
+    phase2_epochs: int = 6                # Phase 2: Teacher-forced relation head warmup
     epochs: int = 20
     batch_size: int = 4
     lr: float = 5e-5
@@ -212,6 +222,32 @@ def train_one(
         checkpoint_dir.mkdir(parents=True, exist_ok=True)
 
     for epoch in range(config.epochs):
+        # Curriculum learning: decouple token classification and relation head optimization
+        if is_joint and getattr(config, "curriculum", False):
+            p1_end = getattr(config, "phase1_epochs", 8)
+            p2_end = p1_end + getattr(config, "phase2_epochs", 6)
+            if epoch < p1_end:
+                # Phase 1: Train LiLT backbone + token classification only (lambda_linking = 0)
+                model.linking_loss_weight = 0.0
+                for p in model.encoder.parameters():
+                    p.requires_grad = True
+                for p in model.relation_head.parameters():
+                    p.requires_grad = False
+            elif epoch < p2_end:
+                # Phase 2: Warm up relation head with Teacher Forcing (freeze LiLT backbone)
+                model.linking_loss_weight = config.linking_loss_weight
+                for p in model.encoder.parameters():
+                    p.requires_grad = False
+                for p in model.relation_head.parameters():
+                    p.requires_grad = True
+            else:
+                # Phase 3: Unfreeze all parameters for joint end-to-end fine-tuning
+                model.linking_loss_weight = config.linking_loss_weight
+                for p in model.encoder.parameters():
+                    p.requires_grad = True
+                for p in model.relation_head.parameters():
+                    p.requires_grad = True
+
         model_to_optimize.train()
         epoch_loss = 0.0
         pbar = tqdm(
@@ -391,6 +427,13 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
             linking_loss_weight=config.linking_loss_weight,
             pos_weight=config.pos_weight,
             use_spatial_relations=config.use_spatial_relations,
+            spatial_in_features=getattr(config, "spatial_in_features", 10),
+            loss_type=getattr(config, "loss_type", "focal"),
+            focal_gamma=getattr(config, "focal_gamma", 2.0),
+            focal_alpha=getattr(config, "focal_alpha", 0.75),
+            masking_mode=getattr(config, "masking_mode", "soft"),
+            k_neighbors=getattr(config, "k_neighbors", 0),
+            fallback_top_k=getattr(config, "fallback_top_k", 0),
         )
     return TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
 

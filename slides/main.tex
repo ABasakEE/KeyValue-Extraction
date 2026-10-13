@@ -701,7 +701,7 @@
     \end{column}
     \begin{column}{0.48\textwidth}
       \centering
-      \includegraphics[width=\linewidth]{figures/error_taxonomy.pdf}
+      \includegraphics[width=\linewidth]{figures/error_taxonomy.png}
       \vspace{-0.15cm}
 
       {\scriptsize\textbf{Pilot finding on UTL:} Schema/type misalignment accounts for 97.2\% of errors; OCR corruption is negligible (0.2\%). Failure is purely structural.}
@@ -725,7 +725,7 @@
     \end{column}
     \begin{column}{0.52\textwidth}
       \centering
-      \includegraphics[width=\linewidth]{figures/funsd_curve.pdf}
+      \includegraphics[width=\linewidth]{figures/funsd_curve.png}
       \vspace{0.1cm}
 
       \begin{alertblock}{Read this number correctly}
@@ -761,7 +761,7 @@
     \end{column}
     \begin{column}{0.52\textwidth}
       \centering
-      \includegraphics[width=0.88\linewidth]{figures/vrdu_gap.pdf}
+      \includegraphics[width=0.88\linewidth]{figures/vrdu_gap_updated.png}
       \vspace{-0.2cm}
 
       {\scriptsize\textbf{Key Finding:} Form-Short drops steepest ($0.88 \to 0.58$); degradation is consistent across folds.\\[0.05cm]
@@ -813,12 +813,12 @@
     \textcolor{good}{\textbf{done}} & S0 Pipeline & Loaders, split + leakage assertion, dual metric implementation & both\\
     \textcolor{good}{\textbf{done}} & S1 VRDU loader & Parse VRDU to words/boxes/tags with template ids & PM\\
     \textcolor{good}{\textbf{done}} & S2 Gap measurement & MTL vs UTL, matched size, 3 seeds ($\Delta = 21.1$ pt gap verified) & PM\\
-    3 & S3 Linking head & BROS SPADE-EL on RFUND; linking F1 under holdout & AB\\
+    \textcolor{good}{\textbf{done}} & S3 Linking head & Spatial Biaffine Head on LiLT (Track A+ 79.10\% Ent, 32.05\% Link) & AB\\
     4 & S4 Scale up & VRDU Ad-buy: $\geq$4 training, $\geq$2 held-out templates & AB\\
-    5 & S5 Synthetic templates & CommonForms + PyMuPDF + Augraphy & AB\\
+    \textcolor{good}{\textbf{done}} & S5 Synthetic templates & 7 form families, irregular tables + Augraphy (Track C 100\% F1) & AB\\
     6 & S6 Ablations & Absolute vs relative position, $\pm$vision, OCR-free, reading order & PM\\
     \textcolor{good}{\textbf{done}} & S7 Failure analysis & Per-template, per-bucket error breakdown (taxonomised on UTL) & both\\
-    8 & S8 Interface & Gradio upload $\to$ highlighted key-value boxes & PM\\
+    \textcolor{good}{\textbf{done}} & S8 Interface & Interactive Gradio Demo (RapidOCR/PyMuPDF + live visualization) & PM\\
     9 & S9 Report & Stage-wise report & both\\
     \bottomrule
   \end{tabular}
