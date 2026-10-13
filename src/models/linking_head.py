@@ -319,10 +319,6 @@ class BiaffineRelationClassifier(nn.Module):
         if valid_mask is not None:
             loss_mask = loss_mask & valid_mask
 
-        denom = loss_mask.sum().float()
-        if denom == 0:
-            return torch.tensor(0.0, device=logits.device, requires_grad=True)
-
         if loss_type == "focal":
             # Numerically stable Sigmoid Focal Loss
             bce_loss = F.binary_cross_entropy_with_logits(logits, target, reduction="none")
@@ -331,12 +327,19 @@ class BiaffineRelationClassifier(nn.Module):
             alpha_t = target * focal_alpha + (1.0 - target) * (1.0 - focal_alpha)
             focal_weight = alpha_t * ((1.0 - p_t) ** focal_gamma)
             loss_matrix = focal_weight * bce_loss
+            # Canonical Focal Loss (Lin et al., RetinaNet): normalize by positive links (N_pos)
+            # to prevent easy negatives from diluting positive link gradients.
+            n_pos = (target * loss_mask.float()).sum()
+            denom = torch.clamp(n_pos, min=1.0)
+            return (loss_matrix * loss_mask.float()).sum() / denom
         else:
+            denom = loss_mask.sum().float()
+            if denom == 0:
+                return torch.tensor(0.0, device=logits.device, requires_grad=True)
             weight_tensor = torch.tensor([pos_weight], device=logits.device, dtype=logits.dtype)
             criterion = nn.BCEWithLogitsLoss(pos_weight=weight_tensor, reduction="none")
             loss_matrix = criterion(logits, target)
-
-        return (loss_matrix * loss_mask.float()).sum() / denom
+            return (loss_matrix * loss_mask.float()).sum() / denom
 
     @staticmethod
     def decode_predictions(

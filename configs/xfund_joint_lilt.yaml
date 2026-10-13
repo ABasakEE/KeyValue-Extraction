@@ -1,0 +1,45 @@
+# Track C — Multilingual Joint Key-Value Extraction on XFUND
+#
+# Key Features:
+# 1. Scaled Dataset: 5 Latin-alphabet languages (Spanish, French, German, Italian, Portuguese)
+#    providing ~745 training documents and ~250 test documents (over 6x larger than FUNSD).
+# 2. Canonical Focal Loss (normalized by N_pos) to resolve positive gradient dilution.
+# 3. One-to-One Decoding (decode_one_to_one: true) preventing multi-candidate collisions.
+# 4. Decoupled 3-Stage Curriculum with patience=3 early stopping on task-specific validation.
+# 5. 12-D Geometric Spatial Inductive Bias with Soft Marginal Type Masking.
+
+backbone: lilt
+dataset: xfund
+data_root: data/xfund
+languages: [es, fr, de, it, pt]
+
+task: joint
+linking_loss_weight: 1.0
+use_spatial_relations: true
+spatial_in_features: 12
+loss_type: focal
+focal_gamma: 2.0
+focal_alpha: 0.75
+masking_mode: soft
+decode_one_to_one: true
+link_threshold: 0.5
+k_neighbors: 0
+fallback_top_k: 0
+
+# Dynamic Decoupled Curriculum Schedule with Early Stopping
+curriculum: true
+patience_tolerance: 3
+min_delta: 0.001
+max_phase1_epochs: 8
+max_phase2_epochs: 6
+max_phase3_epochs: 8
+epochs: 22
+
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+output_dir: results/xfund_joint_lilt

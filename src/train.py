@@ -78,6 +78,9 @@ class TrainConfig:
     masking_mode: str = "soft"            # "soft", "hard", or "none"
     k_neighbors: int = 0                  # 0 = all O(N^2) pairs, > 0 = KNN spatial filtering
     fallback_top_k: int = 0
+    decode_one_to_one: bool = False       # True = 1-to-1 argmax matching per value entity
+    link_threshold: float = 0.5
+    languages: tuple[str, ...] | list[str] = ("es", "fr", "de", "it", "pt")
     curriculum: bool = False              # True = 3-stage decoupled warmup
     patience_tolerance: int = 3           # Early stopping patience (epochs without validation improvement)
     min_delta: float = 0.001              # Minimum improvement threshold to reset patience
@@ -104,6 +107,8 @@ class TrainConfig:
             raw = yaml.safe_load(fh) or {}
         if "seeds" in raw:
             raw["seeds"] = tuple(raw["seeds"])
+        if "languages" in raw and isinstance(raw["languages"], (list, tuple)):
+            raw["languages"] = tuple(raw["languages"])
         known = {f for f in cls.__dataclass_fields__}
         unknown = set(raw) - known
         if unknown:
@@ -668,7 +673,17 @@ def load_dataset(config: TrainConfig):
         print(vrdu_leak_check(split))
         return split.train, split.val, split.test, label_list, id2label
 
-    raise NotImplementedError(f"Unknown dataset {config.dataset!r}. Supported: 'funsd', 'vrdu'.")
+    if config.dataset == "xfund":
+        from data.xfund_loader import ID2LABEL, LABEL_LIST, load_xfund_dataset, summarize
+
+        langs = list(getattr(config, "languages", ["es", "fr", "de", "it", "pt"]))
+        train, val, test = load_xfund_dataset(config.data_root, languages=langs)
+        print("XFUND train:", json.dumps(summarize(train)))
+        print("XFUND val:  ", json.dumps(summarize(val)))
+        print("XFUND test: ", json.dumps(summarize(test)))
+        return train, val, test, LABEL_LIST, ID2LABEL
+
+    raise NotImplementedError(f"Unknown dataset {config.dataset!r}. Supported: 'funsd', 'vrdu', 'xfund'.")
 
 
 def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
@@ -688,6 +703,8 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
             masking_mode=getattr(config, "masking_mode", "soft"),
             k_neighbors=getattr(config, "k_neighbors", 0),
             fallback_top_k=getattr(config, "fallback_top_k", 0),
+            decode_one_to_one=getattr(config, "decode_one_to_one", False),
+            link_threshold=getattr(config, "link_threshold", 0.5),
         )
     return TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
 

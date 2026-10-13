@@ -71,6 +71,8 @@ class JointFormExtractor(nn.Module):
         masking_mode: str = "soft",
         k_neighbors: int = 0,
         fallback_top_k: int = 0,
+        decode_one_to_one: bool = False,
+        link_threshold: float = 0.5,
         use_spatial_relations: bool = True,
         dropout: float = 0.1,
     ):
@@ -92,6 +94,8 @@ class JointFormExtractor(nn.Module):
         self.masking_mode = masking_mode
         self.k_neighbors = k_neighbors
         self.fallback_top_k = fallback_top_k
+        self.decode_one_to_one = decode_one_to_one
+        self.link_threshold = link_threshold
         self.spatial_in_features = spatial_in_features
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_checkpoint, use_fast=True)
@@ -133,7 +137,7 @@ class JointFormExtractor(nn.Module):
         entity_spans: list[list[list[int]]] | None = None,
         gold_links: list[list[tuple[int, int]]] | None = None,
         entity_types: list[list[str]] | None = None,
-        link_threshold: float = 0.5,
+        link_threshold: float | None = None,
     ) -> JointModelOutput:
         """Forward pass computing token logits, relation matrices, and joint loss.
 
@@ -144,6 +148,8 @@ class JointFormExtractor(nn.Module):
             entity_types: Optional list of entity type strings for domain constraint masking.
             link_threshold: Probability threshold for predicting active links.
         """
+        thresh = link_threshold if link_threshold is not None else getattr(self, "link_threshold", 0.5)
+
         # Forward pass through backbone with hidden states requested
         encoder_outputs = self.encoder(**inputs, output_hidden_states=True)
 
@@ -192,9 +198,12 @@ class JointFormExtractor(nn.Module):
                 )
                 relation_logits_list.append(rel_logits)
 
-                # Decode link predictions (with optional fallback top-k)
+                # Decode link predictions (with optional fallback top-k and 1-to-1 constraint)
                 preds = BiaffineRelationClassifier.decode_predictions(
-                    rel_logits, threshold=link_threshold, fallback_top_k=self.fallback_top_k
+                    rel_logits,
+                    threshold=thresh,
+                    fallback_top_k=self.fallback_top_k,
+                    one_to_one=self.decode_one_to_one,
                 )
                 predicted_links_list.append(preds)
 
