@@ -16,7 +16,11 @@ data_root: data/funsd/dataset
 task: joint
 linking_loss_weight: 1.0
 use_spatial_relations: true
-spatial_in_features: 12
+spatial_in_features: 16
+use_geometry: true
+use_containment: true
+use_line_of_sight: true
+use_typography: true
 loss_type: focal
 focal_gamma: 2.0
 focal_alpha: 0.75

@@ -74,6 +74,10 @@ class JointFormExtractor(nn.Module):
         decode_one_to_one: bool = False,
         link_threshold: float = 0.5,
         use_spatial_relations: bool = True,
+        use_geometry: bool = True,
+        use_containment: bool = True,
+        use_line_of_sight: bool = True,
+        use_typography: bool = True,
         dropout: float = 0.1,
     ):
         super().__init__()
@@ -96,7 +100,11 @@ class JointFormExtractor(nn.Module):
         self.fallback_top_k = fallback_top_k
         self.decode_one_to_one = decode_one_to_one
         self.link_threshold = link_threshold
-        self.spatial_in_features = spatial_in_features
+        self.use_spatial_relations = use_spatial_relations
+        self.use_geometry = use_geometry
+        self.use_containment = use_containment
+        self.use_line_of_sight = use_line_of_sight
+        self.use_typography = use_typography
 
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_checkpoint, use_fast=True)
 
@@ -119,7 +127,12 @@ class JointFormExtractor(nn.Module):
             spatial_in_features=spatial_in_features,
             dropout=dropout,
             use_spatial=use_spatial_relations,
+            use_geometry=use_geometry,
+            use_containment=use_containment,
+            use_line_of_sight=use_line_of_sight,
+            use_typography=use_typography,
         )
+        self.spatial_in_features = self.relation_head.spatial_in_features
 
     def encode(
         self,
@@ -183,10 +196,11 @@ class JointFormExtractor(nn.Module):
                 # Domain compatibility masking / soft log-priors
                 type_mask = None
                 soft_priors = None
+                masking = getattr(self, "masking_mode", "soft")
                 if entity_types is not None and b < len(entity_types) and entity_types[b]:
-                    if self.masking_mode == "hard":
+                    if masking == "hard":
                         type_mask = build_type_compatibility_mask(entity_types[b]).to(hidden_states.device)
-                    elif self.masking_mode == "soft":
+                    elif masking == "soft":
                         soft_priors = build_soft_type_priors_from_labels(entity_types[b]).to(hidden_states.device)
 
                 # Compute pairwise relation logits
@@ -202,8 +216,8 @@ class JointFormExtractor(nn.Module):
                 preds = BiaffineRelationClassifier.decode_predictions(
                     rel_logits,
                     threshold=thresh,
-                    fallback_top_k=self.fallback_top_k,
-                    one_to_one=self.decode_one_to_one,
+                    fallback_top_k=getattr(self, "fallback_top_k", 0),
+                    one_to_one=getattr(self, "decode_one_to_one", False),
                 )
                 predicted_links_list.append(preds)
 
@@ -211,18 +225,19 @@ class JointFormExtractor(nn.Module):
                 if gold_links is not None and b < len(gold_links):
                     doc_gold = gold_links[b]
                     valid_mask = None
-                    if self.k_neighbors > 0:
+                    k_nn = getattr(self, "k_neighbors", 0)
+                    if k_nn > 0:
                         valid_mask = build_knn_spatial_candidate_mask(
-                            entity_boxes, k_neighbors=self.k_neighbors, gold_links=doc_gold
+                            entity_boxes, k_neighbors=k_nn, gold_links=doc_gold
                         )
                     link_loss = BiaffineRelationClassifier.compute_loss(
                         rel_logits,
                         doc_gold,
-                        pos_weight=self.pos_weight,
+                        pos_weight=getattr(self, "pos_weight", 10.0),
                         valid_mask=valid_mask,
-                        loss_type=self.loss_type,
-                        focal_gamma=self.focal_gamma,
-                        focal_alpha=self.focal_alpha,
+                        loss_type=getattr(self, "loss_type", "focal"),
+                        focal_gamma=getattr(self, "focal_gamma", 2.0),
+                        focal_alpha=getattr(self, "focal_alpha", 0.75),
                     )
                     linking_losses.append(link_loss)
 

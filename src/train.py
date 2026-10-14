@@ -78,7 +78,11 @@ class TrainConfig:
     linking_loss_weight: float = 1.0
     pos_weight: float = 10.0
     use_spatial_relations: bool = True
-    spatial_in_features: int = 10
+    spatial_in_features: int = 16
+    use_geometry: bool = True
+    use_containment: bool = True
+    use_line_of_sight: bool = True
+    use_typography: bool = True
     loss_type: str = "focal"              # "focal" or "bce"
     focal_gamma: float = 2.0
     focal_alpha: float = 0.75
@@ -707,7 +711,11 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
             linking_loss_weight=config.linking_loss_weight,
             pos_weight=config.pos_weight,
             use_spatial_relations=config.use_spatial_relations,
-            spatial_in_features=getattr(config, "spatial_in_features", 10),
+            spatial_in_features=getattr(config, "spatial_in_features", 16),
+            use_geometry=getattr(config, "use_geometry", True),
+            use_containment=getattr(config, "use_containment", True),
+            use_line_of_sight=getattr(config, "use_line_of_sight", True),
+            use_typography=getattr(config, "use_typography", True),
             loss_type=getattr(config, "loss_type", "focal"),
             focal_gamma=getattr(config, "focal_gamma", 2.0),
             focal_alpha=getattr(config, "focal_alpha", 0.75),
@@ -788,7 +796,7 @@ def _mp_seed_worker(
     gpu_id: int,
     task_queue: mp.Queue,
     result_queue: mp.Queue,
-    config_path: str,
+    config_input: TrainConfig | str,
     output_dir_str: str,
     n_train_override: int | None = None,
 ) -> None:
@@ -800,7 +808,10 @@ def _mp_seed_worker(
 
         torch.cuda.set_device(gpu_id)
         device = torch.device(f"cuda:{gpu_id}")
-        config = TrainConfig.from_yaml(config_path)
+        if isinstance(config_input, str):
+            config = TrainConfig.from_yaml(config_input)
+        else:
+            config = config_input
         if n_train_override is not None:
             config.n_train = n_train_override
         output_dir = Path(output_dir_str)
@@ -867,9 +878,55 @@ def main() -> None:
                         help="Force single-process execution even if multiple GPUs are available")
     parser.add_argument("--seed", type=int, default=None,
                         help="Run only this specific seed instead of all seeds in config")
+    parser.add_argument("--output-dir", default=None,
+                        help="Override output directory")
+    parser.add_argument("--no-line-of-sight", action="store_true",
+                        help="Ablation: disable Line-of-Sight visibility ray-casting")
+    parser.add_argument("--no-typography", action="store_true",
+                        help="Ablation: disable typographical scale and prominence features")
+    parser.add_argument("--no-containment", action="store_true",
+                        help="Ablation: disable axial containment overlap-over-minimum features")
+    parser.add_argument("--geometry-only", action="store_true",
+                        help="Ablation: use only continuous geometry features (5 dims)")
+    parser.add_argument("--loss-type", choices=["focal", "bce"], default=None,
+                        help="Ablation: override loss function ('focal' or 'bce')")
+    parser.add_argument("--no-one-to-one", action="store_true",
+                        help="Ablation: disable one-to-one argmax matching during decoding")
+    parser.add_argument("--epochs", type=int, default=None,
+                        help="Override number of training epochs")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
+
+    # Apply command-line overrides and ablation flags
+    if args.output_dir:
+        config.output_dir = args.output_dir
+    if args.no_line_of_sight:
+        config.use_line_of_sight = False
+    if args.no_typography:
+        config.use_typography = False
+    if args.no_containment:
+        config.use_containment = False
+    if args.geometry_only:
+        config.use_line_of_sight = False
+        config.use_typography = False
+        config.use_containment = False
+    if args.loss_type:
+        config.loss_type = args.loss_type
+    if args.no_one_to_one:
+        config.decode_one_to_one = False
+    if args.epochs is not None:
+        config.epochs = args.epochs
+
+    # Dynamically compute spatial_in_features to match active ablation groups
+    if config.task == "joint" and config.use_spatial_relations:
+        dim = 0
+        if config.use_geometry: dim += 5
+        if config.use_containment: dim += 5
+        if config.use_line_of_sight: dim += 2
+        if config.use_typography: dim += 4
+        config.spatial_in_features = dim if dim > 0 else 5
+
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
@@ -884,6 +941,8 @@ def main() -> None:
 
     seeds = [args.seed] if args.seed is not None else list(config.seeds)
     print(f"[*] Backbone: {config.backbone} | Dataset: {config.dataset} | Task: {config.task} | Seeds: {seeds}")
+    if config.task == "joint":
+        print(f"[*] Spatial Features: {config.spatial_in_features}D (Geo: {config.use_geometry}, Contain: {config.use_containment}, LOS: {config.use_line_of_sight}, Typo: {config.use_typography}) | Loss: {config.loss_type} | 1-to-1: {config.decode_one_to_one}")
 
     if args.protocol == "standard":
         can_parallel = len(gpu_ids) >= 2 and len(seeds) > 1 and not args.no_parallel
@@ -914,7 +973,7 @@ def main() -> None:
                         gid,
                         task_queue,
                         result_queue,
-                        args.config,
+                        config,
                         str(output_dir),
                         config.n_train,
                     ),

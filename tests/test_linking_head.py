@@ -36,18 +36,84 @@ class TestLinkingHead(unittest.TestCase):
             [300, 100, 400, 150],
             [500, 100, 600, 150],
         ])
+        # Default is upgraded 16-D vector
         features = compute_spatial_features(boxes_a, boxes_b)
-        self.assertEqual(features.shape, (2, 3, 10))
+        self.assertEqual(features.shape, (2, 3, 16))
+
+        # Check backward compatibility with 10-D legacy mode
+        features_10d = compute_spatial_features(boxes_a, boxes_b, feature_dim=10)
+        self.assertEqual(features_10d.shape, (2, 3, 10))
+
         # Check that distance is non-negative
-        dist = features[..., 4]
+        dist = features[..., 2]
         self.assertTrue(torch.all(dist >= 0))
         # Self distance between box 0 and box 0 should be approximately 0
         self.assertTrue(torch.isclose(dist[0, 0], torch.tensor(0.0), atol=1e-3))
         # Cosine and sine should lie in [-1, 1]
-        cos_theta = features[..., 5]
-        sin_theta = features[..., 6]
+        cos_theta = features[..., 3]
+        sin_theta = features[..., 4]
         self.assertTrue(torch.all(cos_theta >= -1.0 - 1e-5) and torch.all(cos_theta <= 1.0 + 1e-5))
         self.assertTrue(torch.all(sin_theta >= -1.0 - 1e-5) and torch.all(sin_theta <= 1.0 + 1e-5))
+
+    def test_axial_containment_overlap_over_minimum(self):
+        # Key box (single line, height=20) vs Value box (multi-line, height=80)
+        # Standard Jaccard IoU would be 20/80 = 0.25, failing inline threshold
+        # Overlap-over-min is 20/min(20, 80) = 1.0
+        key_box = torch.tensor([[100, 100, 200, 120]])
+        val_box = torch.tensor([[250, 100, 450, 180]])
+        feats = compute_spatial_features(key_box, val_box)
+        overlap_y = feats[0, 0, 6].item()  # Group 2, second feature: overlap_ratio_y
+        self.assertAlmostEqual(overlap_y, 1.0, places=4)
+
+    def test_line_of_sight_visibility(self):
+        # 3 collinear horizontal boxes: Box 0 (left), Box 1 (center), Box 2 (right)
+        boxes = torch.tensor([
+            [100, 100, 200, 150],
+            [300, 100, 400, 150],
+            [500, 100, 600, 150],
+        ])
+        feats = compute_spatial_features(boxes, boxes)
+        # Group 3 features are at index 10 (los_h) and 11 (los_v)
+        # Direct neighbours 0 -> 1 have unobstructed LOS
+        self.assertEqual(feats[0, 1, 10].item(), 1.0)
+        # Obstructed pair 0 -> 2 has an obstacle (Box 1), so los_h must be 0.0
+        self.assertEqual(feats[0, 2, 10].item(), 0.0)
+
+    def test_ablation_configurations(self):
+        boxes = torch.tensor([
+            [100, 100, 200, 150],
+            [300, 100, 400, 150],
+        ])
+        # Full 16-D
+        f_full = compute_spatial_features(boxes, boxes, use_geometry=True, use_containment=True, use_line_of_sight=True, use_typography=True)
+        self.assertEqual(f_full.shape[-1], 16)
+
+        # Ablation: w/o Line-of-Sight (14-D)
+        f_no_los = compute_spatial_features(boxes, boxes, use_line_of_sight=False)
+        self.assertEqual(f_no_los.shape[-1], 14)
+
+        # Ablation: w/o Typography (12-D)
+        f_no_typo = compute_spatial_features(boxes, boxes, use_typography=False)
+        self.assertEqual(f_no_typo.shape[-1], 12)
+
+        # Ablation: w/o Containment (11-D)
+        f_no_cont = compute_spatial_features(boxes, boxes, use_containment=False)
+        self.assertEqual(f_no_cont.shape[-1], 11)
+
+        # Ablation: Geometry Only (5-D)
+        f_geo_only = compute_spatial_features(boxes, boxes, use_containment=False, use_line_of_sight=False, use_typography=False)
+        self.assertEqual(f_geo_only.shape[-1], 5)
+
+        # Biaffine classifier dynamically adapts its input projection
+        for use_los, expected_dim in [(True, 16), (False, 14)]:
+            clf = BiaffineRelationClassifier(
+                hidden_dim=32, proj_dim=16, geo_dim=8,
+                use_line_of_sight=use_los
+            )
+            self.assertEqual(clf.spatial_in_features, expected_dim)
+            reps = torch.randn(2, 32)
+            logits = clf(reps, boxes)
+            self.assertEqual(logits.shape, (2, 2))
 
     def test_spatial_edge_encoder(self):
         encoder = SpatialEdgeEncoder(in_features=10, geo_dim=32, dropout=0.0)
