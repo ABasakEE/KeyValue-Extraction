@@ -37,6 +37,22 @@ python src/train.py --config configs/funsd_lilt.yaml
 
 Track A targets entity F1 ≈ 0.88. **Read this number as a code-path validation, not as evidence of generalization** — see the caveats below.
 
+## Current Benchmark Results
+
+| Benchmark | Backbone | Split / Regimes | Train Docs | Entity F1 | Linking F1 | Key Insights |
+|---|---|---|:---:|:---:|:---:|---|
+| **FUNSD** | LiLT-RoBERTa | Official Standard Split | 119 | 78.31% ± 0.42% | 28.52% | Pipeline validation; diagnosed severe data starvation |
+| **VRDU Registration** | LiLT-RoBERTa | MTL vs UTL (Matched $n=200$) | 200 | MTL 87.74% / UTL 66.66% | — | Generalization Gap: $\Delta = 21.08$ pts ($-24.0\%$ drop) |
+| **XFUND (5 Latin Langs)** | LiLT-RoBERTa | Official Multilingual Split | 745 | **79.09% ± 0.21%** | **65.51% ± 1.26%** | Scaled architecture, canonical focal loss ($N_{\text{pos}}$), 1-to-1 argmax decoding |
+
+### Joint Architecture Overview
+1. **Multimodal Backbone**: LiLT (`npthe/lilt-roberta-en-base`) fusing text tokens and 0–1000 normalized 2D layout coordinates via Bidirectional Attention Complementary Module (BiACM).
+2. **Deep Biaffine Relation Head**: Evaluates pairwise entity relations $(k, v)$ using query/key affine projections + pairwise geometric features + soft type compatibility priors.
+3. **Canonical Focal Loss ($N_{\text{pos}}$)**: Normalizes focal loss strictly by positive link count ($N_{\text{pos}}$) rather than all $O(N^2)$ candidate pairs, preventing positive gradient dilution.
+4. **One-to-One Column Decoding**: Constrains each value entity to select at most one governing key via column-wise argmax decoding, eliminating multi-candidate false positives.
+5. **Decoupled 3-Stage Curriculum**: (Phase 1) Backbone token classification warmup $\to$ (Phase 2) Teacher-forced relation head warmup with frozen backbone $\to$ (Phase 3) Joint end-to-end fine-tuning with patience early stopping.
+6. **Dual-GPU Seed Parallelism**: Employs multiprocessing spawn workers to concurrently train seeds across multiple GPUs (`cuda:0`, `cuda:1`), cutting training wall-clock time by ~50%.
+
 ## Layout
 
 | Path | Purpose |
