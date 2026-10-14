@@ -19,16 +19,17 @@ from __future__ import annotations
 
 import argparse
 import json
+import queue
 import random
 from dataclasses import dataclass
 from pathlib import Path
+import sys
 
 import numpy as np
 import torch
+import torch.multiprocessing as mp
 import yaml
 from torch.utils.data import DataLoader, Dataset
-
-import sys
 
 from evaluate import cross_check, entity_f1, generalization_gap, malformed_tag_rate, linking_f1
 from models.token_clf import TokenClassifier
@@ -270,8 +271,12 @@ def train_one(
     config: TrainConfig,
     device: torch.device,
     checkpoint_dir: Path | None = None,
+    log_prefix: str = "",
 ) -> dict:
     """Fine-tune once and return test metrics for the best-validation checkpoint."""
+    pfx = f"{log_prefix} " if log_prefix else ""
+    leave_bar = not bool(log_prefix)
+
     is_joint = config.task == "joint"
     collate = make_collator(model, is_joint=is_joint)
     train_loader = DataLoader(FormDataset(train_examples), batch_size=config.batch_size, shuffle=True, collate_fn=collate)
@@ -298,10 +303,10 @@ def train_one(
         # Validation subset: ONLY Entity Tagging (predict_phase1_tagging)
         # -------------------------------------------------------------------------
         max_p1 = getattr(config, "max_phase1_epochs", getattr(config, "phase1_epochs", 10))
-        print(f"\n{'='*70}", flush=True)
-        print(f"[*] [Phase 1/3] Token Classification Warmup (max {max_p1} eps, patience={patience})", flush=True)
-        print(f"[*] Validating strictly on Entity F1 (no relation linking)", flush=True)
-        print(f"{'='*70}", flush=True)
+        print(f"\n{pfx}{'='*70}", flush=True)
+        print(f"{pfx}[*] [Phase 1/3] Token Classification Warmup (max {max_p1} eps, patience={patience})", flush=True)
+        print(f"{pfx}[*] Validating strictly on Entity F1 (no relation linking)", flush=True)
+        print(f"{pfx}{'='*70}", flush=True)
 
         model.linking_loss_weight = 0.0
         for p in model.encoder.parameters():
@@ -318,7 +323,7 @@ def train_one(
         for ep in range(max_p1):
             model.train()
             ep_loss = 0.0
-            pbar = tqdm(train_loader, desc=f"Phase 1 Epoch {ep+1:>2}/{max_p1}", leave=True, unit="b", **TQDM_KWARGS)
+            pbar = tqdm(train_loader, desc=f"{pfx}Phase 1 Epoch {ep+1:>2}/{max_p1}".strip(), leave=leave_bar, unit="b", **TQDM_KWARGS)
             for batch_data in pbar:
                 encoded, _, spans, gold_links, entity_types = batch_data
                 inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
@@ -337,7 +342,7 @@ def train_one(
             val_pred, val_ref = predict_phase1_tagging(model, val_loader, device)
             val_ent_f1 = entity_f1(val_pred, val_ref, model.id2label).f1
             avg_loss = ep_loss / max(1, len(train_loader))
-            print(f"  [Phase 1 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Entity F1: {val_ent_f1:.4f} (best: {max(best_p1_ent_f1, val_ent_f1):.4f})", flush=True)
+            print(f"  {pfx}[Phase 1 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Entity F1: {val_ent_f1:.4f} (best: {max(best_p1_ent_f1, val_ent_f1):.4f})", flush=True)
 
             history.append({
                 "phase": 1,
@@ -353,7 +358,7 @@ def train_one(
             else:
                 p1_patience += 1
                 if p1_patience >= patience:
-                    print(f"  [Phase 1 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 2 with best Val Entity F1={best_p1_ent_f1:.4f}\n", flush=True)
+                    print(f"  {pfx}[Phase 1 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 2 with best Val Entity F1={best_p1_ent_f1:.4f}\n", flush=True)
                     break
 
         # Restore peak Phase 1 weights before Phase 2
@@ -365,10 +370,10 @@ def train_one(
         # Validation subset: ONLY Key-Value Linking (predict_phase2_linking)
         # -------------------------------------------------------------------------
         max_p2 = getattr(config, "max_phase2_epochs", getattr(config, "phase2_epochs", 8))
-        print(f"\n{'='*70}", flush=True)
-        print(f"[*] [Phase 2/3] Spatial Relation Head Warmup (max {max_p2} eps, patience={patience})", flush=True)
-        print(f"[*] Backbone frozen. Validating strictly on Linking F1 under Teacher Forcing", flush=True)
-        print(f"{'='*70}", flush=True)
+        print(f"\n{pfx}{'='*70}", flush=True)
+        print(f"{pfx}[*] [Phase 2/3] Spatial Relation Head Warmup (max {max_p2} eps, patience={patience})", flush=True)
+        print(f"{pfx}[*] Backbone frozen. Validating strictly on Linking F1 under Teacher Forcing", flush=True)
+        print(f"{pfx}{'='*70}", flush=True)
 
         model.linking_loss_weight = config.linking_loss_weight
         for p in model.encoder.parameters():
@@ -385,7 +390,7 @@ def train_one(
         for ep in range(max_p2):
             model.train()
             ep_loss = 0.0
-            pbar = tqdm(train_loader, desc=f"Phase 2 Epoch {ep+1:>2}/{max_p2}", leave=True, unit="b", **TQDM_KWARGS)
+            pbar = tqdm(train_loader, desc=f"{pfx}Phase 2 Epoch {ep+1:>2}/{max_p2}".strip(), leave=leave_bar, unit="b", **TQDM_KWARGS)
             for batch_data in pbar:
                 encoded, _, spans, gold_links, entity_types = batch_data
                 inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
@@ -405,7 +410,7 @@ def train_one(
             val_link_scores = linking_f1(val_pred_links, val_gold_links)
             val_link_f1 = val_link_scores["f1"]
             avg_loss = ep_loss / max(1, len(train_loader))
-            print(f"  [Phase 2 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Linking F1: {val_link_f1:.4f} (best: {max(best_p2_link_f1, val_link_f1):.4f})", flush=True)
+            print(f"  {pfx}[Phase 2 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Linking F1: {val_link_f1:.4f} (best: {max(best_p2_link_f1, val_link_f1):.4f})", flush=True)
 
             history.append({
                 "phase": 2,
@@ -421,7 +426,7 @@ def train_one(
             else:
                 p2_patience += 1
                 if p2_patience >= patience:
-                    print(f"  [Phase 2 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 3 with best Val Linking F1={best_p2_link_f1:.4f}\n", flush=True)
+                    print(f"  {pfx}[Phase 2 Early Stop] Plateau reached ({patience} eps without gain). Transitioning to Phase 3 with best Val Linking F1={best_p2_link_f1:.4f}\n", flush=True)
                     break
 
         # Restore peak Phase 2 weights before Phase 3
@@ -433,10 +438,10 @@ def train_one(
         # Validation: FULL Joint Evaluation (Entity F1 + Linking F1)
         # -------------------------------------------------------------------------
         max_p3 = getattr(config, "max_phase3_epochs", getattr(config, "phase3_epochs", 10))
-        print(f"\n{'='*70}", flush=True)
-        print(f"[*] [Phase 3/3] Joint End-to-End Fine-Tuning (max {max_p3} eps, patience={patience})", flush=True)
-        print(f"[*] All weights unfrozen. Validating on Joint Score = 0.5 * (Entity F1 + Linking F1)", flush=True)
-        print(f"{'='*70}", flush=True)
+        print(f"\n{pfx}{'='*70}", flush=True)
+        print(f"{pfx}[*] [Phase 3/3] Joint End-to-End Fine-Tuning (max {max_p3} eps, patience={patience})", flush=True)
+        print(f"{pfx}[*] All weights unfrozen. Validating on Joint Score = 0.5 * (Entity F1 + Linking F1)", flush=True)
+        print(f"{pfx}{'='*70}", flush=True)
 
         model.linking_loss_weight = config.linking_loss_weight
         for p in model.parameters():
@@ -461,7 +466,7 @@ def train_one(
         for ep in range(max_p3):
             model.train()
             ep_loss = 0.0
-            pbar = tqdm(train_loader, desc=f"Phase 3 Epoch {ep+1:>2}/{max_p3}", leave=True, unit="b", **TQDM_KWARGS)
+            pbar = tqdm(train_loader, desc=f"{pfx}Phase 3 Epoch {ep+1:>2}/{max_p3}".strip(), leave=leave_bar, unit="b", **TQDM_KWARGS)
             for batch_data in pbar:
                 encoded, _, spans, gold_links, entity_types = batch_data
                 inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
@@ -483,7 +488,7 @@ def train_one(
             val_link_f1 = val_link_scores["f1"]
             val_score = 0.5 * (val_ent_f1 + val_link_f1)
             avg_loss = ep_loss / max(1, len(train_loader))
-            print(f"  [Phase 3 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Ent F1: {val_ent_f1:.4f} | Val Link F1: {val_link_f1:.4f} | Joint Val: {val_score:.4f} (best: {max(best_val_score, val_score):.4f})", flush=True)
+            print(f"  {pfx}[Phase 3 Ep {ep+1}] Train Loss: {avg_loss:.4f} | Val Ent F1: {val_ent_f1:.4f} | Val Link F1: {val_link_f1:.4f} | Joint Val: {val_score:.4f} (best: {max(best_val_score, val_score):.4f})", flush=True)
 
             history.append({
                 "phase": 3,
@@ -514,7 +519,7 @@ def train_one(
             else:
                 p3_patience += 1
                 if p3_patience >= patience:
-                    print(f"  [Phase 3 Early Stop] Plateau reached ({patience} eps without gain). Concluding training with best Joint Val={best_val_score:.4f}\n", flush=True)
+                    print(f"  {pfx}[Phase 3 Early Stop] Plateau reached ({patience} eps without gain). Concluding training with best Joint Val={best_val_score:.4f}\n", flush=True)
                     break
 
     else:
@@ -530,7 +535,7 @@ def train_one(
         for epoch in range(config.epochs):
             model_to_optimize.train()
             epoch_loss = 0.0
-            pbar = tqdm(train_loader, desc=f"Epoch {epoch+1:>2}/{config.epochs}", leave=True, unit="b", **TQDM_KWARGS)
+            pbar = tqdm(train_loader, desc=f"{pfx}Epoch {epoch+1:>2}/{config.epochs}".strip(), leave=leave_bar, unit="b", **TQDM_KWARGS)
             for batch_data in pbar:
                 if is_joint:
                     encoded, _, spans, gold_links, entity_types = batch_data
@@ -580,7 +585,7 @@ def train_one(
             else:
                 patience_cnt += 1
                 if patience_cnt >= patience:
-                    print(f"  [Early Stop] Early stopping triggered after {patience} epochs without improvement.")
+                    print(f"  {pfx}[Early Stop] Early stopping triggered after {patience} epochs without improvement.", flush=True)
                     break
 
     if best_state is not None:
@@ -588,7 +593,7 @@ def train_one(
 
     if is_joint:
         test_pred, test_ref, test_pred_links, test_gold_links = predict_joint(
-            model, test_loader, device, desc="Test eval"
+            model, test_loader, device, desc=f"{pfx}Test eval".strip()
         )
         id2label = model.id2label
         scores = entity_f1(test_pred, test_ref, id2label)
@@ -602,7 +607,7 @@ def train_one(
             "cross_check": cross_check(test_pred, test_ref, id2label),
         }
     else:
-        test_pred, test_ref = predict(model, test_loader, device, desc="Test eval")
+        test_pred, test_ref = predict(model, test_loader, device, desc=f"{pfx}Test eval".strip())
         id2label = model.model.config.id2label
         scores = entity_f1(test_pred, test_ref, id2label)
         res = {
@@ -709,91 +714,254 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
     return TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
 
 
+def save_summary(runs: list[dict], config: TrainConfig, output_dir: Path) -> dict:
+    """Save metrics.json summary across all completed seeds."""
+    if not runs:
+        return {}
+    f1s = [r["test"]["f1"] for r in runs]
+    summary = {
+        "config": vars(config) | {"seeds": list(config.seeds)},
+        "runs": runs,
+        "mean_f1": round(sum(f1s) / len(f1s), 4),
+        "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4) if len(f1s) > 1 else 0.0,
+    }
+    if config.task == "joint":
+        link_f1s = [r["test_linking"]["f1"] for r in runs]
+        summary["mean_linking_f1"] = round(sum(link_f1s) / len(link_f1s), 4)
+        summary["std_linking_f1"] = round((sum((x - sum(link_f1s) / len(link_f1s)) ** 2 for x in link_f1s) / max(1, len(link_f1s) - 1)) ** 0.5, 4) if len(link_f1s) > 1 else 0.0
+    out = output_dir / "metrics.json"
+    out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
+    return summary
+
+
+def train_single_seed(
+    seed: int,
+    config: TrainConfig,
+    train_ex: list,
+    val_ex: list,
+    test_ex: list,
+    label_list: list[str],
+    id2label: dict[int, str],
+    device: torch.device,
+    output_dir: Path,
+    log_prefix: str = "",
+) -> dict:
+    """Train and evaluate one single seed, resuming from checkpoint if available."""
+    run_dir = output_dir / f"seed_{seed}"
+    result_file = run_dir / "result.json"
+
+    if result_file.exists():
+        print(f"\n{log_prefix} === Seed {seed} (resuming from checkpoint: {result_file}) ===", flush=True)
+        try:
+            cached = json.loads(result_file.read_text(encoding="utf-8"))
+            msg = f"{log_prefix}   Loaded existing result: Test F1 {cached['test']['f1']:.4f}"
+            if "test_linking" in cached:
+                msg += f" | Linking F1 {cached['test_linking']['f1']:.4f}"
+            print(msg, flush=True)
+            return cached
+        except Exception as e:
+            print(f"{log_prefix}   Warning: Failed reading {result_file} ({e}), re-running Seed {seed}...", flush=True)
+
+    print(f"\n{log_prefix} === Seed {seed} ===", flush=True)
+    set_seed(seed)
+    model = build_model(config, len(label_list), id2label)
+    result = train_one(model, train_ex, val_ex, test_ex, config, device, checkpoint_dir=run_dir, log_prefix=log_prefix)
+    result["seed"] = seed
+    if config.task == "joint":
+        print(
+            f"{log_prefix} Seed {seed} -> Test Entity F1: {result['test']['f1']:.4f} | "
+            f"Test Linking F1: {result['test_linking']['f1']:.4f} | {result['cross_check']}",
+            flush=True,
+        )
+    else:
+        print(f"{log_prefix} Seed {seed} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
+    return result
+
+
+def _mp_seed_worker(
+    gpu_id: int,
+    task_queue: mp.Queue,
+    result_queue: mp.Queue,
+    config_path: str,
+    output_dir_str: str,
+    n_train_override: int | None = None,
+) -> None:
+    """Worker process targeting a specific GPU (e.g. cuda:0 or cuda:1)."""
+    try:
+        torch.cuda.set_device(gpu_id)
+        device = torch.device(f"cuda:{gpu_id}")
+        config = TrainConfig.from_yaml(config_path)
+        if n_train_override is not None:
+            config.n_train = n_train_override
+        output_dir = Path(output_dir_str)
+
+        train_ex, val_ex, test_ex, label_list, id2label = load_dataset(config)
+        if config.n_train:
+            train_ex = train_ex[: config.n_train]
+
+        while True:
+            seed = task_queue.get()
+            if seed is None:
+                # Poison pill received: worker terminates cleanly
+                break
+
+            log_prefix = f"[GPU {gpu_id} | Seed {seed}]"
+            try:
+                res = train_single_seed(
+                    seed=seed,
+                    config=config,
+                    train_ex=train_ex,
+                    val_ex=val_ex,
+                    test_ex=test_ex,
+                    label_list=label_list,
+                    id2label=id2label,
+                    device=device,
+                    output_dir=output_dir,
+                    log_prefix=log_prefix,
+                )
+                result_queue.put((seed, res, None))
+            except Exception as e:
+                import traceback
+                err = traceback.format_exc()
+                print(f"{log_prefix} Training failed:\n{err}", flush=True)
+                result_queue.put((seed, None, err))
+    except Exception as e:
+        import traceback
+        err = traceback.format_exc()
+        print(f"[GPU {gpu_id} Worker Initialization Error]\n{err}", flush=True)
+        result_queue.put((-1, None, err))
+
+
+def get_device_list(gpu_arg: str, no_parallel: bool) -> list[int]:
+    """Parse device indices for parallel or single execution."""
+    if no_parallel or not torch.cuda.is_available():
+        return []
+    if gpu_arg == "auto":
+        count = torch.cuda.device_count()
+        return list(range(count))
+    try:
+        return [int(x.strip()) for x in gpu_arg.split(",") if x.strip()]
+    except Exception as e:
+        print(f"Warning: Failed to parse --gpus '{gpu_arg}' ({e}), defaulting to [0]")
+        return [0]
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--config", required=True)
     parser.add_argument("--protocol", choices=["standard", "matched"], default="standard",
                         help="standard = the dataset's own split; matched = MTL vs UTL at equal train size")
+    parser.add_argument("--gpus", default="auto",
+                        help="Comma-separated GPU indices (e.g. '0,1') or 'auto' to use all available CUDA devices")
+    parser.add_argument("--no-parallel", action="store_true",
+                        help="Force single-process execution even if multiple GPUs are available")
+    parser.add_argument("--seed", type=int, default=None,
+                        help="Run only this specific seed instead of all seeds in config")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"device: {device}  backbone: {config.backbone}  dataset: {config.dataset}  task: {config.task}")
-    if device.type == "cpu":
-        print("WARNING: no GPU visible. Fine-tuning on CPU will take hours; this is a Kaggle/Colab job.")
-
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
 
+    gpu_ids = get_device_list(args.gpus, args.no_parallel)
+    if not torch.cuda.is_available():
+        print("WARNING: no GPU visible. Fine-tuning on CPU will take hours; this is a Kaggle/Colab job.")
+    else:
+        print(f"[*] Detected {len(gpu_ids)} GPU(s): {gpu_ids} (total visible: {torch.cuda.device_count()})")
+        for gid in gpu_ids:
+            prop = torch.cuda.get_device_properties(gid)
+            print(f"    GPU {gid}: {prop.name} ({prop.total_memory / 1e9:.1f} GB VRAM)")
+
+    seeds = [args.seed] if args.seed is not None else list(config.seeds)
+    print(f"[*] Backbone: {config.backbone} | Dataset: {config.dataset} | Task: {config.task} | Seeds: {seeds}")
+
     if args.protocol == "standard":
-        train_ex, val_ex, test_ex, label_list, id2label = load_dataset(config)
-        if config.n_train:
-            train_ex = train_ex[: config.n_train]
+        can_parallel = len(gpu_ids) >= 2 and len(seeds) > 1 and not args.no_parallel
 
-        runs = []
-        for seed in config.seeds:
-            run_dir = output_dir / f"seed_{seed}"
-            result_file = run_dir / "result.json"
+        if can_parallel:
+            num_workers = min(len(gpu_ids), len(seeds))
+            active_gpus = gpu_ids[:num_workers]
+            print(f"\n{'='*75}")
+            print(f"[*] MULTI-GPU SEED PARALLELISM ACTIVE")
+            print(f"[*] Spawning {num_workers} parallel workers on GPUs {active_gpus} for seeds {seeds}")
+            print(f"{'='*75}\n", flush=True)
 
-            if result_file.exists():
-                print(f"\n=== Seed {seed} (resuming from checkpoint: {result_file}) ===", flush=True)
-                try:
-                    cached = json.loads(result_file.read_text(encoding="utf-8"))
-                    msg = f"  Loaded existing result: Test F1 {cached['test']['f1']:.4f}"
-                    if "test_linking" in cached:
-                        msg += f" | Linking F1 {cached['test_linking']['f1']:.4f}"
-                    print(msg, flush=True)
-                    runs.append(cached)
-                    continue
-                except Exception as e:
-                    print(f"  Warning: Failed reading {result_file} ({e}), re-running Seed {seed}...", flush=True)
+            task_queue = mp.Queue()
+            result_queue = mp.Queue()
 
-            print(f"\n=== Seed {seed} ===", flush=True)
-            set_seed(seed)
-            model = build_model(config, len(label_list), id2label)
-            result = train_one(model, train_ex, val_ex, test_ex, config, device, checkpoint_dir=run_dir)
-            result["seed"] = seed
-            if config.task == "joint":
-                print(
-                    f"Seed {seed} -> Test Entity F1: {result['test']['f1']:.4f} | "
-                    f"Test Linking F1: {result['test_linking']['f1']:.4f} | {result['cross_check']}",
-                    flush=True,
+            # Enqueue all seed tasks
+            for s in seeds:
+                task_queue.put(s)
+            # Enqueue poison pills so workers terminate when queue is exhausted
+            for _ in active_gpus:
+                task_queue.put(None)
+
+            workers = []
+            for gid in active_gpus:
+                p = mp.Process(
+                    target=_mp_seed_worker,
+                    args=(
+                        gid,
+                        task_queue,
+                        result_queue,
+                        args.config,
+                        str(output_dir),
+                        config.n_train,
+                    ),
                 )
-            else:
-                print(f"Seed {seed} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
-            runs.append(result)
+                p.start()
+                workers.append(p)
 
-            # Incremental checkpoint of metrics.json after each seed completes
-            f1s = [r["test"]["f1"] for r in runs]
-            summary = {
-                "config": vars(config) | {"seeds": list(config.seeds)},
-                "runs": runs,
-                "mean_f1": round(sum(f1s) / len(f1s), 4),
-                "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4) if len(f1s) > 1 else 0.0,
-            }
-            if config.task == "joint":
-                link_f1s = [r["test_linking"]["f1"] for r in runs]
-                summary["mean_linking_f1"] = round(sum(link_f1s) / len(link_f1s), 4)
-                summary["std_linking_f1"] = round((sum((x - sum(link_f1s) / len(link_f1s)) ** 2 for x in link_f1s) / max(1, len(link_f1s) - 1)) ** 0.5, 4) if len(link_f1s) > 1 else 0.0
-            out = output_dir / "metrics.json"
-            out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
+            runs_dict = {}
+            for _ in range(len(seeds)):
+                seed, res, err = result_queue.get()
+                if err is not None:
+                    print(f"\n[FATAL] Worker failed for seed {seed}:\n{err}", flush=True)
+                    for p in workers:
+                        if p.is_alive():
+                            p.terminate()
+                    raise RuntimeError(f"Multi-GPU worker failed: {err}")
 
-        f1s = [r["test"]["f1"] for r in runs]
-        summary = {
-            "config": vars(config) | {"seeds": list(config.seeds)},
-            "runs": runs,
-            "mean_f1": round(sum(f1s) / len(f1s), 4),
-            "std_f1": round((sum((x - sum(f1s) / len(f1s)) ** 2 for x in f1s) / max(1, len(f1s) - 1)) ** 0.5, 4) if len(f1s) > 1 else 0.0,
-        }
+                runs_dict[seed] = res
+                current_runs = [runs_dict[s] for s in seeds if s in runs_dict]
+                save_summary(current_runs, config, output_dir)
+
+            for p in workers:
+                p.join()
+
+            runs = [runs_dict[s] for s in seeds]
+
+        else:
+            device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
+            print(f"[*] Running sequentially on device: {device}", flush=True)
+            train_ex, val_ex, test_ex, label_list, id2label = load_dataset(config)
+            if config.n_train:
+                train_ex = train_ex[: config.n_train]
+
+            runs = []
+            for seed in seeds:
+                res = train_single_seed(
+                    seed=seed,
+                    config=config,
+                    train_ex=train_ex,
+                    val_ex=val_ex,
+                    test_ex=test_ex,
+                    label_list=label_list,
+                    id2label=id2label,
+                    device=device,
+                    output_dir=output_dir,
+                    log_prefix=f"[Seed {seed}]",
+                )
+                runs.append(res)
+                save_summary(runs, config, output_dir)
+
+        summary = save_summary(runs, config, output_dir)
+        out = output_dir / "metrics.json"
         if config.task == "joint":
-            link_f1s = [r["test_linking"]["f1"] for r in runs]
-            summary["mean_linking_f1"] = round(sum(link_f1s) / len(link_f1s), 4)
-            summary["std_linking_f1"] = round((sum((x - sum(link_f1s) / len(link_f1s)) ** 2 for x in link_f1s) / max(1, len(link_f1s) - 1)) ** 0.5, 4) if len(link_f1s) > 1 else 0.0
             print(f"\nmean test Entity F1 {summary['mean_f1']:.4f} +/- {summary['std_f1']:.4f} | Linking F1 {summary['mean_linking_f1']:.4f} +/- {summary['std_linking_f1']:.4f}  ->  {out}")
         else:
             print(f"\nmean test F1 {summary['mean_f1']:.4f} +/- {summary['std_f1']:.4f}  ->  {out}")
-        out = output_dir / "metrics.json"
-        out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
+
     else:
         # --protocol matched: the headline experiment.
         # Train under both MTL and UTL at identical training-set size, measure
@@ -807,6 +975,7 @@ def main() -> None:
         from data.splits import assert_no_template_leakage, matched_size_protocol
         from data.vrdu_loader import load_vrdu, summarize as vrdu_summarize
 
+        device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
         root = Path(config.data_root)
         examples, label_list, id2label = load_vrdu(root, config.subcorpus)
         print("VRDU:", json.dumps(vrdu_summarize(examples)))
@@ -897,4 +1066,9 @@ def main() -> None:
 
 
 if __name__ == "__main__":
+    try:
+        mp.set_start_method("spawn", force=True)
+    except RuntimeError:
+        pass
     main()
+

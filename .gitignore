@@ -33,6 +33,7 @@ __pycache__/
 venv/
 *.egg-info/
 .ipynb_checkpoints/
+scratch/
 
 # latex build products (Overleaf rebuilds these)
 slides/*.aux
