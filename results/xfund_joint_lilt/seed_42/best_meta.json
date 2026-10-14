@@ -1,0 +1,8 @@
+{
+  "phase": 3,
+  "epoch": 7,
+  "best_val_score": 0.739,
+  "val_entity_f1": 0.7993,
+  "val_linking_f1": 0.6787,
+  "train_loss": 0.2869
+}
