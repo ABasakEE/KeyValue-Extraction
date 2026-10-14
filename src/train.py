@@ -25,6 +25,12 @@ from dataclasses import dataclass
 from pathlib import Path
 import sys
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+SRC_DIR = Path(__file__).resolve().parent
+for _p in (str(ROOT_DIR), str(SRC_DIR)):
+    if _p not in sys.path:
+        sys.path.insert(0, _p)
+
 import numpy as np
 import torch
 import torch.multiprocessing as mp
@@ -788,6 +794,10 @@ def _mp_seed_worker(
 ) -> None:
     """Worker process targeting a specific GPU (e.g. cuda:0 or cuda:1)."""
     try:
+        for _p in (str(ROOT_DIR), str(SRC_DIR)):
+            if _p not in sys.path:
+                sys.path.insert(0, _p)
+
         torch.cuda.set_device(gpu_id)
         device = torch.device(f"cuda:{gpu_id}")
         config = TrainConfig.from_yaml(config_path)

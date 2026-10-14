@@ -40,15 +40,37 @@ import random
 from pathlib import Path
 from typing import Any
 
-from src.data.funsd_loader import (
-    ENTITY_LABELS,
-    FormExample,
-    ID2LABEL,
-    LABEL2ID,
-    LABEL_LIST,
-    normalize_box,
-    summarize,
-)
+try:
+    from data.funsd_loader import (
+        ENTITY_LABELS,
+        FormExample,
+        ID2LABEL,
+        LABEL2ID,
+        LABEL_LIST,
+        normalize_box,
+        summarize,
+    )
+except ImportError:
+    try:
+        from src.data.funsd_loader import (
+            ENTITY_LABELS,
+            FormExample,
+            ID2LABEL,
+            LABEL2ID,
+            LABEL_LIST,
+            normalize_box,
+            summarize,
+        )
+    except ImportError:
+        from .funsd_loader import (
+            ENTITY_LABELS,
+            FormExample,
+            ID2LABEL,
+            LABEL2ID,
+            LABEL_LIST,
+            normalize_box,
+            summarize,
+        )
 
 SUPPORTED_LANGUAGES = ("es", "fr", "de", "it", "pt", "zh", "ja")
 LATIN_LANGUAGES = ("es", "fr", "de", "it", "pt")
