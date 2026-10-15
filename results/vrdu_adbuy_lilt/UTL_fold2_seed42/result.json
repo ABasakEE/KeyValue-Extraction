@@ -1,0 +1,124 @@
+{
+  "test": {
+    "precision": 0.8991,
+    "recall": 0.8698,
+    "f1": 0.8842,
+    "support": 47427,
+    "truncated_words": 177910,
+    "per_type": {
+      "advertiser": {
+        "precision": 0.94,
+        "recall": 0.9463,
+        "f1": 0.9431,
+        "support": 149
+      },
+      "agency": {
+        "precision": 0.931,
+        "recall": 0.9153,
+        "f1": 0.9231,
+        "support": 59
+      },
+      "contract_num": {
+        "precision": 0.9704,
+        "recall": 0.8851,
+        "f1": 0.9258,
+        "support": 148
+      },
+      "flight_from": {
+        "precision": 0.874,
+        "recall": 0.8952,
+        "f1": 0.8845,
+        "support": 124
+      },
+      "flight_to": {
+        "precision": 0.8571,
+        "recall": 0.9344,
+        "f1": 0.8941,
+        "support": 122
+      },
+      "gross_amount": {
+        "precision": 0.7927,
+        "recall": 0.7927,
+        "f1": 0.7927,
+        "support": 82
+      },
+      "product": {
+        "precision": 0.904,
+        "recall": 0.7793,
+        "f1": 0.837,
+        "support": 145
+      },
+      "property": {
+        "precision": 0.8927,
+        "recall": 0.8595,
+        "f1": 0.8758,
+        "support": 242
+      },
+      "tv_address": {
+        "precision": 0.9052,
+        "recall": 0.8268,
+        "f1": 0.8642,
+        "support": 127
+      }
+    }
+  },
+  "best_val_f1": 0.9298,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.2147,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.2506,
+      "val_f1": 0.3726
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1119,
+      "val_f1": 0.7371
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0504,
+      "val_f1": 0.8486
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0282,
+      "val_f1": 0.8601
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.02,
+      "val_f1": 0.904
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0138,
+      "val_f1": 0.9298
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0095,
+      "val_f1": 0.923
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0074,
+      "val_f1": 0.9201
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0052,
+      "val_f1": 0.9251
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 73,
+    "total_i_tags": 2714,
+    "rate": 0.0269
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8842 == independent F1=0.8842 (delta 0.00e+00)\n  lenient-IOB2 F1=0.8778 (spread 0.0064)\n  malformed I- tags: 73/2714 (2.7%)"
+}

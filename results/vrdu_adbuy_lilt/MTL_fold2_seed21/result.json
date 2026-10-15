@@ -1,0 +1,149 @@
+{
+  "test": {
+    "precision": 0.9277,
+    "recall": 0.9241,
+    "f1": 0.9259,
+    "support": 93396,
+    "truncated_words": 376048,
+    "per_type": {
+      "advertiser": {
+        "precision": 0.9663,
+        "recall": 0.9663,
+        "f1": 0.9663,
+        "support": 297
+      },
+      "agency": {
+        "precision": 0.9685,
+        "recall": 0.9318,
+        "f1": 0.9498,
+        "support": 132
+      },
+      "contract_num": {
+        "precision": 0.9601,
+        "recall": 0.9138,
+        "f1": 0.9364,
+        "support": 290
+      },
+      "flight_from": {
+        "precision": 0.9004,
+        "recall": 0.9476,
+        "f1": 0.9234,
+        "support": 248
+      },
+      "flight_to": {
+        "precision": 0.9382,
+        "recall": 0.9918,
+        "f1": 0.9643,
+        "support": 245
+      },
+      "gross_amount": {
+        "precision": 0.8802,
+        "recall": 0.8077,
+        "f1": 0.8424,
+        "support": 182
+      },
+      "product": {
+        "precision": 0.9127,
+        "recall": 0.9029,
+        "f1": 0.9078,
+        "support": 278
+      },
+      "property": {
+        "precision": 0.9327,
+        "recall": 0.9178,
+        "f1": 0.9252,
+        "support": 438
+      },
+      "tv_address": {
+        "precision": 0.8833,
+        "recall": 0.9116,
+        "f1": 0.8972,
+        "support": 249
+      }
+    }
+  },
+  "best_val_f1": 0.9389,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.3309,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.287,
+      "val_f1": 0.3348
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1056,
+      "val_f1": 0.7388
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.046,
+      "val_f1": 0.813
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0275,
+      "val_f1": 0.877
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.02,
+      "val_f1": 0.9102
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0122,
+      "val_f1": 0.9046
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0091,
+      "val_f1": 0.9274
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0062,
+      "val_f1": 0.9221
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0047,
+      "val_f1": 0.9158
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0036,
+      "val_f1": 0.9284
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0027,
+      "val_f1": 0.9389
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0023,
+      "val_f1": 0.9372
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.002,
+      "val_f1": 0.9378
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0016,
+      "val_f1": 0.9341
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 95,
+    "total_i_tags": 5549,
+    "rate": 0.0171
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9259 == independent F1=0.9259 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9188 (spread 0.0071)\n  malformed I- tags: 95/5549 (1.7%)"
+}
