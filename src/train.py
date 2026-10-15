@@ -853,6 +853,90 @@ def _mp_seed_worker(
         result_queue.put((-1, None, err))
 
 
+def _mp_matched_worker(
+    gpu_id: int,
+    task_queue: mp.Queue,
+    result_queue: mp.Queue,
+    config: TrainConfig,
+    protocol: dict,
+    label_list: list,
+    id2label: dict,
+    output_dir_str: str,
+) -> None:
+    """Worker process for matched protocol targeting a specific GPU."""
+    try:
+        for _p in (str(ROOT_DIR), str(SRC_DIR)):
+            if _p not in sys.path:
+                sys.path.insert(0, _p)
+
+        torch.cuda.set_device(gpu_id)
+        device = torch.device(f"cuda:{gpu_id}")
+        output_dir = Path(output_dir_str)
+
+        while True:
+            task = task_queue.get()
+            if task is None:
+                # Poison pill received: worker terminates cleanly
+                break
+
+            regime, fold_idx, seed = task
+            tag = f"{regime}/fold{fold_idx}/seed{seed}"
+            log_prefix = f"[GPU {gpu_id} | {tag}]"
+            run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
+            result_file = run_dir / "result.json"
+
+            if result_file.exists():
+                try:
+                    cached = json.loads(result_file.read_text(encoding="utf-8"))
+                    print(f"{log_prefix} Resuming from checkpoint: {result_file} (Test F1 {cached['test']['f1']:.4f})", flush=True)
+                    result_queue.put((regime, fold_idx, seed, cached, None))
+                    continue
+                except Exception as e:
+                    print(f"{log_prefix} Warning: Failed reading {result_file} ({e}), re-running...", flush=True)
+
+            try:
+                split = protocol[regime][fold_idx]
+                print(f"\n{log_prefix} Starting training ({len(split.train)} train, {len(split.val)} val, {len(split.test)} test)...", flush=True)
+                set_seed(seed)
+
+                model = build_model(config, len(label_list), id2label)
+                result = train_one(
+                    model=model,
+                    train_examples=split.train,
+                    val_examples=split.val,
+                    test_examples=split.test,
+                    config=config,
+                    device=device,
+                    checkpoint_dir=run_dir,
+                    log_prefix=log_prefix,
+                )
+                result["seed"] = seed
+                result["fold"] = fold_idx
+                result["regime"] = regime
+                result["held_out"] = list(split.held_out_templates)
+
+                if config.task == "joint":
+                    print(
+                        f"{log_prefix} -> Test Entity F1: {result['test']['f1']:.4f} | "
+                        f"Linking F1: {result['test_linking']['f1']:.4f} | {result['cross_check']}",
+                        flush=True,
+                    )
+                else:
+                    print(f"{log_prefix} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
+
+                result_queue.put((regime, fold_idx, seed, result, None))
+            except Exception as e:
+                import traceback
+                err = traceback.format_exc()
+                print(f"{log_prefix} Training failed:\n{err}", flush=True)
+                result_queue.put((regime, fold_idx, seed, None, err))
+    except Exception as e:
+        import traceback
+        err = traceback.format_exc()
+        print(f"[GPU {gpu_id} Matched Worker Initialization Error]\n{err}", flush=True)
+        result_queue.put(("ERROR", -1, -1, None, err))
+
+
 def get_device_list(gpu_arg: str, no_parallel: bool) -> list[int]:
     """Parse device indices for parallel or single execution."""
     if no_parallel or not torch.cuda.is_available():
@@ -1044,7 +1128,6 @@ def main() -> None:
         from data.splits import assert_no_template_leakage, matched_size_protocol
         from data.vrdu_loader import load_vrdu, summarize as vrdu_summarize
 
-        device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
         root = Path(config.data_root)
         examples, label_list, id2label = load_vrdu(root, config.subcorpus)
         print("VRDU:", json.dumps(vrdu_summarize(examples)))
@@ -1055,10 +1138,11 @@ def main() -> None:
             splits_dir = root / config.subcorpus / "few_shot-splits"
             protocol = load_deepform_protocol(examples, splits_dir, n_train=n)
         else:
-            protocol = matched_size_protocol(examples, n_train=n, seed=config.seeds[0])
+            protocol = matched_size_protocol(examples, n_train=n, seed=seeds[0])
 
         all_results: dict[str, list[dict]] = {"MTL": [], "UTL": []}
 
+        # Print split proofs and descriptions upfront
         for regime in ("MTL", "UTL"):
             folds = protocol[regime]
             for fold_idx, split in enumerate(folds):
@@ -1068,20 +1152,109 @@ def main() -> None:
                 else:
                     print(f"\n[Official DeepForm Split] {regime} Fold {fold_idx} ({len(split.train)} train, {len(split.val)} val, {len(split.test)} test)", flush=True)
 
-                for seed in config.seeds:
-                    tag = f"{regime}/fold{fold_idx}/seed{seed}"
-                    run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
-                    result_file = run_dir / "result.json"
+        tasks = []
+        for regime in ("MTL", "UTL"):
+            for fold_idx in range(len(protocol[regime])):
+                for seed in seeds:
+                    tasks.append((regime, fold_idx, seed))
 
-                    if result_file.exists():
-                        print(f"\n=== {tag} (resuming from checkpoint: {result_file}) ===", flush=True)
-                        try:
-                            cached = json.loads(result_file.read_text(encoding="utf-8"))
-                            print(f"  Loaded existing result: Test F1 {cached['test']['f1']:.4f}", flush=True)
-                            all_results[regime].append(cached)
-                            continue
-                        except Exception as e:
-                            print(f"  Warning: Failed reading {result_file} ({e}), re-running {tag}...", flush=True)
+        # Check existing checkpoints upfront
+        pending_tasks = []
+        for t in tasks:
+            regime, fold_idx, seed = t
+            run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
+            result_file = run_dir / "result.json"
+            if result_file.exists():
+                try:
+                    cached = json.loads(result_file.read_text(encoding="utf-8"))
+                    print(f"[*] Resuming from checkpoint: {regime}/fold{fold_idx}/seed{seed} ({result_file}) -> Test F1 {cached['test']['f1']:.4f}", flush=True)
+                    all_results[regime].append(cached)
+                    continue
+                except Exception as e:
+                    print(f"[*] Warning: Failed reading {result_file} ({e}), will re-run {regime}/fold{fold_idx}/seed{seed}", flush=True)
+            pending_tasks.append(t)
+
+        def _update_and_save_matched_summary():
+            all_results["MTL"].sort(key=lambda r: (r.get("fold", 0), r.get("seed", 0)))
+            all_results["UTL"].sort(key=lambda r: (r.get("fold", 0), r.get("seed", 0)))
+            mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
+            utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
+            gap = generalization_gap(mtl_f1s, utl_f1s) if (mtl_f1s and utl_f1s) else {}
+
+            summary = {
+                "config": vars(config) | {"seeds": list(config.seeds)},
+                "protocol": "matched",
+                "n_train": n,
+                "MTL": all_results["MTL"],
+                "UTL": all_results["UTL"],
+                "gap": gap,
+            }
+            out = output_dir / "metrics.json"
+            out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
+            return summary, gap, out
+
+        if not pending_tasks:
+            print("\n[*] All tasks already completed from checkpoints!", flush=True)
+            summary, gap, out = _update_and_save_matched_summary()
+        else:
+            can_parallel = len(gpu_ids) >= 2 and not args.no_parallel
+            if can_parallel and len(pending_tasks) > 1:
+                num_workers = min(len(gpu_ids), len(pending_tasks))
+                active_gpus = gpu_ids[:num_workers]
+                print(f"\n{'='*75}")
+                print(f"[*] MULTI-GPU MATCHED PROTOCOL PARALLELISM ACTIVE")
+                print(f"[*] Spawning {num_workers} parallel workers on GPUs {active_gpus} for {len(pending_tasks)} pending tasks")
+                print(f"{'='*75}\n", flush=True)
+
+                task_queue = mp.Queue()
+                result_queue = mp.Queue()
+
+                for t in pending_tasks:
+                    task_queue.put(t)
+                for _ in active_gpus:
+                    task_queue.put(None)
+
+                workers = []
+                for gid in active_gpus:
+                    p = mp.Process(
+                        target=_mp_matched_worker,
+                        args=(
+                            gid,
+                            task_queue,
+                            result_queue,
+                            config,
+                            protocol,
+                            label_list,
+                            id2label,
+                            str(output_dir),
+                        ),
+                    )
+                    p.start()
+                    workers.append(p)
+
+                for _ in range(len(pending_tasks)):
+                    regime, fold_idx, seed, res, err = result_queue.get()
+                    if err is not None:
+                        print(f"\n[FATAL] Worker failed for {regime} fold {fold_idx} seed {seed}:\n{err}", flush=True)
+                        for p in workers:
+                            if p.is_alive():
+                                p.terminate()
+                        raise RuntimeError(f"Multi-GPU worker failed: {err}")
+
+                    all_results[regime].append(res)
+                    _update_and_save_matched_summary()
+
+                for p in workers:
+                    p.join()
+
+            else:
+                device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
+                print(f"[*] Running sequentially on device: {device} ({len(pending_tasks)} task(s))", flush=True)
+
+                for regime, fold_idx, seed in pending_tasks:
+                    tag = f"{regime}/fold{fold_idx}/seed{seed}"
+                    split = protocol[regime][fold_idx]
+                    run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
 
                     print(f"\n=== {tag} ===", flush=True)
                     print(split.describe(), flush=True)
@@ -1104,41 +1277,13 @@ def main() -> None:
                     else:
                         print(f"{tag} -> Test F1: {result['test']['f1']:.4f}  |  {result['cross_check']}", flush=True)
                     all_results[regime].append(result)
+                    _update_and_save_matched_summary()
 
-                    # Incremental checkpoint of metrics.json after each fold/seed completes
-                    mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
-                    utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
-                    gap = generalization_gap(mtl_f1s, utl_f1s) if (mtl_f1s and utl_f1s) else {}
-
-                    summary = {
-                        "config": vars(config) | {"seeds": list(config.seeds)},
-                        "protocol": "matched",
-                        "n_train": n,
-                        "MTL": all_results["MTL"],
-                        "UTL": all_results["UTL"],
-                        "gap": gap,
-                    }
-                    out = output_dir / "metrics.json"
-                    out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
-
-        mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]
-        utl_f1s = [r["test"]["f1"] for r in all_results["UTL"]]
-        gap = generalization_gap(mtl_f1s, utl_f1s)
-
-        summary = {
-            "config": vars(config) | {"seeds": list(config.seeds)},
-            "protocol": "matched",
-            "n_train": n,
-            "MTL": all_results["MTL"],
-            "UTL": all_results["UTL"],
-            "gap": gap,
-        }
-        out = output_dir / "metrics.json"
-        out.write_text(json.dumps(summary, indent=2, default=json_serializable), encoding="utf-8")
+        summary, gap, out = _update_and_save_matched_summary()
         print(f"\n{'=' * 60}")
-        print(f"MTL mean F1: {gap['mtl_mean_f1']:.4f} +/- {gap['mtl_std']:.4f}")
-        print(f"UTL mean F1: {gap['utl_mean_f1']:.4f} +/- {gap['utl_std']:.4f}")
-        print(f"GAP (MTL - UTL): {gap['gap_f1']:.4f}  ({gap['relative_drop_pct']:.1f}% relative drop)")
+        print(f"MTL mean F1: {gap.get('mtl_mean_f1', 0.0):.4f} +/- {gap.get('mtl_std', 0.0):.4f}")
+        print(f"UTL mean F1: {gap.get('utl_mean_f1', 0.0):.4f} +/- {gap.get('utl_std', 0.0):.4f}")
+        print(f"GAP (MTL - UTL): {gap.get('gap_f1', 0.0):.4f}  ({gap.get('relative_drop_pct', 0.0):.1f}% relative drop)")
         print(f"-> {out}")
 
 
