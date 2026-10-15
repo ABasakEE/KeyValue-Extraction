@@ -288,6 +288,8 @@ def _parse_record(record: dict, label2id: dict[str, int], templates: list[str]) 
 
     template = template_from_filename(record["filename"], templates)
     if template is None:
+        template = "ad-buy-form" if not templates else None
+    if template is None:
         return None
 
     return VrduExample(
@@ -520,3 +522,48 @@ def summarize(examples: list[VrduExample]) -> dict:
         "docs_with_unaligned_entities": sum(1 for e in examples if e.unaligned_entities),
         "total_unaligned_entity_occurrences": sum(e.unaligned_entities for e in examples),
     }
+
+
+def load_deepform_protocol(
+    examples: list[VrduExample],
+    splits_dir: str | Path,
+    n_train: int = 200,
+) -> dict[str, list]:
+    """Load the official DeepForm (VRDU Ad-Buy) MTL and UTL matched splits."""
+    try:
+        from data.splits import Split
+    except ImportError:
+        from src.data.splits import Split
+    by_id = {e.guid: e for e in examples}
+    splits_dir = Path(splits_dir)
+    protocol: dict[str, list] = {"MTL": [], "UTL": []}
+
+    regimes = [
+        ("MTL", "DeepForm-mixed_template"),
+        ("UTL", "DeepForm-unk_template"),
+    ]
+    for regime, prefix in regimes:
+        for sd in (0, 1, 2):
+            matches = sorted(splits_dir.glob(f"{prefix}-train_{n_train}-*-SD_{sd}.json"))
+            if not matches:
+                # Fallback to any SD file if specific pattern varies
+                matches = sorted(splits_dir.glob(f"{prefix}-train_*-SD_{sd}.json"))
+            if not matches:
+                continue
+            with open(matches[0], encoding="utf-8") as f:
+                d = json.load(f)
+            train_ex = [by_id[name] for name in d.get("train", []) if name in by_id]
+            val_ex = [by_id[name] for name in d.get("valid", []) if name in by_id]
+            test_ex = [by_id[name] for name in d.get("test", []) if name in by_id]
+            protocol[regime].append(
+                Split(
+                    train=train_ex,
+                    val=val_ex,
+                    test=test_ex,
+                    regime=regime,
+                    held_out_templates=(f"DeepForm_{regime}_SD{sd}",),
+                    fold=sd,
+                )
+            )
+    return protocol
+

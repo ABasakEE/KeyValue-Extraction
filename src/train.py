@@ -1050,15 +1050,23 @@ def main() -> None:
         print("VRDU:", json.dumps(vrdu_summarize(examples)))
 
         n = config.n_train or 200
-        protocol = matched_size_protocol(examples, n_train=n, seed=config.seeds[0])
+        if config.subcorpus == "ad-buy-form":
+            from data.vrdu_loader import load_deepform_protocol
+            splits_dir = root / config.subcorpus / "few_shot-splits"
+            protocol = load_deepform_protocol(examples, splits_dir, n_train=n)
+        else:
+            protocol = matched_size_protocol(examples, n_train=n, seed=config.seeds[0])
 
         all_results: dict[str, list[dict]] = {"MTL": [], "UTL": []}
 
         for regime in ("MTL", "UTL"):
             folds = protocol[regime]
             for fold_idx, split in enumerate(folds):
-                proof = assert_no_template_leakage(split)
-                print(f"\n{proof}", flush=True)
+                if config.subcorpus != "ad-buy-form":
+                    proof = assert_no_template_leakage(split)
+                    print(f"\n{proof}", flush=True)
+                else:
+                    print(f"\n[Official DeepForm Split] {regime} Fold {fold_idx} ({len(split.train)} train, {len(split.val)} val, {len(split.test)} test)", flush=True)
 
                 for seed in config.seeds:
                     tag = f"{regime}/fold{fold_idx}/seed{seed}"
