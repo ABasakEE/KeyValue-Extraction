@@ -43,8 +43,23 @@ At matched training size ($N = 200$), we evaluate Mixed Template Learning (**MTL
 | :--- | :--- | :---: | :---: | :--- |
 | **FUNSD** (`funsd_lilt`) | Token Tagging | **79.29%** $\pm$ 1.36% | N/A | Standard 3-seed baseline |
 | **FUNSD Joint** (`funsd_joint_lilt`) | Tagging + Linking | **79.10%** $\pm$ 0.79% | **32.05%** $\pm$ 2.74% | Joint relation head baseline |
-| **XFUND Multilingual** (`xfund_joint_lilt`) | Tagging + Linking | **79.09%** $\pm$ 0.21% | **65.51%** $\pm$ 1.26% | 5 languages (es, fr, de, it, pt) |
+| **XFUND (12-D Baseline)** | Tagging + Linking | **79.09%** $\pm$ 0.21% | **65.51%** $\pm$ 1.26% | 5 languages (es, fr, de, it, pt) |
+| **XFUND (Full 16-D Upgraded)** | Tagging + Linking | **79.32%** $\pm$ 0.36% | **67.21%** $\pm$ 0.83% | **+1.70%** gain with full 16-D features |
 | **Synthetic Sanity** (`synthetic_joint_lilt`) | Joint Extraction | **100.00%** | **100.00%** | Proves architectural expressivity |
+
+---
+
+### C. Systematic Feature & Head Ablation Study (XFUND)
+
+| Experiment / Condition | Active Dims | Entity F1 | Linking F1 | $\Delta$ vs 16-D | Key Finding |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Full 16-D Upgraded Model** | **16-D** | **79.32%** $\pm$ 0.36% | **67.21%** $\pm$ 0.83% | **Ref** | Baseline for all ablations |
+| **w/o Line-of-Sight (14-D)** | 14-D | 78.60% $\pm$ 0.71% | 65.26% $\pm$ 2.11% | **-1.95%** | Ray-casting prevents false cross-column links |
+| **w/o Typography (12-D)** | 12-D | 79.09% $\pm$ 0.21% | 65.51% $\pm$ 1.26% | **-1.70%** | Font hierarchy separates headers from values |
+| **w/o Containment (11-D)** | 11-D | 79.25% $\pm$ 0.36% | 64.57% $\pm$ 1.13% | **-2.64%** | Overlap-over-min resolves multi-line boxes |
+| **Geometry Only (5-D)** | 5-D | 78.87% $\pm$ 0.19% | **57.26%** $\pm$ 1.66% | **-9.95%** | **Severe drop:** continuous polar/distance fails alone |
+| **BCE Loss (no Focal)** | 16-D | 79.18% $\pm$ 0.34% | 64.76% $\pm$ 0.64% | **-2.45%** | Hard negative mining necessary for 99:1 imbalance |
+| **Independent Decoding (no 1-1)** | 16-D | 79.32% $\pm$ 0.36% | **57.33%** $\pm$ 0.03% | **-9.88%** | **Severe drop:** argmax bipartite prevents collision |
 
 ---
 

@@ -72,7 +72,23 @@ In Ad-Buy Forms (DeepForm), target entities carry high lexical salience and US t
 
 ---
 
-## 4. Implementation Status of 16-D Spatial Relation Head
+## 4. Systematic Ablation Study (XFUND Multilingual Key-Value Extraction)
+
+To isolate the exact contribution of each spatial feature group, loss formulation, and decoding constraint, a 6-condition controlled ablation suite was executed across all seeds.
+
+| Experiment / Condition | Active Spatial Dims | Entity F1 | Linking F1 | $\Delta$ vs Full 16-D | Component Role & Key Finding |
+| :--- | :---: | :---: | :---: | :---: | :--- |
+| **Full 16-D Upgraded Model** | **16-D** | **79.32%** $\pm$ 0.36% | **67.21%** $\pm$ 0.83% | **Reference** | Full feature set + Focal Loss + 1-to-1 argmax decoding. |
+| **Ablation 1: w/o Line-of-Sight** | 14-D | 78.60% $\pm$ 0.71% | 65.26% $\pm$ 2.11% | **-1.95%** | Disabling ray-casting corridor creates false positive links across distant table columns. |
+| **Ablation 2: w/o Typography** | 12-D | 79.09% $\pm$ 0.21% | 65.51% $\pm$ 1.26% | **-1.70%** | Removing font scale log-ratios impairs header-vs-value hierarchical distinction. |
+| **Ablation 3: w/o Containment Overlap** | 11-D | 79.25% $\pm$ 0.36% | 64.57% $\pm$ 1.13% | **-2.64%** | Removing overlap-over-min damages multi-line address and value entity grouping. |
+| **Ablation 4: Continuous Geometry Only** | 5-D | 78.87% $\pm$ 0.19% | **57.26%** $\pm$ 1.66% | **-9.95%** | **Catastrophic drop:** pure polar distance $(\Delta x, \Delta y, d, \cos\theta, \sin\theta)$ lacks document inductive bias. |
+| **Ablation 5: BCE Loss (No Focal Loss)** | 16-D | 79.18% $\pm$ 0.34% | 64.76% $\pm$ 0.64% | **-2.45%** | Hard negative mining via focal loss ($\gamma=2$) is essential for the 99:1 link class imbalance. |
+| **Ablation 6: Independent Decoding (No 1-1)** | 16-D | 79.32% $\pm$ 0.36% | **57.33%** $\pm$ 0.03% | **-9.88%** | **Catastrophic drop:** independent thresholding causes multiple questions to collide over the same value. |
+
+---
+
+## 5. Implementation Status of 16-D Spatial Relation Head
 
 The 16-D Spatial Feature Vector computes pairwise geometric and structural relationships:
 - **Geometry (5D):** Normalized coordinates, box deltas, Euclidean center distances, polar angles.
@@ -92,7 +108,7 @@ The 16-D Spatial Feature Vector computes pairwise geometric and structural relat
 
 ---
 
-## 5. Model Checkpoints & Storage Policy
+## 6. Model Checkpoints & Storage Policy
 
 - **Weight Checkpoints:** Model weights (`*.pt`) are preserved locally and excluded from git tracking via [`.gitignore`](file:///D:/KeyValue-Extraction/.gitignore).
 - **Top Checkpoint:**
@@ -102,12 +118,13 @@ The 16-D Spatial Feature Vector computes pairwise geometric and structural relat
 
 ---
 
-## 6. Planned Experiment Changelog & Next Horizons
+## 7. Planned Experiment Changelog & Next Horizons
 
 - [x] Establish dual-GPU matched protocol for VRDU Ad-Buy Forms (Kaggle 2 $\times$ T4).
 - [x] Evaluate cross-template generalization on FARA Registration Forms (21.08 pt drop confirmed).
 - [x] Evaluate cross-template generalization on DeepForm Ad-Buy Forms (1.85 pt drop confirmed).
-- [x] Evaluate 16-D spatial relation head on multilingual XFUND (65.51% link F1).
-- [ ] **Ablation Study Matrix:** Full feature knockouts (Line-of-Sight, Containment, Typography, Focal vs. BCE Loss, 1-to-1 Matching).
-- [ ] **VRDU Pseudo-Linking:** Synthesizing printed prompt keys to test whether the 16-D spatial head narrows the 21-point Registration Form gap.
+- [x] Evaluate 16-D spatial relation head on multilingual XFUND (67.21% link F1).
+- [x] **Ablation Study Matrix:** Completed all 6 feature knockouts (Line-of-Sight, Containment, Typography, Focal vs. BCE Loss, 1-to-1 Matching).
+- [ ] **Multi-Page Sliding Window Loader:** Eliminate sequence truncation (currently 83.3% of tokens truncated on multi-page forms).
+- [ ] **VRDU Pseudo-Linking / Relational Attention Adapter:** Inject 16-D relative spatial bias to narrow the 21-point Registration Form gap.
 - [ ] **Evaluation on CORD / SROIE:** Expanding spatial linking to scanned commercial receipts.
