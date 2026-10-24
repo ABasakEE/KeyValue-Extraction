@@ -1,0 +1,102 @@
+{
+  "seed": 42,
+  "best_val_f1": 0.894,
+  "test": {
+    "precision": 0.9098,
+    "recall": 0.882,
+    "f1": 0.8957,
+    "support": 184231,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.8989,
+        "recall": 0.8511,
+        "f1": 0.8743,
+        "support": 188
+      },
+      "foreign_principle_name": {
+        "precision": 0.8684,
+        "recall": 0.8684,
+        "f1": 0.8684,
+        "support": 114
+      },
+      "registrant_name": {
+        "precision": 0.9211,
+        "recall": 0.9162,
+        "f1": 0.9186,
+        "support": 191
+      },
+      "registration_num": {
+        "precision": 1.0,
+        "recall": 0.9895,
+        "f1": 0.9947,
+        "support": 190
+      },
+      "signer_name": {
+        "precision": 0.8712,
+        "recall": 0.8156,
+        "f1": 0.8425,
+        "support": 141
+      },
+      "signer_title": {
+        "precision": 0.7692,
+        "recall": 0.7018,
+        "f1": 0.7339,
+        "support": 57
+      }
+    }
+  },
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.0477,
+      "val_f1": 0.8016
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0089,
+      "val_f1": 0.8696
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0068,
+      "val_f1": 0.894
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0053,
+      "val_f1": 0.866
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0047,
+      "val_f1": 0.8716
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.004,
+      "val_f1": 0.8918
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0035,
+      "val_f1": 0.8658
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0031,
+      "val_f1": 0.8607
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0027,
+      "val_f1": 0.8888
+    }
+  ],
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8957 == independent F1=0.8957 (delta 0.00e+00)\n  lenient-IOB2 F1=0.8576 (spread 0.0381)\n  malformed I- tags: 119/2180 (5.5%)",
+  "malformed_tags": {
+    "invalid_i_tags": 119,
+    "total_i_tags": 2180,
+    "rate": 0.0546
+  }
+}
