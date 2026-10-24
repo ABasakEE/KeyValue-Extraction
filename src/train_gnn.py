@@ -218,8 +218,7 @@ def train_gnn_one_seed(
         total_loss = 0.0
         n_batches = 0
 
-        pbar = tqdm(train_loader, desc=f"Seed {seed} Ep {ep+1:>2}/{epochs}", leave=False, file=sys.stdout)
-        for batch in pbar:
+        for batch in train_loader:
             optimizer.zero_grad()
             x = batch["x"].to(device)
             edge_index = batch["edge_index"].to(device)
@@ -234,14 +233,13 @@ def train_gnn_one_seed(
 
             total_loss += loss.item()
             n_batches += 1
-            pbar.set_postfix(loss=f"{loss.item():.4f}")
 
         avg_loss = total_loss / max(1, n_batches)
         val_res, _, _ = evaluate_gnn(model, val_loader, device, id2label, desc="Val")
         val_f1 = val_res.get("f1", 0.0)
 
         history.append({"epoch": ep + 1, "train_loss": round(avg_loss, 4), "val_f1": round(val_f1, 4)})
-        print(f"  [Seed {seed} on {device}] [Ep {ep+1:>2}/{epochs}] Train Loss: {avg_loss:.4f} | Val F1: {val_f1:.4f} (best: {max(best_val_f1, val_f1):.4f})", flush=True)
+        print(f"  [Seed {seed} on {device}] Ep {ep+1:>2}/{epochs} | Train Loss: {avg_loss:.4f} | Val F1: {val_f1:.4f} (best: {max(best_val_f1, val_f1):.4f})", flush=True)
 
         if val_f1 > best_val_f1 + 0.001:
             best_val_f1 = val_f1
