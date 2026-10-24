@@ -92,6 +92,85 @@ class VrduExample:
     page_ids: list[int] = field(default_factory=list)
     n_pages: int = 1
     unaligned_entities: int = 0     # annotation occurrences that matched no token
+    doc_guid: str = ""
+    word_offset: int = 0
+    total_doc_words: int = 0
+    doc_envelope: tuple[int, int, int, int] | None = None
+
+    def __post_init__(self):
+        if not self.doc_guid:
+            self.doc_guid = self.guid
+        if not self.total_doc_words:
+            self.total_doc_words = len(self.words)
+        if self.doc_envelope is None and self.boxes:
+            min_x = min(b[0] for b in self.boxes)
+            min_y = min(b[1] for b in self.boxes)
+            max_x = max(b[2] for b in self.boxes)
+            max_y = max(b[3] for b in self.boxes)
+            self.doc_envelope = (min_x, min_y, max_x, max_y)
+
+
+def chunk_vrdu_example(
+    example: VrduExample,
+    window_size: int = 384,
+    overlap: int = 128,
+) -> list[VrduExample]:
+    """Chunk a multi-page VrduExample into sliding windows of words."""
+    n_words = len(example.words)
+    if n_words <= window_size:
+        return [
+            VrduExample(
+                guid=example.guid,
+                words=list(example.words),
+                boxes=[list(b) for b in example.boxes],
+                ner_tags=list(example.ner_tags),
+                template_id=example.template_id,
+                page_ids=list(example.page_ids) if example.page_ids else [],
+                n_pages=example.n_pages,
+                unaligned_entities=example.unaligned_entities,
+                doc_guid=example.doc_guid or example.guid,
+                word_offset=0,
+                total_doc_words=n_words,
+                doc_envelope=example.doc_envelope,
+            )
+        ]
+
+    step = max(1, window_size - overlap)
+    chunks: list[VrduExample] = []
+    chunk_idx = 0
+    for start in range(0, n_words, step):
+        end = min(n_words, start + window_size)
+        chunk = VrduExample(
+            guid=f"{example.guid}#chunk{chunk_idx}",
+            words=example.words[start:end],
+            boxes=example.boxes[start:end],
+            ner_tags=example.ner_tags[start:end],
+            template_id=example.template_id,
+            page_ids=example.page_ids[start:end] if example.page_ids else [],
+            n_pages=example.n_pages,
+            unaligned_entities=0,
+            doc_guid=example.doc_guid or example.guid,
+            word_offset=start,
+            total_doc_words=n_words,
+            doc_envelope=example.doc_envelope,
+        )
+        chunks.append(chunk)
+        chunk_idx += 1
+        if end >= n_words:
+            break
+    return chunks
+
+
+def chunk_vrdu_examples(
+    examples: list[VrduExample],
+    window_size: int = 384,
+    overlap: int = 128,
+) -> list[VrduExample]:
+    """Chunk a list of VrduExamples into sliding windows of words."""
+    chunked: list[VrduExample] = []
+    for ex in examples:
+        chunked.extend(chunk_vrdu_example(ex, window_size=window_size, overlap=overlap))
+    return chunked
 
 
 def normalize_template(name: str) -> str:

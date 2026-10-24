@@ -111,6 +111,15 @@ class TrainConfig:
     subcorpus: str = "registration-form"
     n_train: int | None = None
     output_dir: str = "results/run"
+    sliding_window: bool = False
+    window_size: int = 384
+    window_overlap: int = 128
+    coordinate_jitter: bool = False
+    jitter_shift: int = 80
+    jitter_scale_min: float = 0.85
+    jitter_scale_max: float = 1.15
+    relative_coords: bool = False
+    anchor_mode: str = "content_box"
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -127,6 +136,65 @@ class TrainConfig:
         return cls(**raw)
 
 
+def jitter_boxes(
+    boxes: list[list[int]],
+    shift_range: int = 80,
+    scale_range: tuple[float, float] = (0.85, 1.15),
+) -> list[list[int]]:
+    """Track 1 Coordinate Jitter: random translation and scaling to break spatial memorization."""
+    if not boxes:
+        return boxes
+    dx = random.randint(-shift_range, shift_range)
+    dy = random.randint(-shift_range, shift_range)
+    sx = random.uniform(scale_range[0], scale_range[1])
+    sy = random.uniform(scale_range[0], scale_range[1])
+
+    all_x = [b[0] for b in boxes] + [b[2] for b in boxes]
+    all_y = [b[1] for b in boxes] + [b[3] for b in boxes]
+    cx = (min(all_x) + max(all_x)) / 2.0
+    cy = (min(all_y) + max(all_y)) / 2.0
+
+    new_boxes = []
+    for x0, y0, x1, y1 in boxes:
+        nx0 = int(round(cx + (x0 - cx) * sx + dx))
+        ny0 = int(round(cy + (y0 - cy) * sy + dy))
+        nx1 = int(round(cx + (x1 - cx) * sx + dx))
+        ny1 = int(round(cy + (y1 - cy) * sy + dy))
+        nx0, nx1 = min(nx0, nx1), max(nx0, nx1)
+        ny0, ny1 = min(ny0, ny1), max(ny0, ny1)
+        nx0 = max(0, min(1000, nx0))
+        ny0 = max(0, min(1000, ny0))
+        nx1 = max(0, min(1000, nx1))
+        ny1 = max(0, min(1000, ny1))
+        new_boxes.append([nx0, ny0, nx1, ny1])
+    return new_boxes
+
+
+def make_relative_boxes(boxes: list[list[int]]) -> list[list[int]]:
+    """Track 1 Relative Coordinate Injection: center document centroid at (500, 500)."""
+    if not boxes:
+        return boxes
+    all_x = [b[0] for b in boxes] + [b[2] for b in boxes]
+    all_y = [b[1] for b in boxes] + [b[3] for b in boxes]
+    cx = (min(all_x) + max(all_x)) / 2.0
+    cy = (min(all_y) + max(all_y)) / 2.0
+
+    new_boxes = []
+    for x0, y0, x1, y1 in boxes:
+        nx0 = int(round(500 + (x0 - cx)))
+        ny0 = int(round(500 + (y0 - cy)))
+        nx1 = int(round(500 + (x1 - cx)))
+        ny1 = int(round(500 + (y1 - cy)))
+        nx0, nx1 = min(nx0, nx1), max(nx0, nx1)
+        ny0, ny1 = min(ny0, ny1), max(ny0, ny1)
+        nx0 = max(0, min(1000, nx0))
+        ny0 = max(0, min(1000, ny0))
+        nx1 = max(0, min(1000, nx1))
+        ny1 = max(0, min(1000, ny1))
+        new_boxes.append([nx0, ny0, nx1, ny1])
+    return new_boxes
+
+
 class FormDataset(Dataset):
     """Wraps parsed documents; tokenization happens in the collator."""
 
@@ -140,11 +208,34 @@ class FormDataset(Dataset):
         return self.examples[index]
 
 
-def make_collator(model: TokenClassifier | JointFormExtractor, is_joint: bool = False):
+def make_collator(
+    model: TokenClassifier | JointFormExtractor,
+    is_joint: bool = False,
+    is_train: bool = False,
+    coordinate_jitter: bool = False,
+    relative_coords: bool = False,
+    anchor_mode: str = "none",
+):
     def collate(batch: list):
+        boxes_batch = [ex.boxes for ex in batch]
+        if is_train and coordinate_jitter:
+            boxes_batch = [jitter_boxes(b) for b in boxes_batch]
+        mode = anchor_mode
+        if mode == "none" and relative_coords:
+            mode = "content_box"
+        if mode != "none":
+            try:
+                from data.transforms import anchor_boxes
+            except ImportError:
+                from src.data.transforms import anchor_boxes
+            boxes_batch = [
+                anchor_boxes(b, mode=mode, active_envelope=getattr(ex, "doc_envelope", None))
+                for b, ex in zip(boxes_batch, batch)
+            ]
+
         encoded = model.encode(
             [ex.words for ex in batch],
-            [ex.boxes for ex in batch],
+            boxes_batch,
             [ex.ner_tags for ex in batch],
         )
         if is_joint:
@@ -162,19 +253,57 @@ def predict(
     device: torch.device,
     desc: str | None = None,
 ):
+    """Predict token labels with multi-page sliding window soft-voting aggregation."""
     classifier.model.eval()
-    predictions: list[list[int]] = []
-    references: list[list[int]] = []
+    doc_scores: dict[str, torch.Tensor] = {}
+    doc_counts: dict[str, torch.Tensor] = {}
+    doc_refs: dict[str, list[int]] = {}
+    doc_order: list[str] = []
 
     it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
     for encoded, batch in it:
         inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
         logits = classifier.model(**inputs).logits.cpu()
+        probs = torch.softmax(logits, dim=-1)
+
         for i, example in enumerate(batch):
-            predictions.append(
-                classifier.first_subword_predictions(logits[i], encoded.word_ids[i], len(example.words))
-            )
-            references.append(example.ner_tags)
+            doc_guid = getattr(example, "doc_guid", None) or example.guid
+            word_offset = getattr(example, "word_offset", 0)
+            total_words = getattr(example, "total_doc_words", None) or len(example.words)
+
+            if doc_guid not in doc_scores:
+                num_classes = logits.shape[-1]
+                doc_scores[doc_guid] = torch.zeros((total_words, num_classes), dtype=torch.float32)
+                doc_counts[doc_guid] = torch.zeros(total_words, dtype=torch.float32)
+                doc_refs[doc_guid] = [-1] * total_words
+                doc_order.append(doc_guid)
+
+            for w_idx, tag in enumerate(example.ner_tags):
+                target_idx = word_offset + w_idx
+                if target_idx < total_words:
+                    doc_refs[doc_guid][target_idx] = tag
+
+            word_ids = encoded.word_ids[i]
+            previous = None
+            for pos, wid in enumerate(word_ids):
+                if wid is not None and wid != previous and wid < len(example.words):
+                    target_idx = word_offset + wid
+                    if target_idx < total_words:
+                        doc_scores[doc_guid][target_idx] += probs[i, pos]
+                        doc_counts[doc_guid][target_idx] += 1.0
+                previous = wid
+
+    predictions: list[list[int]] = []
+    references: list[list[int]] = []
+    for doc_guid in doc_order:
+        scores = doc_scores[doc_guid]
+        counts = doc_counts[doc_guid]
+        pred_tags = scores.argmax(dim=-1).tolist()
+        for w in range(len(counts)):
+            if counts[w] == 0:
+                pred_tags[w] = 0
+        predictions.append(pred_tags)
+        references.append(doc_refs[doc_guid])
 
     return predictions, references
 
@@ -222,24 +351,59 @@ def predict_phase1_tagging(
     device: torch.device,
     desc: str | None = None,
 ):
-    """Phase 1 validation: ONLY evaluate token classification (tagging).
-
-    Does not compute pairwise biaffine relation matrices or spatial edge features,
-    strictly validating entity tagging quality before relation head learning.
-    """
+    """Phase 1 validation: ONLY evaluate token classification (tagging) with soft voting."""
     model.eval()
-    predictions: list[list[int]] = []
-    references: list[list[int]] = []
+    doc_scores: dict[str, torch.Tensor] = {}
+    doc_counts: dict[str, torch.Tensor] = {}
+    doc_refs: dict[str, list[int]] = {}
+    doc_order: list[str] = []
+
     it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
     for batch_data in it:
         encoded, batch = batch_data[0], batch_data[1]
         inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
         logits = model.encoder(**inputs).logits.cpu()
+        probs = torch.softmax(logits, dim=-1)
+
         for i, example in enumerate(batch):
-            predictions.append(
-                model.first_subword_predictions(logits[i], encoded.word_ids[i], len(example.words))
-            )
-            references.append(example.ner_tags)
+            doc_guid = getattr(example, "doc_guid", None) or example.guid
+            word_offset = getattr(example, "word_offset", 0)
+            total_words = getattr(example, "total_doc_words", None) or len(example.words)
+
+            if doc_guid not in doc_scores:
+                num_classes = logits.shape[-1]
+                doc_scores[doc_guid] = torch.zeros((total_words, num_classes), dtype=torch.float32)
+                doc_counts[doc_guid] = torch.zeros(total_words, dtype=torch.float32)
+                doc_refs[doc_guid] = [-1] * total_words
+                doc_order.append(doc_guid)
+
+            for w_idx, tag in enumerate(example.ner_tags):
+                target_idx = word_offset + w_idx
+                if target_idx < total_words:
+                    doc_refs[doc_guid][target_idx] = tag
+
+            word_ids = encoded.word_ids[i]
+            previous = None
+            for pos, wid in enumerate(word_ids):
+                if wid is not None and wid != previous and wid < len(example.words):
+                    target_idx = word_offset + wid
+                    if target_idx < total_words:
+                        doc_scores[doc_guid][target_idx] += probs[i, pos]
+                        doc_counts[doc_guid][target_idx] += 1.0
+                previous = wid
+
+    predictions: list[list[int]] = []
+    references: list[list[int]] = []
+    for doc_guid in doc_order:
+        scores = doc_scores[doc_guid]
+        counts = doc_counts[doc_guid]
+        pred_tags = scores.argmax(dim=-1).tolist()
+        for w in range(len(counts)):
+            if counts[w] == 0:
+                pred_tags[w] = 0
+        predictions.append(pred_tags)
+        references.append(doc_refs[doc_guid])
+
     return predictions, references
 
 
@@ -288,10 +452,36 @@ def train_one(
     leave_bar = not bool(log_prefix)
 
     is_joint = config.task == "joint"
-    collate = make_collator(model, is_joint=is_joint)
-    train_loader = DataLoader(FormDataset(train_examples), batch_size=config.batch_size, shuffle=True, collate_fn=collate)
-    val_loader = DataLoader(FormDataset(val_examples), batch_size=config.batch_size, collate_fn=collate)
-    test_loader = DataLoader(FormDataset(test_examples), batch_size=config.batch_size, collate_fn=collate)
+    if getattr(config, "sliding_window", False):
+        try:
+            from data.vrdu_loader import chunk_vrdu_examples
+        except ImportError:
+            from src.data.vrdu_loader import chunk_vrdu_examples
+        w_size = getattr(config, "window_size", 384)
+        w_overlap = getattr(config, "window_overlap", 128)
+        train_examples = chunk_vrdu_examples(train_examples, window_size=w_size, overlap=w_overlap)
+        val_examples = chunk_vrdu_examples(val_examples, window_size=w_size, overlap=w_overlap)
+        test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap)
+
+    anc_mode = getattr(config, "anchor_mode", "content_box" if getattr(config, "relative_coords", False) else "none")
+    train_collate = make_collator(
+        model,
+        is_joint=is_joint,
+        is_train=True,
+        coordinate_jitter=getattr(config, "coordinate_jitter", False),
+        relative_coords=getattr(config, "relative_coords", False),
+        anchor_mode=anc_mode,
+    )
+    eval_collate = make_collator(
+        model,
+        is_joint=is_joint,
+        is_train=False,
+        relative_coords=getattr(config, "relative_coords", False),
+        anchor_mode=anc_mode,
+    )
+    train_loader = DataLoader(FormDataset(train_examples), batch_size=config.batch_size, shuffle=True, collate_fn=train_collate)
+    val_loader = DataLoader(FormDataset(val_examples), batch_size=config.batch_size, collate_fn=eval_collate)
+    test_loader = DataLoader(FormDataset(test_examples), batch_size=config.batch_size, collate_fn=eval_collate)
 
     model_to_optimize = model if is_joint else model.model
     model_to_optimize.to(device)
@@ -978,6 +1168,17 @@ def main() -> None:
                         help="Ablation: disable one-to-one argmax matching during decoding")
     parser.add_argument("--epochs", type=int, default=None,
                         help="Override number of training epochs")
+    parser.add_argument("--sliding-window", action="store_true",
+                        help="Track 1: enable multi-page sliding window chunking with soft voting")
+    parser.add_argument("--coordinate-jitter", action="store_true",
+                        help="Track 1: enable aggressive random translation, scaling and jittering during training")
+    parser.add_argument("--relative-coords", action="store_true",
+                        help="Track 1: inject centroid-relative coordinates instead of absolute [0, 1000]")
+    parser.add_argument("--window-size", type=int, default=None,
+                        help="Sliding window size (default: 384)")
+    parser.add_argument("--window-overlap", type=int, default=None,
+                        help="Sliding window overlap (default: 128)")
+    parser.add_argument("--anchor-mode", choices=["none", "centroid", "content_box", "cluster"], default=None, help="Track 1 ablation: anchoring strategy")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
@@ -1001,6 +1202,19 @@ def main() -> None:
         config.decode_one_to_one = False
     if args.epochs is not None:
         config.epochs = args.epochs
+    if args.sliding_window:
+        config.sliding_window = True
+    if args.coordinate_jitter:
+        config.coordinate_jitter = True
+    if args.relative_coords:
+        config.relative_coords = True
+    if args.window_size is not None:
+        config.window_size = args.window_size
+    if args.window_overlap is not None:
+        config.window_overlap = args.window_overlap
+    if args.anchor_mode is not None:
+        config.anchor_mode = args.anchor_mode
+        config.relative_coords = (args.anchor_mode != "none")
 
     # Dynamically compute spatial_in_features to match active ablation groups
     if config.task == "joint" and config.use_spatial_relations:

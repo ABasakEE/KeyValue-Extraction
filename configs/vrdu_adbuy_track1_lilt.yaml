@@ -1,0 +1,29 @@
+# Track 1 — Patched LiLT Architecture on VRDU Ad-Buy Forms (DeepForm)
+#
+# Evaluates cross-template generalization with sliding window, coordinate jitter, and relative coordinates.
+#
+# Run with:
+#   python src/train.py --config configs/vrdu_adbuy_track1_lilt.yaml --protocol matched
+
+backbone: lilt
+dataset: vrdu
+data_root: data/vrdu          # clone of google-research-datasets/vrdu
+subcorpus: ad-buy-form
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+# Track 1 Enhancements
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13, 21, 42]
+n_train: 200                  # matched training size for cross-template comparison
+output_dir: results/vrdu_adbuy_track1_lilt
