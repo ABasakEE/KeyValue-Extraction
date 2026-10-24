@@ -64,7 +64,7 @@ def _to_tag_sequences(
     for pred_row, ref_row in zip(predictions, references):
         p_row, r_row = [], []
         for p, r in zip(pred_row, ref_row):
-            if p == -1:
+            if p == -1 or r == -1:
                 continue
             p_row.append(id2label[p])
             r_row.append(id2label[r])

@@ -95,12 +95,19 @@ def evaluate_gnn(
     for doc_guid in doc_order:
         scores = doc_scores[doc_guid]
         counts = doc_counts[doc_guid]
+        refs = doc_refs[doc_guid]
         pred_tags = scores.argmax(dim=-1).tolist()
+
+        clean_preds = []
+        clean_refs = []
         for w in range(len(counts)):
-            if counts[w] == 0:
-                pred_tags[w] = 0
-        predictions.append(pred_tags)
-        references.append(doc_refs[doc_guid])
+            if refs[w] != -1:
+                clean_preds.append(pred_tags[w] if counts[w] > 0 else 0)
+                clean_refs.append(refs[w])
+
+        if clean_refs:
+            predictions.append(clean_preds)
+            references.append(clean_refs)
 
     scores = entity_f1(predictions, references, id2label)
     return scores.as_dict(), predictions, references
@@ -240,17 +247,27 @@ def main():
     if not all_files:
         raise FileNotFoundError(f"No .pt graph files found in {cache_path}")
 
-    # Deterministic split partition (80% train, 10% val, 10% test)
-    rng = random.Random(42)
-    shuffled = list(all_files)
-    rng.shuffle(shuffled)
-    n_total = len(shuffled)
-    n_train = int(0.8 * n_total)
-    n_val = int(0.1 * n_total)
+    # Group chunks by parent document GUID to prevent cross-chunk document leakage
+    by_doc: dict[str, list[Path]] = {}
+    for p in all_files:
+        doc_key = p.stem.split("#chunk")[0]
+        by_doc.setdefault(doc_key, []).append(p)
 
-    train_files = shuffled[:n_train]
-    val_files = shuffled[n_train:n_train + n_val]
-    test_files = shuffled[n_train + n_val:]
+    doc_keys = sorted(by_doc.keys())
+    rng = random.Random(42)
+    rng.shuffle(doc_keys)
+
+    n_total = len(doc_keys)
+    n_train = max(1, int(0.8 * n_total))
+    n_val = max(1, int(0.1 * n_total))
+
+    train_docs = set(doc_keys[:n_train])
+    val_docs = set(doc_keys[n_train:n_train + n_val])
+    test_docs = set(doc_keys[n_train + n_val:])
+
+    train_files = [f for d in train_docs for f in by_doc[d]]
+    val_files = [f for d in val_docs for f in by_doc[d]]
+    test_files = [f for d in test_docs for f in by_doc[d]]
 
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
     output_dir = Path(args.output_dir)
