@@ -241,7 +241,7 @@ def train_gnn_one_seed(
         val_f1 = val_res.get("f1", 0.0)
 
         history.append({"epoch": ep + 1, "train_loss": round(avg_loss, 4), "val_f1": round(val_f1, 4)})
-        print(f"  [Ep {ep+1:>2}/{epochs}] Train Loss: {avg_loss:.4f} | Val F1: {val_f1:.4f} (best: {max(best_val_f1, val_f1):.4f})", flush=True)
+        print(f"  [Seed {seed} on {device}] [Ep {ep+1:>2}/{epochs}] Train Loss: {avg_loss:.4f} | Val F1: {val_f1:.4f} (best: {max(best_val_f1, val_f1):.4f})", flush=True)
 
         if val_f1 > best_val_f1 + 0.001:
             best_val_f1 = val_f1
@@ -250,7 +250,7 @@ def train_gnn_one_seed(
         else:
             patience_cnt += 1
             if patience_cnt >= patience:
-                print(f"  [Early Stop] Reached plateau at epoch {ep+1}.", flush=True)
+                print(f"  [Seed {seed} on {device}] [Early Stop] Reached plateau at epoch {ep+1}.", flush=True)
                 break
 
     if best_state is not None:
@@ -272,7 +272,7 @@ def train_gnn_one_seed(
     if best_state is not None:
         torch.save(best_state, run_dir / "best_model.pt")
 
-    print(f"[+] Seed {seed} Test F1: {test_res.get('f1', 0):.4f} | {result['cross_check']}", flush=True)
+    print(f"[+] Seed {seed} on {device} Test F1: {test_res.get('f1', 0):.4f} | {result['cross_check']}", flush=True)
     return result
 
 
@@ -335,24 +335,56 @@ def main():
     output_dir.mkdir(parents=True, exist_ok=True)
 
     results = []
-    for s in seeds:
-        res = train_gnn_one_seed(
-            seed=s,
-            train_dataset=train_dataset,
-            val_dataset=val_dataset,
-            test_dataset=test_dataset,
-            num_labels=num_labels,
-            id2label=id2label,
-            output_dir=output_dir,
-            epochs=args.epochs,
-            lr=args.lr,
-            batch_size=args.batch_size,
-            hidden_dim=args.hidden_dim,
-            num_layers=args.num_layers,
-            edge_dim=args.edge_dim,
-            num_heads=args.num_heads,
-        )
-        results.append(res)
+    num_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    if num_gpus >= 2 and len(seeds) >= 2:
+        max_workers = min(num_gpus, len(seeds))
+        print(f"\n{'='*75}", flush=True)
+        print(f"[*] MULTI-GPU PARALLELISM ACTIVE: Spawning {max_workers} concurrent workers across {[f'cuda:{i}' for i in range(max_workers)]}", flush=True)
+        print(f"{'='*75}\n", flush=True)
+        import concurrent.futures
+
+        def _worker(item):
+            worker_idx, s = item
+            assigned_gpu = f"cuda:{worker_idx % num_gpus}"
+            return train_gnn_one_seed(
+                seed=s,
+                train_dataset=train_dataset,
+                val_dataset=val_dataset,
+                test_dataset=test_dataset,
+                num_labels=num_labels,
+                id2label=id2label,
+                output_dir=output_dir,
+                epochs=args.epochs,
+                lr=args.lr,
+                batch_size=args.batch_size,
+                hidden_dim=args.hidden_dim,
+                num_layers=args.num_layers,
+                edge_dim=args.edge_dim,
+                num_heads=args.num_heads,
+                device_str=assigned_gpu,
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = list(executor.map(_worker, enumerate(seeds)))
+    else:
+        for s in seeds:
+            res = train_gnn_one_seed(
+                seed=s,
+                train_dataset=train_dataset,
+                val_dataset=val_dataset,
+                test_dataset=test_dataset,
+                num_labels=num_labels,
+                id2label=id2label,
+                output_dir=output_dir,
+                epochs=args.epochs,
+                lr=args.lr,
+                batch_size=args.batch_size,
+                hidden_dim=args.hidden_dim,
+                num_layers=args.num_layers,
+                edge_dim=args.edge_dim,
+                num_heads=args.num_heads,
+            )
+            results.append(res)
 
     f1s = [r["test"]["f1"] for r in results]
     summary = {
