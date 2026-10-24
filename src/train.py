@@ -1150,8 +1150,8 @@ def main() -> None:
                         help="Comma-separated GPU indices (e.g. '0,1') or 'auto' to use all available CUDA devices")
     parser.add_argument("--no-parallel", action="store_true",
                         help="Force single-process execution even if multiple GPUs are available")
-    parser.add_argument("--seed", type=int, default=None,
-                        help="Run only this specific seed instead of all seeds in config")
+    parser.add_argument("--seed", "--seeds", type=str, default=None,
+                        help="Run specific seed(s), e.g. '42' or '13,42' (enables multi-GPU seed parallelism)")
     parser.add_argument("--output-dir", default=None,
                         help="Override output directory")
     parser.add_argument("--no-line-of-sight", action="store_true",
@@ -1237,7 +1237,10 @@ def main() -> None:
             prop = torch.cuda.get_device_properties(gid)
             print(f"    GPU {gid}: {prop.name} ({prop.total_memory / 1e9:.1f} GB VRAM)")
 
-    seeds = [args.seed] if args.seed is not None else list(config.seeds)
+    if args.seed is not None:
+        seeds = [int(s.strip()) for s in str(args.seed).split(",") if s.strip()]
+    else:
+        seeds = list(config.seeds)
     print(f"[*] Backbone: {config.backbone} | Dataset: {config.dataset} | Task: {config.task} | Seeds: {seeds}")
     if config.task == "joint":
         print(f"[*] Spatial Features: {config.spatial_in_features}D (Geo: {config.use_geometry}, Contain: {config.use_containment}, LOS: {config.use_line_of_sight}, Typo: {config.use_typography}) | Loss: {config.loss_type} | 1-to-1: {config.decode_one_to_one}")
