@@ -310,7 +310,10 @@ def process_uploaded_document(
         if len(doc) == 0:
             raise gr.Error("Uploaded PDF has no pages.")
         page = doc[0]
-        pix = page.get_pixmap(dpi=150)
+        rect = page.rect
+        zoom = min(1200.0 / max(1, rect.width), 1200.0 / max(1, rect.height), 1.5)
+        mat = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=mat)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
     else:
         img = Image.open(file_path).convert("RGB")

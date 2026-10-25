@@ -319,23 +319,50 @@ def process_gnn_document(
     if ext == ".pdf" and HAVE_PYMUPDF:
         doc = fitz.open(str(file_path))
         page = doc[0]
-        pix = page.get_pixmap(dpi=150)
+        rect = page.rect
+        # Normalize zoom so max dimension is around 1200 px (safe for RAM and fast)
+        zoom = min(1200.0 / max(1, rect.width), 1200.0 / max(1, rect.height), 1.5)
+        mat = fitz.Matrix(zoom, zoom)
+        pix = page.get_pixmap(matrix=mat)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         width, height = img.size
 
         # Extract words from PDF text stream
-        words = page.get_text("words")
-        for idx, w in enumerate(words):
-            x0, y0, x1, y1, text = int(w[0] * 150 / 72), int(w[1] * 150 / 72), int(w[2] * 150 / 72), int(w[3] * 150 / 72), w[4]
+        raw_words = page.get_text("words")
+        for idx, w in enumerate(raw_words):
+            x0, y0, x1, y1, text = int(w[0] * zoom), int(w[1] * zoom), int(w[2] * zoom), int(w[3] * zoom), w[4]
             if text.strip():
                 entities.append({
-                    "id": idx,
+                    "id": len(entities),
                     "text": text.strip(),
                     "box": [max(0, x0), max(0, y0), min(width, x1), min(height, y1)],
                     "label": "other",
                     "raw_tag": "O",
                     "confidence": 1.0,
                 })
+
+        # If scanned PDF with no text stream, fallback to OCR
+        if not entities and HAVE_RAPID_OCR and RAPID_OCR is not None:
+            ocr_res, _ = RAPID_OCR(np.array(img))
+            if ocr_res:
+                for idx, line in enumerate(ocr_res):
+                    poly, text, score = line[0], line[1].strip(), float(line[2])
+                    xs = [pt[0] for pt in poly]
+                    ys = [pt[1] for pt in poly]
+                    x0, y0, x1, y1 = int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))
+                    line_words = text.split()
+                    n_w = len(line_words)
+                    for w_idx, w in enumerate(line_words):
+                        sub_x0 = int(x0 + w_idx * (x1 - x0) / max(1, n_w))
+                        sub_x1 = int(x0 + (w_idx + 1) * (x1 - x0) / max(1, n_w))
+                        entities.append({
+                            "id": len(entities),
+                            "text": w,
+                            "box": [max(0, sub_x0), max(0, y0), min(width, sub_x1), min(height, y1)],
+                            "label": "other",
+                            "raw_tag": "O",
+                            "confidence": score,
+                        })
         doc.close()
     else:
         img = Image.open(str(file_path)).convert("RGB")
@@ -408,15 +435,35 @@ def process_gnn_document(
     if lilt_wrapper is not None and gnn_model is not None and len(entities) > 0:
         try:
             words = [e["text"] for e in entities]
-            encoded = lilt_wrapper.encode([words], [scaled_boxes])
-            inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
+            dynamic_len = min(512, max(64, int(math.ceil(len(words) * 1.3 / 64.0) * 64)))
+            try:
+                encoding = lilt_wrapper.tokenizer(
+                    [words],
+                    boxes=[scaled_boxes],
+                    is_split_into_words=True,
+                    padding="max_length",
+                    truncation=True,
+                    max_length=dynamic_len,
+                    return_tensors="pt",
+                )
+            except TypeError:
+                encoding = lilt_wrapper.tokenizer(
+                    [words],
+                    boxes=[scaled_boxes],
+                    padding="max_length",
+                    truncation=True,
+                    max_length=dynamic_len,
+                    return_tensors="pt",
+                )
 
-            with torch.no_grad():
-                outputs = lilt_wrapper.model(**inputs, output_hidden_states=True)
-                hidden_states = outputs.hidden_states[-1][0].cpu()  # (seq_len, 768)
+            inputs = {k: v.to(device) for k, v in encoding.items() if k in ("input_ids", "bbox", "attention_mask")}
+
+            with torch.inference_mode():
+                outputs = lilt_wrapper.model.lilt(**inputs)
+                hidden_states = outputs.last_hidden_state[0].cpu()  # (seq_len, 768)
 
                 # Extract first-subword representations
-                word_ids = encoded.word_ids[0]
+                word_ids = encoding.word_ids(0)
                 n_words = len(words)
                 node_feats = torch.zeros((n_words, hidden_states.size(-1)), dtype=torch.float32)
                 previous = None
@@ -449,7 +496,9 @@ def process_gnn_document(
                     entities[w_idx]["raw_tag"] = "O"
 
         except Exception as ex:
-            print(f"[-] GNN inference warning ({ex}), using mock tags.")
+            import traceback
+            print(f"[-] GNN inference error: {ex}")
+            traceback.print_exc()
 
     # 5. Render Annotations
     annotated_img = render_annotated_gnn_document(
