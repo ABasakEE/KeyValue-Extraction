@@ -308,8 +308,9 @@ def main():
             proof = assert_no_template_leakage(split)
             print(f"\n{proof}")
 
-    device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    print(f"\n[*] Training RSA-GNN ({args.num_layers}-Layer, {args.edge_dim}-D Edges) on {device}...\n")
+    num_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
+    device = torch.device("cuda:0" if num_gpus > 0 else "cpu")
+    print(f"\n[*] Training RSA-GNN ({args.num_layers}-Layer, {args.edge_dim}-D Edges) across {num_gpus} GPU(s)...\n", flush=True)
 
     all_results = {"MTL": [], "UTL": []}
 
@@ -320,22 +321,47 @@ def main():
             val_graphs = [g for doc in split.val for g in by_doc[doc.guid]]
             test_graphs = [g for doc in split.test for g in by_doc[doc.guid]]
 
-            for s in seeds:
-                res = train_one_matched_run(
-                    regime=regime,
-                    fold=fold_idx,
-                    seed=s,
-                    train_graphs=train_graphs,
-                    val_graphs=val_graphs,
-                    test_graphs=test_graphs,
-                    num_labels=num_labels,
-                    id2label=id2label,
-                    device=device,
-                    epochs=args.epochs,
-                    num_layers=args.num_layers,
-                    edge_dim=args.edge_dim,
-                )
-                all_results[regime].append(res)
+            if num_gpus >= 2 and len(seeds) >= 2:
+                import concurrent.futures
+
+                def _worker(item):
+                    idx, s = item
+                    assigned_dev = torch.device(f"cuda:{idx % num_gpus}")
+                    return train_one_matched_run(
+                        regime=regime,
+                        fold=fold_idx,
+                        seed=s,
+                        train_graphs=train_graphs,
+                        val_graphs=val_graphs,
+                        test_graphs=test_graphs,
+                        num_labels=num_labels,
+                        id2label=id2label,
+                        device=assigned_dev,
+                        epochs=args.epochs,
+                        num_layers=args.num_layers,
+                        edge_dim=args.edge_dim,
+                    )
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=min(num_gpus, len(seeds))) as ex:
+                    res_list = list(ex.map(_worker, enumerate(seeds)))
+                    all_results[regime].extend(res_list)
+            else:
+                for s in seeds:
+                    res = train_one_matched_run(
+                        regime=regime,
+                        fold=fold_idx,
+                        seed=s,
+                        train_graphs=train_graphs,
+                        val_graphs=val_graphs,
+                        test_graphs=test_graphs,
+                        num_labels=num_labels,
+                        id2label=id2label,
+                        device=device,
+                        epochs=args.epochs,
+                        num_layers=args.num_layers,
+                        edge_dim=args.edge_dim,
+                    )
+                    all_results[regime].append(res)
 
     # Compute official generalization gap
     mtl_f1s = [r["test"]["f1"] for r in all_results["MTL"]]

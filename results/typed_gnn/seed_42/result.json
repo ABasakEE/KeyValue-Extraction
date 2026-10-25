@@ -1,0 +1,11 @@
+{
+  "seed": 42,
+  "device": "cuda:1",
+  "val_score": 0.93665,
+  "test": {
+    "node_acc": 0.9976,
+    "link_precision": 0.8567,
+    "link_recall": 0.8897,
+    "link_f1": 0.8729
+  }
+}
