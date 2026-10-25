@@ -1,0 +1,23 @@
+================================================================================
+1. CROSS-TEMPLATE GENERALIZATION BENCHMARKS (MATCHED MTL VS UTL PROTOCOL)
+================================================================================
+| Experiment             | MTL F1 (Seen)   | UTL F1 (Unseen)   | Gap (Δ)   | Relative Drop   |
+|------------------------|-----------------|-------------------|-----------|-----------------|
+| vrdu_adbuy_lilt        | 92.46%          | 90.61%            | 1.85%     | 2.0%            |
+| vrdu_adbuy_track1_lilt | 92.12%          | 90.72%            | 1.40%     | 1.5%            |
+| vrdu_lilt              | 87.74%          | 66.66%            | 21.08%    | 24.0%           |
+| vrdu_track1_lilt       | 91.56%          | 64.24%            | 27.31%    | 29.8%           |
+
+================================================================================
+2. STANDARD BENCHMARKS & ANCHORING ABLATIONS (TEST F1)
+================================================================================
+| Experiment                         | Entity / Node F1   | Relation Linking F1   |
+|------------------------------------|--------------------|-----------------------|
+| funsd_joint_lilt                   | 79.10%             | 32.05%                |
+| funsd_lilt                         | 79.29%             | N/A                   |
+| synthetic_joint_lilt               | 100.00%            | 100.00%               |
+| track1_ablation_anchor_centroid    | 80.96%             | N/A                   |
+| track1_ablation_anchor_cluster     | 79.54%             | N/A                   |
+| track1_ablation_anchor_content_box | 80.55%             | N/A                   |
+| track1_ablation_anchor_none        | 75.56%             | N/A                   |
+| xfund_joint_lilt                   | 79.09%             | 65.51%                |
