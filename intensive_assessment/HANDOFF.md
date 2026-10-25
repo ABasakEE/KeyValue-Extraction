@@ -117,31 +117,32 @@ A 10-slide high-impact structure designed for an academic / technical panel:
 
 ---
 
-## 5. Deliverable C: Code Walkthrough Video Guide (Script & Flow)
+## 5. Deliverable C: Code Walkthrough Video Guide (3-Part Modular Script)
 
 * **Target Duration:** 5–7 Minutes.
 * **Format:** Screen capture of IDE / VS Code with voiceover.
+* **Structure:** Instead of getting bogged down in individual hyperparameter permutations, the walkthrough is organized into three clean architectural pillars:
 
-### Step-by-Step Walkthrough Flow:
-1. **0:00 - 1:00 | Project Structure & Configuration (`configs/`):**
-   - Show [`configs/vrdu_track1_lilt.yaml`](file:///D:/KeyValue-Extraction/configs/vrdu_track1_lilt.yaml).
-   - Explain hyperparameters: sliding window (384 window, 128 overlap), coordinate jittering, relative coordinates, batch size, and seed list (`[13, 21, 42]`).
-2. **1:00 - 2:30 | Graph Construction & 16-D Spatial Features (`src/models/`):**
-   - Open [`src/models/delaunay_graph.py`](file:///D:/KeyValue-Extraction/src/models/delaunay_graph.py).
-   - Walk through `build_delaunay_graph()`: Delaunay triangulation via `scipy.spatial.Delaunay`, OpenCV morphological line extraction, ray-segment intersection pruning, and 16-D feature calculation (Geometry, Containment, Line-of-Sight, Typography).
-   - Open [`src/models/edge_gat.py`](file:///D:/KeyValue-Extraction/src/models/edge_gat.py): Show how asymmetric edge attributes modulate attention logits: $\alpha_{ij} = \text{LeakyReLU}(a^T [Wh_i \parallel Wh_j \parallel W_e e_{ij}])$.
-3. **2:30 - 4:00 | Strict Matched Protocol & Zero-Leakage Proof (`src/data/`):**
-   - Open [`src/data/splits.py`](file:///D:/KeyValue-Extraction/src/data/splits.py).
-   - Walk through `matched_size_protocol()`: Explain how sample size is clamped to $N=200$ across both MTL and UTL to eliminate dataset size bias.
-   - Walk through `assert_no_template_leakage()`: Show the set-disjointness assertions between `train_templates` and `test_templates`.
-4. **4:00 - 5:30 | Dual-GPU Training Harness (`src/`):**
-   - Open [`src/train_gnn_matched.py`](file:///D:/KeyValue-Extraction/src/train_gnn_matched.py) and [`src/train_typed_gnn_matched.py`](file:///D:/KeyValue-Extraction/src/train_typed_gnn_matched.py).
-   - Show the `ThreadPoolExecutor` worker mapping: Worker 0 runs Seed 13 on `cuda:0`, Worker 1 runs Seed 42 on `cuda:1` concurrently.
-   - Show batch collation: `collate_disjoint_graphs()` handling disjoint node/edge offsets.
-5. **5:30 - 6:30 | Master Benchmark Notebook (`notebooks/`):**
-   - Open [`notebooks/kaggle_gnn_utl_benchmark.ipynb`](file:///D:/KeyValue-Extraction/notebooks/kaggle_gnn_utl_benchmark.ipynb).
-   - Show concurrent feature caching (Cell 8) launching `cache_features.py` and `cache_fused_features.py` simultaneously.
-   - Show final summary table generation formatting the Master Deliverable 4 table.
+### Part 1: The Multimodal Transformer Pipeline (LiLT Architecture) [0:00 - 2:00]
+* **Files to Show:** [`configs/vrdu_track1_lilt.yaml`](file:///D:/KeyValue-Extraction/configs/vrdu_track1_lilt.yaml) and [`src/models/token_clf.py`](file:///D:/KeyValue-Extraction/src/models/token_clf.py).
+* **Talking Points:**
+  - *Data Representation:* How OCR words, bounding boxes $[x_0, y_0, x_1, y_1] \in [0, 1000]^4$, and BIO entity labels are ingested.
+  - *Sliding Window Chunking:* How multi-page documents (which previously caused an 83.3% truncation drop) are processed via overlapping windows (`window_size=384`, `window_overlap=128`) with soft probability aggregation across chunks.
+  - *Backbone & Classification Head:* How LiLT pairs an XLM-RoBERTa text encoder with separate 2D spatial coordinate embeddings for sequence labeling.
+
+### Part 2: The Geometric Graph Pipeline (GNN Backbone) [2:00 - 4:00]
+* **Files to Show:** [`src/models/delaunay_graph.py`](file:///D:/KeyValue-Extraction/src/models/delaunay_graph.py) and [`src/models/edge_gat.py`](file:///D:/KeyValue-Extraction/src/models/edge_gat.py).
+* **Talking Points:**
+  - *Delaunay Visibility Graph Construction:* How token centroids are computed, how planar Delaunay triangulation builds the graph topology, and how OpenCV morphological line detection prunes edges that cross visual borders.
+  - *16-D Spatial Edge Vectors:* Walk through the 4 feature groups: Geometry (5D), Containment Overlap (5D), Line-of-Sight Visibility (2D), and Typography Scale (4D).
+  - *Edge-GAT Message Passing:* Explain how edge attributes modulate attention logits ($\alpha_{ij} = \text{LeakyReLU}(a^T [Wh_i \parallel Wh_j \parallel W_e e_{ij}])$) to exchange structural spatial context across neighboring nodes.
+
+### Part 3: The Interactive System & Gradio Demo [4:00 - 6:00]
+* **Files to Show:** [`demo.py`](file:///D:/KeyValue-Extraction/demo.py), [`demo_gnn.py`](file:///D:/KeyValue-Extraction/demo_gnn.py), and [`src/demo.py`](file:///D:/KeyValue-Extraction/src/demo.py).
+* **Talking Points:**
+  - *Dual Demo Architecture:* Explain that the project provides dedicated interactive entrypoints for both the Transformer pipeline (`demo.py`) and the GNN pipeline (`demo_gnn.py`).
+  - *Inference Workflow:* How an uploaded PDF or scanned document image is preprocessed, converted to tokens/boxes, routed through the loaded model weights (`top_model.pt` or `best_gnn_model.pt`), and rendered with colored bounding box overlays.
+  - *User Experience:* Demonstrate the extracted structured JSON/table of Key-Value fields ready for downstream business processing.
 
 ---
 
