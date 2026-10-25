@@ -83,7 +83,7 @@ def _cache_worker_shard(
                 boxes=ex.boxes,
                 image=getattr(ex, "image", None),
                 mode=graph_mode,
-                k=k_neighbors,
+                k_neighbors=k_neighbors,
                 prune_visual_lines=prune_visual_lines,
                 add_self_loops=False,
             )
