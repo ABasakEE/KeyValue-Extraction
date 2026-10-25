@@ -131,15 +131,16 @@ def extract_and_cache_fused(
         hidden_states = outputs.hidden_states[-1][0].cpu()  # (seq_len, 768)
 
         # Map word tokens to first subword embedding
-        word_ids = encoded.word_ids(0)
+        word_ids = encoded.word_ids[0] if isinstance(encoded.word_ids, list) else encoded.word_ids(0)
         num_words = len(ex.words)
         token_embeddings = torch.zeros((num_words, 768), dtype=torch.float32)
         seen_words = set()
 
+        previous = None
         for s_idx, wid in enumerate(word_ids):
-            if wid is not None and wid not in seen_words and wid < num_words:
-                seen_words.add(wid)
+            if wid is not None and wid != previous and wid < num_words:
                 token_embeddings[wid] = hidden_states[s_idx]
+            previous = wid
 
         # 2. Extract linguistic entity one-hot features (N, 8)
         semantic_one_hot = get_semantic_one_hot(ex.words)
