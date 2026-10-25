@@ -17,6 +17,11 @@ Features:
 
 from __future__ import annotations
 
+import os
+for _var in ("OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "OMP_NUM_THREADS"):
+    if _var not in os.environ:
+        os.environ[_var] = "1"
+
 import argparse
 import json
 import math
@@ -391,7 +396,7 @@ def process_gnn_document(
     # 3. Build Planar Delaunay Visibility Graph & 16-D Features
     edge_index, edge_attr = build_delaunay_graph(
         boxes=scaled_boxes,
-        image=img,
+        image=np.array(img),
         mode="delaunay",
         prune_visual_lines=True,
     )

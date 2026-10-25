@@ -10,7 +10,12 @@ Constructs planar Attributed Relational Graphs (ARG) over document tokens:
 from __future__ import annotations
 
 import math
-from typing import Sequence
+from typing import Any, Sequence
+import os
+for _var in ("OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "OMP_NUM_THREADS"):
+    if _var not in os.environ:
+        os.environ[_var] = "1"
+
 import numpy as np
 import torch
 
@@ -25,7 +30,7 @@ def _segments_intersect(p1: tuple[float, float], p2: tuple[float, float],
     return (ccw(p1, p3, p4) != ccw(p2, p3, p4)) and (ccw(p1, p2, p3) != ccw(p1, p2, p4))
 
 
-def extract_visual_lines(image: np.ndarray, min_line_ratio: float = 0.05) -> list[tuple[tuple[int, int], tuple[int, int]]]:
+def extract_visual_lines(image: Any, min_line_ratio: float = 0.05) -> list[tuple[tuple[int, int], tuple[int, int]]]:
     """Detect horizontal and vertical visual lines/rules in document image using morphological filtering."""
     try:
         import cv2
@@ -35,9 +40,24 @@ def extract_visual_lines(image: np.ndarray, min_line_ratio: float = 0.05) -> lis
     if image is None:
         return []
 
+    # Handle PIL Image or other array-like types
+    if not isinstance(image, np.ndarray):
+        try:
+            image = np.array(image)
+        except Exception:
+            return []
+
+    if not hasattr(image, "shape") or len(image.shape) < 2:
+        return []
+
     # Ensure grayscale
     if len(image.shape) == 3:
-        gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+        if image.shape[2] == 4:
+            gray = cv2.cvtColor(image, cv2.COLOR_RGBA2GRAY)
+        elif image.shape[2] == 3:
+            gray = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
+        else:
+            gray = image[:, :, 0]
     else:
         gray = image
 
