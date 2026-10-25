@@ -95,7 +95,10 @@ def extract_and_cache_fused(
     cache_root = Path(output_dir) / config.subcorpus
     cache_root.mkdir(parents=True, exist_ok=True)
 
-    device = torch.device("cuda:0" if (device_str == "auto" and torch.cuda.is_available()) else "cpu")
+    if device_str == "auto":
+        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    else:
+        device = torch.device(device_str)
 
     print(f"[*] Loading dataset: {config.dataset} ({config.subcorpus})...")
     examples, label_list, id2label = load_vrdu(config.data_root, config.subcorpus)
@@ -199,5 +202,6 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--config", type=str, default="configs/vrdu_track1_lilt.yaml")
     parser.add_argument("--output-dir", type=str, default="feature_cache_fused")
+    parser.add_argument("--device", type=str, default="auto")
     args = parser.parse_args()
-    extract_and_cache_fused(args.config, args.output_dir)
+    extract_and_cache_fused(args.config, args.output_dir, args.device)

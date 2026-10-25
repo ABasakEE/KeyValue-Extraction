@@ -28,6 +28,82 @@ from src.models.token_clf import TokenClassifier
 from src.train import TrainConfig
 
 
+def _cache_worker_shard(
+    gpu_id: int,
+    shard_examples: list,
+    config,
+    label_list: list,
+    id2label: dict,
+    cache_root: Path,
+    graph_mode: str,
+    k_neighbors: int,
+    prune_visual_lines: bool,
+):
+    """Processes a shard of documents on a dedicated GPU."""
+    device = torch.device(f"cuda:{gpu_id}" if torch.cuda.is_available() else "cpu")
+    print(f"[GPU {gpu_id}] Initializing LiLT on {device} for {len(shard_examples)} document chunks...", flush=True)
+
+    model_wrapper = TokenClassifier(
+        backbone=config.backbone,
+        num_labels=len(label_list),
+        id2label=id2label,
+        max_length=config.max_length,
+    )
+    model = model_wrapper.model.to(device)
+    model.eval()
+
+    with torch.no_grad():
+        pbar = tqdm(shard_examples, desc=f"GPU {gpu_id} Caching", position=gpu_id, leave=True)
+        for ex in pbar:
+            safe_name = ex.guid.replace("/", "_").replace("\\", "_")
+            target_path = cache_root / f"{safe_name}.pt"
+            if target_path.exists():
+                continue
+
+            # 1. Encode with LiLT
+            encoded = model_wrapper.encode([ex.words], [ex.boxes], [ex.ner_tags])
+            inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
+
+            # Extract last hidden states (1, seq_len, 768)
+            outputs = model(**inputs, output_hidden_states=True)
+            hidden_states = outputs.hidden_states[-1][0].cpu()
+
+            word_ids = encoded.word_ids[0] if isinstance(encoded.word_ids, list) else encoded.word_ids(0)
+            n_words = len(ex.words)
+            node_feats = torch.zeros((n_words, hidden_states.size(-1)), dtype=torch.float32)
+
+            previous = None
+            for pos, wid in enumerate(word_ids):
+                if wid is not None and wid != previous and wid < n_words:
+                    node_feats[wid] = hidden_states[pos]
+                previous = wid
+
+            # 2. Build Delaunay Visibility Graph
+            edge_index, edge_attr = build_delaunay_graph(
+                boxes=ex.boxes,
+                image=getattr(ex, "image", None),
+                mode=graph_mode,
+                k=k_neighbors,
+                prune_visual_lines=prune_visual_lines,
+                add_self_loops=False,
+            )
+
+            # 3. Save to disk
+            payload = {
+                "x": node_feats,
+                "edge_index": edge_index,
+                "edge_attr": edge_attr,
+                "boxes": torch.tensor(ex.boxes, dtype=torch.long),
+                "labels": torch.tensor(ex.ner_tags, dtype=torch.long),
+                "guid": ex.guid,
+                "doc_guid": getattr(ex, "doc_guid", ex.guid),
+                "word_offset": getattr(ex, "word_offset", 0),
+                "total_doc_words": getattr(ex, "total_doc_words", n_words),
+                "template_id": ex.template_id,
+            }
+            torch.save(payload, target_path)
+
+
 @torch.no_grad()
 def extract_and_cache(
     config_path: str,
@@ -41,11 +117,6 @@ def extract_and_cache(
     cache_root = Path(output_dir) / config.subcorpus
     cache_root.mkdir(parents=True, exist_ok=True)
 
-    if device_str == "auto":
-        device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    else:
-        device = torch.device(device_str)
-
     print(f"[*] Loading dataset: {config.dataset} ({config.subcorpus})...")
     examples, label_list, id2label = load_vrdu(config.data_root, config.subcorpus)
     print(f"[*] Loaded {len(examples)} document(s).")
@@ -57,16 +128,6 @@ def extract_and_cache(
         print(f"[*] Applying sliding window chunking (window={w_size}, overlap={w_overlap})...")
         examples = chunk_vrdu_examples(examples, window_size=w_size, overlap=w_overlap)
         print(f"[*] Total chunked examples: {len(examples)}")
-
-    print(f"[*] Initializing LiLT backbone encoder on {device}...")
-    model_wrapper = TokenClassifier(
-        backbone=config.backbone,
-        num_labels=len(label_list),
-        id2label=id2label,
-        max_length=config.max_length,
-    )
-    model = model_wrapper.model.to(device)
-    model.eval()
 
     # Save metadata
     meta = {
@@ -81,60 +142,60 @@ def extract_and_cache(
     }
     (cache_root / "meta.json").write_text(json.dumps(meta, indent=2), encoding="utf-8")
 
-    cached_count = 0
-    pbar = tqdm(examples, desc="Extracting & Caching Features", ncols=88)
-    for ex in pbar:
-        # Sanitize filename for disk
-        safe_name = ex.guid.replace("/", "_").replace("\\", "_")
-        target_path = cache_root / f"{safe_name}.pt"
-        if target_path.exists():
-            cached_count += 1
-            continue
+    num_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
 
-        # 1. Encode with LiLT
-        encoded = model_wrapper.encode([ex.words], [ex.boxes], [ex.ner_tags])
-        inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
+    if device_str != "auto":
+        target_gid = int(device_str.split(":")[-1]) if ":" in device_str else 0
+        _cache_worker_shard(
+            target_gid,
+            examples,
+            config,
+            label_list,
+            id2label,
+            cache_root,
+            graph_mode,
+            k_neighbors,
+            prune_visual_lines,
+        )
+    elif num_gpus >= 2:
+        print(f"\n{'='*75}")
+        print(f"[*] DUAL GPU ACCELERATION ACTIVE: Sharding {len(examples)} examples across {num_gpus} GPUs")
+        print(f"[*] Worker 0 handles GPU 0 (cuda:0) | Worker 1 handles GPU 1 (cuda:1)")
+        print(f"{'='*75}\n", flush=True)
 
-        # Extract last hidden states (1, seq_len, 768)
-        outputs = model(**inputs, output_hidden_states=True)
-        hidden_states = outputs.hidden_states[-1][0].cpu()  # (seq_len, 768)
-
-        # Pull first-subword representations for each word
-        word_ids = encoded.word_ids[0]
-        n_words = len(ex.words)
-        node_feats = torch.zeros((n_words, hidden_states.size(-1)), dtype=torch.float32)
-
-        previous = None
-        for pos, wid in enumerate(word_ids):
-            if wid is not None and wid != previous and wid < n_words:
-                node_feats[wid] = hidden_states[pos]
-            previous = wid
-
-        # 2. Build Delaunay Visibility Graph
-        edge_index, edge_attr = build_delaunay_graph(
-            boxes=ex.boxes,
-            image=None,
-            mode=graph_mode,
-            k_neighbors=k_neighbors,
-            prune_visual_lines=prune_visual_lines,
+        import concurrent.futures
+        with concurrent.futures.ThreadPoolExecutor(max_workers=num_gpus) as executor:
+            futures = [
+                executor.submit(
+                    _cache_worker_shard,
+                    gid,
+                    examples[gid::num_gpus],
+                    config,
+                    label_list,
+                    id2label,
+                    cache_root,
+                    graph_mode,
+                    k_neighbors,
+                    prune_visual_lines,
+                )
+                for gid in range(num_gpus)
+            ]
+            concurrent.futures.wait(futures)
+    else:
+        # Single GPU or CPU execution
+        _cache_worker_shard(
+            0,
+            examples,
+            config,
+            label_list,
+            id2label,
+            cache_root,
+            graph_mode,
+            k_neighbors,
+            prune_visual_lines,
         )
 
-        # 3. Save to disk
-        payload = {
-            "x": node_feats,
-            "edge_index": edge_index,
-            "edge_attr": edge_attr,
-            "boxes": torch.tensor(ex.boxes, dtype=torch.long),
-            "labels": torch.tensor(ex.ner_tags, dtype=torch.long),
-            "guid": ex.guid,
-            "doc_guid": getattr(ex, "doc_guid", ex.guid),
-            "word_offset": getattr(ex, "word_offset", 0),
-            "total_doc_words": getattr(ex, "total_doc_words", n_words),
-            "template_id": ex.template_id,
-        }
-        torch.save(payload, target_path)
-        cached_count += 1
-
+    cached_count = len(list(cache_root.glob("*.pt")))
     print(f"\n[+] Successfully cached {cached_count} graphs to {cache_root}")
 
 
