@@ -130,6 +130,38 @@ class TokenClassifier:
 
         inputs = dict(encoding)
         inputs.pop("offset_mapping", None)
+
+        # Build or normalize bbox tensor if missing from tokenizer output (e.g. for BROS / BERT-based tokenizers)
+        if "bbox" not in inputs and boxes_batch is not None:
+            batch_size = len(words_batch)
+            seq_length = inputs["input_ids"].shape[1]
+            if self.backbone == "bros":
+                bbox_tensor = torch.zeros((batch_size, seq_length, 4), dtype=torch.float32)
+                for b_idx in range(batch_size):
+                    boxes = boxes_batch[b_idx]
+                    for pos, wid in enumerate(all_word_ids[b_idx]):
+                        if wid is not None and wid < len(boxes):
+                            box = boxes[wid]
+                            # BROS relative spatial attention expects coordinates scaled to [0, 1.0]
+                            bbox_tensor[b_idx, pos] = torch.tensor([
+                                box[0] / 1000.0,
+                                box[1] / 1000.0,
+                                box[2] / 1000.0,
+                                box[3] / 1000.0,
+                            ], dtype=torch.float32)
+                inputs["bbox"] = bbox_tensor
+            else:
+                bbox_tensor = torch.zeros((batch_size, seq_length, 4), dtype=torch.long)
+                for b_idx in range(batch_size):
+                    boxes = boxes_batch[b_idx]
+                    for pos, wid in enumerate(all_word_ids[b_idx]):
+                        if wid is not None and wid < len(boxes):
+                            bbox_tensor[b_idx, pos] = torch.tensor(boxes[wid], dtype=torch.long)
+                inputs["bbox"] = bbox_tensor
+        elif "bbox" in inputs and self.backbone == "bros":
+            # If bbox was populated as ints [0, 1000], convert to float in [0, 1.0] for BROS
+            inputs["bbox"] = inputs["bbox"].float() / 1000.0
+
         # The BROS tokenizer emits token_type_ids that BrosForTokenClassification
         # accepts, but LiLT's RoBERTa-derived tower does not take them.
         if self.backbone == "lilt":

@@ -1,0 +1,39 @@
+# Template-Adversarial Representation Learning (DANN-LiLT) on VRDU Registration Forms
+#
+# Addresses the 27.31-point generalization collapse via:
+# 1. Gradient Reversal Layer (GRL) and Template Discriminator
+# 2. Dynamic Ganin & Lempitsky adaptation schedule (gamma=10.0)
+# 3. Penalizing the LiLT backbone for encoding template-identifying spatial features,
+#    enforcing template-invariant representations across unseen layouts.
+#
+# Run with:
+#   python src/train.py --config configs/vrdu_dann_lilt.yaml --protocol matched
+
+backbone: lilt
+dataset: vrdu
+data_root: data/vrdu
+subcorpus: registration-form
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+# DANN Template-Adversarial Settings
+adversarial_dann: true
+dann_weight: 0.1
+dann_gamma: 10.0
+dann_hidden_dim: 256
+
+# Multi-Page Sliding Window & Jitter
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13, 21, 42]
+n_train: 200
+output_dir: results/vrdu_dann_lilt

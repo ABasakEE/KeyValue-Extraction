@@ -1,0 +1,39 @@
+# Unified BROS 2D Relative Layout + Template-Adversarial Learning (DANN-BROS)
+#
+# Combines BOTH next-generation architectural horizons:
+# 1. BROS 2D Relative Positional Attention (pairwise relative spatial displacements)
+# 2. Template-Adversarial Training via Gradient Reversal Layer (DANN)
+# 3. Multi-page sliding window (384 tokens, 128 overlap)
+# 4. Random coordinate jittering (translation & scale)
+#
+# Run with:
+#   python src/train.py --config configs/vrdu_dann_bros.yaml --protocol matched
+
+backbone: bros
+dataset: vrdu
+data_root: data/vrdu
+subcorpus: registration-form
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+# DANN Settings
+adversarial_dann: true
+dann_weight: 0.1
+dann_gamma: 10.0
+dann_hidden_dim: 256
+
+# Track 1 Enhancements
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13, 21, 42]
+n_train: 200
+output_dir: results/vrdu_dann_bros

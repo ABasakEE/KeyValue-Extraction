@@ -120,6 +120,10 @@ class TrainConfig:
     jitter_scale_max: float = 1.15
     relative_coords: bool = False
     anchor_mode: str = "content_box"
+    adversarial_dann: bool = False
+    dann_weight: float = 0.1
+    dann_gamma: float = 10.0
+    dann_hidden_dim: int = 256
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -215,6 +219,8 @@ def make_collator(
     coordinate_jitter: bool = False,
     relative_coords: bool = False,
     anchor_mode: str = "none",
+    is_dann: bool = False,
+    template_to_idx: dict[str, int] | None = None,
 ):
     def collate(batch: list):
         boxes_batch = [ex.boxes for ex in batch]
@@ -241,6 +247,10 @@ def make_collator(
         if is_joint:
             spans, links, types = prepare_entity_batch(batch, encoded.word_ids)
             return encoded, batch, spans, links, types
+        if is_dann and template_to_idx is not None:
+            t_indices = [template_to_idx.get(getattr(ex, "template_id", "unk"), 0) for ex in batch]
+            template_targets = torch.tensor(t_indices, dtype=torch.long)
+            return encoded, batch, template_targets
         return encoded, batch
 
     return collate
@@ -261,13 +271,18 @@ def predict(
     doc_order: list[str] = []
 
     it = tqdm(loader, desc=desc, leave=False, **TQDM_KWARGS) if desc else loader
-    for encoded, batch in it:
+    for batch_data in it:
+        if len(batch_data) == 3:
+            encoded, batch, _ = batch_data
+        else:
+            encoded, batch = batch_data
         inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
-        logits = classifier.model(**inputs).logits.cpu()
+        out = classifier.model(**inputs)
+        logits = out.token_logits.cpu() if hasattr(out, "token_logits") else out.logits.cpu()
         probs = torch.softmax(logits, dim=-1)
 
         for i, example in enumerate(batch):
-            doc_guid = getattr(example, "doc_guid", None) or example.guid
+            doc_guid = getattr(example, "doc_guid", None) or getattr(example, "guid", f"doc_{i}")
             word_offset = getattr(example, "word_offset", 0)
             total_words = getattr(example, "total_doc_words", None) or len(example.words)
 
@@ -366,7 +381,7 @@ def predict_phase1_tagging(
         probs = torch.softmax(logits, dim=-1)
 
         for i, example in enumerate(batch):
-            doc_guid = getattr(example, "doc_guid", None) or example.guid
+            doc_guid = getattr(example, "doc_guid", None) or getattr(example, "guid", f"doc_{i}")
             word_offset = getattr(example, "word_offset", 0)
             total_words = getattr(example, "total_doc_words", None) or len(example.words)
 
@@ -464,6 +479,12 @@ def train_one(
         test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap)
 
     anc_mode = getattr(config, "anchor_mode", "content_box" if getattr(config, "relative_coords", False) else "none")
+    is_dann = getattr(config, "adversarial_dann", False)
+    template_to_idx = None
+    if is_dann:
+        unique_templates = sorted(list({getattr(ex, "template_id", "unk") for ex in train_examples}))
+        template_to_idx = {t: idx for idx, t in enumerate(unique_templates)}
+
     train_collate = make_collator(
         model,
         is_joint=is_joint,
@@ -471,6 +492,8 @@ def train_one(
         coordinate_jitter=getattr(config, "coordinate_jitter", False),
         relative_coords=getattr(config, "relative_coords", False),
         anchor_mode=anc_mode,
+        is_dann=is_dann,
+        template_to_idx=template_to_idx,
     )
     eval_collate = make_collator(
         model,
@@ -478,6 +501,8 @@ def train_one(
         is_train=False,
         relative_coords=getattr(config, "relative_coords", False),
         anchor_mode=anc_mode,
+        is_dann=is_dann,
+        template_to_idx=template_to_idx,
     )
     train_loader = DataLoader(FormDataset(train_examples), batch_size=config.batch_size, shuffle=True, collate_fn=train_collate)
     val_loader = DataLoader(FormDataset(val_examples), batch_size=config.batch_size, collate_fn=eval_collate)
@@ -742,6 +767,17 @@ def train_one(
                     inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
                     output = model(inputs=inputs, entity_spans=spans, gold_links=gold_links, entity_types=entity_types)
                     loss = output.total_loss
+                elif is_dann:
+                    encoded, _, template_targets = batch_data
+                    inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
+                    try:
+                        from models.dann import compute_dann_alpha
+                    except ImportError:
+                        from src.models.dann import compute_dann_alpha
+                    step = epoch * len(train_loader) + (pbar.n if hasattr(pbar, "n") else 0)
+                    cur_alpha = compute_dann_alpha(step, total_steps, gamma=getattr(config, "dann_gamma", 10.0))
+                    out = model_to_optimize(inputs=inputs, template_targets=template_targets.to(device), alpha=cur_alpha)
+                    loss = out.total_loss
                 else:
                     encoded, _ = batch_data
                     inputs = {k: v.to(device) for k, v in encoded.inputs.items()}
@@ -781,6 +817,14 @@ def train_one(
                 best_state = {k: v.detach().cpu().clone() for k, v in model_to_optimize.state_dict().items()}
                 if checkpoint_dir is not None:
                     torch.save(best_state, checkpoint_dir / "best_model.pt")
+                    meta = {
+                        "epoch": epoch + 1,
+                        "best_val_score": round(best_val_score, 4),
+                        "train_loss": round(avg_loss, 4),
+                    }
+                    (checkpoint_dir / "best_meta.json").write_text(
+                        json.dumps(meta, indent=2, default=json_serializable), encoding="utf-8"
+                    )
                 patience_cnt = 0
             else:
                 patience_cnt += 1
@@ -891,7 +935,7 @@ def load_dataset(config: TrainConfig):
     raise NotImplementedError(f"Unknown dataset {config.dataset!r}. Supported: 'funsd', 'vrdu', 'xfund'.")
 
 
-def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
+def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], num_templates: int = 4):
     if config.task == "joint":
         return JointFormExtractor(
             backbone=config.backbone,
@@ -915,7 +959,21 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str]):
             decode_one_to_one=getattr(config, "decode_one_to_one", False),
             link_threshold=getattr(config, "link_threshold", 0.5),
         )
-    return TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
+    base = TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
+    if getattr(config, "adversarial_dann", False):
+        try:
+            from models.dann import DomainAdversarialModel
+        except ImportError:
+            from src.models.dann import DomainAdversarialModel
+        return DomainAdversarialModel(
+            base_classifier=base,
+            num_templates=num_templates,
+            hidden_dim=768,
+            discriminator_hidden_dim=getattr(config, "dann_hidden_dim", 256),
+            domain_loss_weight=getattr(config, "dann_weight", 0.1),
+            gamma=getattr(config, "dann_gamma", 10.0),
+        )
+    return base
 
 
 def save_summary(runs: list[dict], config: TrainConfig, output_dir: Path) -> dict:
