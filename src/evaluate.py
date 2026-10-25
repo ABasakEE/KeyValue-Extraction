@@ -66,8 +66,8 @@ def _to_tag_sequences(
         for p, r in zip(pred_row, ref_row):
             if p == -1 or r == -1:
                 continue
-            p_row.append(id2label[p])
-            r_row.append(id2label[r])
+            p_row.append(id2label[p] if isinstance(p, (int, getattr(__import__('numpy'), 'integer', int))) else str(p))
+            r_row.append(id2label[r] if isinstance(r, (int, getattr(__import__('numpy'), 'integer', int))) else str(r))
         pred_tags.append(p_row)
         ref_tags.append(r_row)
     return pred_tags, ref_tags

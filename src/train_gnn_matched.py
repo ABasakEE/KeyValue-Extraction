@@ -148,8 +148,8 @@ def evaluate_gnn(
                 if off + idx < tot:
                     doc_r[off + idx] = val
 
-        pred_sequences.append([id2label.get(v, "O") for v in doc_p])
-        ref_sequences.append([id2label.get(v, "O") for v in doc_r])
+        pred_sequences.append(doc_p)
+        ref_sequences.append(doc_r)
 
     res = entity_f1(pred_sequences, ref_sequences, id2label)
     return {
