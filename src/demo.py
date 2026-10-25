@@ -14,9 +14,16 @@ Features:
 
 from __future__ import annotations
 
+import os
+for _var in ("OPENBLAS_NUM_THREADS", "MKL_NUM_THREADS", "OMP_NUM_THREADS"):
+    if _var not in os.environ:
+        os.environ[_var] = "1"
+
 import argparse
+import json
 import math
 import random
+import re
 import tempfile
 from pathlib import Path
 from typing import Any
@@ -39,14 +46,17 @@ except ImportError:
     except ImportError:
         HAVE_PYMUPDF = False
 
-# Try to import RapidOCR for live image OCR
-try:
-    from rapidocr_onnxruntime import RapidOCR
-    RAPID_OCR = RapidOCR()
-    HAVE_RAPID_OCR = True
-except ImportError:
-    RAPID_OCR = None
-    HAVE_RAPID_OCR = False
+# RapidOCR lazy loader for live image OCR
+_RAPID_OCR = None
+def get_ocr():
+    global _RAPID_OCR
+    if _RAPID_OCR is None:
+        try:
+            from rapidocr_onnxruntime import RapidOCR
+            _RAPID_OCR = RapidOCR()
+        except Exception:
+            _RAPID_OCR = False
+    return _RAPID_OCR if _RAPID_OCR is not False else None
 
 # Import synthetic document generators
 try:
@@ -284,6 +294,295 @@ def render_annotated_document(
 
 
 # ---------------------------------------------------------------------------
+# Robust Preprocessing & Spatial Inference-Level Blocking
+# ---------------------------------------------------------------------------
+def split_colon_ocr_boxes(raw_ocr_items: list[Any]) -> tuple[list[dict[str, Any]], list[tuple[int, int]]]:
+    """Splits OCR boxes containing colons or key-value separators into discrete Question and Answer tokens.
+    
+    This eliminates the common OCR failure mode where 'Invoice Date: 12/04/2026' is lumped
+    into a single box that cannot be separated by standard sequence taggers.
+    """
+    processed: list[dict[str, Any]] = []
+    inline_pairs: list[tuple[int, int]] = []
+    curr_id = 0
+
+    for item in raw_ocr_items:
+        pts, text, score = item
+        text = text.strip()
+        if not text:
+            continue
+
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        x0, y0, x1, y1 = int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))
+        box_w = max(1, x1 - x0)
+
+        # Detect inline colon separator (e.g. "Order No: 94821" or "Total: $500.00")
+        colon_pos = -1
+        for sep in [":", "："]:
+            if sep in text:
+                colon_pos = text.find(sep)
+                break
+
+        if colon_pos > 0 and colon_pos < len(text) - 1:
+            key_part = text[: colon_pos + 1].strip()
+            val_part = text[colon_pos + 1 :].strip()
+
+            if key_part and val_part:
+                # Proportional horizontal bounding box split
+                split_frac = max(0.15, min(0.85, (len(key_part) + 0.5) / float(len(text))))
+                split_x = int(x0 + box_w * split_frac)
+
+                q_box = [x0, y0, split_x, y1]
+                a_box = [split_x, y0, x1, y1]
+
+                q_ent = {
+                    "id": curr_id,
+                    "text": key_part,
+                    "box": q_box,
+                    "label": "question",
+                    "confidence": float(score),
+                    "is_inline_fixed": True,
+                }
+                curr_id += 1
+
+                a_ent = {
+                    "id": curr_id,
+                    "text": val_part,
+                    "box": a_box,
+                    "label": "answer",
+                    "confidence": float(score),
+                    "is_inline_fixed": True,
+                }
+                curr_id += 1
+
+                processed.append(q_ent)
+                processed.append(a_ent)
+                inline_pairs.append((q_ent["id"], a_ent["id"]))
+                continue
+
+        # Standard box without colon split
+        lower = text.lower()
+        is_header = len(text) < 45 and (
+            text.isupper()
+            or any(h in lower for h in ["statement", "invoice", "summary", "contract", "disclosure", "report", "agreement", "receipt"])
+        )
+        is_question = (
+            text.endswith(":")
+            or any(
+                k in lower
+                for k in ["date", "no", "number", "num", "name", "address", "total", "amount", "status", "tax", "due", "phone", "email", "bill to", "ship to", "terms"]
+            )
+        ) and not (text.replace("$", "").replace(",", "").replace(".", "").replace("/", "").isdigit())
+
+        if is_header:
+            lbl = "header"
+        elif is_question:
+            lbl = "question"
+        else:
+            lbl = "answer"
+
+        processed.append({
+            "id": curr_id,
+            "text": text,
+            "box": [x0, y0, x1, y1],
+            "label": lbl,
+            "confidence": float(score),
+            "is_inline_fixed": False,
+        })
+        curr_id += 1
+
+    return processed, inline_pairs
+
+
+def compute_type_compatibility(q_text: str, a_text: str) -> float:
+    """Computes semantic alignment bonus/penalty between Key and Value candidates."""
+    q_lower = q_text.lower()
+    a_lower = a_text.lower()
+    bonus = 0.0
+
+    # 1. Date heuristics
+    is_date_q = any(w in q_lower for w in ["date", "due", "period", "issued", "expir", "month", "day", "year"])
+    has_date_a = bool(
+        re.search(r"\b(?:\d{1,4}[-/.]\d{1,2}[-/.]\d{1,4}|\d{1,2}\s+(?:jan|feb|mar|apr|may|jun|jul|aug|sep|oct|nov|dec)[a-z]*\s+\d{2,4})\b", a_lower)
+    )
+    if is_date_q:
+        if has_date_a:
+            bonus += 0.35
+        elif not any(c.isdigit() for c in a_text):
+            bonus -= 0.30
+
+    # 2. Currency / Monetary heuristics
+    is_money_q = any(w in q_lower for w in ["amount", "total", "balance", "price", "subtotal", "cost", "tax", "fee", "rate", "sum", "gross", "net"])
+    has_money_a = bool(re.search(r"[\$€£¥]\s*[\d,]+(?:\.\d+)?|\b\d{1,3}(?:,\d{3})*(?:\.\d{2})\b", a_text))
+    if is_money_q:
+        if has_money_a:
+            bonus += 0.35
+        elif not any(c.isdigit() for c in a_text):
+            bonus -= 0.25
+
+    # 3. Numeric ID / Code heuristics
+    is_id_q = any(w in q_lower for w in ["no", "number", "num", "code", "id", "ref", "inv", "po#", "order#", "tracking", "account"])
+    has_digits_a = bool(re.search(r"\b[A-Za-z0-9-]{3,}\b", a_text) and any(c.isdigit() for c in a_text))
+    if is_id_q:
+        if has_digits_a:
+            bonus += 0.30
+
+    # 4. Entity / Person Name heuristics
+    is_name_q = any(w in q_lower for w in ["name", "client", "vendor", "customer", "signer", "registrant", "to:", "from:", "by:"])
+    if is_name_q:
+        if has_money_a:
+            bonus -= 0.35
+
+    return bonus
+
+
+def check_corridor_line_of_sight(
+    box_from: list[int],
+    box_to: list[int],
+    all_boxes: list[list[int]],
+    from_idx: int,
+    to_idx: int,
+    direction: str = "horizontal",
+) -> bool:
+    """Returns True if there are NO occluding entity bounding boxes inside the corridor between box_from and box_to."""
+    fx0, fy0, fx1, fy1 = box_from
+    tx0, ty0, tx1, ty1 = box_to
+
+    if direction == "horizontal":
+        corridor_x0 = min(fx1, tx0) + 2
+        corridor_x1 = max(fx1, tx0) - 2
+        corridor_y0 = min(fy0, ty0) - 4
+        corridor_y1 = max(fy1, ty1) + 4
+
+        if corridor_x1 <= corridor_x0:
+            return True
+
+        for idx, obox in enumerate(all_boxes):
+            if idx == from_idx or idx == to_idx:
+                continue
+            ox0, oy0, ox1, oy1 = obox
+            # Obstacle intersects corridor horizontally & vertically
+            if not (ox1 < corridor_x0 or ox0 > corridor_x1 or oy1 < corridor_y0 or oy0 > corridor_y1):
+                return False  # Blocked by intervening box!
+        return True
+
+    elif direction == "vertical":
+        corridor_y0 = min(fy1, ty0) + 2
+        corridor_y1 = max(fy1, ty0) - 2
+        corridor_x0 = min(fx0, tx0) - 4
+        corridor_x1 = max(fx1, tx1) + 4
+
+        if corridor_y1 <= corridor_y0:
+            return True
+
+        for idx, obox in enumerate(all_boxes):
+            if idx == from_idx or idx == to_idx:
+                continue
+            ox0, oy0, ox1, oy1 = obox
+            if not (ox1 < corridor_x0 or ox0 > corridor_x1 or oy1 < corridor_y0 or oy0 > corridor_y1):
+                return False  # Blocked by intervening box!
+        return True
+
+    return True
+
+
+def resolve_key_value_links(
+    entities: list[dict[str, Any]],
+    inline_pairs: list[tuple[int, int]],
+    threshold: float = 0.40,
+) -> tuple[list[tuple[int, int, float]], list[dict[str, Any]]]:
+    """Resolves Key-Value links using Line-of-Sight corridor raycasting and 1-to-1 competitive matching."""
+    links: list[tuple[int, int, float]] = []
+    kv_records: list[dict[str, Any]] = []
+
+    matched_questions: set[int] = set()
+    matched_answers: set[int] = set()
+
+    all_boxes = [e["box"] for e in entities]
+    id2entity = {e["id"]: e for e in entities}
+
+    # 1. Top priority: Inline colon pairs (exact geometric cohesion)
+    for qid, aid in inline_pairs:
+        if qid in id2entity and aid in id2entity:
+            q = id2entity[qid]
+            a = id2entity[aid]
+            score = 0.98
+            links.append((qid, aid, score))
+            kv_records.append({
+                "Key (Question)": q["text"],
+                "Value (Answer)": a["text"],
+                "Confidence": f"{score:.3f}",
+                "Topology": "Inline",
+            })
+            matched_questions.add(qid)
+            matched_answers.add(aid)
+
+    # 2. Gather candidate pairs for unlinked entities
+    questions = [e for e in entities if e["label"] == "question" and e["id"] not in matched_questions]
+    answers = [e for e in entities if e["label"] == "answer" and e["id"] not in matched_answers]
+
+    candidates: list[tuple[float, int, int, str]] = []  # (score, qid, aid, topology)
+
+    for q in questions:
+        qid = q["id"]
+        qx0, qy0, qx1, qy1 = q["box"]
+        qw = max(1, qx1 - qx0)
+        qh = max(1, qy1 - qy0)
+        q_cx, q_cy = (qx0 + qx1) / 2.0, (qy0 + qy1) / 2.0
+
+        for a in answers:
+            aid = a["id"]
+            ax0, ay0, ax1, ay1 = a["box"]
+            a_cx, a_cy = (ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0
+
+            dx = a_cx - q_cx
+            dy = a_cy - q_cy
+            dist = math.hypot(dx, dy)
+
+            type_bonus = compute_type_compatibility(q["text"], a["text"])
+
+            # Check A: Horizontal Corridor (A is to the right of Q within vertical band)
+            is_horizontal = (ax0 >= qx0 - 5) and (abs(a_cy - q_cy) <= max(18.0, qh * 0.85)) and (dx > 0)
+            if is_horizontal:
+                if check_corridor_line_of_sight(q["box"], a["box"], all_boxes, qid, aid, direction="horizontal"):
+                    base_score = 1.0 / (1.0 + (dist / 350.0))
+                    final_score = max(0.01, min(0.99, base_score + type_bonus))
+                    if final_score >= threshold:
+                        candidates.append((final_score, qid, aid, "Horizontal"))
+                continue
+
+            # Check B: Vertical Corridor (A is below Q within column width)
+            is_vertical = (ay0 >= qy0 - 5) and (abs(a_cx - q_cx) <= max(25.0, qw * 0.75)) and (dy > 0)
+            if is_vertical:
+                if check_corridor_line_of_sight(q["box"], a["box"], all_boxes, qid, aid, direction="vertical"):
+                    base_score = 0.85 / (1.0 + (dist / 300.0))
+                    final_score = max(0.01, min(0.99, base_score + type_bonus))
+                    if final_score >= threshold:
+                        candidates.append((final_score, qid, aid, "Stacked"))
+                continue
+
+    # 3. Competitive 1-to-1 Matching (Greedy Argmax over candidates)
+    candidates.sort(key=lambda c: c[0], reverse=True)
+
+    for score, qid, aid, topo in candidates:
+        if qid not in matched_questions and aid not in matched_answers:
+            matched_questions.add(qid)
+            matched_answers.add(aid)
+            q = id2entity[qid]
+            a = id2entity[aid]
+            links.append((qid, aid, score))
+            kv_records.append({
+                "Key (Question)": q["text"],
+                "Value (Answer)": a["text"],
+                "Confidence": f"{score:.3f}",
+                "Topology": topo,
+            })
+
+    return links, kv_records
+
+
+# ---------------------------------------------------------------------------
 # OCR & Field Extraction Pipeline
 # ---------------------------------------------------------------------------
 def process_uploaded_document(
@@ -300,8 +599,9 @@ def process_uploaded_document(
         draw.text((250, 280), "Please upload a document to begin extraction.", fill="#777777", font=get_font(24))
         return empty_img, pd.DataFrame(), {}
 
-    # 1. Load document image
+    # 1. Load document image with bounded zoom
     file_path = Path(file_obj.name if hasattr(file_obj, "name") else str(file_obj))
+    raw_pdf_words = []
 
     if file_path.suffix.lower() == ".pdf":
         if not HAVE_PYMUPDF:
@@ -315,82 +615,80 @@ def process_uploaded_document(
         mat = fitz.Matrix(zoom, zoom)
         pix = page.get_pixmap(matrix=mat)
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+
+        # Extract native PDF words as fallback
+        raw_words = page.get_text("words")
+        if raw_words:
+            for w in raw_words:
+                wx0, wy0, wx1, wy1, wtxt = w[0], w[1], w[2], w[3], w[4]
+                raw_pdf_words.append((
+                    [[wx0 * zoom, wy0 * zoom], [wx1 * zoom, wy0 * zoom], [wx1 * zoom, wy1 * zoom], [wx0 * zoom, wy1 * zoom]],
+                    wtxt,
+                    0.99,
+                ))
     else:
         img = Image.open(file_path).convert("RGB")
 
     width, height = img.size
 
-    # 2. OCR Processing
+    # 2. OCR Processing & Colon Sub-Box Decomposition
     entities: list[dict[str, Any]] = []
-    links: list[tuple[int, int, float]] = []
+    inline_pairs: list[tuple[int, int]] = []
 
-    if HAVE_RAPID_OCR and RAPID_OCR is not None:
+    ocr = get_ocr()
+    if ocr is not None:
         np_img = np.array(img)
-        ocr_result, _ = RAPID_OCR(np_img)
+        ocr_result, _ = ocr(np_img)
+        if not ocr_result and raw_pdf_words:
+            ocr_result = raw_pdf_words
         if ocr_result:
-            for idx, item in enumerate(ocr_result):
-                pts, text, score = item
-                text = text.strip()
-                if not text:
-                    continue
+            entities, inline_pairs = split_colon_ocr_boxes(ocr_result)
+    elif raw_pdf_words:
+        entities, inline_pairs = split_colon_ocr_boxes(raw_pdf_words)
+    else:
+        # Fallback dummy OCR for systems without OCR library
+        entities = [
+            {"id": 0, "text": "Invoice Number:", "box": [100, 100, 300, 140], "label": "question", "is_inline_fixed": True},
+            {"id": 1, "text": "INV-84920", "box": [320, 100, 480, 140], "label": "answer", "is_inline_fixed": True},
+            {"id": 2, "text": "Total Due:", "box": [100, 200, 250, 240], "label": "question", "is_inline_fixed": True},
+            {"id": 3, "text": "$4,250.00", "box": [270, 200, 420, 240], "label": "answer", "is_inline_fixed": True},
+        ]
+        inline_pairs = [(0, 1), (2, 3)]
 
-                xs = [p[0] for p in pts]
-                ys = [p[1] for p in pts]
-                x0, y0, x1, y1 = int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))
-
-                # Heuristic classification for live OCR demonstration
-                lower = text.lower()
-                is_header = len(text) < 40 and (text.isupper() or "statement" in lower or "invoice" in lower or "summary" in lower)
-                is_question = text.endswith(":") or any(
-                    k in lower for k in ["date", "no", "number", "name", "address", "total", "amount", "status", "tax", "due"]
-                ) and not text.replace("$", "").replace(",", "").replace(".", "").isdigit()
-
-                if is_header:
-                    label = "header"
-                elif is_question:
-                    label = "question"
-                else:
-                    label = "answer"
-
-                entities.append({
-                    "id": idx,
-                    "text": text,
-                    "box": [x0, y0, x1, y1],
-                    "label": label,
-                    "confidence": float(score),
-                })
-
-        # Apply trained Neural Network predictions if checkpoint is loaded
-        model = get_loaded_model()
-        if model is not None and entities:
-            try:
-                words = [e["text"] for e in entities]
-                scaled_boxes = [
-                    [
-                        max(0, min(1000, int(1000 * e["box"][0] / max(1, width)))),
-                        max(0, min(1000, int(1000 * e["box"][1] / max(1, height)))),
-                        max(0, min(1000, int(1000 * e["box"][2] / max(1, width)))),
-                        max(0, min(1000, int(1000 * e["box"][3] / max(1, height)))),
-                    ]
-                    for e in entities
+    # 3. Apply LiLT Neural Backbone predictions if checkpoint is loaded
+    model = get_loaded_model()
+    if model is not None and entities:
+        try:
+            words = [e["text"] for e in entities]
+            scaled_boxes = [
+                [
+                    max(0, min(1000, int(1000 * e["box"][0] / max(1, width)))),
+                    max(0, min(1000, int(1000 * e["box"][1] / max(1, height)))),
+                    max(0, min(1000, int(1000 * e["box"][2] / max(1, width)))),
+                    max(0, min(1000, int(1000 * e["box"][3] / max(1, height)))),
                 ]
-                encoding = model.tokenizer(
-                    [words],
-                    boxes=[scaled_boxes],
-                    padding="max_length",
-                    truncation=True,
-                    max_length=512,
-                    return_tensors="pt",
-                )
-                with torch.no_grad():
-                    logits = model.encoder(**encoding).logits
-                    preds = logits[0].argmax(dim=-1).tolist()
+                for e in entities
+            ]
+            dynamic_max_len = min(512, max(64, int(math.ceil(len(words) * 1.3 / 64.0) * 64)))
+            encoding = model.tokenizer(
+                [words],
+                boxes=[scaled_boxes],
+                padding="max_length",
+                truncation=True,
+                max_length=dynamic_max_len,
+                return_tensors="pt",
+            )
+            with torch.inference_mode():
+                logits = model.encoder(**encoding).logits
+                preds = logits[0].argmax(dim=-1).tolist()
 
-                word_ids = encoding.word_ids(0)
-                seen_wids = set()
-                for s_idx, wid in enumerate(word_ids):
-                    if wid is not None and wid not in seen_wids and wid < len(entities):
-                        seen_wids.add(wid)
+            word_ids = encoding.word_ids(0)
+            seen_wids = set()
+            for s_idx, wid in enumerate(word_ids):
+                if wid is not None and wid not in seen_wids and wid < len(entities):
+                    seen_wids.add(wid)
+                    # Preserve fixed inline colon classifications
+                    if not entities[wid].get("is_inline_fixed", False):
                         pred_tag = ID2LABEL.get(preds[s_idx], "O")
                         if "QUESTION" in pred_tag:
                             entities[wid]["label"] = "question"
@@ -400,62 +698,13 @@ def process_uploaded_document(
                             entities[wid]["label"] = "header"
                         else:
                             entities[wid]["label"] = "other"
-            except Exception as ex:
-                print(f"[-] Neural tagging fallback: {ex}")
-    else:
-        # Fallback dummy OCR for systems without OCR library
-        entities = [
-            {"id": 0, "text": "Invoice Number:", "box": [100, 100, 300, 140], "label": "question"},
-            {"id": 1, "text": "INV-84920", "box": [320, 100, 480, 140], "label": "answer"},
-            {"id": 2, "text": "Total Due:", "box": [100, 200, 250, 240], "label": "question"},
-            {"id": 3, "text": "$4,250.00", "box": [270, 200, 420, 240], "label": "answer"},
-        ]
+        except Exception as ex:
+            print(f"[-] Neural tagging fallback: {ex}")
 
-    # 3. Spatial Key-Value Relation Linker
-    questions = [e for e in entities if e["label"] == "question"]
-    answers = [e for e in entities if e["label"] == "answer"]
+    # 4. Spatial Inference-Level Blocking & Line-of-Sight Relation Resolution
+    links, kv_records = resolve_key_value_links(entities, inline_pairs, threshold=link_threshold)
 
-    kv_records = []
-
-    for q in questions:
-        qx0, qy0, qx1, qy1 = q["box"]
-        q_cx, q_cy = (qx0 + qx1) / 2.0, (qy0 + qy1) / 2.0
-
-        best_cand = None
-        best_score = -1.0
-
-        for a in answers:
-            ax0, ay0, ax1, ay1 = a["box"]
-            a_cx, a_cy = (ax0 + ax1) / 2.0, (ay0 + ay1) / 2.0
-
-            # Geometric features
-            dx = a_cx - q_cx
-            dy = a_cy - q_cy
-            dist = math.hypot(dx, dy)
-
-            # Horizontal alignment bonus (A to the right of Q)
-            if ax0 >= qx0 - 10 and abs(dy) < (qy1 - qy0) * 1.5:
-                score = 1.0 / (1.0 + dist / 400.0)
-            # Vertical alignment bonus (A right below Q)
-            elif ay0 >= qy0 - 5 and abs(dx) < (qx1 - qx0) * 1.2:
-                score = 0.85 / (1.0 + dist / 400.0)
-            else:
-                score = 0.3 / (1.0 + dist / 300.0)
-
-            if score > best_score:
-                best_score = score
-                best_cand = a
-
-        if best_cand is not None and best_score >= link_threshold:
-            links.append((q["id"], best_cand["id"], float(best_score)))
-            kv_records.append({
-                "Key (Question)": q["text"],
-                "Value (Answer)": best_cand["text"],
-                "Confidence": f"{best_score:.3f}",
-                "Topology": "Horizontal" if abs(best_cand["box"][1] - q["box"][1]) < 30 else "Stacked",
-            })
-
-    # 4. Render Annotations
+    # 5. Render Annotations
     annotated_img = render_annotated_document(
         img, entities, links, show_boxes=show_boxes, show_links=show_links, show_labels=show_labels
     )
@@ -467,6 +716,8 @@ def process_uploaded_document(
         "entities": entities,
         "extracted_pairs": kv_records,
     }
+
+    return annotated_img, df, summary_json
 
     return annotated_img, df, summary_json
 
