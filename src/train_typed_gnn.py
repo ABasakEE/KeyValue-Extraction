@@ -144,21 +144,17 @@ def evaluate_fused_gnn(
 
 def train_fused_gnn_one_seed(
     seed: int,
-    train_paths: list[Path],
-    val_paths: list[Path],
-    test_paths: list[Path],
+    train_ds: CachedFusedDataset,
+    val_ds: CachedFusedDataset,
+    test_ds: CachedFusedDataset,
     epochs: int = 25,
     lr: float = 1e-3,
     output_dir: Path = Path("results/typed_gnn"),
     device_str: str = "auto",
 ) -> dict:
     set_seed(seed)
-    device = torch.device("cuda:0" if (device_str == "auto" and torch.cuda.is_available()) else "cpu")
-    print(f"\n[*] Training Fused GNN Seed {seed} on {device}...")
-
-    train_ds = CachedFusedDataset(train_paths)
-    val_ds = CachedFusedDataset(val_paths)
-    test_ds = CachedFusedDataset(test_paths)
+    device = torch.device(device_str if device_str != "auto" else ("cuda:0" if torch.cuda.is_available() else "cpu"))
+    print(f"\n[*] Training Fused GNN Seed {seed} on {device}...", flush=True)
 
     train_loader = DataLoader(train_ds, batch_size=4, shuffle=True, collate_fn=collate_fused_graphs)
     val_loader = DataLoader(val_ds, batch_size=4, shuffle=False, collate_fn=collate_fused_graphs)
@@ -205,7 +201,7 @@ def train_fused_gnn_one_seed(
             best_state = {k: v.cpu().clone() for k, v in model.state_dict().items()}
 
         print(
-            f"  [Ep {ep+1:>2}/{epochs}] Loss: {total_loss/len(train_loader):.4f} | "
+            f"  [Seed {seed} on {device}] Ep {ep+1:>2}/{epochs} | Loss: {total_loss/len(train_loader):.4f} | "
             f"Val Node Acc: {val_metrics['node_acc']:.4f} | Link F1: {val_metrics['link_f1']:.4f}",
             flush=True,
         )
@@ -214,7 +210,7 @@ def train_fused_gnn_one_seed(
         model.load_state_dict(best_state)
 
     test_metrics = evaluate_fused_gnn(model, test_loader, device)
-    print(f"\n[+] Seed {seed} Test Results: {test_metrics}")
+    print(f"\n[+] Seed {seed} on {device} Test Results: {test_metrics}", flush=True)
 
     run_dir = output_dir / f"seed_{seed}"
     run_dir.mkdir(parents=True, exist_ok=True)
@@ -223,6 +219,7 @@ def train_fused_gnn_one_seed(
 
     result = {
         "seed": seed,
+        "device": str(device),
         "val_score": best_val_f1,
         "test": test_metrics,
     }
@@ -254,20 +251,55 @@ def main():
     val_paths = all_files[n_train : n_train + n_val]
     test_paths = all_files[n_train + n_val :]
 
-    print(f"[*] Dataset Split: {len(train_paths)} train, {len(val_paths)} val, {len(test_paths)} test")
+    print(f"[*] Dataset Split: {len(train_paths)} train, {len(val_paths)} val, {len(test_paths)} test", flush=True)
+
+    # Preload datasets once into shared memory
+    train_ds = CachedFusedDataset(train_paths)
+    val_ds = CachedFusedDataset(val_paths)
+    test_ds = CachedFusedDataset(test_paths)
 
     seeds = [int(s.strip()) for s in args.seeds.split(",") if s.strip()]
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+
+    num_gpus = torch.cuda.device_count() if torch.cuda.is_available() else 0
     results = []
-    for s in seeds:
-        res = train_fused_gnn_one_seed(
-            seed=s,
-            train_paths=train_paths,
-            val_paths=val_paths,
-            test_paths=test_paths,
-            epochs=args.epochs,
-            output_dir=Path(args.output_dir),
-        )
-        results.append(res)
+
+    if num_gpus >= 2 and len(seeds) >= 2:
+        max_workers = min(num_gpus, len(seeds))
+        print(f"\n{'='*75}", flush=True)
+        print(f"[*] DUAL GPU DETECTED: Spawning {max_workers} parallel workers on {[f'cuda:{i}' for i in range(max_workers)]}", flush=True)
+        print(f"[*] Worker 0 takes Seed {seeds[0]} on cuda:0 | Worker 1 takes Seed {seeds[1]} on cuda:1", flush=True)
+        print(f"{'='*75}\n", flush=True)
+        import concurrent.futures
+
+        def _worker(item):
+            worker_idx, s = item
+            assigned_gpu = f"cuda:{worker_idx % num_gpus}"
+            return train_fused_gnn_one_seed(
+                seed=s,
+                train_ds=train_ds,
+                val_ds=val_ds,
+                test_ds=test_ds,
+                epochs=args.epochs,
+                output_dir=output_dir,
+                device_str=assigned_gpu,
+            )
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=max_workers) as executor:
+            results = list(executor.map(_worker, enumerate(seeds)))
+    else:
+        for s in seeds:
+            res = train_fused_gnn_one_seed(
+                seed=s,
+                train_ds=train_ds,
+                val_ds=val_ds,
+                test_ds=test_ds,
+                epochs=args.epochs,
+                output_dir=output_dir,
+                device_str="auto",
+            )
+            results.append(res)
 
     print("\n" + "=" * 65)
     print("FUSED RSA-GNN BENCHMARK SUMMARY")
