@@ -40,7 +40,10 @@ from torch.utils.data import DataLoader, Dataset
 from evaluate import cross_check, entity_f1, generalization_gap, malformed_tag_rate, linking_f1
 from models.token_clf import TokenClassifier
 from models.joint_extractor import JointFormExtractor, prepare_entity_batch
-from tqdm.auto import tqdm
+try:
+    from utils.progress import FlushProgressBar as tqdm
+except ImportError:
+    from src.utils.progress import FlushProgressBar as tqdm
 
 TQDM_KWARGS = {
     "file": sys.stdout,

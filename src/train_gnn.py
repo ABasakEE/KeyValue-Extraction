@@ -24,7 +24,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
-from tqdm.auto import tqdm
+try:
+    from utils.progress import FlushProgressBar as tqdm
+except ImportError:
+    from src.utils.progress import FlushProgressBar as tqdm
 
 from src.evaluate import entity_f1, cross_check, malformed_tag_rate
 from src.models.edge_gat import EdgeGATTokenClassifier

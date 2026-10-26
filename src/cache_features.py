@@ -20,7 +20,10 @@ for _p in (str(ROOT_DIR), str(SRC_DIR)):
         sys.path.insert(0, _p)
 
 import torch
-from tqdm.auto import tqdm
+try:
+    from utils.progress import FlushProgressBar as tqdm
+except ImportError:
+    from src.utils.progress import FlushProgressBar as tqdm
 
 from src.data.vrdu_loader import VrduExample, chunk_vrdu_examples, load_vrdu
 from src.models.delaunay_graph import build_delaunay_graph

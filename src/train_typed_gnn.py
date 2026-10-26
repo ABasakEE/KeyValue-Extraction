@@ -23,7 +23,10 @@ import numpy as np
 import torch
 import torch.nn as nn
 from torch.utils.data import DataLoader, Dataset
-from tqdm.auto import tqdm
+try:
+    from utils.progress import FlushProgressBar as tqdm
+except ImportError:
+    from src.utils.progress import FlushProgressBar as tqdm
 
 from src.models.edge_gat_joint import EdgeGATJointExtractor, focal_binary_loss
 from src.train import set_seed, json_serializable
