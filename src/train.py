@@ -1194,14 +1194,17 @@ def get_device_list(gpu_arg: str, no_parallel: bool) -> list[int]:
     """Parse device indices for parallel or single execution."""
     if no_parallel or not torch.cuda.is_available():
         return []
+    count = torch.cuda.device_count()
+    if count == 0:
+        return []
     if gpu_arg == "auto":
-        count = torch.cuda.device_count()
         return list(range(count))
     try:
-        return [int(x.strip()) for x in gpu_arg.split(",") if x.strip()]
+        gpus = [int(x.strip()) for x in gpu_arg.split(",") if x.strip()]
+        return [g for g in gpus if 0 <= g < count]
     except Exception as e:
-        print(f"Warning: Failed to parse --gpus '{gpu_arg}' ({e}), defaulting to [0]")
-        return [0]
+        print(f"Warning: Failed to parse --gpus '{gpu_arg}' ({e}), defaulting to [0] if available")
+        return [0] if count > 0 else []
 
 
 def main() -> None:
@@ -1309,7 +1312,7 @@ def main() -> None:
         print(f"[*] Spatial Features: {config.spatial_in_features}D (Geo: {config.use_geometry}, Contain: {config.use_containment}, LOS: {config.use_line_of_sight}, Typo: {config.use_typography}) | Loss: {config.loss_type} | 1-to-1: {config.decode_one_to_one}")
 
     if args.protocol == "standard":
-        can_parallel = len(gpu_ids) >= 2 and len(seeds) > 1 and not args.no_parallel
+        can_parallel = torch.cuda.is_available() and len(gpu_ids) >= 2 and len(seeds) > 1 and not args.no_parallel
 
         if can_parallel:
             num_workers = min(len(gpu_ids), len(seeds))
@@ -1365,7 +1368,7 @@ def main() -> None:
             runs = [runs_dict[s] for s in seeds]
 
         else:
-            device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
+            device = torch.device(f"cuda:{gpu_ids[0]}" if (gpu_ids and torch.cuda.is_available()) else "cpu")
             print(f"[*] Running sequentially on device: {device}", flush=True)
             train_ex, val_ex, test_ex, label_list, id2label = load_dataset(config)
             if config.n_train:
@@ -1477,7 +1480,7 @@ def main() -> None:
             print("\n[*] All tasks already completed from checkpoints!", flush=True)
             summary, gap, out = _update_and_save_matched_summary()
         else:
-            can_parallel = len(gpu_ids) >= 2 and not args.no_parallel
+            can_parallel = torch.cuda.is_available() and len(gpu_ids) >= 2 and not args.no_parallel
             if can_parallel and len(pending_tasks) > 1:
                 num_workers = min(len(gpu_ids), len(pending_tasks))
                 active_gpus = gpu_ids[:num_workers]
@@ -1528,7 +1531,7 @@ def main() -> None:
                     p.join()
 
             else:
-                device = torch.device(f"cuda:{gpu_ids[0]}" if gpu_ids else ("cuda" if torch.cuda.is_available() else "cpu"))
+                device = torch.device(f"cuda:{gpu_ids[0]}" if (gpu_ids and torch.cuda.is_available()) else "cpu")
                 print(f"[*] Running sequentially on device: {device} ({len(pending_tasks)} task(s))", flush=True)
 
                 for regime, fold_idx, seed in pending_tasks:

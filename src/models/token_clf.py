@@ -72,6 +72,24 @@ class TokenClassifier:
             checkpoint, config=config, ignore_mismatched_sizes=True
         )
 
+    def to(self, *args, **kwargs):
+        self.model.to(*args, **kwargs)
+        return self
+
+    def parameters(self, recurse: bool = True):
+        return self.model.parameters(recurse=recurse)
+
+    def named_parameters(self, prefix: str = '', recurse: bool = True):
+        return self.model.named_parameters(prefix=prefix, recurse=recurse)
+
+    def train(self, mode: bool = True):
+        self.model.train(mode)
+        return self
+
+    def eval(self):
+        self.model.eval()
+        return self
+
     def encode(
         self,
         words_batch: list[list[str]],

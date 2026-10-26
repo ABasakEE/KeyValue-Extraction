@@ -65,6 +65,7 @@ def run_smoke_test(config_path: str | Path, device: torch.device) -> bool:
 
     # 1. Build model
     model = build_model(config, len(label_list), id2label, num_templates=config.num_templates)
+    model.to(device)
     model_to_optimize = model if hasattr(model, "parameters") else model.model
     model_to_optimize.to(device)
     model_to_optimize.train()

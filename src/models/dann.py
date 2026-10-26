@@ -135,6 +135,13 @@ class DomainAdversarialModel(nn.Module):
     ):
         super().__init__()
         self.base_classifier = base_classifier
+        if hasattr(base_classifier, "model") and isinstance(base_classifier.model, nn.Module):
+            self.base_model = base_classifier.model
+        elif isinstance(base_classifier, nn.Module):
+            self.base_model = base_classifier
+        else:
+            self.base_model = None
+
         self.num_templates = num_templates
         self.hidden_dim = hidden_dim
         self.domain_loss_weight = domain_loss_weight
@@ -147,6 +154,13 @@ class DomainAdversarialModel(nn.Module):
             num_templates=num_templates,
             dropout=dropout,
         )
+
+    def to(self, *args, **kwargs):
+        if hasattr(self.base_classifier, "to") and callable(self.base_classifier.to):
+            self.base_classifier.to(*args, **kwargs)
+        elif hasattr(self.base_classifier, "model") and hasattr(self.base_classifier.model, "to"):
+            self.base_classifier.model.to(*args, **kwargs)
+        return super().to(*args, **kwargs)
 
     @property
     def model(self):
@@ -179,7 +193,7 @@ class DomainAdversarialModel(nn.Module):
             inputs = {**inputs, **kwargs}
         """Forward pass computing token labeling task loss and template domain adversarial loss."""
         # 1. Forward through transformer backbone requesting hidden states
-        base_model = getattr(self.base_classifier, "model", self.base_classifier)
+        base_model = getattr(self, "base_model", None) or getattr(self.base_classifier, "model", self.base_classifier)
         outputs = base_model(**inputs, output_hidden_states=True)
 
         token_logits = outputs.logits
@@ -207,6 +221,9 @@ class DomainAdversarialModel(nn.Module):
         domain_loss = None
         total_loss = task_loss
         if template_targets is not None:
+            # Defensive check: ensure template_targets matches domain_logits device
+            if template_targets.device != domain_logits.device:
+                template_targets = template_targets.to(domain_logits.device)
             # Cross-entropy over template classes
             domain_loss = nn.functional.cross_entropy(domain_logits, template_targets)
             if task_loss is not None:
