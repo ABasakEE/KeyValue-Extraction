@@ -3,6 +3,8 @@
 # src/data/, which is source code.
 /data/
 demo_examples/
+presentation_scripts/
+*_script.txt
 *.pdf
 *.png
 *.jpg
