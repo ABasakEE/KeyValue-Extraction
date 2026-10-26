@@ -2,6 +2,7 @@
 # Leading slash anchors this to the repo root: a bare "data/" would also swallow
 # src/data/, which is source code.
 /data/
+demo_examples/
 *.pdf
 *.png
 *.jpg
