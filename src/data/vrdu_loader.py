@@ -383,13 +383,33 @@ def _parse_record(record: dict, label2id: dict[str, int], templates: list[str]) 
     )
 
 
+def ensure_vrdu_dataset(root: str | Path, subcorpus: str = "registration-form") -> Path:
+    """Ensure Google VRDU dataset is cloned and present under data/vrdu."""
+    root_path = Path(root)
+    base = root_path / subcorpus
+    data_path = base / "main" / "dataset.jsonl.gz"
+    if not data_path.exists():
+        print(f"[*] VRDU dataset missing under {root_path}. Auto-cloning from https://github.com/google-research-datasets/vrdu...", flush=True)
+        root_path.parent.mkdir(parents=True, exist_ok=True)
+        import subprocess
+        try:
+            subprocess.run(
+                ["git", "clone", "--depth", "1", "https://github.com/google-research-datasets/vrdu.git", str(root_path)],
+                check=True,
+            )
+            print(f"[+] Successfully cloned Google VRDU dataset to {root_path}", flush=True)
+        except Exception as e:
+            print(f"[*] Warning: automatic git clone failed ({e}).", flush=True)
+    return root_path
+
+
 def load_vrdu(root: str | Path, subcorpus: str = "registration-form") -> tuple[list[VrduExample], list[str], dict[int, str]]:
     """Load one VRDU sub-corpus.
 
     ``root`` is the checkout of the vrdu repository, so that
     ``<root>/<subcorpus>/main/dataset.jsonl.gz`` exists.
     """
-    root = Path(root)
+    root = ensure_vrdu_dataset(root, subcorpus)
     base = root / subcorpus
     data_path = base / "main" / "dataset.jsonl.gz"
     meta_path = base / "main" / "meta.json"
