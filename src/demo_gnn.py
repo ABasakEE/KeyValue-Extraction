@@ -27,6 +27,7 @@ import json
 import math
 import os
 import random
+import re
 import sys
 import tempfile
 from pathlib import Path
@@ -289,10 +290,19 @@ def parse_entities_into_fields(entities: list[dict[str, Any]]) -> list[dict[str,
             current_tokens.append(text)
             current_boxes.append(box)
             current_confs.append(conf)
-        elif tag.startswith("I-") and current_field == tag[2:]:
-            current_tokens.append(text)
-            current_boxes.append(box)
-            current_confs.append(conf)
+        elif tag.startswith("I-"):
+            field_name = tag[2:]
+            if current_field == field_name:
+                current_tokens.append(text)
+                current_boxes.append(box)
+                current_confs.append(conf)
+            else:
+                # Lenient continuation: start new entity of this type
+                flush()
+                current_field = field_name
+                current_tokens.append(text)
+                current_boxes.append(box)
+                current_confs.append(conf)
         else:
             flush()
     flush()
@@ -305,7 +315,7 @@ def process_gnn_document(
     show_boxes: bool = True,
     show_graph: bool = True,
     show_labels: bool = True,
-    conf_threshold: float = 0.5,
+    conf_threshold: float = 0.25,
 ) -> tuple[Image.Image, pd.DataFrame, dict[str, Any]]:
     """Runs full Track 2 RSA-GNN inference: OCR -> LiLT -> Delaunay Graph -> Edge-GAT."""
     if file_obj is None:
@@ -327,22 +337,17 @@ def process_gnn_document(
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
         width, height = img.size
 
-        # Extract words from PDF text stream
+        # Inspect PDF page: detect scanned forms with metadata stamps
         raw_words = page.get_text("words")
-        for idx, w in enumerate(raw_words):
-            x0, y0, x1, y1, text = int(w[0] * zoom), int(w[1] * zoom), int(w[2] * zoom), int(w[3] * zoom), w[4]
-            if text.strip():
-                entities.append({
-                    "id": len(entities),
-                    "text": text.strip(),
-                    "box": [max(0, x0), max(0, y0), min(width, x1), min(height, y1)],
-                    "label": "other",
-                    "raw_tag": "O",
-                    "confidence": 1.0,
-                })
+        is_scanned_with_metadata = False
+        if raw_words:
+            first_words = " ".join(w[4] for w in raw_words[:5]).lower()
+            max_y = max(w[3] for w in raw_words)
+            if "metadata" in first_words or "accessibility" in first_words or (len(page.get_images()) > 0 and max_y < rect.height * 0.4):
+                is_scanned_with_metadata = True
 
-        # If scanned PDF with no text stream, fallback to OCR
-        if not entities and HAVE_RAPID_OCR and RAPID_OCR is not None:
+        # Run RapidOCR if scanned/metadata document or if no native words
+        if (not raw_words or is_scanned_with_metadata) and HAVE_RAPID_OCR and RAPID_OCR is not None:
             ocr_res, _ = RAPID_OCR(np.array(img))
             if ocr_res:
                 for idx, line in enumerate(ocr_res):
@@ -350,9 +355,11 @@ def process_gnn_document(
                     xs = [pt[0] for pt in poly]
                     ys = [pt[1] for pt in poly]
                     x0, y0, x1, y1 = int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))
-                    line_words = text.split()
-                    n_w = len(line_words)
-                    for w_idx, w in enumerate(line_words):
+                    tokens = [t.strip() for t in re.split(r'[:_\s\(\)\[\]/?.,]+', text) if t.strip()]
+                    if not tokens:
+                        tokens = [text]
+                    n_w = len(tokens)
+                    for w_idx, w in enumerate(tokens):
                         sub_x0 = int(x0 + w_idx * (x1 - x0) / max(1, n_w))
                         sub_x1 = int(x0 + (w_idx + 1) * (x1 - x0) / max(1, n_w))
                         entities.append({
@@ -363,6 +370,20 @@ def process_gnn_document(
                             "raw_tag": "O",
                             "confidence": score,
                         })
+
+        # Fallback to native PDF words for born-digital PDFs
+        if not entities and raw_words:
+            for idx, w in enumerate(raw_words):
+                x0, y0, x1, y1, text = int(w[0] * zoom), int(w[1] * zoom), int(w[2] * zoom), int(w[3] * zoom), w[4]
+                if text.strip():
+                    entities.append({
+                        "id": len(entities),
+                        "text": text.strip(),
+                        "box": [max(0, x0), max(0, y0), min(width, x1), min(height, y1)],
+                        "label": "other",
+                        "raw_tag": "O",
+                        "confidence": 1.0,
+                    })
         doc.close()
     else:
         img = Image.open(str(file_path)).convert("RGB")
@@ -376,10 +397,11 @@ def process_gnn_document(
                     xs = [pt[0] for pt in poly]
                     ys = [pt[1] for pt in poly]
                     x0, y0, x1, y1 = int(min(xs)), int(min(ys)), int(max(xs)), int(max(ys))
-                    # Split line into words for token-level precision
-                    line_words = text.split()
-                    n_w = len(line_words)
-                    for w_idx, w in enumerate(line_words):
+                    tokens = [t.strip() for t in re.split(r'[:_\s\(\)\[\]/?.,]+', text) if t.strip()]
+                    if not tokens:
+                        tokens = [text]
+                    n_w = len(tokens)
+                    for w_idx, w in enumerate(tokens):
                         sub_x0 = int(x0 + w_idx * (x1 - x0) / max(1, n_w))
                         sub_x1 = int(x0 + (w_idx + 1) * (x1 - x0) / max(1, n_w))
                         entities.append({
@@ -435,35 +457,16 @@ def process_gnn_document(
     if lilt_wrapper is not None and gnn_model is not None and len(entities) > 0:
         try:
             words = [e["text"] for e in entities]
-            dynamic_len = min(512, max(64, int(math.ceil(len(words) * 1.3 / 64.0) * 64)))
-            try:
-                encoding = lilt_wrapper.tokenizer(
-                    [words],
-                    boxes=[scaled_boxes],
-                    is_split_into_words=True,
-                    padding="max_length",
-                    truncation=True,
-                    max_length=dynamic_len,
-                    return_tensors="pt",
-                )
-            except TypeError:
-                encoding = lilt_wrapper.tokenizer(
-                    [words],
-                    boxes=[scaled_boxes],
-                    padding="max_length",
-                    truncation=True,
-                    max_length=dynamic_len,
-                    return_tensors="pt",
-                )
-
-            inputs = {k: v.to(device) for k, v in encoding.items() if k in ("input_ids", "bbox", "attention_mask")}
+            # Use TokenClassifier's robust multi-subword encoding
+            encoded = lilt_wrapper.encode([words], [scaled_boxes])
+            inputs = {k: v.to(device) for k, v in encoded.inputs.items() if k != "labels"}
 
             with torch.inference_mode():
-                outputs = lilt_wrapper.model.lilt(**inputs)
-                hidden_states = outputs.last_hidden_state[0].cpu()  # (seq_len, 768)
+                outputs = lilt_wrapper.model(**inputs, output_hidden_states=True)
+                hidden_states = outputs.hidden_states[-1][0].cpu()  # (seq_len, 768)
 
-                # Extract first-subword representations
-                word_ids = encoding.word_ids(0)
+                # Extract first-subword representations aligned with input words
+                word_ids = encoded.word_ids[0] if isinstance(encoded.word_ids, list) else encoded.word_ids(0)
                 n_words = len(words)
                 node_feats = torch.zeros((n_words, hidden_states.size(-1)), dtype=torch.float32)
                 previous = None
@@ -616,7 +619,7 @@ def create_gnn_demo() -> gr.Blocks:
                         label="Field Confidence Threshold",
                         minimum=0.1,
                         maximum=0.95,
-                        value=0.5,
+                        value=0.25,
                         step=0.05,
                         info="Minimum softmax probability to display an extracted entity tag",
                     )
