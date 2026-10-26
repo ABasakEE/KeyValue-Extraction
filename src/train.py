@@ -1079,7 +1079,8 @@ def _mp_seed_worker(
                 # Poison pill received: worker terminates cleanly
                 break
 
-            log_prefix = f"[GPU {gpu_id} | Seed {seed}]"
+            exp_name = Path(config.output_dir).name if config.output_dir else 'run'
+            log_prefix = f"[{exp_name} | GPU {gpu_id} | Seed {seed}]"
             try:
                 res = train_single_seed(
                     seed=seed,
@@ -1134,7 +1135,8 @@ def _mp_matched_worker(
 
             regime, fold_idx, seed = task
             tag = f"{regime}/fold{fold_idx}/seed{seed}"
-            log_prefix = f"[GPU {gpu_id} | {tag}]"
+            exp_name = Path(config.output_dir).name if config.output_dir else 'run'
+            log_prefix = f"[{exp_name} | GPU {gpu_id} | {tag}]"
             run_dir = output_dir / f"{regime}_fold{fold_idx}_seed{seed}"
             result_file = run_dir / "result.json"
 
@@ -1307,7 +1309,30 @@ def main() -> None:
         seeds = [int(s.strip()) for s in str(args.seed).split(",") if s.strip()]
     else:
         seeds = list(config.seeds)
-    print(f"[*] Backbone: {config.backbone} | Dataset: {config.dataset} | Task: {config.task} | Seeds: {seeds}")
+
+    exp_name = Path(config.output_dir).name if config.output_dir else Path(args.config).stem
+    print(f"\n{'='*75}", flush=True)
+    print(f"[*] ACTIVE EXPERIMENT / ABLATION: {exp_name}", flush=True)
+    print(f"[*] Config: {args.config} | Protocol: {args.protocol} | Output: {config.output_dir}", flush=True)
+    print(f"[*] Backbone: {config.backbone} | DANN: {getattr(config, 'adversarial_dann', False)} | Sliding Window: {getattr(config, 'sliding_window', False)} | Jitter: {getattr(config, 'coordinate_jitter', False)}", flush=True)
+    print(f"[*] Task: {config.task} | Seeds: {seeds}", flush=True)
+    print(f"{'='*75}\n", flush=True)
+
+    try:
+        Path("current_run.txt").write_text(
+            f"Active Experiment: {exp_name}\n"
+            f"Config: {args.config}\n"
+            f"Output Dir: {config.output_dir}\n"
+            f"Protocol: {args.protocol}\n"
+            f"Backbone: {config.backbone}\n"
+            f"DANN: {getattr(config, 'adversarial_dann', False)}\n"
+            f"Sliding Window: {getattr(config, 'sliding_window', False)}\n"
+            f"Coordinate Jitter: {getattr(config, 'coordinate_jitter', False)}\n"
+            f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}\n",
+            encoding="utf-8",
+        )
+    except Exception:
+        pass
     if config.task == "joint":
         print(f"[*] Spatial Features: {config.spatial_in_features}D (Geo: {config.use_geometry}, Contain: {config.use_containment}, LOS: {config.use_line_of_sight}, Typo: {config.use_typography}) | Loss: {config.loss_type} | 1-to-1: {config.decode_one_to_one}")
 
@@ -1386,7 +1411,7 @@ def main() -> None:
                     id2label=id2label,
                     device=device,
                     output_dir=output_dir,
-                    log_prefix=f"[Seed {seed}]",
+                    log_prefix=f"[{exp_name} | Seed {seed}]",
                 )
                 runs.append(res)
                 save_summary(runs, config, output_dir)
@@ -1544,8 +1569,9 @@ def main() -> None:
                     set_seed(seed)
 
                     model = build_model(config, len(label_list), id2label)
+                    log_prefix = f"[{exp_name} | {tag}]"
                     result = train_one(
-                        model, split.train, split.val, split.test, config, device, checkpoint_dir=run_dir
+                        model, split.train, split.val, split.test, config, device, checkpoint_dir=run_dir, log_prefix=log_prefix
                     )
                     result["seed"] = seed
                     result["fold"] = fold_idx
