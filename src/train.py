@@ -124,6 +124,7 @@ class TrainConfig:
     dann_weight: float = 0.1
     dann_gamma: float = 10.0
     dann_hidden_dim: int = 256
+    num_templates: int = 32
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -935,7 +936,7 @@ def load_dataset(config: TrainConfig):
     raise NotImplementedError(f"Unknown dataset {config.dataset!r}. Supported: 'funsd', 'vrdu', 'xfund'.")
 
 
-def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], num_templates: int = 4):
+def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], num_templates: int | None = None):
     if config.task == "joint":
         return JointFormExtractor(
             backbone=config.backbone,
@@ -965,9 +966,10 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], 
             from models.dann import DomainAdversarialModel
         except ImportError:
             from src.models.dann import DomainAdversarialModel
+        n_templates = num_templates if num_templates is not None else getattr(config, "num_templates", 32)
         return DomainAdversarialModel(
             base_classifier=base,
-            num_templates=num_templates,
+            num_templates=n_templates,
             hidden_dim=768,
             discriminator_hidden_dim=getattr(config, "dann_hidden_dim", 256),
             domain_loss_weight=getattr(config, "dann_weight", 0.1),
