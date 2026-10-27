@@ -23,12 +23,12 @@ from models.dann import compute_dann_alpha
 from train import FormDataset, TrainConfig, build_model, make_collator, predict
 
 
-def create_smoke_examples() -> list[VrduExample]:
+def create_smoke_examples(is_cpu: bool = False) -> list[VrduExample]:
     """Create 4 mock VRDU documents with multi-page structure and different template IDs."""
     examples = []
     templates = ["Amendment", "Dissemination_Report", "Short-Form", "Amendment"]
     for i in range(4):
-        n_words = 60 if i % 2 == 0 else 400  # Exercise sliding window if enabled
+        n_words = (30 if i % 2 == 0 else 80) if is_cpu else (60 if i % 2 == 0 else 400)
         words = [f"word_{k}" for k in range(n_words)]
         boxes = [[(k * 15) % 800, (k * 10) % 900, ((k * 15) % 800) + 50, ((k * 10) % 900) + 20] for k in range(n_words)]
         ner_tags = [(k % 7) for k in range(n_words)]
@@ -50,7 +50,11 @@ def run_smoke_test(config_path: str | Path, device: torch.device) -> bool:
     print(f"{'='*70}")
 
     config = TrainConfig.from_yaml(config_path)
-    print(f"    Backbone: {config.backbone} | DANN: {getattr(config, 'adversarial_dann', False)} | Sliding Window: {getattr(config, 'sliding_window', False)}")
+    if device.type == "cpu":
+        config.max_length = min(config.max_length, 48)
+        config.window_size = min(getattr(config, "window_size", 32), 32)
+        config.window_overlap = min(getattr(config, "window_overlap", 16), 16)
+    print(f"    Backbone: {config.backbone} | Graph-BROS: {getattr(config, 'use_graph_bros', False)} | DANN: {getattr(config, 'adversarial_dann', False)} | Sliding Window: {getattr(config, 'sliding_window', False)}")
 
     label_list = [
         "O",
@@ -69,10 +73,12 @@ def run_smoke_test(config_path: str | Path, device: torch.device) -> bool:
     model_to_optimize = model if hasattr(model, "parameters") else model.model
     model_to_optimize.to(device)
     model_to_optimize.train()
-    print("    [+] Model built and loaded to device successfully.")
+    total_p = sum(p.numel() for p in model_to_optimize.parameters())
+    train_p = sum(p.numel() for p in model_to_optimize.parameters() if p.requires_grad)
+    print(f"    [+] Model built and loaded to device ({train_p:,} / {total_p:,} trainable params, {100.0 * train_p / max(1, total_p):.2f}%).")
 
     # 2. Prepare examples and collation
-    raw_examples = create_smoke_examples()
+    raw_examples = create_smoke_examples(is_cpu=(device.type == "cpu"))
     train_examples = raw_examples[:2]
     val_examples = raw_examples[2:]
 
@@ -114,7 +120,8 @@ def run_smoke_test(config_path: str | Path, device: torch.device) -> bool:
     print(f"    [+] DataLoaders initialized ({len(train_examples)} train chunks, {len(val_examples)} val chunks).")
 
     # 3. Test 1-step Training (Forward + Backward + Optimizer step)
-    optimizer = torch.optim.AdamW(model_to_optimize.parameters(), lr=1e-5)
+    trainable_params = [p for p in model_to_optimize.parameters() if p.requires_grad]
+    optimizer = torch.optim.AdamW(trainable_params, lr=1e-4)
     batch_data = next(iter(train_loader))
 
     if is_dann:
@@ -165,6 +172,7 @@ def main():
             "configs/vrdu_track1_bros.yaml",
             "configs/vrdu_dann_lilt.yaml",
             "configs/vrdu_dann_bros.yaml",
+            "configs/vrdu_graph_bros.yaml",
         ],
         help="List of YAML config paths to test",
     )

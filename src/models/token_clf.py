@@ -68,9 +68,14 @@ class TokenClassifier:
             id2label=id2label,
             label2id={v: k for k, v in id2label.items()},
         )
-        self.model = AutoModelForTokenClassification.from_pretrained(
-            checkpoint, config=config, ignore_mismatched_sizes=True
-        )
+        try:
+            self.model = AutoModelForTokenClassification.from_pretrained(
+                checkpoint, config=config, ignore_mismatched_sizes=True, low_cpu_mem_usage=True
+            )
+        except Exception:
+            self.model = AutoModelForTokenClassification.from_pretrained(
+                checkpoint, config=config, ignore_mismatched_sizes=True
+            )
 
     def to(self, *args, **kwargs):
         self.model.to(*args, **kwargs)

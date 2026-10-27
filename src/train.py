@@ -21,6 +21,7 @@ import argparse
 import json
 import queue
 import random
+import time
 from dataclasses import dataclass
 from pathlib import Path
 import sys
@@ -129,6 +130,15 @@ class TrainConfig:
     dann_hidden_dim: int = 256
     num_templates: int = 32
     save_weights: bool = True
+    use_graph_bros: bool = False
+    lora_r: int = 8
+    lora_alpha: float = 16.0
+    lora_dropout: float = 0.05
+    beta_skeleton: float = 1.0
+    graph_eps: float = 1e-9
+    merge_spans: bool = True
+    gradient_checkpointing: bool = False
+    max_folds: int | None = None
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -760,7 +770,8 @@ def train_one(
         # =========================================================================
         # STANDARD SINGLE-STAGE TRAINING WITH PATIENCE EARLY STOPPING
         # =========================================================================
-        optimizer = torch.optim.AdamW(model_to_optimize.parameters(), lr=config.lr, weight_decay=config.weight_decay)
+        trainable_params = [p for p in model_to_optimize.parameters() if p.requires_grad]
+        optimizer = torch.optim.AdamW(trainable_params, lr=config.lr, weight_decay=config.weight_decay)
         total_steps = max(1, len(train_loader) * config.epochs)
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
             optimizer, max_lr=config.lr, total_steps=total_steps, pct_start=config.warmup_ratio, anneal_strategy="linear"
@@ -793,7 +804,7 @@ def train_one(
                     loss = model.model(**inputs).loss
 
                 loss.backward()
-                torch.nn.utils.clip_grad_norm_(model_to_optimize.parameters(), 1.0)
+                torch.nn.utils.clip_grad_norm_(trainable_params, 1.0)
                 optimizer.step()
                 scheduler.step()
                 optimizer.zero_grad()
@@ -973,6 +984,23 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], 
             link_threshold=getattr(config, "link_threshold", 0.5),
         )
     base = TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
+    if getattr(config, "use_graph_bros", False):
+        try:
+            from models.graph_bros import GraphBrosForTokenClassification
+        except ImportError:
+            from src.models.graph_bros import GraphBrosForTokenClassification
+        base = GraphBrosForTokenClassification(
+            base_classifier=base,
+            lora_r=getattr(config, "lora_r", 8),
+            lora_alpha=getattr(config, "lora_alpha", 16.0),
+            lora_dropout=getattr(config, "lora_dropout", 0.05),
+            beta=getattr(config, "beta_skeleton", 1.0),
+            eps=getattr(config, "graph_eps", 1e-9),
+            merge_spans=getattr(config, "merge_spans", True),
+            loss_type=getattr(config, "loss_type", "focal"),
+            focal_gamma=getattr(config, "focal_gamma", 2.0),
+            gradient_checkpointing=getattr(config, "gradient_checkpointing", False),
+        )
     if getattr(config, "adversarial_dann", False):
         try:
             from models.dann import DomainAdversarialModel
@@ -1260,6 +1288,8 @@ def main() -> None:
                         help="Force saving best_model.pt weights (~500MB per fold)")
     parser.add_argument("--no-save-weights", action="store_true", default=False,
                         help="Disable saving best_model.pt weights to disk to conserve disk space on Kaggle")
+    parser.add_argument("--max-folds", type=int, default=None,
+                        help="Fast-track option: limit number of folds per regime in matched protocol (e.g. 2)")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
@@ -1300,6 +1330,8 @@ def main() -> None:
         config.save_weights = False
     elif args.save_weights:
         config.save_weights = True
+    if args.max_folds is not None:
+        config.max_folds = args.max_folds
 
     # Dynamically compute spatial_in_features to match active ablation groups
     if config.task == "joint" and config.use_spatial_relations:
@@ -1331,8 +1363,8 @@ def main() -> None:
     print(f"\n{'='*75}", flush=True)
     print(f"[*] ACTIVE EXPERIMENT / ABLATION: {exp_name}", flush=True)
     print(f"[*] Config: {args.config} | Protocol: {args.protocol} | Output: {config.output_dir}", flush=True)
-    print(f"[*] Backbone: {config.backbone} | DANN: {getattr(config, 'adversarial_dann', False)} | Sliding Window: {getattr(config, 'sliding_window', False)} | Jitter: {getattr(config, 'coordinate_jitter', False)}", flush=True)
-    print(f"[*] Task: {config.task} | Seeds: {seeds}", flush=True)
+    print(f"[*] Backbone: {config.backbone} | Graph-BROS: {getattr(config, 'use_graph_bros', False)} | DANN: {getattr(config, 'adversarial_dann', False)} | Sliding Window: {getattr(config, 'sliding_window', False)} | Jitter: {getattr(config, 'coordinate_jitter', False)}", flush=True)
+    print(f"[*] Task: {config.task} | Seeds: {seeds} | Max Folds: {getattr(config, 'max_folds', 'all')}", flush=True)
     print(f"{'='*75}\n", flush=True)
 
     try:
@@ -1342,9 +1374,11 @@ def main() -> None:
             f"Output Dir: {config.output_dir}\n"
             f"Protocol: {args.protocol}\n"
             f"Backbone: {config.backbone}\n"
+            f"Graph-BROS: {getattr(config, 'use_graph_bros', False)}\n"
             f"DANN: {getattr(config, 'adversarial_dann', False)}\n"
             f"Sliding Window: {getattr(config, 'sliding_window', False)}\n"
             f"Coordinate Jitter: {getattr(config, 'coordinate_jitter', False)}\n"
+            f"Max Folds: {getattr(config, 'max_folds', 'all')}\n"
             f"Timestamp: {time.strftime('%Y-%m-%d %H:%M:%S')}\n",
             encoding="utf-8",
         )
@@ -1464,6 +1498,11 @@ def main() -> None:
             protocol = load_deepform_protocol(examples, splits_dir, n_train=n)
         else:
             protocol = matched_size_protocol(examples, n_train=n, seed=seeds[0])
+
+        if getattr(config, "max_folds", None) is not None and config.max_folds > 0:
+            for regime in ("MTL", "UTL"):
+                protocol[regime] = protocol[regime][: config.max_folds]
+            print(f"[*] Fast-Track Protocol active: limiting to {config.max_folds} fold(s) per regime.", flush=True)
 
         all_results: dict[str, list[dict]] = {"MTL": [], "UTL": []}
 
