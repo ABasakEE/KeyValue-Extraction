@@ -128,6 +128,7 @@ class TrainConfig:
     dann_gamma: float = 10.0
     dann_hidden_dim: int = 256
     num_templates: int = 32
+    save_weights: bool = True
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -732,7 +733,11 @@ def train_one(
                 best_val_score = val_score
                 best_state = {k: v.detach().cpu().clone() for k, v in model.state_dict().items()}
                 if checkpoint_dir is not None:
-                    torch.save(best_state, checkpoint_dir / "best_model.pt")
+                    if getattr(config, "save_weights", True):
+                        try:
+                            torch.save(best_state, checkpoint_dir / "best_model.pt")
+                        except Exception as e:
+                            print(f"  {pfx}[Warning] Failed to save best_model.pt ({e}); continuing in-memory.", flush=True)
                     meta = {
                         "phase": 3,
                         "epoch": ep + 1,
@@ -820,7 +825,11 @@ def train_one(
                 best_val_score = val_score
                 best_state = {k: v.detach().cpu().clone() for k, v in model_to_optimize.state_dict().items()}
                 if checkpoint_dir is not None:
-                    torch.save(best_state, checkpoint_dir / "best_model.pt")
+                    if getattr(config, "save_weights", True):
+                        try:
+                            torch.save(best_state, checkpoint_dir / "best_model.pt")
+                        except Exception as e:
+                            print(f"  {pfx}[Warning] Failed to save best_model.pt ({e}); continuing in-memory.", flush=True)
                     meta = {
                         "epoch": epoch + 1,
                         "best_val_score": round(best_val_score, 4),
@@ -1247,6 +1256,10 @@ def main() -> None:
     parser.add_argument("--window-overlap", type=int, default=None,
                         help="Sliding window overlap (default: 128)")
     parser.add_argument("--anchor-mode", choices=["none", "centroid", "content_box", "cluster"], default=None, help="Track 1 ablation: anchoring strategy")
+    parser.add_argument("--save-weights", action="store_true", default=False,
+                        help="Force saving best_model.pt weights (~500MB per fold)")
+    parser.add_argument("--no-save-weights", action="store_true", default=False,
+                        help="Disable saving best_model.pt weights to disk to conserve disk space on Kaggle")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
@@ -1283,6 +1296,10 @@ def main() -> None:
     if args.anchor_mode is not None:
         config.anchor_mode = args.anchor_mode
         config.relative_coords = (args.anchor_mode != "none")
+    if args.no_save_weights:
+        config.save_weights = False
+    elif args.save_weights:
+        config.save_weights = True
 
     # Dynamically compute spatial_in_features to match active ablation groups
     if config.task == "joint" and config.use_spatial_relations:

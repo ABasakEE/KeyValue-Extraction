@@ -20,4 +20,5 @@ max_length: 512
 
 seeds: [13, 21, 42]
 n_train: 200                  # match FormNet's published 200-doc condition
+save_weights: false
 output_dir: results/vrdu_bros

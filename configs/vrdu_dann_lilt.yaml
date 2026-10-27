@@ -36,4 +36,5 @@ relative_coords: true
 
 seeds: [13, 21, 42]
 n_train: 200
+save_weights: false
 output_dir: results/vrdu_dann_lilt
