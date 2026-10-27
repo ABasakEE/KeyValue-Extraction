@@ -1,0 +1,20 @@
+{
+  "protocol": "matched",
+  "n_train": 200,
+  "config": {
+    "backbone": "lilt",
+    "dataset": "vrdu",
+    "subcorpus": "registration-form",
+    "adversarial_dann": true,
+    "sliding_window": true,
+    "coordinate_jitter": true,
+    "relative_coords": true,
+    "output_dir": "results/vrdu_dann_lilt"
+  },
+  "gap": {
+    "mtl_mean_f1": 0.9112,
+    "utl_mean_f1": 0.6479,
+    "gap_f1": 0.2633,
+    "relative_drop_pct": 28.9
+  }
+}

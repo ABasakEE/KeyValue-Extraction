@@ -1,0 +1,7 @@
+Architecture / Method,MTL (Seen) F1,UTL (Unseen) F1,Gap (MTL - UTL),Relative Drop (%),Status
+1. Baseline LiLT (Absolute Coordinates),0.9156,0.6424,0.2731,29.8,Benchmark Reference
+2. Standalone RSA-GNN (Geometric Graph),0.8597,0.4205,0.4392,51.1,Benchmark Reference
+3. BROS Baseline (Pairwise Relative Spatial PE),0.227,0.0748,0.1522,67.0,Completed (Exp 1)
+4. BROS + 384-tok Window + Coordinate Jitter,0.9236,0.7127,0.211,22.8,Completed (Exp 2)
+5. DANN-LiLT (Template-Adversarial Regularization),0.9112,0.6479,0.2633,28.9,Completed (Exp 3)
+6. DANN-BROS (Relative Layout + Adversarial Invariance),0.918,0.6959,0.222,24.2,Completed (Exp 4)

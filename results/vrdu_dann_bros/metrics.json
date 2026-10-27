@@ -1,0 +1,2118 @@
+{
+  "config": {
+    "backbone": "bros",
+    "dataset": "vrdu",
+    "data_root": "data/vrdu",
+    "task": "tagging",
+    "linking_loss_weight": 1.0,
+    "pos_weight": 10.0,
+    "use_spatial_relations": true,
+    "spatial_in_features": 16,
+    "use_geometry": true,
+    "use_containment": true,
+    "use_line_of_sight": true,
+    "use_typography": true,
+    "loss_type": "focal",
+    "focal_gamma": 2.0,
+    "focal_alpha": 0.75,
+    "masking_mode": "soft",
+    "k_neighbors": 0,
+    "fallback_top_k": 0,
+    "decode_one_to_one": false,
+    "link_threshold": 0.5,
+    "languages": [
+      "es",
+      "fr",
+      "de",
+      "it",
+      "pt"
+    ],
+    "curriculum": false,
+    "patience_tolerance": 3,
+    "min_delta": 0.001,
+    "phase1_epochs": 10,
+    "phase2_epochs": 8,
+    "phase3_epochs": 10,
+    "max_phase1_epochs": 10,
+    "max_phase2_epochs": 8,
+    "max_phase3_epochs": 10,
+    "epochs": 20,
+    "batch_size": 4,
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 512,
+    "seeds": [
+      13,
+      21,
+      42
+    ],
+    "subcorpus": "registration-form",
+    "n_train": 200,
+    "output_dir": "results/vrdu_dann_bros",
+    "sliding_window": true,
+    "window_size": 384,
+    "window_overlap": 128,
+    "coordinate_jitter": true,
+    "jitter_shift": 80,
+    "jitter_scale_min": 0.85,
+    "jitter_scale_max": 1.15,
+    "relative_coords": true,
+    "anchor_mode": "content_box",
+    "adversarial_dann": true,
+    "dann_weight": 0.1,
+    "dann_gamma": 10.0,
+    "dann_hidden_dim": 256,
+    "num_templates": 32,
+    "save_weights": false
+  },
+  "protocol": "matched",
+  "n_train": 200,
+  "MTL": [
+    {
+      "test": {
+        "precision": 0.9155,
+        "recall": 0.9317,
+        "f1": 0.9236,
+        "support": 362369,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9005,
+            "recall": 0.9223,
+            "f1": 0.9113,
+            "support": 373
+          },
+          "foreign_principle_name": {
+            "precision": 0.9083,
+            "recall": 0.9204,
+            "f1": 0.9143,
+            "support": 226
+          },
+          "registrant_name": {
+            "precision": 0.9254,
+            "recall": 0.9474,
+            "f1": 0.9363,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.9639,
+            "recall": 0.9894,
+            "f1": 0.9765,
+            "support": 378
+          },
+          "signer_name": {
+            "precision": 0.8947,
+            "recall": 0.8854,
+            "f1": 0.8901,
+            "support": 288
+          },
+          "signer_title": {
+            "precision": 0.8348,
+            "recall": 0.8571,
+            "f1": 0.8458,
+            "support": 112
+          }
+        }
+      },
+      "best_val_f1": 0.9387,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7864,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2498,
+          "val_f1": 0.823
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1714,
+          "val_f1": 0.904
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1421,
+          "val_f1": 0.9212
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1299,
+          "val_f1": 0.8365
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1228,
+          "val_f1": 0.9348
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1166,
+          "val_f1": 0.8783
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1142,
+          "val_f1": 0.9387
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1131,
+          "val_f1": 0.9166
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1114,
+          "val_f1": 0.9203
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.1096,
+          "val_f1": 0.9365
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 74,
+        "total_i_tags": 4589,
+        "rate": 0.0161
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9236 == independent F1=0.9236 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9179 (spread 0.0057)\n  malformed I- tags: 74/4589 (1.6%)",
+      "seed": 13,
+      "fold": 0,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9005,
+        "recall": 0.9271,
+        "f1": 0.9136,
+        "support": 362369,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8831,
+            "recall": 0.9115,
+            "f1": 0.8971,
+            "support": 373
+          },
+          "foreign_principle_name": {
+            "precision": 0.8765,
+            "recall": 0.9425,
+            "f1": 0.9083,
+            "support": 226
+          },
+          "registrant_name": {
+            "precision": 0.9115,
+            "recall": 0.9211,
+            "f1": 0.9162,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.961,
+            "recall": 0.9788,
+            "f1": 0.9699,
+            "support": 378
+          },
+          "signer_name": {
+            "precision": 0.8792,
+            "recall": 0.9097,
+            "f1": 0.8942,
+            "support": 288
+          },
+          "signer_title": {
+            "precision": 0.8246,
+            "recall": 0.8393,
+            "f1": 0.8319,
+            "support": 112
+          }
+        }
+      },
+      "best_val_f1": 0.9353,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7721,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2374,
+          "val_f1": 0.7876
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1691,
+          "val_f1": 0.8878
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1449,
+          "val_f1": 0.9082
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1278,
+          "val_f1": 0.9251
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1215,
+          "val_f1": 0.9035
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1182,
+          "val_f1": 0.9271
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1165,
+          "val_f1": 0.9134
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1139,
+          "val_f1": 0.9353
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1109,
+          "val_f1": 0.9272
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.108,
+          "val_f1": 0.9137
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.107,
+          "val_f1": 0.9342
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 105,
+        "total_i_tags": 4698,
+        "rate": 0.0223
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9136 == independent F1=0.9136 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9003 (spread 0.0134)\n  malformed I- tags: 105/4698 (2.2%)",
+      "seed": 21,
+      "fold": 0,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9359,
+        "recall": 0.9226,
+        "f1": 0.9292,
+        "support": 362369,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9106,
+            "recall": 0.9008,
+            "f1": 0.9057,
+            "support": 373
+          },
+          "foreign_principle_name": {
+            "precision": 0.9292,
+            "recall": 0.9292,
+            "f1": 0.9292,
+            "support": 226
+          },
+          "registrant_name": {
+            "precision": 0.9372,
+            "recall": 0.9421,
+            "f1": 0.9396,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.9867,
+            "recall": 0.9788,
+            "f1": 0.9827,
+            "support": 378
+          },
+          "signer_name": {
+            "precision": 0.9173,
+            "recall": 0.8854,
+            "f1": 0.9011,
+            "support": 288
+          },
+          "signer_title": {
+            "precision": 0.902,
+            "recall": 0.8214,
+            "f1": 0.8598,
+            "support": 112
+          }
+        }
+      },
+      "best_val_f1": 0.9354,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8268,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2348,
+          "val_f1": 0.7542
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.17,
+          "val_f1": 0.8696
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1454,
+          "val_f1": 0.8617
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1307,
+          "val_f1": 0.9199
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1201,
+          "val_f1": 0.9098
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1148,
+          "val_f1": 0.9326
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1133,
+          "val_f1": 0.9354
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1113,
+          "val_f1": 0.9302
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1091,
+          "val_f1": 0.9229
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.1084,
+          "val_f1": 0.9127
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 119,
+        "total_i_tags": 4643,
+        "rate": 0.0256
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9292 == independent F1=0.9292 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9168 (spread 0.0124)\n  malformed I- tags: 119/4643 (2.6%)",
+      "seed": 42,
+      "fold": 0,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9207,
+        "recall": 0.9249,
+        "f1": 0.9228,
+        "support": 363520,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8872,
+            "recall": 0.9105,
+            "f1": 0.8987,
+            "support": 380
+          },
+          "foreign_principle_name": {
+            "precision": 0.9207,
+            "recall": 0.9207,
+            "f1": 0.9207,
+            "support": 227
+          },
+          "registrant_name": {
+            "precision": 0.9554,
+            "recall": 0.9604,
+            "f1": 0.9579,
+            "support": 379
+          },
+          "registration_num": {
+            "precision": 0.9541,
+            "recall": 0.9816,
+            "f1": 0.9677,
+            "support": 381
+          },
+          "signer_name": {
+            "precision": 0.8963,
+            "recall": 0.8582,
+            "f1": 0.8768,
+            "support": 282
+          },
+          "signer_title": {
+            "precision": 0.8585,
+            "recall": 0.8349,
+            "f1": 0.8465,
+            "support": 109
+          }
+        }
+      },
+      "best_val_f1": 0.9351,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7913,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2453,
+          "val_f1": 0.7901
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1745,
+          "val_f1": 0.8827
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1455,
+          "val_f1": 0.9164
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1302,
+          "val_f1": 0.9167
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1229,
+          "val_f1": 0.9149
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.117,
+          "val_f1": 0.9279
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1147,
+          "val_f1": 0.9351
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1108,
+          "val_f1": 0.9089
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1102,
+          "val_f1": 0.9294
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.1088,
+          "val_f1": 0.9211
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 116,
+        "total_i_tags": 4543,
+        "rate": 0.0255
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9228 == independent F1=0.9228 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9095 (spread 0.0133)\n  malformed I- tags: 116/4543 (2.5%)",
+      "seed": 13,
+      "fold": 1,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9032,
+        "recall": 0.9232,
+        "f1": 0.9131,
+        "support": 363520,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8828,
+            "recall": 0.8921,
+            "f1": 0.8874,
+            "support": 380
+          },
+          "foreign_principle_name": {
+            "precision": 0.9159,
+            "recall": 0.9119,
+            "f1": 0.9139,
+            "support": 227
+          },
+          "registrant_name": {
+            "precision": 0.9313,
+            "recall": 0.9657,
+            "f1": 0.9482,
+            "support": 379
+          },
+          "registration_num": {
+            "precision": 0.9467,
+            "recall": 0.979,
+            "f1": 0.9626,
+            "support": 381
+          },
+          "signer_name": {
+            "precision": 0.8781,
+            "recall": 0.8688,
+            "f1": 0.8734,
+            "support": 282
+          },
+          "signer_title": {
+            "precision": 0.7686,
+            "recall": 0.8532,
+            "f1": 0.8087,
+            "support": 109
+          }
+        }
+      },
+      "best_val_f1": 0.9284,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7713,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2295,
+          "val_f1": 0.8008
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.164,
+          "val_f1": 0.8859
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1473,
+          "val_f1": 0.9109
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1341,
+          "val_f1": 0.892
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1221,
+          "val_f1": 0.9078
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1159,
+          "val_f1": 0.917
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1123,
+          "val_f1": 0.9205
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1107,
+          "val_f1": 0.9231
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1103,
+          "val_f1": 0.9284
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.1075,
+          "val_f1": 0.919
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.1078,
+          "val_f1": 0.9216
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.1048,
+          "val_f1": 0.9288
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 120,
+        "total_i_tags": 4631,
+        "rate": 0.0259
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9131 == independent F1=0.9131 (delta 0.00e+00)\n  lenient-IOB2 F1=0.8967 (spread 0.0164)\n  malformed I- tags: 120/4631 (2.6%)",
+      "seed": 21,
+      "fold": 1,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9289,
+        "recall": 0.9061,
+        "f1": 0.9174,
+        "support": 363520,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9278,
+            "recall": 0.8789,
+            "f1": 0.9027,
+            "support": 380
+          },
+          "foreign_principle_name": {
+            "precision": 0.9202,
+            "recall": 0.8634,
+            "f1": 0.8909,
+            "support": 227
+          },
+          "registrant_name": {
+            "precision": 0.9506,
+            "recall": 0.9657,
+            "f1": 0.9581,
+            "support": 379
+          },
+          "registration_num": {
+            "precision": 0.9587,
+            "recall": 0.9738,
+            "f1": 0.9661,
+            "support": 381
+          },
+          "signer_name": {
+            "precision": 0.8881,
+            "recall": 0.844,
+            "f1": 0.8655,
+            "support": 282
+          },
+          "signer_title": {
+            "precision": 0.8627,
+            "recall": 0.8073,
+            "f1": 0.8341,
+            "support": 109
+          }
+        }
+      },
+      "best_val_f1": 0.931,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8295,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2386,
+          "val_f1": 0.8175
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.166,
+          "val_f1": 0.8976
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1498,
+          "val_f1": 0.8911
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1293,
+          "val_f1": 0.9088
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1213,
+          "val_f1": 0.9198
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1168,
+          "val_f1": 0.9224
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1135,
+          "val_f1": 0.931
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.1125,
+          "val_f1": 0.9239
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1102,
+          "val_f1": 0.9133
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.1076,
+          "val_f1": 0.9269
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 108,
+        "total_i_tags": 4474,
+        "rate": 0.0241
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9174 == independent F1=0.9174 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9105 (spread 0.0069)\n  malformed I- tags: 108/4474 (2.4%)",
+      "seed": 42,
+      "fold": 1,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9099,
+        "recall": 0.8883,
+        "f1": 0.899,
+        "support": 360133,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.891,
+            "recall": 0.9005,
+            "f1": 0.8957,
+            "support": 372
+          },
+          "foreign_principle_name": {
+            "precision": 0.9282,
+            "recall": 0.8739,
+            "f1": 0.9002,
+            "support": 222
+          },
+          "registrant_name": {
+            "precision": 0.8889,
+            "recall": 0.9474,
+            "f1": 0.9172,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.9683,
+            "recall": 0.9708,
+            "f1": 0.9695,
+            "support": 377
+          },
+          "signer_name": {
+            "precision": 0.861,
+            "recall": 0.8411,
+            "f1": 0.8509,
+            "support": 302
+          },
+          "signer_title": {
+            "precision": 0.9828,
+            "recall": 0.5182,
+            "f1": 0.6786,
+            "support": 110
+          }
+        }
+      },
+      "best_val_f1": 0.8851,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8045,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2528,
+          "val_f1": 0.7933
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1752,
+          "val_f1": 0.8851
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1451,
+          "val_f1": 0.874
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1323,
+          "val_f1": 0.8783
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.123,
+          "val_f1": 0.8694
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 147,
+        "total_i_tags": 4337,
+        "rate": 0.0339
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8990 == independent F1=0.8990 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9026 (spread 0.0036)\n  malformed I- tags: 147/4337 (3.4%)",
+      "seed": 13,
+      "fold": 2,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9207,
+        "recall": 0.9223,
+        "f1": 0.9215,
+        "support": 360133,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9326,
+            "recall": 0.8925,
+            "f1": 0.9121,
+            "support": 372
+          },
+          "foreign_principle_name": {
+            "precision": 0.922,
+            "recall": 0.9054,
+            "f1": 0.9136,
+            "support": 222
+          },
+          "registrant_name": {
+            "precision": 0.9508,
+            "recall": 0.9658,
+            "f1": 0.9582,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.9816,
+            "recall": 0.9894,
+            "f1": 0.9855,
+            "support": 377
+          },
+          "signer_name": {
+            "precision": 0.8269,
+            "recall": 0.8543,
+            "f1": 0.8404,
+            "support": 302
+          },
+          "signer_title": {
+            "precision": 0.8333,
+            "recall": 0.8636,
+            "f1": 0.8482,
+            "support": 110
+          }
+        }
+      },
+      "best_val_f1": 0.8983,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.782,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2385,
+          "val_f1": 0.6805
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1639,
+          "val_f1": 0.8701
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1508,
+          "val_f1": 0.7888
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1353,
+          "val_f1": 0.8861
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1218,
+          "val_f1": 0.8912
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.119,
+          "val_f1": 0.8983
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.1187,
+          "val_f1": 0.8959
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.114,
+          "val_f1": 0.8797
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.1114,
+          "val_f1": 0.8922
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 97,
+        "total_i_tags": 4280,
+        "rate": 0.0227
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9215 == independent F1=0.9215 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9109 (spread 0.0106)\n  malformed I- tags: 97/4280 (2.3%)",
+      "seed": 21,
+      "fold": 2,
+      "regime": "MTL",
+      "held_out": []
+    },
+    {
+      "test": {
+        "precision": 0.9256,
+        "recall": 0.9172,
+        "f1": 0.9214,
+        "support": 360133,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9122,
+            "recall": 0.922,
+            "f1": 0.9171,
+            "support": 372
+          },
+          "foreign_principle_name": {
+            "precision": 0.8964,
+            "recall": 0.8964,
+            "f1": 0.8964,
+            "support": 222
+          },
+          "registrant_name": {
+            "precision": 0.9633,
+            "recall": 0.9658,
+            "f1": 0.9645,
+            "support": 380
+          },
+          "registration_num": {
+            "precision": 0.9789,
+            "recall": 0.9841,
+            "f1": 0.9815,
+            "support": 377
+          },
+          "signer_name": {
+            "precision": 0.8521,
+            "recall": 0.8013,
+            "f1": 0.8259,
+            "support": 302
+          },
+          "signer_title": {
+            "precision": 0.9048,
+            "recall": 0.8636,
+            "f1": 0.8837,
+            "support": 110
+          }
+        }
+      },
+      "best_val_f1": 0.9108,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8255,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2402,
+          "val_f1": 0.7952
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1596,
+          "val_f1": 0.8927
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1527,
+          "val_f1": 0.9108
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.1339,
+          "val_f1": 0.899
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.1226,
+          "val_f1": 0.8846
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.1196,
+          "val_f1": 0.8811
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 103,
+        "total_i_tags": 4292,
+        "rate": 0.024
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9214 == independent F1=0.9214 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9076 (spread 0.0138)\n  malformed I- tags: 103/4292 (2.4%)",
+      "seed": 42,
+      "fold": 2,
+      "regime": "MTL",
+      "held_out": []
+    }
+  ],
+  "UTL": [
+    {
+      "test": {
+        "precision": 0.9042,
+        "recall": 0.8103,
+        "f1": 0.8547,
+        "support": 575978,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9703,
+            "recall": 0.7101,
+            "f1": 0.8201,
+            "support": 690
+          },
+          "foreign_principle_name": {
+            "precision": 0.1111,
+            "recall": 0.1,
+            "f1": 0.1053,
+            "support": 20
+          },
+          "registrant_name": {
+            "precision": 0.8803,
+            "recall": 0.9377,
+            "f1": 0.9081,
+            "support": 706
+          },
+          "registration_num": {
+            "precision": 0.972,
+            "recall": 0.9734,
+            "f1": 0.9727,
+            "support": 713
+          },
+          "signer_name": {
+            "precision": 0.8327,
+            "recall": 0.6705,
+            "f1": 0.7428,
+            "support": 616
+          },
+          "signer_title": {
+            "precision": 0.7553,
+            "recall": 0.5338,
+            "f1": 0.6256,
+            "support": 133
+          }
+        }
+      },
+      "best_val_f1": 0.9432,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7747,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.1738,
+          "val_f1": 0.8825
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0976,
+          "val_f1": 0.941
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0785,
+          "val_f1": 0.9432
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0722,
+          "val_f1": 0.9077
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0685,
+          "val_f1": 0.9246
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0659,
+          "val_f1": 0.9273
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 244,
+        "total_i_tags": 5488,
+        "rate": 0.0445
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8547 == independent F1=0.8547 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7983 (spread 0.0564)\n  malformed I- tags: 244/5488 (4.5%)",
+      "seed": 13,
+      "fold": 0,
+      "regime": "UTL",
+      "held_out": [
+        "Amendment"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.8937,
+        "recall": 0.8124,
+        "f1": 0.8511,
+        "support": 575978,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8911,
+            "recall": 0.7116,
+            "f1": 0.7913,
+            "support": 690
+          },
+          "foreign_principle_name": {
+            "precision": 0.2,
+            "recall": 0.1,
+            "f1": 0.1333,
+            "support": 20
+          },
+          "registrant_name": {
+            "precision": 0.9396,
+            "recall": 0.9037,
+            "f1": 0.9213,
+            "support": 706
+          },
+          "registration_num": {
+            "precision": 0.9886,
+            "recall": 0.9748,
+            "f1": 0.9816,
+            "support": 713
+          },
+          "signer_name": {
+            "precision": 0.7651,
+            "recall": 0.7403,
+            "f1": 0.7525,
+            "support": 616
+          },
+          "signer_title": {
+            "precision": 0.7273,
+            "recall": 0.4211,
+            "f1": 0.5333,
+            "support": 133
+          }
+        }
+      },
+      "best_val_f1": 0.9474,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7559,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.1934,
+          "val_f1": 0.8138
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1035,
+          "val_f1": 0.9309
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0812,
+          "val_f1": 0.9402
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0734,
+          "val_f1": 0.9474
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0691,
+          "val_f1": 0.9381
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0667,
+          "val_f1": 0.9477
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0633,
+          "val_f1": 0.9285
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 298,
+        "total_i_tags": 5235,
+        "rate": 0.0569
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8511 == independent F1=0.8511 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7985 (spread 0.0526)\n  malformed I- tags: 298/5235 (5.7%)",
+      "seed": 21,
+      "fold": 0,
+      "regime": "UTL",
+      "held_out": [
+        "Amendment"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.8478,
+        "recall": 0.8322,
+        "f1": 0.8399,
+        "support": 575978,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8842,
+            "recall": 0.7304,
+            "f1": 0.8,
+            "support": 690
+          },
+          "foreign_principle_name": {
+            "precision": 0.0417,
+            "recall": 0.05,
+            "f1": 0.0455,
+            "support": 20
+          },
+          "registrant_name": {
+            "precision": 0.8895,
+            "recall": 0.9122,
+            "f1": 0.9007,
+            "support": 706
+          },
+          "registration_num": {
+            "precision": 0.9799,
+            "recall": 0.9579,
+            "f1": 0.9688,
+            "support": 713
+          },
+          "signer_name": {
+            "precision": 0.695,
+            "recall": 0.7841,
+            "f1": 0.7368,
+            "support": 616
+          },
+          "signer_title": {
+            "precision": 0.6957,
+            "recall": 0.6015,
+            "f1": 0.6452,
+            "support": 133
+          }
+        }
+      },
+      "best_val_f1": 0.9486,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7725,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.1837,
+          "val_f1": 0.8002
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1107,
+          "val_f1": 0.939
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0818,
+          "val_f1": 0.9348
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0743,
+          "val_f1": 0.9313
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0709,
+          "val_f1": 0.947
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.067,
+          "val_f1": 0.9403
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.064,
+          "val_f1": 0.9454
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0627,
+          "val_f1": 0.9486
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0611,
+          "val_f1": 0.9428
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0593,
+          "val_f1": 0.9454
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0588,
+          "val_f1": 0.9391
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 329,
+        "total_i_tags": 5942,
+        "rate": 0.0554
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8399 == independent F1=0.8399 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7844 (spread 0.0555)\n  malformed I- tags: 329/5942 (5.5%)",
+      "seed": 42,
+      "fold": 0,
+      "regime": "UTL",
+      "held_out": [
+        "Amendment"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.7658,
+        "recall": 0.5561,
+        "f1": 0.6443,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9132,
+            "recall": 0.8443,
+            "f1": 0.8774,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.418,
+            "recall": 0.1349,
+            "f1": 0.204,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.5433,
+            "recall": 0.5604,
+            "f1": 0.5517,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9579,
+            "recall": 0.9927,
+            "f1": 0.975,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.7254,
+            "recall": 0.4338,
+            "f1": 0.5429,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.8204,
+            "recall": 0.3333,
+            "f1": 0.474,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.9225,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7814,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.186,
+          "val_f1": 0.8606
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.121,
+          "val_f1": 0.8564
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0994,
+          "val_f1": 0.8377
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0865,
+          "val_f1": 0.8948
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0827,
+          "val_f1": 0.9009
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0809,
+          "val_f1": 0.9074
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0786,
+          "val_f1": 0.9083
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.076,
+          "val_f1": 0.8972
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0748,
+          "val_f1": 0.9119
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0745,
+          "val_f1": 0.9162
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0728,
+          "val_f1": 0.9076
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0736,
+          "val_f1": 0.9204
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0743,
+          "val_f1": 0.9225
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.0735,
+          "val_f1": 0.9185
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0722,
+          "val_f1": 0.9121
+        },
+        {
+          "epoch": 17,
+          "train_loss": 0.0724,
+          "val_f1": 0.9174
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 257,
+        "total_i_tags": 2891,
+        "rate": 0.0889
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6443 == independent F1=0.6443 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6194 (spread 0.0249)\n  malformed I- tags: 257/2891 (8.9%)",
+      "seed": 13,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.8936,
+        "recall": 0.614,
+        "f1": 0.7278,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9674,
+            "recall": 0.4331,
+            "f1": 0.5983,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.1702,
+            "recall": 0.0212,
+            "f1": 0.0376,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.9385,
+            "recall": 0.8116,
+            "f1": 0.8705,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9491,
+            "recall": 0.9927,
+            "f1": 0.9704,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.8031,
+            "recall": 0.6397,
+            "f1": 0.7121,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.9235,
+            "recall": 0.7348,
+            "f1": 0.8184,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.9164,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7495,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.1875,
+          "val_f1": 0.8891
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.122,
+          "val_f1": 0.903
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.102,
+          "val_f1": 0.906
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0906,
+          "val_f1": 0.9164
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0825,
+          "val_f1": 0.9168
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0796,
+          "val_f1": 0.8903
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0772,
+          "val_f1": 0.9014
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 256,
+        "total_i_tags": 2665,
+        "rate": 0.0961
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.7278 == independent F1=0.7278 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6919 (spread 0.0359)\n  malformed I- tags: 256/2665 (9.6%)",
+      "seed": 21,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.7664,
+        "recall": 0.5429,
+        "f1": 0.6356,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9412,
+            "recall": 0.6618,
+            "f1": 0.7771,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.5539,
+            "recall": 0.4894,
+            "f1": 0.5197,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.6745,
+            "recall": 0.9058,
+            "f1": 0.7732,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9688,
+            "recall": 0.9782,
+            "f1": 0.9735,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.4868,
+            "recall": 0.0907,
+            "f1": 0.1529,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.9245,
+            "recall": 0.1192,
+            "f1": 0.2112,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.919,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.7817,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.198,
+          "val_f1": 0.8559
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1322,
+          "val_f1": 0.8583
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1034,
+          "val_f1": 0.9004
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.092,
+          "val_f1": 0.9033
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0848,
+          "val_f1": 0.8885
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0808,
+          "val_f1": 0.919
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0778,
+          "val_f1": 0.9131
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0759,
+          "val_f1": 0.9194
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0763,
+          "val_f1": 0.9131
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 340,
+        "total_i_tags": 3832,
+        "rate": 0.0887
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6356 == independent F1=0.6356 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6092 (spread 0.0264)\n  malformed I- tags: 340/3832 (8.9%)",
+      "seed": 42,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.6724,
+        "recall": 0.6422,
+        "f1": 0.657,
+        "support": 961898,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9253,
+            "recall": 0.8943,
+            "f1": 0.9096,
+            "support": 776
+          },
+          "foreign_principle_name": {
+            "precision": 0.3636,
+            "recall": 0.0218,
+            "f1": 0.0411,
+            "support": 734
+          },
+          "registrant_name": {
+            "precision": 0.3808,
+            "recall": 0.6087,
+            "f1": 0.4685,
+            "support": 782
+          },
+          "registration_num": {
+            "precision": 0.9572,
+            "recall": 0.8839,
+            "f1": 0.9191,
+            "support": 784
+          },
+          "signer_name": {
+            "precision": 0.7962,
+            "recall": 0.8673,
+            "f1": 0.8302,
+            "support": 437
+          },
+          "signer_title": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          }
+        }
+      },
+      "best_val_f1": 0.9412,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.8761,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.25,
+          "val_f1": 0.5091
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1354,
+          "val_f1": 0.8713
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1007,
+          "val_f1": 0.9258
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0911,
+          "val_f1": 0.9412
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0831,
+          "val_f1": 0.9368
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0821,
+          "val_f1": 0.9271
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0761,
+          "val_f1": 0.9235
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 492,
+        "total_i_tags": 6229,
+        "rate": 0.079
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6570 == independent F1=0.6570 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6091 (spread 0.0479)\n  malformed I- tags: 492/6229 (7.9%)",
+      "seed": 13,
+      "fold": 2,
+      "regime": "UTL",
+      "held_out": [
+        "Short-Form"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.4979,
+        "recall": 0.6004,
+        "f1": 0.5444,
+        "support": 961898,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9206,
+            "recall": 0.9111,
+            "f1": 0.9158,
+            "support": 776
+          },
+          "foreign_principle_name": {
+            "precision": 0.3158,
+            "recall": 0.0163,
+            "f1": 0.0311,
+            "support": 734
+          },
+          "registrant_name": {
+            "precision": 0.2158,
+            "recall": 0.3286,
+            "f1": 0.2605,
+            "support": 782
+          },
+          "registration_num": {
+            "precision": 0.9756,
+            "recall": 0.9694,
+            "f1": 0.9725,
+            "support": 784
+          },
+          "signer_name": {
+            "precision": 0.7845,
+            "recall": 0.8581,
+            "f1": 0.8197,
+            "support": 437
+          },
+          "signer_title": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          }
+        }
+      },
+      "best_val_f1": 0.9501,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.819,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2651,
+          "val_f1": 0.7254
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1349,
+          "val_f1": 0.9139
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1034,
+          "val_f1": 0.9337
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0939,
+          "val_f1": 0.9303
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0854,
+          "val_f1": 0.9394
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0775,
+          "val_f1": 0.9392
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0747,
+          "val_f1": 0.9256
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0741,
+          "val_f1": 0.9501
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0735,
+          "val_f1": 0.9441
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0726,
+          "val_f1": 0.9402
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.07,
+          "val_f1": 0.943
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 900,
+        "total_i_tags": 6349,
+        "rate": 0.1418
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5444 == independent F1=0.5444 (delta 0.00e+00)\n  lenient-IOB2 F1=0.4860 (spread 0.0584)\n  malformed I- tags: 900/6349 (14.2%)",
+      "seed": 21,
+      "fold": 2,
+      "regime": "UTL",
+      "held_out": [
+        "Short-Form"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.4951,
+        "recall": 0.5225,
+        "f1": 0.5084,
+        "support": 961898,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.9256,
+            "recall": 0.9137,
+            "f1": 0.9196,
+            "support": 776
+          },
+          "foreign_principle_name": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 734
+          },
+          "registrant_name": {
+            "precision": 0.0104,
+            "recall": 0.0102,
+            "f1": 0.0103,
+            "support": 782
+          },
+          "registration_num": {
+            "precision": 0.9801,
+            "recall": 0.9439,
+            "f1": 0.9617,
+            "support": 784
+          },
+          "signer_name": {
+            "precision": 0.8034,
+            "recall": 0.8696,
+            "f1": 0.8352,
+            "support": 437
+          },
+          "signer_title": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          }
+        }
+      },
+      "best_val_f1": 0.9378,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.9072,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.2564,
+          "val_f1": 0.7301
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.1496,
+          "val_f1": 0.8813
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.1116,
+          "val_f1": 0.9033
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0977,
+          "val_f1": 0.9141
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.088,
+          "val_f1": 0.9025
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0827,
+          "val_f1": 0.9281
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.08,
+          "val_f1": 0.9286
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0756,
+          "val_f1": 0.9287
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0738,
+          "val_f1": 0.9378
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0732,
+          "val_f1": 0.9363
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0715,
+          "val_f1": 0.935
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0724,
+          "val_f1": 0.932
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 604,
+        "total_i_tags": 5280,
+        "rate": 0.1144
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5084 == independent F1=0.5084 (delta 0.00e+00)\n  lenient-IOB2 F1=0.4677 (spread 0.0407)\n  malformed I- tags: 604/5280 (11.4%)",
+      "seed": 42,
+      "fold": 2,
+      "regime": "UTL",
+      "held_out": [
+        "Short-Form"
+      ]
+    }
+  ],
+  "gap": {
+    "mtl_mean_f1": 0.918,
+    "mtl_std": 0.0087,
+    "mtl_folds": 9,
+    "utl_mean_f1": 0.6959,
+    "utl_std": 0.1309,
+    "utl_folds": 9,
+    "gap_f1": 0.222,
+    "relative_drop_pct": 24.19
+  }
+}
