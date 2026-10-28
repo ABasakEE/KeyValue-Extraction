@@ -38,7 +38,7 @@ import torch.multiprocessing as mp
 import yaml
 from torch.utils.data import DataLoader, Dataset
 
-from evaluate import cross_check, entity_f1, generalization_gap, malformed_tag_rate, linking_f1
+from evaluate import _extract_spans, cross_check, entity_f1, generalization_gap, malformed_tag_rate, linking_f1
 from models.token_clf import TokenClassifier
 from models.joint_extractor import JointFormExtractor, prepare_entity_batch
 try:
@@ -141,6 +141,7 @@ class TrainConfig:
     graph_lr: float = 0.00025
     gradient_checkpointing: bool = False
     max_folds: int | None = None
+    regimes: tuple = ("MTL", "UTL")
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -148,6 +149,8 @@ class TrainConfig:
             raw = yaml.safe_load(fh) or {}
         if "seeds" in raw:
             raw["seeds"] = tuple(raw["seeds"])
+        if "regimes" in raw:
+            raw["regimes"] = tuple(raw["regimes"])
         if "languages" in raw and isinstance(raw["languages"], (list, tuple)):
             raw["languages"] = tuple(raw["languages"])
         known = {f for f in cls.__dataclass_fields__}
@@ -340,6 +343,33 @@ def predict(
     return predictions, references
 
 
+def dump_test_entities(path: Path, examples: list, predictions: list, references: list, id2label: dict) -> None:
+    """Write gold vs predicted entity spans per document, for error analysis.
+
+    Rebuilds documents from (possibly windowed) examples in the same first-seen
+    order `predict` uses, so row k lines up with predictions[k].
+    """
+    docs: dict[str, list[str]] = {}
+    templates: dict[str, str] = {}
+    for ex in examples:
+        guid = getattr(ex, "doc_guid", None) or ex.guid
+        total = getattr(ex, "total_doc_words", None) or len(ex.words)
+        words = docs.setdefault(guid, [""] * total)
+        offset = getattr(ex, "word_offset", 0)
+        words[offset:offset + len(ex.words)] = ex.words
+        templates[guid] = getattr(ex, "template_id", "")
+    assert len(docs) == len(predictions), f"{len(docs)} docs vs {len(predictions)} predictions"
+
+    def spans(tags, words):
+        names = [id2label.get(int(t), "O") for t in tags]
+        return sorted([t, s, e, " ".join(words[s:e])] for t, s, e in _extract_spans(names))
+
+    with open(path, "w", encoding="utf-8") as fh:
+        for (guid, words), pred, ref in zip(docs.items(), predictions, references):
+            row = {"guid": guid, "template": templates[guid], "gold": spans(ref, words), "pred": spans(pred, words)}
+            fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
 @torch.no_grad()
 def predict_joint(
     model: JointFormExtractor,
@@ -482,6 +512,9 @@ def train_one(
     """Fine-tune once and return test metrics for the best-validation checkpoint."""
     pfx = f"{log_prefix} " if log_prefix else ""
     leave_bar = not bool(log_prefix)
+    if device.type == "cuda":
+        # a worker process runs several tasks back to back; peak memory must be per task
+        torch.cuda.reset_peak_memory_stats(device)
 
     is_joint = config.task == "joint"
     if getattr(config, "sliding_window", False):
@@ -897,6 +930,12 @@ def train_one(
             "malformed_tags": malformed_tag_rate(test_pred, id2label),
             "cross_check": cross_check(test_pred, test_ref, id2label),
         }
+        if checkpoint_dir is not None:
+            dump_test_entities(checkpoint_dir / "test_entities.jsonl", test_examples, test_pred, test_ref, id2label)
+
+    if device.type == "cuda":
+        # max_memory_reserved is what nvidia-smi sees; use it to decide whether two runs fit on one GPU
+        res["peak_gpu_mem_gb"] = round(torch.cuda.max_memory_reserved(device) / 1024**3, 2)
 
     if checkpoint_dir is not None:
         (checkpoint_dir / "result.json").write_text(
@@ -1303,6 +1342,8 @@ def main() -> None:
                         help="Disable saving best_model.pt weights to disk to conserve disk space on Kaggle")
     parser.add_argument("--max-folds", type=int, default=None,
                         help="Fast-track option: limit number of folds per regime in matched protocol (e.g. 2)")
+    parser.add_argument("--regimes", default=None,
+                        help="Comma-separated regimes to run in matched protocol, e.g. 'UTL'")
     args = parser.parse_args()
 
     config = TrainConfig.from_yaml(args.config)
@@ -1345,6 +1386,8 @@ def main() -> None:
         config.save_weights = True
     if args.max_folds is not None:
         config.max_folds = args.max_folds
+    if args.regimes:
+        config.regimes = tuple(r.strip() for r in args.regimes.split(","))
 
     # Dynamically compute spatial_in_features to match active ablation groups
     if config.task == "joint" and config.use_spatial_relations:
@@ -1530,7 +1573,7 @@ def main() -> None:
                     print(f"\n[Official DeepForm Split] {regime} Fold {fold_idx} ({len(split.train)} train, {len(split.val)} val, {len(split.test)} test)", flush=True)
 
         tasks = []
-        for regime in ("MTL", "UTL"):
+        for regime in config.regimes:
             for fold_idx in range(len(protocol[regime])):
                 for seed in seeds:
                     tasks.append((regime, fold_idx, seed))

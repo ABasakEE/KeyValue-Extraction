@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import argparse
 import gc
+import tempfile
 from pathlib import Path
 import sys
 import torch
@@ -20,7 +21,10 @@ sys.path.insert(0, str(ROOT_DIR / "src"))
 
 from data.vrdu_loader import VrduExample, chunk_vrdu_examples
 from models.dann import compute_dann_alpha
-from train import FormDataset, TrainConfig, build_model, make_collator, predict
+from train import FormDataset, TrainConfig, build_model, dump_test_entities, make_collator, predict
+
+sys.path.insert(0, str(ROOT_DIR / "scripts"))
+from analyze_entity_errors import analyze
 
 
 def create_smoke_examples(is_cpu: bool = False) -> list[VrduExample]:
@@ -151,6 +155,14 @@ def run_smoke_test(config_path: str | Path, device: torch.device) -> bool:
     preds, refs = predict(model, val_loader, device=device)
     assert len(preds) > 0, f"Expected predictions, got {len(preds)}"
     print(f"    [+] Inference & soft-voting verified ({len(preds)} document predictions generated).")
+
+    # 5. Test the error-analysis path: per-document entity dump -> analyzer report
+    with tempfile.TemporaryDirectory() as tmp:
+        dump_path = Path(tmp) / "test_entities.jsonl"
+        dump_test_entities(dump_path, val_examples, preds, refs, id2label)
+        report = analyze([dump_path])
+        assert report, "Entity error report is empty"
+    print(f"    [+] Entity dump & error analysis verified ({len(report)} template(s) in report).")
 
     # Clean up memory
     del model, model_to_optimize, optimizer, train_loader, val_loader
