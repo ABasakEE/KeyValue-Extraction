@@ -1,0 +1,132 @@
+{
+  "test": {
+    "precision": 0.8683,
+    "recall": 0.6366,
+    "f1": 0.7346,
+    "support": 279131,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.9132,
+        "recall": 0.7932,
+        "f1": 0.849,
+        "support": 411
+      },
+      "foreign_principle_name": {
+        "precision": 0.4028,
+        "recall": 0.0767,
+        "f1": 0.1289,
+        "support": 378
+      },
+      "registrant_name": {
+        "precision": 0.9028,
+        "recall": 0.9203,
+        "f1": 0.9115,
+        "support": 414
+      },
+      "registration_num": {
+        "precision": 0.9447,
+        "recall": 0.9927,
+        "f1": 0.9681,
+        "support": 413
+      },
+      "signer_name": {
+        "precision": 0.7136,
+        "recall": 0.3603,
+        "f1": 0.4788,
+        "support": 408
+      },
+      "signer_title": {
+        "precision": 0.8741,
+        "recall": 0.6253,
+        "f1": 0.7291,
+        "support": 411
+      }
+    }
+  },
+  "best_val_f1": 0.9322,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4251,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0299,
+      "val_f1": 0.8313
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0094,
+      "val_f1": 0.8914
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0054,
+      "val_f1": 0.8827
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0041,
+      "val_f1": 0.9145
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0032,
+      "val_f1": 0.9124
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0028,
+      "val_f1": 0.9175
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0022,
+      "val_f1": 0.9213
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0018,
+      "val_f1": 0.9172
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0012,
+      "val_f1": 0.923
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0007,
+      "val_f1": 0.9236
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0009,
+      "val_f1": 0.9322
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0005,
+      "val_f1": 0.9207
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0005,
+      "val_f1": 0.9051
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0005,
+      "val_f1": 0.9188
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 174,
+    "total_i_tags": 2990,
+    "rate": 0.0582
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.7346 == independent F1=0.7346 (delta 0.00e+00)\n  lenient-IOB2 F1=0.7125 (spread 0.0221)\n  malformed I- tags: 174/2990 (5.8%)",
+  "peak_gpu_mem_gb": 7.9
+}

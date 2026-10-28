@@ -1,0 +1,1139 @@
+{
+  "UTL_fold0_seed13": {
+    "Amendment": {
+      "file_date": {
+        "gold": 690,
+        "exact": 510,
+        "partial": 39,
+        "wrong_pred": 180,
+        "wrong_pred_on_O": 179,
+        "missed": 140,
+        "wrong_pred_on_signer_name": 1,
+        "labelled_as_other_type": 1,
+        "top_wrong_preds": [
+          [
+            "this",
+            41
+          ],
+          [
+            "March",
+            5
+          ],
+          [
+            "this day of",
+            5
+          ],
+          [
+            "May",
+            3
+          ],
+          [
+            "February",
+            2
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 20,
+        "labelled_as_other_type": 10,
+        "wrong_pred": 30,
+        "wrong_pred_on_registrant_name": 1,
+        "partial": 1,
+        "wrong_pred_on_O": 25,
+        "missed": 7,
+        "wrong_pred_on_signer_name": 3,
+        "wrong_pred_on_signer_title": 1,
+        "exact": 2,
+        "top_wrong_preds": [
+          [
+            "CAYMAN ISLANDS DEPARTMENT OF TOURISM",
+            2
+          ],
+          [
+            "Japan National Tourism Organization",
+            2
+          ],
+          [
+            "Austrian Federal Railways",
+            1
+          ],
+          [
+            "Iraq Jordan Lebanon Morroco , Saudi Arabia , Sudan",
+            1
+          ],
+          [
+            "Zuerich 1 , Switzerland",
+            1
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 706,
+        "exact": 659,
+        "partial": 36,
+        "wrong_pred": 95,
+        "wrong_pred_on_O": 78,
+        "missed": 11,
+        "wrong_pred_on_foreign_principle_name": 9,
+        "wrong_pred_on_registration_num": 4,
+        "wrong_pred_on_signer_name": 4,
+        "top_wrong_preds": [
+          [
+            "agent",
+            2
+          ],
+          [
+            "Industrial Development Authority",
+            2
+          ],
+          [
+            "Ireland",
+            2
+          ],
+          [
+            "Crowell",
+            2
+          ],
+          [
+            "BRITISH VIRGIN ISLANDS TOURIST BOARD",
+            2
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 713,
+        "exact": 691,
+        "missed": 18,
+        "wrong_pred": 23,
+        "wrong_pred_on_O": 23,
+        "labelled_as_other_type": 4,
+        "top_wrong_preds": [
+          [
+            "#",
+            16
+          ],
+          [
+            "3899",
+            1
+          ],
+          [
+            "3492",
+            1
+          ],
+          [
+            "027051",
+            1
+          ],
+          [
+            "032726",
+            1
+          ]
+        ]
+      },
+      "signer_name": {
+        "wrong_pred": 189,
+        "wrong_pred_on_O": 173,
+        "gold": 616,
+        "exact": 487,
+        "wrong_pred_on_foreign_principle_name": 1,
+        "partial": 56,
+        "labelled_as_other_type": 8,
+        "wrong_pred_on_signer_title": 14,
+        "missed": 65,
+        "wrong_pred_on_file_date": 1,
+        "top_wrong_preds": [
+          [
+            "(",
+            3
+          ],
+          [
+            "Jean A. Jantz",
+            3
+          ],
+          [
+            "NATHAN BETHEIL",
+            2
+          ],
+          [
+            "T. Clark",
+            2
+          ],
+          [
+            "Ismet Korukoglu",
+            2
+          ]
+        ]
+      },
+      "signer_title": {
+        "wrong_pred": 31,
+        "wrong_pred_on_O": 29,
+        "gold": 133,
+        "missed": 38,
+        "exact": 69,
+        "labelled_as_other_type": 13,
+        "partial": 13,
+        "wrong_pred_on_signer_name": 2,
+        "top_wrong_preds": [
+          [
+            "Partner",
+            2
+          ],
+          [
+            "Managing",
+            2
+          ],
+          [
+            "MANAGER , NEW YORK",
+            1
+          ],
+          [
+            "KOREA TRADE PROMOTION CENTER",
+            1
+          ],
+          [
+            "Japan Trade Center",
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "UTL_fold0_seed42": {
+    "Amendment": {
+      "file_date": {
+        "gold": 690,
+        "exact": 503,
+        "missed": 174,
+        "wrong_pred": 45,
+        "wrong_pred_on_O": 44,
+        "wrong_pred_on_signer_name": 1,
+        "partial": 13,
+        "top_wrong_preds": [
+          [
+            "this day of 19",
+            2
+          ],
+          [
+            "Aqəəri )",
+            1
+          ],
+          [
+            "Hee Kon Kim",
+            1
+          ],
+          [
+            "this you day of",
+            1
+          ],
+          [
+            "JUN 30 1965",
+            1
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 20,
+        "labelled_as_other_type": 6,
+        "partial": 1,
+        "wrong_pred": 17,
+        "wrong_pred_on_O": 16,
+        "missed": 11,
+        "wrong_pred_on_signer_name": 1,
+        "exact": 2,
+        "top_wrong_preds": [
+          [
+            "CAYMAN ISLANDS DEPARTMENT OF TOURISM",
+            2
+          ],
+          [
+            "Japan National Tourism Organization",
+            2
+          ],
+          [
+            "Iraq Jordan Lebanon Morroco , Saudi Arabia , Sudan",
+            1
+          ],
+          [
+            "World Zionist Organization",
+            1
+          ],
+          [
+            "Young - Duck Min , Director",
+            1
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 706,
+        "exact": 667,
+        "wrong_pred": 74,
+        "wrong_pred_on_foreign_principle_name": 6,
+        "wrong_pred_on_signer_name": 6,
+        "partial": 31,
+        "wrong_pred_on_O": 55,
+        "missed": 8,
+        "wrong_pred_on_registration_num": 6,
+        "wrong_pred_on_signer_title": 1,
+        "top_wrong_preds": [
+          [
+            "Rudolf F. Mattesich",
+            3
+          ],
+          [
+            "BRITISH VIRGIN ISLANDS TOURIST BOARD",
+            2
+          ],
+          [
+            "Representative of Turkish Republic of Northern Cyp",
+            2
+          ],
+          [
+            "ABAR INFORMATION CENTER The goverments of",
+            1
+          ],
+          [
+            "Kilton",
+            1
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 713,
+        "exact": 690,
+        "missed": 17,
+        "wrong_pred": 21,
+        "wrong_pred_on_O": 20,
+        "labelled_as_other_type": 6,
+        "wrong_pred_on_signer_title": 1,
+        "top_wrong_preds": [
+          [
+            "#",
+            13
+          ],
+          [
+            "2327",
+            1
+          ],
+          [
+            "Delegate",
+            1
+          ],
+          [
+            "3899",
+            1
+          ],
+          [
+            "PR",
+            1
+          ]
+        ]
+      },
+      "signer_name": {
+        "wrong_pred": 114,
+        "wrong_pred_on_O": 108,
+        "gold": 616,
+        "labelled_as_other_type": 10,
+        "missed": 140,
+        "exact": 418,
+        "partial": 48,
+        "wrong_pred_on_signer_title": 6,
+        "top_wrong_preds": [
+          [
+            "Joseph B. Tompkins",
+            8
+          ],
+          [
+            "HOGAN",
+            2
+          ],
+          [
+            "Harold G. Bailey",
+            2
+          ],
+          [
+            "Ari Ben",
+            2
+          ],
+          [
+            "John Zentay",
+            1
+          ]
+        ]
+      },
+      "signer_title": {
+        "gold": 133,
+        "missed": 87,
+        "exact": 32,
+        "labelled_as_other_type": 9,
+        "partial": 5,
+        "wrong_pred": 16,
+        "wrong_pred_on_O": 12,
+        "wrong_pred_on_signer_name": 4,
+        "top_wrong_preds": [
+          [
+            "Senior Vice President , Senior Partner",
+            2
+          ],
+          [
+            "Director of",
+            1
+          ],
+          [
+            "General Manager",
+            1
+          ],
+          [
+            "Managing Partner",
+            1
+          ],
+          [
+            "Lawrence",
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "UTL_fold1_seed13": {
+    "Dissemination_Report": {
+      "file_date": {
+        "gold": 411,
+        "exact": 305,
+        "missed": 79,
+        "partial": 27,
+        "wrong_pred": 33,
+        "wrong_pred_on_O": 29,
+        "wrong_pred_on_signer_name": 2,
+        "wrong_pred_on_signer_title": 2,
+        "top_wrong_preds": [
+          [
+            "January",
+            3
+          ],
+          [
+            "March",
+            3
+          ],
+          [
+            "August",
+            2
+          ],
+          [
+            "October",
+            2
+          ],
+          [
+            "Sept.",
+            2
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 378,
+        "missed": 352,
+        "labelled_as_other_type": 21,
+        "wrong_pred": 6,
+        "wrong_pred_on_O": 6,
+        "partial": 2,
+        "exact": 3,
+        "top_wrong_preds": [
+          [
+            "Bridges",
+            1
+          ],
+          [
+            "Oman",
+            1
+          ],
+          [
+            "Korea",
+            1
+          ],
+          [
+            "Haiti Update Government",
+            1
+          ],
+          [
+            "Focus Japan",
+            1
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 414,
+        "exact": 325,
+        "missed": 64,
+        "wrong_pred": 69,
+        "wrong_pred_on_foreign_principle_name": 21,
+        "partial": 21,
+        "wrong_pred_on_O": 48,
+        "labelled_as_other_type": 4,
+        "top_wrong_preds": [
+          [
+            "JETRO ,",
+            12
+          ],
+          [
+            "Focus Japan",
+            6
+          ],
+          [
+            "Japan External Trade Organization",
+            5
+          ],
+          [
+            "Asahi Homecast Corporation",
+            5
+          ],
+          [
+            "Public Strategies Washington , Inc.",
+            3
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 413,
+        "exact": 410,
+        "wrong_pred": 20,
+        "wrong_pred_on_O": 20,
+        "missed": 2,
+        "partial": 1,
+        "top_wrong_preds": [
+          [
+            "485",
+            2
+          ],
+          [
+            "790",
+            2
+          ],
+          [
+            "606",
+            1
+          ],
+          [
+            "4364",
+            1
+          ],
+          [
+            "1287",
+            1
+          ]
+        ]
+      },
+      "signer_name": {
+        "gold": 408,
+        "missed": 295,
+        "wrong_pred": 61,
+        "wrong_pred_on_O": 54,
+        "exact": 102,
+        "labelled_as_other_type": 2,
+        "partial": 9,
+        "wrong_pred_on_registrant_name": 5,
+        "wrong_pred_on_signer_title": 2,
+        "top_wrong_preds": [
+          [
+            "Tamam",
+            4
+          ],
+          [
+            "Robin S. Matthews",
+            2
+          ],
+          [
+            "James A. Coppola",
+            2
+          ],
+          [
+            "J. L. D. Haggarty",
+            2
+          ],
+          [
+            "T. Clark",
+            2
+          ]
+        ]
+      },
+      "signer_title": {
+        "gold": 411,
+        "missed": 241,
+        "wrong_pred": 20,
+        "wrong_pred_on_O": 20,
+        "exact": 152,
+        "partial": 14,
+        "labelled_as_other_type": 4,
+        "top_wrong_preds": [
+          [
+            "Executive",
+            8
+          ],
+          [
+            "Executive Director ,",
+            2
+          ],
+          [
+            "Senior",
+            1
+          ],
+          [
+            "Economic Counsellor",
+            1
+          ],
+          [
+            "Director ,",
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "UTL_fold1_seed42": {
+    "Dissemination_Report": {
+      "file_date": {
+        "gold": 411,
+        "exact": 326,
+        "missed": 65,
+        "partial": 20,
+        "wrong_pred": 31,
+        "wrong_pred_on_signer_name": 12,
+        "wrong_pred_on_O": 18,
+        "wrong_pred_on_signer_title": 1,
+        "top_wrong_preds": [
+          [
+            "December",
+            2
+          ],
+          [
+            "April 6 ,",
+            2
+          ],
+          [
+            "March 18 , 1991 Sam E. Bloch",
+            1
+          ],
+          [
+            "July 15 , 1991",
+            1
+          ],
+          [
+            "er 22 , 1991",
+            1
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 378,
+        "missed": 323,
+        "wrong_pred": 43,
+        "wrong_pred_on_O": 43,
+        "exact": 29,
+        "labelled_as_other_type": 5,
+        "partial": 21,
+        "top_wrong_preds": [
+          [
+            "Focus Japan Japan External Trade Organization Toky",
+            7
+          ],
+          [
+            "Bridges & Barriers",
+            2
+          ],
+          [
+            "ImpetUS Japan",
+            2
+          ],
+          [
+            "New Technology Japan",
+            2
+          ],
+          [
+            "New Technology Japan JAPAN External Trade Organiza",
+            2
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 414,
+        "exact": 381,
+        "partial": 21,
+        "wrong_pred": 41,
+        "wrong_pred_on_O": 31,
+        "missed": 12,
+        "wrong_pred_on_foreign_principle_name": 5,
+        "wrong_pred_on_signer_name": 5,
+        "top_wrong_preds": [
+          [
+            "Turkish Republic of Northern Cyprus",
+            7
+          ],
+          [
+            "Public Strategies Washington , Inc.",
+            4
+          ],
+          [
+            "Joseph P. O'Neill",
+            2
+          ],
+          [
+            "Tamam A.",
+            2
+          ],
+          [
+            "the Turkish Republic of Northern Cyprus",
+            2
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 413,
+        "exact": 410,
+        "wrong_pred": 24,
+        "wrong_pred_on_O": 24,
+        "missed": 2,
+        "partial": 1,
+        "top_wrong_preds": [
+          [
+            "606",
+            1
+          ],
+          [
+            "4364",
+            1
+          ],
+          [
+            "cmq",
+            1
+          ],
+          [
+            "1287",
+            1
+          ],
+          [
+            "1813",
+            1
+          ]
+        ]
+      },
+      "signer_name": {
+        "gold": 408,
+        "missed": 214,
+        "wrong_pred": 59,
+        "wrong_pred_on_O": 55,
+        "wrong_pred_on_signer_title": 3,
+        "exact": 147,
+        "partial": 30,
+        "labelled_as_other_type": 17,
+        "wrong_pred_on_registrant_name": 1,
+        "top_wrong_preds": [
+          [
+            "Joel Jankowsky",
+            3
+          ],
+          [
+            "Eugene",
+            3
+          ],
+          [
+            "James A. Coppola",
+            2
+          ],
+          [
+            "Sam",
+            2
+          ],
+          [
+            "Archibald N. Stewart",
+            2
+          ]
+        ]
+      },
+      "signer_title": {
+        "gold": 411,
+        "exact": 257,
+        "missed": 127,
+        "wrong_pred": 37,
+        "wrong_pred_on_O": 34,
+        "partial": 24,
+        "labelled_as_other_type": 3,
+        "wrong_pred_on_signer_name": 3,
+        "top_wrong_preds": [
+          [
+            "Account",
+            3
+          ],
+          [
+            "Director",
+            3
+          ],
+          [
+            "Executive Director",
+            3
+          ],
+          [
+            "Exec . Dir . ,",
+            3
+          ],
+          [
+            "Public Affairs",
+            3
+          ]
+        ]
+      }
+    }
+  },
+  "UTL_fold2_seed13": {
+    "Short-Form": {
+      "file_date": {
+        "gold": 776,
+        "exact": 689,
+        "partial": 42,
+        "wrong_pred": 65,
+        "wrong_pred_on_O": 64,
+        "missed": 45,
+        "wrong_pred_on_signer_name": 1,
+        "top_wrong_preds": [
+          [
+            "2",
+            2
+          ],
+          [
+            "Janually 15,2008",
+            1
+          ],
+          [
+            "MAY 30 08",
+            1
+          ],
+          [
+            "08/1 18/08",
+            1
+          ],
+          [
+            "88/2008",
+            1
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 734,
+        "missed": 733,
+        "wrong_pred": 3,
+        "wrong_pred_on_O": 3,
+        "labelled_as_other_type": 1,
+        "top_wrong_preds": [
+          [
+            "Barack Obama",
+            1
+          ],
+          [
+            "BARACK OBAMA BARACK OBAMA BARACK OBAMA",
+            1
+          ],
+          [
+            "Martin Heinrich",
+            1
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 782,
+        "missed": 733,
+        "wrong_pred": 786,
+        "wrong_pred_on_O": 786,
+        "labelled_as_other_type": 12,
+        "exact": 18,
+        "partial": 19,
+        "top_wrong_preds": [
+          [
+            "Daniel",
+            6
+          ],
+          [
+            "Joseph L. Brand",
+            3
+          ],
+          [
+            "Patton Boggs",
+            3
+          ],
+          [
+            "William Joseph Turenne , Jr.",
+            3
+          ],
+          [
+            "Matthew S. Oresman",
+            3
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 784,
+        "exact": 775,
+        "wrong_pred": 55,
+        "wrong_pred_on_O": 55,
+        "partial": 5,
+        "missed": 4,
+        "top_wrong_preds": [
+          [
+            "2009",
+            9
+          ],
+          [
+            "2010",
+            7
+          ],
+          [
+            "6170",
+            4
+          ],
+          [
+            "5875",
+            2
+          ],
+          [
+            "62",
+            2
+          ]
+        ]
+      },
+      "signer_name": {
+        "wrong_pred": 114,
+        "wrong_pred_on_O": 99,
+        "wrong_pred_on_registrant_name": 12,
+        "gold": 437,
+        "exact": 385,
+        "partial": 19,
+        "missed": 32,
+        "wrong_pred_on_signer_title": 2,
+        "labelled_as_other_type": 1,
+        "wrong_pred_on_foreign_principle_name": 1,
+        "top_wrong_preds": [
+          [
+            "Daniel",
+            3
+          ],
+          [
+            "Is",
+            3
+          ],
+          [
+            "Daniel J. Edelman",
+            2
+          ],
+          [
+            "Martin Heinrich",
+            2
+          ],
+          [
+            "Daniel J.",
+            2
+          ]
+        ]
+      },
+      "signer_title": {
+        "wrong_pred": 23,
+        "wrong_pred_on_O": 20,
+        "gold": 3,
+        "missed": 1,
+        "wrong_pred_on_signer_name": 2,
+        "labelled_as_other_type": 2,
+        "wrong_pred_on_foreign_principle_name": 1,
+        "top_wrong_preds": [
+          [
+            "director",
+            9
+          ],
+          [
+            "Barack Obama",
+            1
+          ],
+          [
+            "Marketing Manager",
+            1
+          ],
+          [
+            "Martin",
+            1
+          ],
+          [
+            "Marketing Specialist",
+            1
+          ]
+        ]
+      }
+    }
+  },
+  "UTL_fold2_seed42": {
+    "Short-Form": {
+      "file_date": {
+        "gold": 776,
+        "exact": 705,
+        "partial": 39,
+        "wrong_pred": 53,
+        "wrong_pred_on_O": 53,
+        "missed": 31,
+        "labelled_as_other_type": 1,
+        "top_wrong_preds": [
+          [
+            "Janually 15,2008",
+            1
+          ],
+          [
+            "04.23.08",
+            1
+          ],
+          [
+            "MAY 30 08",
+            1
+          ],
+          [
+            "08/1 18/08",
+            1
+          ],
+          [
+            "88/2008",
+            1
+          ]
+        ]
+      },
+      "foreign_principle_name": {
+        "gold": 734,
+        "missed": 730,
+        "wrong_pred": 1,
+        "wrong_pred_on_registrant_name": 1,
+        "labelled_as_other_type": 4,
+        "top_wrong_preds": [
+          [
+            "Quebec Government Office",
+            1
+          ]
+        ]
+      },
+      "registrant_name": {
+        "gold": 782,
+        "missed": 705,
+        "wrong_pred": 779,
+        "wrong_pred_on_O": 779,
+        "exact": 49,
+        "partial": 11,
+        "labelled_as_other_type": 17,
+        "top_wrong_preds": [
+          [
+            "Joseph L. Brand",
+            3
+          ],
+          [
+            "William Joseph Turenne , Jr.",
+            3
+          ],
+          [
+            "Matthew S. Oresman",
+            3
+          ],
+          [
+            "Robert Raben",
+            3
+          ],
+          [
+            "Mark Tavlarides",
+            3
+          ]
+        ]
+      },
+      "registration_num": {
+        "gold": 784,
+        "exact": 774,
+        "wrong_pred": 11,
+        "wrong_pred_on_O": 11,
+        "partial": 3,
+        "missed": 7,
+        "top_wrong_preds": [
+          [
+            "5438",
+            1
+          ],
+          [
+            "194",
+            1
+          ],
+          [
+            "5971",
+            1
+          ],
+          [
+            "3327",
+            1
+          ],
+          [
+            "252",
+            1
+          ]
+        ]
+      },
+      "signer_name": {
+        "wrong_pred": 111,
+        "wrong_pred_on_O": 88,
+        "wrong_pred_on_registrant_name": 16,
+        "gold": 437,
+        "exact": 392,
+        "partial": 15,
+        "missed": 30,
+        "wrong_pred_on_file_date": 1,
+        "wrong_pred_on_signer_title": 2,
+        "wrong_pred_on_foreign_principle_name": 4,
+        "top_wrong_preds": [
+          [
+            "Daniel J. Edelman",
+            5
+          ],
+          [
+            "Sorini Samet",
+            3
+          ],
+          [
+            "Daniel J. Edelman , Inc.",
+            2
+          ],
+          [
+            "Alicia",
+            1
+          ],
+          [
+            "K.",
+            1
+          ]
+        ]
+      },
+      "signer_title": {
+        "wrong_pred": 278,
+        "wrong_pred_on_O": 277,
+        "gold": 3,
+        "missed": 1,
+        "labelled_as_other_type": 2,
+        "wrong_pred_on_signer_name": 1,
+        "top_wrong_preds": [
+          [
+            "director",
+            163
+          ],
+          [
+            "partner",
+            53
+          ],
+          [
+            "partner director",
+            10
+          ],
+          [
+            "Managing Director",
+            5
+          ],
+          [
+            "Director",
+            3
+          ]
+        ]
+      }
+    }
+  }
+}
