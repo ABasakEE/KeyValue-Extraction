@@ -42,7 +42,8 @@ PROMPT = (
     "<pair><key>KEY TEXT</key><value>VALUE TEXT</value></pair>"
 )
 LM_SUFFIX = "\n\nPage text, one line per row, with the [x,y] position of each line on a 0-1000 grid:\n"
-PAIR_RE = re.compile(r"<pair>\s*<key>(.*?)</key>\s*<value>(.*?)</value>\s*</pair>", re.S)
+# the <pair> wrapper is optional: Qwen2.5-VL often drops it and emits bare <key>/<value> lines
+PAIR_RE = re.compile(r"<key>(.*?)</key>\s*<value>(.*?)</value>", re.S)
 MATCH_THRESHOLD = 0.5  # token F1 needed for two strings to count as the same text
 FIELD_SIM_THRESHOLD = 0.4  # min SBERT cosine for a predicted key to map to a VRDU field; fixed a priori
 N_BOOTSTRAP = 1000
@@ -419,6 +420,7 @@ def cmd_selftest(_args) -> None:
     raw = ("Sure!\n<pair><key>Name of Registrant</key><value>DLA Piper LLP</value></pair>\n"
            "<pair><key>Date</key><value></value></pair><pair> <key>Registration No.</key> <value>3712</value> </pair>")
     assert parse_pairs(raw) == [["Name of Registrant", "DLA Piper LLP"], ["Registration No.", "3712"]], parse_pairs(raw)
+    assert parse_pairs("<key>TO:</key><value>George</value>\n<key>FAX</key><value>(614)</value>") == [["TO:", "George"], ["FAX", "(614)"]]
     assert tok_f1("DLA Piper US LLP", "DLA Piper LLP") > 0.8 and tok_f1("a", "b") == 0.0
     assert greedy_match(["x y", "z"], ["z", "x y", "w"], tok_f1) == 2
     lines = group_lines([("Name:", [0.1, 0.1, 0.2, 0.12]), ("Bob", [0.3, 0.101, 0.4, 0.121]), ("Date", [0.1, 0.3, 0.2, 0.32])])
