@@ -131,12 +131,14 @@ class TrainConfig:
     num_templates: int = 32
     save_weights: bool = True
     use_graph_bros: bool = False
-    lora_r: int = 8
-    lora_alpha: float = 16.0
+    lora_r: int = 16
+    lora_alpha: float = 32.0
     lora_dropout: float = 0.05
     beta_skeleton: float = 1.0
-    graph_eps: float = 1e-9
+    graph_eps: float = 0.01
     merge_spans: bool = True
+    freeze_base: bool = False
+    graph_lr: float = 0.00025
     gradient_checkpointing: bool = False
     max_folds: int | None = None
 
@@ -771,10 +773,19 @@ def train_one(
         # STANDARD SINGLE-STAGE TRAINING WITH PATIENCE EARLY STOPPING
         # =========================================================================
         trainable_params = [p for p in model_to_optimize.parameters() if p.requires_grad]
-        optimizer = torch.optim.AdamW(trainable_params, lr=config.lr, weight_decay=config.weight_decay)
+        if hasattr(model_to_optimize, "get_optimizer_param_groups"):
+            g_lr = getattr(config, "graph_lr", None) or (config.lr * 5.0)
+            param_groups = model_to_optimize.get_optimizer_param_groups(
+                base_lr=config.lr, graph_lr=g_lr, weight_decay=config.weight_decay
+            )
+            optimizer = torch.optim.AdamW(param_groups, weight_decay=config.weight_decay)
+            max_lrs = [pg["lr"] for pg in param_groups]
+        else:
+            optimizer = torch.optim.AdamW(trainable_params, lr=config.lr, weight_decay=config.weight_decay)
+            max_lrs = config.lr
         total_steps = max(1, len(train_loader) * config.epochs)
         scheduler = torch.optim.lr_scheduler.OneCycleLR(
-            optimizer, max_lr=config.lr, total_steps=total_steps, pct_start=config.warmup_ratio, anneal_strategy="linear"
+            optimizer, max_lr=max_lrs, total_steps=total_steps, pct_start=config.warmup_ratio, anneal_strategy="linear"
         )
         patience_cnt = 0
         for epoch in range(config.epochs):
@@ -851,7 +862,8 @@ def train_one(
                     )
                 patience_cnt = 0
             else:
-                patience_cnt += 1
+                if best_val_score > 0.05 or epoch >= 4:
+                    patience_cnt += 1
                 if patience_cnt >= patience:
                     print(f"  {pfx}[Early Stop] Early stopping triggered after {patience} epochs without improvement.", flush=True)
                     break
@@ -991,14 +1003,15 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], 
             from src.models.graph_bros import GraphBrosForTokenClassification
         base = GraphBrosForTokenClassification(
             base_classifier=base,
-            lora_r=getattr(config, "lora_r", 8),
-            lora_alpha=getattr(config, "lora_alpha", 16.0),
+            lora_r=getattr(config, "lora_r", 16),
+            lora_alpha=getattr(config, "lora_alpha", 32.0),
             lora_dropout=getattr(config, "lora_dropout", 0.05),
             beta=getattr(config, "beta_skeleton", 1.0),
-            eps=getattr(config, "graph_eps", 1e-9),
+            eps=getattr(config, "graph_eps", 0.01),
             merge_spans=getattr(config, "merge_spans", True),
-            loss_type=getattr(config, "loss_type", "focal"),
+            loss_type=getattr(config, "loss_type", "ce"),
             focal_gamma=getattr(config, "focal_gamma", 2.0),
+            freeze_base=getattr(config, "freeze_base", False),
             gradient_checkpointing=getattr(config, "gradient_checkpointing", False),
         )
     if getattr(config, "adversarial_dann", False):

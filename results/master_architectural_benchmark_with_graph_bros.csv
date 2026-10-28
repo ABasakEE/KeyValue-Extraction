@@ -1,7 +1,0 @@
-Architecture,MTL F1 (%),UTL F1 (%),Gap (MTL-UTL),Rel. Drop (%),Runs (MTL/UTL)
-LiLT Baseline (512 Truncated),87.74 +/- 1.62,66.66 +/- 7.29,21.08,24.0%,9/9
-Exp 1: BROS Baseline (512 Truncated),22.70 +/- 17.03,7.48 +/- 13.07,15.22,67.0%,9/9
-Exp 2: BROS + Track 1 (Window + Jitter),92.36 +/- 0.26,71.27 +/- 11.24,21.10,22.8%,9/9
-Exp 3: DANN-LiLT (Adversarial + Track 1),91.12 +/- 1.41,64.79 +/- 13.69,26.33,28.9%,9/9
-Exp 4: DANN-BROS (Adversarial + Track 1),91.80 +/- 0.87,69.59 +/- 13.09,22.20,24.2%,9/9
-Exp 5: Graph-BROS (Beta-Skeleton + LoRA + Track 1),26.67 +/- 30.82,39.79 +/- 12.37,-13.12,-49.2%,4/4

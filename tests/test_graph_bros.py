@@ -100,7 +100,7 @@ def test_phase2_beta_skeleton_and_isotropy():
 def test_phase3_and_4_lora_and_graph_attention():
     """Verify LoRALinear parameter freezing and GraphBrosSelfAttention gradient flow."""
     base_lin = nn.Linear(64, 64)
-    lora_lin = LoRALinear(base_lin, r=8, lora_alpha=16.0, lora_dropout=0.0)
+    lora_lin = LoRALinear(base_lin, r=8, lora_alpha=16.0, lora_dropout=0.0, freeze_base=True)
 
     assert not lora_lin.base_layer.weight.requires_grad
     assert lora_lin.lora_A.requires_grad and lora_lin.lora_B.requires_grad
@@ -119,13 +119,11 @@ def test_phase3_and_4_lora_and_graph_attention():
             self.is_decoder = False
 
     orig_attn = MockOrigAttention()
-    for p in orig_attn.parameters():
-        p.requires_grad = False
-
-    graph_attn = GraphBrosSelfAttention(orig_attn, lora_r=4, lora_alpha=8.0)
+    graph_attn = GraphBrosSelfAttention(orig_attn, lora_r=4, lora_alpha=8.0, freeze_base=True)
     # Give lora_B non-zero values so gradients flow into lora_A on the very first step
     nn.init.normal_(graph_attn.query.lora_B, std=0.02)
     nn.init.normal_(graph_attn.key.lora_B, std=0.02)
+    nn.init.normal_(graph_attn.value.lora_B, std=0.02)
 
     B, S, H = 2, 6, 64
     hidden_states = torch.randn(B, S, H)
@@ -149,13 +147,14 @@ def test_phase3_and_4_lora_and_graph_attention():
     loss = (context_layer * torch.randn_like(context_layer)).sum()
     loss.backward()
 
-    # Verify gradients flowed to W_g, head_graph_gate, and LoRA weights, but NOT frozen value or base query weights
+    # Verify gradients flowed to W_g, head_graph_gate, and LoRA weights, but NOT frozen base weights
     assert graph_attn.W_g.weight.grad is not None and graph_attn.W_g.weight.grad.abs().sum() > 0
     assert graph_attn.head_graph_gate.grad is not None
     assert graph_attn.query.lora_A.grad is not None and graph_attn.query.lora_A.grad.abs().sum() > 0
     assert graph_attn.key.lora_A.grad is not None and graph_attn.key.lora_A.grad.abs().sum() > 0
+    assert graph_attn.value.lora_A.grad is not None and graph_attn.value.lora_A.grad.abs().sum() > 0
     assert graph_attn.query.base_layer.weight.grad is None
-    assert graph_attn.value.weight.grad is None
+    assert graph_attn.value.base_layer.weight.grad is None
     print("[PASS] Phase 3 & 4: LoRALinear and GraphBrosSelfAttention forward/backward verified.")
 
 
@@ -203,12 +202,15 @@ def test_end_to_end_graph_bros_for_token_classification():
         lora_r=4,
         lora_alpha=8.0,
         beta=1.0,
-        loss_type="focal",
-        focal_gamma=2.0,
+        loss_type="ce",
         merge_spans=True,
+        freeze_base=False,
     )
     stats = wrapper.trainable_parameter_summary()
-    assert stats["trainable_params"] > 0 and stats["trainable_pct"] < 15.0
+    assert stats["trainable_params"] > 0
+    param_groups = wrapper.get_optimizer_param_groups(base_lr=5e-5, graph_lr=2.5e-4, weight_decay=0.01)
+    assert len(param_groups) == 2
+    assert param_groups[0]["lr"] == 5e-5 and param_groups[1]["lr"] == 2.5e-4
 
     B, L = 2, 12
     input_ids = torch.randint(0, 100, (B, L))
@@ -230,11 +232,10 @@ def test_end_to_end_graph_bros_for_token_classification():
     assert out.logits.shape == (B, L, 7)
 
     out.loss.backward()
-    trainable = [p for p in wrapper.parameters() if p.requires_grad]
-    opt = torch.optim.AdamW(trainable, lr=1e-3)
+    opt = torch.optim.AdamW(param_groups, weight_decay=0.01)
     opt.step()
     opt.zero_grad()
-    print(f"[PASS] End-to-End Hugging Face GraphBrosForTokenClassification verified ({stats['trainable_params']:,} trainable params).")
+    print(f"[PASS] End-to-End Hugging Face GraphBrosForTokenClassification verified ({stats['trainable_params']:,} trainable params across {len(param_groups)} differential LR groups).")
 
 
 if __name__ == "__main__":
