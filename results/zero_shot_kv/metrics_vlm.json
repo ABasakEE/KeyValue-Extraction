@@ -1,0 +1,497 @@
+{
+  "missing_pages": 0,
+  "pages_scored": 450,
+  "mean_seconds_per_page": 24.74,
+  "bootstrap": {
+    "resamples": 1000,
+    "stratified_by": "template",
+    "interval": "95% percentile"
+  },
+  "funsd": {
+    "pairs": {
+      "precision": 0.6696,
+      "recall": 0.0934,
+      "f1": 0.1639,
+      "tp": 75,
+      "n_pred": 112,
+      "n_gold": 803,
+      "f1_ci95": [
+        0.0727,
+        0.2662
+      ]
+    },
+    "value_recall": 0.1021
+  },
+  "vrdu": {
+    "ad-buy-form": {
+      "ad-buy": {
+        "advertiser": {
+          "precision": 0.3702,
+          "recall": 0.67,
+          "f1": 0.4769,
+          "tp": 67,
+          "n_pred": 181,
+          "n_gold": 100,
+          "value_recall": 0.68,
+          "f1_ci95": [
+            0.4238,
+            0.5252
+          ]
+        },
+        "agency": {
+          "precision": 0.1514,
+          "recall": 0.6512,
+          "f1": 0.2456,
+          "tp": 28,
+          "n_pred": 185,
+          "n_gold": 43,
+          "value_recall": 0.6744,
+          "f1_ci95": [
+            0.1759,
+            0.3115
+          ]
+        },
+        "channel": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 21,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "contract_num": {
+          "precision": 0.473,
+          "recall": 0.3571,
+          "f1": 0.407,
+          "tp": 35,
+          "n_pred": 74,
+          "n_gold": 98,
+          "value_recall": 0.7245,
+          "f1_ci95": [
+            0.3132,
+            0.5027
+          ]
+        },
+        "flight_from": {
+          "precision": 0.697,
+          "recall": 0.2911,
+          "f1": 0.4107,
+          "tp": 23,
+          "n_pred": 33,
+          "n_gold": 79,
+          "value_recall": 0.7215,
+          "f1_ci95": [
+            0.303,
+            0.5129
+          ]
+        },
+        "flight_to": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 78,
+          "value_recall": 0.7436,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "gross_amount": {
+          "precision": 0.3429,
+          "recall": 0.2222,
+          "f1": 0.2697,
+          "tp": 12,
+          "n_pred": 35,
+          "n_gold": 54,
+          "value_recall": 0.4259,
+          "f1_ci95": [
+            0.1473,
+            0.3762
+          ]
+        },
+        "product": {
+          "precision": 0.4452,
+          "recall": 0.6915,
+          "f1": 0.5417,
+          "tp": 65,
+          "n_pred": 146,
+          "n_gold": 94,
+          "value_recall": 0.7553,
+          "f1_ci95": [
+            0.4784,
+            0.6069
+          ]
+        },
+        "program_desc": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 7,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "program_end_date": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 41,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "program_start_date": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 90,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "property": {
+          "precision": 0.4318,
+          "recall": 0.1845,
+          "f1": 0.2585,
+          "tp": 19,
+          "n_pred": 44,
+          "n_gold": 103,
+          "value_recall": 0.3689,
+          "f1_ci95": [
+            0.1666,
+            0.3546
+          ]
+        },
+        "sub_amount": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 19,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "tv_address": {
+          "precision": 0.0667,
+          "recall": 0.0119,
+          "f1": 0.0202,
+          "tp": 1,
+          "n_pred": 15,
+          "n_gold": 84,
+          "value_recall": 0.1905,
+          "f1_ci95": [
+            0.0,
+            0.0638
+          ]
+        },
+        "_micro": {
+          "precision": 0.2806,
+          "recall": 0.3411,
+          "f1": 0.3079,
+          "tp": 250,
+          "n_pred": 891,
+          "n_gold": 733,
+          "f1_ci95": [
+            0.2783,
+            0.3369
+          ]
+        }
+      }
+    },
+    "registration-form": {
+      "Amendment": {
+        "file_date": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 13,
+          "value_recall": 0.0,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "foreign_principle_name": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 2,
+          "value_recall": 0.0,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "registrant_name": {
+          "precision": 0.9655,
+          "recall": 0.8485,
+          "f1": 0.9032,
+          "tp": 84,
+          "n_pred": 87,
+          "n_gold": 99,
+          "value_recall": 0.8485,
+          "f1_ci95": [
+            0.8571,
+            0.9431
+          ]
+        },
+        "registration_num": {
+          "precision": 0.7611,
+          "recall": 0.86,
+          "f1": 0.8075,
+          "tp": 86,
+          "n_pred": 113,
+          "n_gold": 100,
+          "value_recall": 0.86,
+          "f1_ci95": [
+            0.7512,
+            0.8558
+          ]
+        },
+        "signer_name": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 10,
+          "value_recall": 0.2,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "signer_title": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 9,
+          "value_recall": 0.0,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "_micro": {
+          "precision": 0.85,
+          "recall": 0.7296,
+          "f1": 0.7852,
+          "tp": 170,
+          "n_pred": 200,
+          "n_gold": 233,
+          "f1_ci95": [
+            0.729,
+            0.8356
+          ]
+        }
+      },
+      "Dissemination_Report": {
+        "file_date": {
+          "precision": 0.1442,
+          "recall": 0.9375,
+          "f1": 0.25,
+          "tp": 15,
+          "n_pred": 104,
+          "n_gold": 16,
+          "value_recall": 0.9375,
+          "f1_ci95": [
+            0.1579,
+            0.3263
+          ]
+        },
+        "foreign_principle_name": {
+          "precision": 0.8333,
+          "recall": 0.7471,
+          "f1": 0.7879,
+          "tp": 65,
+          "n_pred": 78,
+          "n_gold": 87,
+          "value_recall": 0.8276,
+          "f1_ci95": [
+            0.7125,
+            0.8555
+          ]
+        },
+        "registrant_name": {
+          "precision": 1.0,
+          "recall": 0.91,
+          "f1": 0.9529,
+          "tp": 91,
+          "n_pred": 91,
+          "n_gold": 100,
+          "value_recall": 0.91,
+          "f1_ci95": [
+            0.9189,
+            0.9796
+          ]
+        },
+        "registration_num": {
+          "precision": 0.978,
+          "recall": 0.89,
+          "f1": 0.9319,
+          "tp": 89,
+          "n_pred": 91,
+          "n_gold": 100,
+          "value_recall": 0.89,
+          "f1_ci95": [
+            0.8913,
+            0.9694
+          ]
+        },
+        "signer_name": {
+          "precision": 0.8571,
+          "recall": 0.375,
+          "f1": 0.5217,
+          "tp": 6,
+          "n_pred": 7,
+          "n_gold": 16,
+          "value_recall": 0.8125,
+          "f1_ci95": [
+            0.2105,
+            0.7586
+          ]
+        },
+        "signer_title": {
+          "precision": 0.7143,
+          "recall": 0.625,
+          "f1": 0.6667,
+          "tp": 10,
+          "n_pred": 14,
+          "n_gold": 16,
+          "value_recall": 0.6875,
+          "f1_ci95": [
+            0.4242,
+            0.88
+          ]
+        },
+        "_micro": {
+          "precision": 0.7169,
+          "recall": 0.8239,
+          "f1": 0.7667,
+          "tp": 276,
+          "n_pred": 385,
+          "n_gold": 335,
+          "f1_ci95": [
+            0.7353,
+            0.7956
+          ]
+        }
+      },
+      "Short-Form": {
+        "file_date": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 96,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "foreign_principle_name": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 0,
+          "n_gold": 91,
+          "value_recall": 0.7802,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "registrant_name": {
+          "precision": 0.0902,
+          "recall": 0.2323,
+          "f1": 0.1299,
+          "tp": 23,
+          "n_pred": 255,
+          "n_gold": 99,
+          "value_recall": 0.3131,
+          "f1_ci95": [
+            0.0877,
+            0.1773
+          ]
+        },
+        "registration_num": {
+          "precision": 0.9381,
+          "recall": 0.91,
+          "f1": 0.9239,
+          "tp": 91,
+          "n_pred": 97,
+          "n_gold": 100,
+          "value_recall": 0.91,
+          "f1_ci95": [
+            0.8687,
+            0.97
+          ]
+        },
+        "signer_name": {
+          "precision": 0.0,
+          "recall": 0.0,
+          "f1": 0.0,
+          "tp": 0,
+          "n_pred": 98,
+          "n_gold": 0,
+          "value_recall": null,
+          "f1_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "_micro": {
+          "precision": 0.2088,
+          "recall": 0.3931,
+          "f1": 0.2727,
+          "tp": 114,
+          "n_pred": 546,
+          "n_gold": 290,
+          "f1_ci95": [
+            0.2479,
+            0.2977
+          ]
+        }
+      }
+    }
+  },
+  "short_form_registrant": {
+    "pages": 100,
+    "predicted_registrant": 91,
+    "correct": 23,
+    "picked_decoy": 0,
+    "filer_is_registrant": 2
+  }
+}
