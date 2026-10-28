@@ -312,6 +312,8 @@ def cmd_describe_schema(args) -> None:
     out = {}
     for ds in ("registration-form", "ad-buy-form"):
         fields = schema_fields(ds)
+        if not fields:
+            continue  # no known schema for this dataset: nothing to describe
         raw, _ = gen(schema_prompt(fields), max_new_tokens=1024)
         out[ds] = parse_schema(raw, fields)
         print(f"[{ds}] described {len(out[ds])}/{len(fields)} fields")
