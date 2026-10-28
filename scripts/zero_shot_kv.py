@@ -45,6 +45,7 @@ LM_SUFFIX = "\n\nPage text, one line per row, with the [x,y] position of each li
 PAIR_RE = re.compile(r"<pair>\s*<key>(.*?)</key>\s*<value>(.*?)</value>\s*</pair>", re.S)
 MATCH_THRESHOLD = 0.5  # token F1 needed for two strings to count as the same text
 FIELD_SIM_THRESHOLD = 0.4  # min SBERT cosine for a predicted key to map to a VRDU field; fixed a priori
+N_BOOTSTRAP = 1000
 
 
 # ---------------------------------------------------------------- text utils
@@ -258,6 +259,33 @@ def sbert_embedder():
     return lambda texts: model.encode(texts, normalize_embeddings=True, convert_to_numpy=True)
 
 
+def bootstrap_f1_ci(page_counts: list[tuple[str, dict]], n_boot: int | None = None, seed: int = 0) -> dict:
+    """95% percentile interval of micro F1 for every key, resampling pages with replacement within each template.
+
+    Templates are the fixed design, pages are the random sample, so only pages are resampled.
+    """
+    import numpy as np
+
+    n_boot = n_boot or N_BOOTSTRAP
+    keys = sorted({k for _, c in page_counts for k in c})
+    if not keys:
+        return {}
+    arr = np.array([[c.get(k, (0, 0, 0)) for k in keys] for _, c in page_counts], dtype=float)  # (pages, keys, 3)
+    groups: dict[str, list[int]] = defaultdict(list)
+    for i, (stratum, _) in enumerate(page_counts):
+        groups[stratum].append(i)
+    rng = np.random.default_rng(seed)
+    f1s = np.empty((n_boot, len(keys)))
+    for b in range(n_boot):
+        idx = np.concatenate([rng.choice(g, size=len(g), replace=True) for g in groups.values()])
+        tp, n_pred, n_gold = arr[idx].sum(axis=0).T
+        p = np.divide(tp, n_pred, out=np.zeros_like(tp), where=n_pred > 0)
+        r = np.divide(tp, n_gold, out=np.zeros_like(tp), where=n_gold > 0)
+        f1s[b] = np.divide(2 * p * r, p + r, out=np.zeros_like(tp), where=(p + r) > 0)
+    lo, hi = np.percentile(f1s, [2.5, 97.5], axis=0)
+    return {k: [round(float(lo[j]), 4), round(float(hi[j]), 4)] for j, k in enumerate(keys)}
+
+
 def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
     import numpy as np
 
@@ -276,6 +304,7 @@ def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
     field_emb = {ds: embed([f.replace("_", " ") for f in fs]) for ds, fs in meta_fields.items()}
 
     per_field = defaultdict(Counter)  # (dataset, template, field) -> tp/n_pred/n_gold/value_found
+    page_counts: list[tuple[str, dict]] = []  # (template, {key: (tp, n_pred, n_gold)}) per page, for the bootstrap
     decoy = Counter()
     missing, seconds = 0, []
     for p in pages:
@@ -287,9 +316,11 @@ def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
         pairs = pr["pairs"]
         if p["dataset"] == "funsd":
             gold = p["gold"]["pairs"]
-            funsd["tp"] += greedy_match(pairs, gold, lambda a, b: min(tok_f1(a[0], b[0]), tok_f1(a[1], b[1])))
+            tp = greedy_match(pairs, gold, lambda a, b: min(tok_f1(a[0], b[0]), tok_f1(a[1], b[1])))
+            funsd["tp"] += tp
             funsd["value_tp"] += greedy_match([v for _, v in pairs], [v for _, v in gold], tok_f1)
             funsd["n_pred"] += len(pairs); funsd["n_gold"] += len(gold)
+            page_counts.append(("funsd", {("funsd", "funsd", "_pairs"): (tp, len(pairs), len(gold))}))
             continue
         ds, fields = p["dataset"], meta_fields[p["dataset"]]
         assigned: dict[str, list[str]] = defaultdict(list)
@@ -300,13 +331,19 @@ def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
                 if row[j] >= FIELD_SIM_THRESHOLD:
                     assigned[fields[j]].append(v)
         all_values = [v for _, v in pairs]
+        counts, micro = {}, [0, 0, 0]
         for f in fields:
             gold = list({norm(g): g for g in p["gold"]["fields"].get(f, [])}.values())
             pv = list({norm(v): v for v in assigned.get(f, [])}.values())
+            tp = greedy_match(pv, gold, tok_f1)
             c = per_field[(ds, p["template"], f)]
-            c["tp"] += greedy_match(pv, gold, tok_f1)
+            c["tp"] += tp
             c["n_pred"] += len(pv); c["n_gold"] += len(gold)
             c["value_found"] += greedy_match(all_values, gold, tok_f1)
+            counts[(ds, p["template"], f)] = (tp, len(pv), len(gold))
+            micro = [micro[0] + tp, micro[1] + len(pv), micro[2] + len(gold)]
+        counts[(ds, p["template"], "_micro")] = tuple(micro)
+        page_counts.append((p["template"], counts))
         if p["template"] == "Short-Form":
             d, gold_reg = p["gold"].get("decoy"), p["gold"]["fields"].get("registrant_name", [])
             reg_preds = assigned.get("registrant_name", [])
@@ -318,22 +355,27 @@ def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
             decoy["correct"] += any(tok_f1(v, g) >= MATCH_THRESHOLD for v in reg_preds for g in gold_reg)
             decoy["picked_decoy"] += bool(d) and any(tok_f1(v, d) >= MATCH_THRESHOLD for v in reg_preds)
 
+    ci = bootstrap_f1_ci(page_counts)
     out: dict = {"missing_pages": missing, "pages_scored": len(seconds),
-                 "mean_seconds_per_page": round(sum(seconds) / len(seconds), 2) if seconds else None}
+                 "mean_seconds_per_page": round(sum(seconds) / len(seconds), 2) if seconds else None,
+                 "bootstrap": {"resamples": N_BOOTSTRAP, "stratified_by": "template", "interval": "95% percentile"}}
     if funsd["n_gold"]:
-        out["funsd"] = {"pairs": prf(funsd["tp"], funsd["n_pred"], funsd["n_gold"]),
-                        "value_recall": round(funsd["value_tp"] / funsd["n_gold"], 4)}
+        pairs_row = prf(funsd["tp"], funsd["n_pred"], funsd["n_gold"])
+        pairs_row["f1_ci95"] = ci[("funsd", "funsd", "_pairs")]
+        out["funsd"] = {"pairs": pairs_row, "value_recall": round(funsd["value_tp"] / funsd["n_gold"], 4)}
     vrdu: dict = {}
     for (ds, t, f), c in sorted(per_field.items()):
         if c["n_gold"] == 0 and c["n_pred"] == 0:
             continue
         row = prf(c["tp"], c["n_pred"], c["n_gold"])
         row["value_recall"] = round(c["value_found"] / c["n_gold"], 4) if c["n_gold"] else None
+        row["f1_ci95"] = ci[(ds, t, f)]
         vrdu.setdefault(ds, {}).setdefault(t, {})[f] = row
     for ds, by_t in vrdu.items():
         for t, by_f in by_t.items():
             tp, npred, ngold = (sum(r[k] for r in by_f.values()) for k in ("tp", "n_pred", "n_gold"))
             by_f["_micro"] = prf(tp, npred, ngold)
+            by_f["_micro"]["f1_ci95"] = ci[(ds, t, "_micro")]
     out["vrdu"] = vrdu
     if decoy:
         out["short_form_registrant"] = dict(decoy)
@@ -404,6 +446,13 @@ def cmd_selftest(_args) -> None:
     assert reg["registration_num"]["tp"] == 1 and reg["registrant_name"]["tp"] == 0, reg
     assert m["short_form_registrant"]["picked_decoy"] == 1 and m["short_form_registrant"]["correct"] == 0
     assert m["funsd"]["pairs"]["tp"] == 1 and m["funsd"]["pairs"]["n_gold"] == 2
+
+    # bootstrap: a perfect page set has a degenerate [1, 1] interval; a mixed one brackets the point estimate
+    perfect = [("t", {"k": (1, 1, 1)})] * 20
+    assert bootstrap_f1_ci(perfect, n_boot=200)["k"] == [1.0, 1.0]
+    mixed = [("t", {"k": (1, 1, 1)})] * 10 + [("t", {"k": (0, 1, 1)})] * 10
+    lo, hi = bootstrap_f1_ci(mixed, n_boot=500)["k"]
+    assert lo < 0.5 < hi and hi - lo < 0.6, (lo, hi)
     print("[+] zero_shot_kv selftest passed")
 
 
