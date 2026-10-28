@@ -1,0 +1,76 @@
+{
+  "test": {
+    "precision": 0.0,
+    "recall": 0.0,
+    "f1": 0.0,
+    "support": 363520,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 380
+      },
+      "foreign_principle_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 227
+      },
+      "registrant_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 379
+      },
+      "registration_num": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 381
+      },
+      "signer_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 282
+      },
+      "signer_title": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 109
+      }
+    }
+  },
+  "best_val_f1": 0.0,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.1141,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0677,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0567,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0438,
+      "val_f1": 0.0
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 0,
+    "total_i_tags": 0,
+    "rate": 0.0
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.0000 == independent F1=0.0000 (delta 0.00e+00)\n  lenient-IOB2 F1=0.0000 (spread 0.0000)\n  malformed I- tags: 0/0 (0.0%)"
+}
