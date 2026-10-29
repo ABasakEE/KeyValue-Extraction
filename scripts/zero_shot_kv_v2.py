@@ -44,8 +44,7 @@ NAMING_PROMPT = (
     "it into one item per piece. Copy value text exactly from the pair. Output only lines of the form:\n"
     "<item><src>PAIR NUMBER</src><field>snake_case_name</field><desc>DESCRIPTION</desc><value>VALUE TEXT</value></item>"
 )
-ITEM_RE = re.compile(r"<src>\s*(\d+)\s*</src>\s*<field>(.*?)</field>\s*<desc>(.*?)</desc>\s*<value>(.*?)</value>", re.S)
-SCHEMA_ITEM_RE = re.compile(r"<field>(.*?)</field>\s*<desc>(.*?)</desc>", re.S)
+DESC_RE = re.compile(r"<desc>(.*?)(?:</desc>|$)", re.S)
 
 
 # ---------------------------------------------------------------- prompts & parsing
@@ -54,31 +53,39 @@ def naming_prompt(pairs: list[list[str]]) -> str:
     return f"{NAMING_PROMPT}\n\nPairs:\n{listing}"
 
 
+def _tag(block: str, name: str) -> str:
+    m = re.search(rf"<{name}>(.*?)</{name}>", block, re.S)
+    return m.group(1).strip() if m else ""
+
+
 def parse_items(text: str, pairs: list[list[str]]) -> list[list]:
-    """[src, field, desc, value] items; value falls back to the source pair's value when left empty."""
+    """[src, field, desc, value] items; value falls back to the source pair's value when left empty.
+
+    Each item starts at a <src> tag; the <item> wrapper is optional and the other tags may come in any order,
+    because small models drift from the requested format (v1 saw the <pair> wrapper dropped).
+    """
     items = []
-    for src, field, desc, value in ITEM_RE.findall(text):
-        i = int(src)
-        field = field.strip()
-        if 1 <= i <= len(pairs) and field:
-            items.append([i, field, desc.strip(), value.strip() or pairs[i - 1][1]])
+    for block in re.split(r"(?=<src>)", text)[1:]:
+        src, field = _tag(block, "src"), _tag(block, "field")
+        if src.isdigit() and field and 1 <= int(src) <= len(pairs):
+            i = int(src)
+            items.append([i, field, _tag(block, "desc"), _tag(block, "value") or pairs[i - 1][1]])
     return items
 
 
-def schema_prompt(fields: list[str]) -> str:
-    return ("A document data-extraction schema has these fields: " + ", ".join(fields) + ". For each field, write one "
-            "sentence describing the information it holds on a document. Output only lines of the form:\n"
-            "<item><field>FIELD NAME</field><desc>DESCRIPTION</desc></item>")
+def field_desc_prompt(fields: list[str], field: str) -> str:
+    # one field per call: a 3B model did not follow a multi-field tagged list (0 parsed on Kaggle)
+    return (f"A document data-extraction schema has these fields: {', '.join(fields)}. In one sentence, describe "
+            f"the information that the field '{field}' holds on a document. Output only: <desc>DESCRIPTION</desc>")
 
 
-def parse_schema(text: str, fields: list[str]) -> dict[str, str]:
-    by_norm = {norm(f): f for f in fields}
-    out = {}
-    for field, desc in SCHEMA_ITEM_RE.findall(text):
-        f = by_norm.get(norm(field))
-        if f and desc.strip():
-            out[f] = desc.strip()
-    return out
+def parse_desc(text: str, field: str) -> str:
+    """Text inside <desc> (closing tag optional); else the first non-empty line of the answer."""
+    m = DESC_RE.search(text)
+    desc = m.group(1) if m else next((l for l in text.splitlines() if l.strip()), "")
+    desc = re.sub(r"<[^>]+>", " ", desc)
+    desc = re.sub(rf"^\W*{re.escape(field)}\W*", "", desc.strip(), flags=re.I)  # drop an echoed "field_name:"
+    return " ".join(desc.split()).strip("\"' ")[:300]
 
 
 def schema_fields(dataset: str, docs: list[dict] | None = None) -> list[str]:
@@ -314,11 +321,14 @@ def cmd_describe_schema(args) -> None:
         fields = schema_fields(ds)
         if not fields:
             continue  # no known schema for this dataset: nothing to describe
-        raw, _ = gen(schema_prompt(fields), max_new_tokens=1024)
-        out[ds] = parse_schema(raw, fields)
-        print(f"[{ds}] described {len(out[ds])}/{len(fields)} fields")
-        for f, desc in out[ds].items():
-            print(f"    {f}: {desc}")
+        out[ds] = {}
+        for f in fields:
+            raw, _ = gen(field_desc_prompt(fields, f), max_new_tokens=128)
+            desc = parse_desc(raw, f)
+            if desc:
+                out[ds][f] = desc
+            print(f"    [{ds}] {f}: {desc!r}  | raw: {raw[:150]!r}", flush=True)
+        print(f"[{ds}] described {len(out[ds])}/{len(fields)} fields", flush=True)
     Path(args.out).write_text(json.dumps(out, indent=2, ensure_ascii=False), encoding="utf-8")
 
 
@@ -370,8 +380,14 @@ def cmd_selftest(_args) -> None:
     items = parse_items(raw, pairs)
     assert [it[1] for it in items] == ["registrant_name", "registrant_address", "start_date"], items
     assert items[2][3] == "01/02/20 - 03/04/20"  # empty value falls back to the source pair
-    assert parse_schema("<item><field>file_date</field><desc>Filing date.</desc></item><field>Bogus</field><desc>z</desc>",
-                        ["file_date", "signer_name"]) == {"file_date": "Filing date."}
+    loose = ("<src>2</src><desc>End.</desc><value>03/04/20</value><field>end_date</field>\n"   # no <item>, any order
+             "<item><src>x</src><field>bad</field></item><src>1</src><value>Acme</value>")       # bad src / no field
+    assert parse_items(loose, pairs) == [[2, "end_date", "End.", "03/04/20"]], parse_items(loose, pairs)
+    assert parse_desc("<desc>The date the form was filed.</desc>", "file_date") == "The date the form was filed."
+    assert parse_desc("Sure! <desc>Date of filing", "file_date") == "Date of filing"            # unclosed tag
+    assert parse_desc("\nfile_date: The filing date.\nMore text", "file_date") == "The filing date."  # no tags
+    assert parse_desc("**file_date**: <b>Date</b> filed", "file_date") == "Date filed"
+    assert parse_desc("", "file_date") == ""
 
     def embed(texts):  # hashed bag-of-words stand-in for SBERT
         m = np.full((len(texts), 4096), 1e-9)
