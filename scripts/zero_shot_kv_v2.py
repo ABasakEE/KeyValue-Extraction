@@ -36,15 +36,19 @@ from zero_shot_kv import (
 )
 
 EXTRACT_PROMPT = PROMPT + "\nDo not output keys whose value is empty or blank."
-# One pair per prompt: on Kaggle the 3B model ignored a many-pairs-in-one-answer tagged format,
-# but followed a single short tagged answer reliably (schema descriptions: 19/20 parsed).
+# One pair per prompt, a worked example, and the answer prefilled with NAMING_PREFILL: on Kaggle the 3B model
+# ignored a many-pairs tagged format, then answered a placeholder-only per-pair prompt with untagged lines
+# ("invoice_number_invoice_number\nInvoice number is ..."). The example is deliberately unrelated to the test data.
 NAMING_PROMPT = (
-    "A key-value pair was extracted from a document.\nKey: {key}\nValue: {value}\n"
-    "Give the field a short canonical name in snake_case and a one-sentence description of the information it "
-    "holds, in your own words. If the value combines separate pieces of information (for example a name and an "
-    "address, or a start date and an end date), write one line per piece with the part of the value it covers. "
-    "Output only lines of the form:\n<field>snake_case_name</field><desc>DESCRIPTION</desc><value>VALUE TEXT</value>"
+    "A key-value pair was extracted from a document. Give its field a short canonical name in snake_case and a "
+    "one-sentence description of the information it holds, in your own words. If the value combines separate pieces "
+    "of information, write one line per piece with the part of the value it covers.\n\n"
+    "Example\nKey: Ship To\nValue: Jane Smith, 12 Oak Road, Austin TX\nAnswer:\n"
+    "<field>recipient_name</field><desc>Name of the person receiving the shipment.</desc><value>Jane Smith</value>\n"
+    "<field>recipient_address</field><desc>Postal address of the recipient.</desc><value>12 Oak Road, Austin TX</value>\n\n"
+    "Now this pair\nKey: {key}\nValue: {value}\nAnswer:"
 )
+NAMING_PREFILL = "<field>"
 DESC_RE = re.compile(r"<desc>(.*?)(?:</desc>|$)", re.S)
 
 
@@ -62,18 +66,42 @@ def _snake(name: str) -> str:
     return re.sub(r"[^0-9a-z]+", "_", name.lower()).strip("_")
 
 
+def _clean_field(name: str) -> str:
+    """snake_case, minus echoed placeholders ('x_snake_case_name') and doubled names ('a_b_a_b'), max 8 words."""
+    parts = [p for p in _snake(re.sub(r"<[^>]+>", " ", name)).split("_") if p]
+    while parts[-2:] == ["case", "name"] or parts[-2:] == ["snake", "case"] or parts[-1:] == ["snake"]:
+        parts = parts[:-1] if parts[-1:] == ["snake"] else parts[:-2]
+    half = len(parts) // 2
+    if len(parts) % 2 == 0 and parts[:half] == parts[half:]:
+        parts = parts[:half]
+    return "_".join(parts[:8])
+
+
+def _first_line(text: str) -> str:
+    return next((" ".join(re.sub(r"<[^>]+>", " ", l).split()) for l in text.splitlines() if l.strip()), "")
+
+
 def parse_named(text: str, pair_value: str) -> list[list[str]]:
     """[field, desc, value] lines for one pair; value falls back to the pair's value.
 
-    A line starts at <field>; if the model drops the <field> tags, the text before <desc> is taken as the name.
+    Each line starts at <field>. Tolerated drift (all seen on Kaggle): a missing </field> or no tags at all, in
+    which case the first line is the name and the next line the description.
     """
-    blocks = re.split(r"(?=<field>)", text)[1:] if "<field>" in text else [text]
+    blocks = text.split("<field>")[1:] if "<field>" in text else [text]
     out = []
     for block in blocks:
-        field = _tag(block, "field") or (block.split("<desc>")[0] if "<desc>" in block else "")
-        field = _snake(re.sub(r"<[^>]+>", " ", field))
+        if "</field>" in block:
+            field, rest = block.split("</field>", 1)
+        elif "<desc>" in block:
+            field, rest = block.split("<desc>", 1)
+            rest = "<desc>" + rest
+        else:
+            lines = [l for l in block.splitlines() if l.strip()]
+            field, rest = (lines[0] if lines else ""), "\n".join(lines[1:])
+        field = _clean_field(field)
         if field:
-            out.append([field, _tag(block, "desc"), _tag(block, "value") or pair_value])
+            desc = _tag(rest, "desc") or ("" if "<desc>" in rest else _first_line(rest))
+            out.append([field, desc, _tag(rest, "value") or pair_value])
     return out
 
 
@@ -158,22 +186,26 @@ class VLM:
         self.proc = AutoProcessor.from_pretrained(model_id, min_pixels=256 * 28 * 28, max_pixels=max_pixels)
         self.proc.tokenizer.padding_side = "left"  # batched generation needs left padding
 
-    def batch_text(self, prompts: list[str], max_new_tokens: int, batch_size: int = 16) -> list[tuple[str, int]]:
-        """Text-only prompts generated in padded batches; returns (text, generated token count) per prompt."""
+    def batch_text(self, prompts: list[str], max_new_tokens: int, prefill: str = "",
+                   batch_size: int = 16) -> list[tuple[str, int]]:
+        """Text-only prompts generated in padded batches; returns (prefill + text, generated token count) per prompt.
+
+        ``prefill`` is written as the start of the assistant's answer, so the model continues in the given format.
+        """
         import torch
 
         pad = self.proc.tokenizer.pad_token_id
         out_all = []
         for s in range(0, len(prompts), batch_size):
             texts = [self.proc.apply_chat_template([{"role": "user", "content": [{"type": "text", "text": p}]}],
-                                                   tokenize=False, add_generation_prompt=True)
+                                                   tokenize=False, add_generation_prompt=True) + prefill
                      for p in prompts[s:s + batch_size]]
             inputs = self.proc(text=texts, padding=True, return_tensors="pt").to(self.device)
             with torch.no_grad():
                 out = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
             new = out[:, inputs["input_ids"].shape[1]:]
             texts_out = self.proc.batch_decode(new, skip_special_tokens=True)
-            out_all += [(t, int((row != pad).sum())) for t, row in zip(texts_out, new)]
+            out_all += [(prefill + t, int((row != pad).sum())) for t, row in zip(texts_out, new)]
         return out_all
 
     def __call__(self, prompt: str, image=None, max_new_tokens: int = 1024) -> tuple[str, int]:
@@ -201,7 +233,7 @@ def process_unit(gen, doc: dict, page: dict, max_new_tokens: int, naming_max_new
         row["raw"], row["extract_tokens"] = gen(EXTRACT_PROMPT, image=image, max_new_tokens=max_new_tokens)
         row["pairs"] = parse_pairs(row["raw"])
         if row["pairs"]:
-            named = gen.batch_text([naming_prompt(k, v) for k, v in row["pairs"]], naming_max_new_tokens)
+            named = gen.batch_text([naming_prompt(k, v) for k, v in row["pairs"]], naming_max_new_tokens, NAMING_PREFILL)
             row["naming_raw"] = "\n---\n".join(t for t, _ in named)
             row["naming_tokens"] = max(n for _, n in named)
             row["items"] = [[i, *item] for i, ((k, v), (t, _)) in enumerate(zip(row["pairs"], named), 1)
@@ -404,10 +436,24 @@ def cmd_selftest(_args) -> None:
         ["registrant_name", "Organization that registers.", "Acme Corp"],
         ["registrant_address", "Its address.", "1 Main St, Springfield"]]
     assert parse_named("<field>Start Date</field><desc>Start.</desc>", "01/02/20") == [["start_date", "Start.", "01/02/20"]]
-    # formats seen on Kaggle: no <field> tags, name written before <desc>
     assert parse_named("invoice_number<desc>Invoice number</desc><value>963706-1</value>", "x") == [
         ["invoice_number", "Invoice number", "963706-1"]]
-    assert parse_named("1. ReceivedBy_NSD_FARA no tags at all", "x") == []
+    # verbatim untagged answers from the Kaggle smoke run (with the "<field>" prefill prepended, as batch_text does)
+    kaggle = [("VAR_description_VAR_description\nThe variable's description is provided.", "(SEE EXPLANATION)",
+               ["var_description", "The variable's description is provided.", "(SEE EXPLANATION)"]),
+              ("received_by_snake_case_name\nReceived By: NSD/FARA Registration Unit\nDate: 09/27/2017", "NSD/FARA ...",
+               ["received_by", "Received By: NSD/FARA Registration Unit", "NSD/FARA ..."]),
+              ("invoice_number_invoice_number\nInvoice number is the unique identifier for the invoice. \nVALUE 963706-1",
+               "963706-1", ["invoice_number", "Invoice number is the unique identifier for the invoice.", "963706-1"])]
+    for raw, value, want in kaggle:
+        assert parse_named(raw, value) == [want], parse_named(raw, value)
+        assert parse_named(NAMING_PREFILL + raw, value) == [want], parse_named(NAMING_PREFILL + raw, value)
+    # prefilled answer that follows the format, and one that forgets </field>
+    assert parse_named("<field>invoice_date</field><desc>Date of the invoice.</desc><value>10/21/12</value>", "x") == [
+        ["invoice_date", "Date of the invoice.", "10/21/12"]]
+    assert parse_named("<field>invoice_date\nDate the invoice was issued.", "10/21/12") == [
+        ["invoice_date", "Date the invoice was issued.", "10/21/12"]]
+    assert parse_named("", "x") == []
     assert parse_desc("<desc>The date the form was filed.</desc>", "file_date") == "The date the form was filed."
     assert parse_desc("Sure! <desc>Date of filing", "file_date") == "Date of filing"            # unclosed tag
     assert parse_desc("\nfile_date: The filing date.\nMore text", "file_date") == "The filing date."  # no tags
@@ -453,9 +499,9 @@ def cmd_selftest(_args) -> None:
                     return "<key>Name of Registrant</key><value>Acme</value>", 10
                 raise AssertionError("naming must use batch_text")
 
-            def batch_text(self, prompts, max_new_tokens):
-                assert all("Key: " in p and "Value: " in p for p in prompts)
-                return [("<field>registrant_name</field><desc>Org.</desc><value>Acme</value>", 12)] * len(prompts)
+            def batch_text(self, prompts, max_new_tokens, prefill=""):
+                assert all(p.rstrip().endswith("Answer:") and "Value: " in p for p in prompts) and prefill == NAMING_PREFILL
+                return [(prefill + "registrant_name</field><desc>Org.</desc><value>Acme</value>", 12)] * len(prompts)
 
         docs = [d for d in build_manifest(None, vrdu, 1, 0, 2) if d["dataset"] == "registration-form"][:1]
         assert len(docs[0]["pages"]) >= 1 and docs[0]["gold"]["fields"]
