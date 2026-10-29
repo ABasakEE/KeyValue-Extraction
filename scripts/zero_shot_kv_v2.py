@@ -128,9 +128,30 @@ def schema_fields(dataset: str, docs: list[dict] | None = None) -> list[str]:
 
 
 # ---------------------------------------------------------------- manifest
-def vrdu_docs(root: Path, subcorpus: str, n_per_template: int, seed: int, max_pages: int) -> list[dict]:
-    """Whole-document records for exactly the documents v1 sampled (same seed and sampling)."""
-    sampled = {p["page_id"].split("/", 1)[1]: p["template"] for p in vrdu_pages(root, subcorpus, n_per_template, seed)}
+def fresh_sample(root: Path, subcorpus: str, n_per_template: int, seed: int, exclude: set[str]) -> dict[str, str]:
+    """filename -> template for a new per-template sample that avoids every filename in ``exclude``."""
+    from data.vrdu_loader import list_templates, template_from_filename
+
+    templates = list_templates(root / subcorpus / "few_shot-splits")
+    by_t: dict[str, list[str]] = defaultdict(list)
+    with gzip.open(root / subcorpus / "main" / "dataset.jsonl.gz", "rt", encoding="utf-8") as fh:
+        for line in fh:
+            fn = json.loads(line)["filename"]
+            t = template_from_filename(fn, templates)
+            if t and fn not in exclude:
+                by_t[t].append(fn)
+    rng = random.Random(seed)
+    return {fn: t for t in sorted(by_t) for fn in rng.sample(sorted(by_t[t]), min(n_per_template, len(by_t[t])))}
+
+
+def vrdu_docs(root: Path, subcorpus: str, n_per_template: int, seed: int, max_pages: int,
+              exclude: set[str] | None = None) -> list[dict]:
+    """Whole-document records: the documents v1 sampled (same seed and sampling), or, given ``exclude``,
+    a fresh sample that avoids those filenames (confirmation runs)."""
+    if exclude is not None:
+        sampled = fresh_sample(root, subcorpus, n_per_template, seed, exclude)
+    else:
+        sampled = {p["page_id"].split("/", 1)[1]: p["template"] for p in vrdu_pages(root, subcorpus, n_per_template, seed)}
     docs = []
     with gzip.open(root / subcorpus / "main" / "dataset.jsonl.gz", "rt", encoding="utf-8") as fh:
         for line in fh:
@@ -159,15 +180,17 @@ def vrdu_docs(root: Path, subcorpus: str, n_per_template: int, seed: int, max_pa
     return docs
 
 
-def build_manifest(funsd_root: Path | None, vrdu_root: Path, n_per_template: int, seed: int, max_pages: int) -> list[dict]:
+def build_manifest(funsd_root: Path | None, vrdu_root: Path, n_per_template: int, seed: int, max_pages: int,
+                   subcorpora: tuple[str, ...] = ("registration-form", "ad-buy-form"),
+                   exclude: set[str] | None = None) -> list[dict]:
     docs = []
     if funsd_root and funsd_root.exists():
         for p in funsd_pages(funsd_root):
             docs.append({"doc_id": p["page_id"], "dataset": "funsd", "template": "funsd", "source": p["image"],
                          "n_pages": 1, "pages": [{"page": None, "lines": p["lines"]}], "gold": p["gold"]})
-    for sub in ("registration-form", "ad-buy-form"):
+    for sub in subcorpora:
         if (vrdu_root / sub / "main").exists():
-            docs += vrdu_docs(vrdu_root, sub, n_per_template, seed, max_pages)
+            docs += vrdu_docs(vrdu_root, sub, n_per_template, seed, max_pages, exclude)
     # deterministic shuffle: a run stopped by the deadline still covers every template evenly
     docs.sort(key=lambda d: d["doc_id"])
     random.Random(seed).shuffle(docs)
@@ -403,8 +426,14 @@ def run_stats(docs: list[dict], rows: dict[str, list[dict]]) -> dict:
 
 # ---------------------------------------------------------------- CLI
 def cmd_prepare(args) -> None:
-    docs = build_manifest(Path(args.funsd_root) if args.funsd_root else None, Path(args.vrdu_root),
-                          args.n_per_template, args.seed, args.max_pages)
+    exclude = None
+    if args.exclude_manifest:
+        exclude = {d["doc_id"].split("/", 1)[-1]
+                   for d in json.loads(Path(args.exclude_manifest).read_text(encoding="utf-8"))}
+    funsd_root = Path(args.funsd_root) if args.funsd_root and "funsd" in args.subcorpora.split(",") else None
+    subcorpora = tuple(s for s in args.subcorpora.split(",") if s != "funsd")
+    docs = build_manifest(funsd_root, Path(args.vrdu_root), args.n_per_template, args.seed, args.max_pages,
+                          subcorpora, exclude)
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(docs, ensure_ascii=False), encoding="utf-8")
     n_units = sum(len(d["pages"]) for d in docs)
@@ -586,6 +615,9 @@ def main() -> None:
     p.add_argument("--n-per-template", type=int, default=100)
     p.add_argument("--max-pages", type=int, default=4)
     p.add_argument("--seed", type=int, default=0)
+    p.add_argument("--subcorpora", default="funsd,registration-form,ad-buy-form")
+    p.add_argument("--exclude-manifest", default=None,
+                   help="sample fresh documents avoiding every document in this manifest (confirmation runs)")
     p.add_argument("--out", required=True)
     for name in ("describe-schema", "run"):
         p = sub.add_parser(name)

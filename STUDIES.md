@@ -29,6 +29,7 @@ Conventions:
 | 9 | Stage B: grounded, matched VLM vs BROS | CPU | 2026-10-29 | Under the strict matched metric BROS wins overall (~70 vs 61); errors are complementary: VLM wins role fields, BROS wins signature/date fields and span boundaries |
 | 10 | Hybrid feasibility (oracle, fill-in, cross-template router) | CPU | 2026-10-29 | Ceiling is large (oracle +16 F1) but neither pre-registered rule passes; the VLM key/named choice does not transfer across templates |
 | 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
+| 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-29 | *pending (Kaggle run)* |
 
 ---
 
@@ -420,3 +421,26 @@ division suggested by studies 9–10: the VLM for role/wording fields, BROS for 
 
 **Evidence:** `results/matched_eval/metrics.json` (adds `vlm_both`), `results/matched_eval/spans.jsonl`,
 `results/hybrid_eval/metrics.json` (verdicts and per-fold router decisions).
+
+---
+
+## 12. Confirmation of the study-11 hybrid on fresh documents — GPU (Kaggle T4 × 2), registered 2026-10-29
+
+**Question:** does the study-11 router (VLM for role fields, BROS for the rest; +3.9 F1 on the 300 documents it
+was chosen on) still beat Track-1 BROS on unseen-template documents never used before?
+
+**Setup (frozen before the run):** 100 fresh documents per registration template (seed 1), excluding the 300 used
+in studies 6–11; all inside the UTL test sets, whose BROS predictions are already dumped (study 4). The VLM
+pipeline is unchanged from study 7 (same prompts and code, schema descriptions copied from v2), with
+one-answer-per-field, the mode-free `vlm_both` mapping, the study-9 grounding, and the study-10 pass rule.
+- **Primary:** the study-11 per-template router tables (each learned on the other two templates' old documents),
+  applied unchanged.
+- **Secondary:** the same routing procedure re-fitted on the fresh documents of the other two templates.
+- **Validity checks:** BROS on the fresh sample vs its full test-set F1; VLM on the fresh sample vs the old sample.
+
+Notebook `notebooks/kaggle_confirm_hybrid.ipynb`; scoring `scripts/confirm_eval.py` (a dry run on the old spans
+reproduces study 11 exactly).
+
+**Results:** *pending*
+
+**Evidence:** `results/confirm_v2/` (after the run).
