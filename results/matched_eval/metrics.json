@@ -1,0 +1,526 @@
+{
+  "protocol": "UTL folds of the matched-size protocol (N=200), seeds 13/42 for BROS; VLM zero-shot, one answer per field; exact entity-span micro F1",
+  "sanity": {
+    "fold0_seed13": {
+      "recomputed_f1": 0.8275,
+      "reported_f1": 0.8275
+    },
+    "fold0_seed42": {
+      "recomputed_f1": 0.8443,
+      "reported_f1": 0.8443
+    },
+    "fold1_seed13": {
+      "recomputed_f1": 0.6582,
+      "reported_f1": 0.6582
+    },
+    "fold1_seed42": {
+      "recomputed_f1": 0.7346,
+      "reported_f1": 0.7346
+    },
+    "fold2_seed13": {
+      "recomputed_f1": 0.5808,
+      "reported_f1": 0.5808
+    },
+    "fold2_seed42": {
+      "recomputed_f1": 0.5758,
+      "reported_f1": 0.5758
+    }
+  },
+  "folds": {
+    "fold0_Amendment": {
+      "n_docs": 100,
+      "systems": {
+        "bros_seed13": {
+          "precision": 0.8285,
+          "recall": 0.8428,
+          "f1": 0.8356,
+          "tp": 343,
+          "n_pred": 414,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.7941,
+            0.8743
+          ],
+          "per_field_f1": {
+            "file_date": 0.7579,
+            "foreign_principle_name": 0.0,
+            "registrant_name": 0.8612,
+            "registration_num": 0.9612,
+            "signer_name": 0.7933,
+            "signer_title": 0.7097
+          }
+        },
+        "bros_seed42": {
+          "precision": 0.8753,
+          "recall": 0.8108,
+          "f1": 0.8418,
+          "tp": 330,
+          "n_pred": 377,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.8025,
+            0.8769
+          ],
+          "per_field_f1": {
+            "file_date": 0.7841,
+            "foreign_principle_name": 0.0,
+            "registrant_name": 0.9091,
+            "registration_num": 0.9612,
+            "signer_name": 0.7531,
+            "signer_title": 0.4286
+          }
+        },
+        "vlm_key": {
+          "precision": 0.8148,
+          "recall": 0.6486,
+          "f1": 0.7223,
+          "tp": 264,
+          "n_pred": 324,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.6825,
+            0.7582
+          ],
+          "per_field_f1": {
+            "file_date": 0.7229,
+            "foreign_principle_name": 0.8,
+            "registrant_name": 0.8923,
+            "registration_num": 0.9254,
+            "signer_name": 0.3014,
+            "signer_title": 0.0
+          },
+          "minus_bros_mean_f1": -0.1162,
+          "minus_bros_mean_ci95": [
+            -0.16,
+            -0.0735
+          ]
+        },
+        "vlm_key_any_occurrence": {
+          "precision": 0.8333,
+          "recall": 0.6634,
+          "f1": 0.7387,
+          "tp": 270,
+          "n_pred": 324,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.6978,
+            0.7745
+          ],
+          "per_field_f1": {
+            "file_date": 0.7349,
+            "foreign_principle_name": 0.8,
+            "registrant_name": 0.9436,
+            "registration_num": 0.9254,
+            "signer_name": 0.3014,
+            "signer_title": 0.0
+          },
+          "minus_bros_mean_f1": -0.0998,
+          "minus_bros_mean_ci95": [
+            -0.1422,
+            -0.0605
+          ]
+        },
+        "vlm_named": {
+          "precision": 0.6904,
+          "recall": 0.6192,
+          "f1": 0.6528,
+          "tp": 252,
+          "n_pred": 365,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.6131,
+            0.6919
+          ],
+          "per_field_f1": {
+            "file_date": 0.4301,
+            "foreign_principle_name": 0.5,
+            "registrant_name": 0.8832,
+            "registration_num": 0.9347,
+            "signer_name": 0.3636,
+            "signer_title": 0.1429
+          },
+          "minus_bros_mean_f1": -0.1856,
+          "minus_bros_mean_ci95": [
+            -0.2291,
+            -0.14
+          ]
+        },
+        "vlm_named_any_occurrence": {
+          "precision": 0.7096,
+          "recall": 0.6364,
+          "f1": 0.671,
+          "tp": 259,
+          "n_pred": 365,
+          "n_gold": 407,
+          "f1_ci95": [
+            0.6314,
+            0.7098
+          ],
+          "per_field_f1": {
+            "file_date": 0.4409,
+            "foreign_principle_name": 0.5,
+            "registrant_name": 0.9442,
+            "registration_num": 0.9347,
+            "signer_name": 0.3636,
+            "signer_title": 0.1429
+          },
+          "minus_bros_mean_f1": -0.1674,
+          "minus_bros_mean_ci95": [
+            -0.2114,
+            -0.123
+          ]
+        }
+      }
+    },
+    "fold1_Dissemination_Report": {
+      "n_docs": 100,
+      "systems": {
+        "bros_seed13": {
+          "precision": 0.845,
+          "recall": 0.4991,
+          "f1": 0.6276,
+          "tp": 289,
+          "n_pred": 342,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.5894,
+            0.6631
+          ],
+          "per_field_f1": {
+            "file_date": 0.763,
+            "foreign_principle_name": 0.0,
+            "registrant_name": 0.7807,
+            "registration_num": 0.9515,
+            "signer_name": 0.3134,
+            "signer_title": 0.4662
+          }
+        },
+        "bros_seed42": {
+          "precision": 0.8554,
+          "recall": 0.5924,
+          "f1": 0.7,
+          "tp": 343,
+          "n_pred": 401,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.6652,
+            0.7311
+          ],
+          "per_field_f1": {
+            "file_date": 0.7956,
+            "foreign_principle_name": 0.101,
+            "registrant_name": 0.8768,
+            "registration_num": 0.9561,
+            "signer_name": 0.4203,
+            "signer_title": 0.6494
+          }
+        },
+        "vlm_key": {
+          "precision": 0.7564,
+          "recall": 0.6114,
+          "f1": 0.6762,
+          "tp": 354,
+          "n_pred": 468,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.6488,
+            0.7052
+          ],
+          "per_field_f1": {
+            "file_date": 0.8528,
+            "foreign_principle_name": 0.6456,
+            "registrant_name": 0.96,
+            "registration_num": 0.9749,
+            "signer_name": 0.3597,
+            "signer_title": 0.013
+          },
+          "minus_bros_mean_f1": 0.0136,
+          "minus_bros_mean_ci95": [
+            -0.0232,
+            0.0493
+          ]
+        },
+        "vlm_key_any_occurrence": {
+          "precision": 0.7799,
+          "recall": 0.6304,
+          "f1": 0.6972,
+          "tp": 365,
+          "n_pred": 468,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.6705,
+            0.7252
+          ],
+          "per_field_f1": {
+            "file_date": 0.8832,
+            "foreign_principle_name": 0.6835,
+            "registrant_name": 0.96,
+            "registration_num": 0.9749,
+            "signer_name": 0.4317,
+            "signer_title": 0.013
+          },
+          "minus_bros_mean_f1": 0.0342,
+          "minus_bros_mean_ci95": [
+            -0.0024,
+            0.0686
+          ]
+        },
+        "vlm_named": {
+          "precision": 0.6905,
+          "recall": 0.5665,
+          "f1": 0.6224,
+          "tp": 328,
+          "n_pred": 475,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.5919,
+            0.6545
+          ],
+          "per_field_f1": {
+            "file_date": 0.7817,
+            "foreign_principle_name": 0.6104,
+            "registrant_name": 0.7638,
+            "registration_num": 0.9749,
+            "signer_name": 0.3611,
+            "signer_title": 0.0621
+          },
+          "minus_bros_mean_f1": -0.0404,
+          "minus_bros_mean_ci95": [
+            -0.08,
+            -0.005
+          ]
+        },
+        "vlm_named_any_occurrence": {
+          "precision": 0.7137,
+          "recall": 0.5855,
+          "f1": 0.6433,
+          "tp": 339,
+          "n_pred": 475,
+          "n_gold": 579,
+          "f1_ci95": [
+            0.6132,
+            0.6737
+          ],
+          "per_field_f1": {
+            "file_date": 0.8122,
+            "foreign_principle_name": 0.6494,
+            "registrant_name": 0.7638,
+            "registration_num": 0.9749,
+            "signer_name": 0.4306,
+            "signer_title": 0.0621
+          },
+          "minus_bros_mean_f1": -0.0199,
+          "minus_bros_mean_ci95": [
+            -0.0586,
+            0.0156
+          ]
+        }
+      }
+    },
+    "fold2_Short-Form": {
+      "n_docs": 100,
+      "systems": {
+        "bros_seed13": {
+          "precision": 0.6631,
+          "recall": 0.5507,
+          "f1": 0.6017,
+          "tp": 250,
+          "n_pred": 377,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.5777,
+            0.6244
+          ],
+          "per_field_f1": {
+            "file_date": 0.9072,
+            "foreign_principle_name": 0.0,
+            "registrant_name": 0.0199,
+            "registration_num": 0.9804,
+            "signer_name": 0.8511
+          }
+        },
+        "bros_seed42": {
+          "precision": 0.6268,
+          "recall": 0.5771,
+          "f1": 0.6009,
+          "tp": 262,
+          "n_pred": 418,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.5771,
+            0.6242
+          ],
+          "per_field_f1": {
+            "file_date": 0.9293,
+            "foreign_principle_name": 0.0,
+            "registrant_name": 0.068,
+            "registration_num": 1.0,
+            "signer_name": 0.8811
+          }
+        },
+        "vlm_key": {
+          "precision": 0.3606,
+          "recall": 0.3106,
+          "f1": 0.3337,
+          "tp": 141,
+          "n_pred": 391,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.305,
+            0.3673
+          ],
+          "per_field_f1": {
+            "file_date": 0.3959,
+            "foreign_principle_name": 0.043,
+            "registrant_name": 0.0603,
+            "registration_num": 0.9592,
+            "signer_name": 0.0
+          },
+          "minus_bros_mean_f1": -0.2673,
+          "minus_bros_mean_ci95": [
+            -0.3046,
+            -0.2285
+          ]
+        },
+        "vlm_key_any_occurrence": {
+          "precision": 0.4297,
+          "recall": 0.37,
+          "f1": 0.3976,
+          "tp": 168,
+          "n_pred": 391,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.3707,
+            0.427
+          ],
+          "per_field_f1": {
+            "file_date": 0.3959,
+            "foreign_principle_name": 0.043,
+            "registrant_name": 0.0603,
+            "registration_num": 0.9592,
+            "signer_name": 0.3375
+          },
+          "minus_bros_mean_f1": -0.2035,
+          "minus_bros_mean_ci95": [
+            -0.235,
+            -0.1705
+          ]
+        },
+        "vlm_named": {
+          "precision": 0.5551,
+          "recall": 0.5771,
+          "f1": 0.5659,
+          "tp": 262,
+          "n_pred": 472,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.5316,
+            0.6037
+          ],
+          "per_field_f1": {
+            "file_date": 0.5143,
+            "foreign_principle_name": 0.578,
+            "registrant_name": 0.6162,
+            "registration_num": 0.9592,
+            "signer_name": 0.233
+          },
+          "minus_bros_mean_f1": -0.0344,
+          "minus_bros_mean_ci95": [
+            -0.0762,
+            0.0051
+          ]
+        },
+        "vlm_named_any_occurrence": {
+          "precision": 0.6017,
+          "recall": 0.6256,
+          "f1": 0.6134,
+          "tp": 284,
+          "n_pred": 472,
+          "n_gold": 454,
+          "f1_ci95": [
+            0.5794,
+            0.6477
+          ],
+          "per_field_f1": {
+            "file_date": 0.5143,
+            "foreign_principle_name": 0.763,
+            "registrant_name": 0.6768,
+            "registration_num": 0.9592,
+            "signer_name": 0.233
+          },
+          "minus_bros_mean_f1": 0.0128,
+          "minus_bros_mean_ci95": [
+            -0.0256,
+            0.051
+          ]
+        }
+      }
+    }
+  },
+  "pooled": {
+    "bros_seed13": {
+      "f1": 0.6856,
+      "f1_ci95": [
+        0.6607,
+        0.7077
+      ]
+    },
+    "bros_seed42": {
+      "f1": 0.7094,
+      "f1_ci95": [
+        0.6859,
+        0.7288
+      ]
+    },
+    "vlm_key": {
+      "f1": 0.5787,
+      "f1_ci95": [
+        0.5524,
+        0.606
+      ],
+      "minus_bros_mean_ci95": [
+        -0.1449,
+        -0.0934
+      ]
+    },
+    "vlm_key_any_occurrence": {
+      "f1": 0.6123,
+      "f1_ci95": [
+        0.5871,
+        0.636
+      ],
+      "minus_bros_mean_ci95": [
+        -0.1104,
+        -0.0612
+      ]
+    },
+    "vlm_named": {
+      "f1": 0.6119,
+      "f1_ci95": [
+        0.5914,
+        0.6333
+      ],
+      "minus_bros_mean_ci95": [
+        -0.1108,
+        -0.0601
+      ]
+    },
+    "vlm_named_any_occurrence": {
+      "f1": 0.641,
+      "f1_ci95": [
+        0.622,
+        0.6613
+      ],
+      "minus_bros_mean_ci95": [
+        -0.0819,
+        -0.0317
+      ]
+    }
+  },
+  "grounding": {
+    "key_values": 1258,
+    "key_grounded": 1183,
+    "named_values": 1405,
+    "named_grounded": 1312
+  }
+}

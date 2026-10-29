@@ -258,6 +258,38 @@ def read_rows(paths: list[str]) -> dict[str, list[dict]]:
 
 
 # ---------------------------------------------------------------- scoring
+def schema_texts(mode: str, fields: list[str], desc: dict[str, str]) -> list[str]:
+    """What each schema field is embedded as: its name (key mode) or name + generated description (named mode)."""
+    if mode == "key":
+        return [f.replace("_", " ") for f in fields]
+    return [f"{f.replace('_', ' ')}: {desc.get(f, '')}".rstrip(": ") for f in fields]
+
+
+def assign_fields(rs: list[dict], mode: str, fields: list[str], field_emb, embed,
+                  one_per_field: bool) -> dict[str, list[tuple[float, str, int | None]]]:
+    """Map a document's predicted values to schema fields: field -> [(similarity, value, page)].
+
+    Each candidate goes to its most similar field if similarity >= FIELD_SIM_THRESHOLD; with ``one_per_field``
+    only the most similar candidate per field is kept (ties go to the earlier one).
+    """
+    import numpy as np
+
+    if mode == "key":
+        cands = [(k, v, r["page"]) for r in rs for k, v in r["pairs"]]
+    else:
+        cands = [(f"{f.replace('_', ' ')}: {desc}", v, r["page"]) for r in rs for _, f, desc, v in r["items"]]
+    assigned: dict[str, list[tuple[float, str, int | None]]] = defaultdict(list)
+    if cands:
+        sims = embed([c for c, _, _ in cands]) @ field_emb.T
+        for (_, v, page), row in zip(cands, sims):
+            j = int(np.argmax(row))
+            if row[j] >= FIELD_SIM_THRESHOLD:
+                assigned[fields[j]].append((float(row[j]), v, page))
+    if one_per_field:
+        assigned = {f: [max(c, key=lambda x: x[0])] for f, c in assigned.items()}
+    return assigned
+
+
 def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, embed,
              one_per_field: bool = False) -> dict:
     """``one_per_field``: keep only the highest-similarity candidate per (document, field); ties go to the earlier one.
@@ -265,8 +297,6 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
     Added after the v2 run showed naming lowering precision (many candidates per field), so results with it
     must be reported as a post-hoc decoding rule, applied identically to both modes.
     """
-    import numpy as np
-
     complete = [d for d in docs if len(rows.get(d["doc_id"], [])) == len(d["pages"])]
     out: dict = {"docs_total": len(docs), "docs_complete": len(complete), "stats": run_stats(docs, rows)}
 
@@ -277,11 +307,8 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
 
     datasets = sorted({d["dataset"] for d in complete if d["dataset"] != "funsd"})
     fields = {ds: schema_fields(ds, docs) for ds in datasets}
-    schema_text = {
-        "key": {ds: [f.replace("_", " ") for f in fields[ds]] for ds in datasets},
-        "named": {ds: [f"{f.replace('_', ' ')}: {schema_desc.get(ds, {}).get(f, '')}".rstrip(": ") for f in fields[ds]]
-                  for ds in datasets},
-    }
+    schema_text = {mode: {ds: schema_texts(mode, fields[ds], schema_desc.get(ds, {})) for ds in datasets}
+                   for mode in ("key", "named")}
     for mode in ("key", "named"):
         field_emb = {ds: embed(schema_text[mode][ds]) for ds in datasets}
         per_field = defaultdict(Counter)
@@ -290,24 +317,12 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
             if d["dataset"] == "funsd":
                 continue
             ds, rs = d["dataset"], rows[d["doc_id"]]
-            if mode == "key":
-                cands = [(k, v) for r in rs for k, v in r["pairs"]]
-            else:
-                cands = [(f"{f.replace('_', ' ')}: {desc}", v) for r in rs for _, f, desc, v in r["items"]]
-            assigned: dict[str, list[tuple[float, str]]] = defaultdict(list)  # field -> [(similarity, value)]
-            if cands:
-                sims = embed([c for c, _ in cands]) @ field_emb[ds].T
-                for (_, v), row in zip(cands, sims):
-                    j = int(np.argmax(row))
-                    if row[j] >= FIELD_SIM_THRESHOLD:
-                        assigned[fields[ds][j]].append((float(row[j]), v))
-            if one_per_field:
-                assigned = {f: [max(c, key=lambda x: x[0])] for f, c in assigned.items()}
+            assigned = assign_fields(rs, mode, fields[ds], field_emb[ds], embed, one_per_field)
             all_values = [v for r in rs for _, v in r["pairs"]] + [it[3] for r in rs for it in r["items"]]
             counts, micro = {}, [0, 0, 0]
             for f in fields[ds]:
                 gold = list({norm(g): g for g in d["gold"]["fields"].get(f, [])}.values())
-                pv = list({norm(v): v for _, v in assigned.get(f, [])}.values())
+                pv = list({norm(v): v for _, v, _ in assigned.get(f, [])}.values())
                 tp = greedy_match(pv, gold, tok_f1)
                 c = per_field[(ds, d["template"], f)]
                 c["tp"] += tp; c["n_pred"] += len(pv); c["n_gold"] += len(gold)
@@ -317,7 +332,7 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
             counts[(ds, d["template"], "_micro")] = tuple(micro)
             doc_counts.append((d["template"], counts))
             if d["template"] == "Short-Form":
-                _decoy_check(decoy, d, [v for _, v in assigned.get("registrant_name", [])])
+                _decoy_check(decoy, d, [v for _, v, _ in assigned.get("registrant_name", [])])
         ci = bootstrap_f1_ci(doc_counts)
         vrdu: dict = {}
         for (ds, t, f), c in sorted(per_field.items()):
