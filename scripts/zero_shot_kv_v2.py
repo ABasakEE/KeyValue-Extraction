@@ -258,7 +258,13 @@ def read_rows(paths: list[str]) -> dict[str, list[dict]]:
 
 
 # ---------------------------------------------------------------- scoring
-def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, embed) -> dict:
+def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, embed,
+             one_per_field: bool = False) -> dict:
+    """``one_per_field``: keep only the highest-similarity candidate per (document, field); ties go to the earlier one.
+
+    Added after the v2 run showed naming lowering precision (many candidates per field), so results with it
+    must be reported as a post-hoc decoding rule, applied identically to both modes.
+    """
     import numpy as np
 
     complete = [d for d in docs if len(rows.get(d["doc_id"], [])) == len(d["pages"])]
@@ -288,18 +294,20 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
                 cands = [(k, v) for r in rs for k, v in r["pairs"]]
             else:
                 cands = [(f"{f.replace('_', ' ')}: {desc}", v) for r in rs for _, f, desc, v in r["items"]]
-            assigned: dict[str, list[str]] = defaultdict(list)
+            assigned: dict[str, list[tuple[float, str]]] = defaultdict(list)  # field -> [(similarity, value)]
             if cands:
                 sims = embed([c for c, _ in cands]) @ field_emb[ds].T
                 for (_, v), row in zip(cands, sims):
                     j = int(np.argmax(row))
                     if row[j] >= FIELD_SIM_THRESHOLD:
-                        assigned[fields[ds][j]].append(v)
+                        assigned[fields[ds][j]].append((float(row[j]), v))
+            if one_per_field:
+                assigned = {f: [max(c, key=lambda x: x[0])] for f, c in assigned.items()}
             all_values = [v for r in rs for _, v in r["pairs"]] + [it[3] for r in rs for it in r["items"]]
             counts, micro = {}, [0, 0, 0]
             for f in fields[ds]:
                 gold = list({norm(g): g for g in d["gold"]["fields"].get(f, [])}.values())
-                pv = list({norm(v): v for v in assigned.get(f, [])}.values())
+                pv = list({norm(v): v for _, v in assigned.get(f, [])}.values())
                 tp = greedy_match(pv, gold, tok_f1)
                 c = per_field[(ds, d["template"], f)]
                 c["tp"] += tp; c["n_pred"] += len(pv); c["n_gold"] += len(gold)
@@ -309,7 +317,7 @@ def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, e
             counts[(ds, d["template"], "_micro")] = tuple(micro)
             doc_counts.append((d["template"], counts))
             if d["template"] == "Short-Form":
-                _decoy_check(decoy, d, assigned.get("registrant_name", []))
+                _decoy_check(decoy, d, [v for _, v in assigned.get("registrant_name", [])])
         ci = bootstrap_f1_ci(doc_counts)
         vrdu: dict = {}
         for (ds, t, f), c in sorted(per_field.items()):
@@ -419,7 +427,8 @@ def cmd_run(args) -> None:
 def cmd_score(args) -> None:
     docs = json.loads(Path(args.manifest).read_text(encoding="utf-8"))
     schema_desc = json.loads(Path(args.schema_desc).read_text(encoding="utf-8")) if args.schema_desc else {}
-    metrics = score_v2(docs, read_rows(args.preds), schema_desc, sbert_embedder())
+    metrics = score_v2(docs, read_rows(args.preds), schema_desc, sbert_embedder(), one_per_field=args.one_per_field)
+    metrics["one_per_field"] = args.one_per_field
     Path(args.out).write_text(json.dumps(metrics, indent=2), encoding="utf-8")
     print(json.dumps({k: metrics[k] for k in ("docs_total", "docs_complete", "stats")}, indent=2))
 
@@ -489,6 +498,14 @@ def cmd_selftest(_args) -> None:
     assert m["docs_complete"] == 1 and m["stats"]["Short-Form"]["extract_truncated"] == 1
     assert score_v2([doc], {"d1": rows["d1"][:1]}, desc, embed)["docs_complete"] == 0  # incomplete docs are not scored
 
+    # one_per_field: a vaguely named filer item and the real registrant both map to registrant_name;
+    # unconstrained scoring keeps both (decoy picked), the rule keeps only the closer match
+    two = {"d1": [dict(rows["d1"][0], items=[[1, "registrant", "", "Jane Doe"]]), rows["d1"][1]]}
+    loose_m = score_v2([doc], two, desc, embed)["named"]["short_form_registrant"]
+    top1_m = score_v2([doc], two, desc, embed, one_per_field=True)["named"]["short_form_registrant"]
+    assert loose_m["picked_decoy"] == 1 and loose_m["correct"] == 1, loose_m
+    assert top1_m["picked_decoy"] == 0 and top1_m["correct"] == 1, top1_m
+
     # end to end with a stub model on real data, if present: manifest, page rendering, naming, resume
     vrdu = ROOT / "data" / "vrdu"
     if (vrdu / "ad-buy-form" / "main" / "meta.json").exists():
@@ -551,6 +568,8 @@ def main() -> None:
     p.add_argument("--manifest", required=True)
     p.add_argument("--preds", nargs="+", required=True)
     p.add_argument("--schema-desc", default=None)
+    p.add_argument("--one-per-field", action="store_true",
+                   help="post-hoc decoding rule: keep the best-matching candidate per document and field")
     p.add_argument("--out", required=True)
     sub.add_parser("selftest")
     args = ap.parse_args()
