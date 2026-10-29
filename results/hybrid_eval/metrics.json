@@ -1,5 +1,5 @@
 {
-  "rules": "Hybrid feasibility study (CPU): is combining Track-1 BROS with the zero-shot VLM worth pursuing?\n\nReads the per-document spans written by scripts/matched_eval.py (same 100 documents per UTL fold, same gold,\nexact entity-span F1). Every rule below was fixed before any hybrid result was computed.\n\nSystems (each built separately with BROS seed 13 and seed 42, compared against the same seed):\n* ``oracle``   per (document, field), the source with more correct spans (ties: fewer predictions, then BROS).\n               An upper bound; it uses the gold labels, so it is never a usable system.\n* ``fill_in``  BROS spans, plus VLM spans for fields BROS predicted nothing for in that document (VLM spans\n               overlapping a BROS span are dropped). The VLM mode (key / named) is chosen by pooled VLM F1 on the\n               other two templates.\n* ``router``   per field, the source (BROS, VLM key, VLM named) with the best pooled F1 for that field on the other\n               two templates (ties and fields without gold there: BROS); applied to the held-out template.\n\nPass rule (pre-declared): a usable hybrid (fill_in or router) is worth pursuing if, pooled over the 300 documents,\nits F1 minus BROS F1 (mean over seeds, paired bootstrap) has a 95% interval above 0, and on no single template\nis that interval entirely below 0.",
+  "rules": "Hybrid feasibility study (CPU): is combining Track-1 BROS with the zero-shot VLM worth pursuing?\n\nReads the per-document spans written by scripts/matched_eval.py (same 100 documents per UTL fold, same gold,\nexact entity-span F1). Every rule below was fixed before any hybrid result was computed.\n\nSystems (each built separately with BROS seed 13 and seed 42, compared against the same seed):\n* ``oracle``   per (document, field), the source with more correct spans (ties: fewer predictions, then BROS).\n               An upper bound; it uses the gold labels, so it is never a usable system.\n* ``fill_in``  BROS spans, plus VLM spans for fields BROS predicted nothing for in that document (VLM spans\n               overlapping a BROS span are dropped). The VLM mode (key / named) is chosen by pooled VLM F1 on the\n               other two templates.\n* ``router``   per field, the source (BROS, VLM key, VLM named) with the best pooled F1 for that field on the other\n               two templates (ties and fields without gold there: BROS); applied to the held-out template.\n\nStudy 11 adds ``fill_in_both`` and ``router_both``: the same rules with the mode-free VLM mapping ``vlm_both``\n(key and named candidates pooled per field, best similarity wins), so no VLM mode is chosen per template.\n\nPass rule (pre-declared): a usable hybrid (fill_in or router) is worth pursuing if, pooled over the 300 documents,\nits F1 minus BROS F1 (mean over seeds, paired bootstrap) has a 95% interval above 0, and on no single template\nis that interval entirely below 0.",
   "decisions": {
     "0": {
       "fill_in_vlm_mode": "vlm_named",
@@ -11,10 +11,26 @@
         "signer_name": "bros_seed13",
         "signer_title": "bros_seed13"
       },
+      "router_both_seed13": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "vlm_both",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
       "router_seed42": {
         "file_date": "bros_seed42",
         "foreign_principle_name": "vlm_named",
         "registrant_name": "vlm_named",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "router_both_seed42": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
         "registration_num": "bros_seed42",
         "signer_name": "bros_seed42",
         "signer_title": "bros_seed42"
@@ -30,10 +46,26 @@
         "signer_name": "bros_seed13",
         "signer_title": "bros_seed13"
       },
+      "router_both_seed13": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
       "router_seed42": {
         "file_date": "bros_seed42",
         "foreign_principle_name": "vlm_named",
         "registrant_name": "vlm_named",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "router_both_seed42": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "bros_seed42",
         "registration_num": "bros_seed42",
         "signer_name": "bros_seed42",
         "signer_title": "bros_seed42"
@@ -49,10 +81,26 @@
         "signer_name": "bros_seed13",
         "signer_title": "bros_seed13"
       },
+      "router_both_seed13": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
       "router_seed42": {
         "file_date": "vlm_key",
         "foreign_principle_name": "vlm_key",
         "registrant_name": "vlm_key",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "router_both_seed42": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
         "registration_num": "bros_seed42",
         "signer_name": "bros_seed42",
         "signer_title": "bros_seed42"
@@ -90,6 +138,30 @@
         "minus_bros_ci95": [
           -0.0242,
           0.0127
+        ]
+      },
+      "fill_in_both": {
+        "f1_per_seed": [
+          0.8198,
+          0.8252
+        ],
+        "f1_mean": 0.8225,
+        "minus_bros": -0.0162,
+        "minus_bros_ci95": [
+          -0.0269,
+          -0.0053
+        ]
+      },
+      "router_both": {
+        "f1_per_seed": [
+          0.8308,
+          0.834
+        ],
+        "f1_mean": 0.8324,
+        "minus_bros": -0.0064,
+        "minus_bros_ci95": [
+          -0.0254,
+          0.0116
         ]
       },
       "oracle": {
@@ -137,6 +209,30 @@
           0.0552
         ]
       },
+      "fill_in_both": {
+        "f1_per_seed": [
+          0.7039,
+          0.7398
+        ],
+        "f1_mean": 0.7219,
+        "minus_bros": 0.0585,
+        "minus_bros_ci95": [
+          0.0415,
+          0.076
+        ]
+      },
+      "router_both": {
+        "f1_per_seed": [
+          0.7167,
+          0.7427
+        ],
+        "f1_mean": 0.7297,
+        "minus_bros": 0.0664,
+        "minus_bros_ci95": [
+          0.0499,
+          0.0836
+        ]
+      },
       "oracle": {
         "f1_per_seed": [
           0.8151,
@@ -180,6 +276,30 @@
         "minus_bros_ci95": [
           -0.1355,
           -0.0796
+        ]
+      },
+      "fill_in_both": {
+        "f1_per_seed": [
+          0.605,
+          0.6154
+        ],
+        "f1_mean": 0.6102,
+        "minus_bros": 0.009,
+        "minus_bros_ci95": [
+          -0.0124,
+          0.0302
+        ]
+      },
+      "router_both": {
+        "f1_per_seed": [
+          0.6667,
+          0.6561
+        ],
+        "f1_mean": 0.6614,
+        "minus_bros": 0.0601,
+        "minus_bros_ci95": [
+          0.0357,
+          0.0829
         ]
       },
       "oracle": {
@@ -228,6 +348,30 @@
         -0.0092
       ]
     },
+    "fill_in_both": {
+      "f1_per_seed": [
+        0.7036,
+        0.7208
+      ],
+      "f1_mean": 0.7122,
+      "minus_bros": 0.0147,
+      "minus_bros_ci95": [
+        0.0042,
+        0.0251
+      ]
+    },
+    "router_both": {
+      "f1_per_seed": [
+        0.7338,
+        0.7388
+      ],
+      "f1_mean": 0.7363,
+      "minus_bros": 0.039,
+      "minus_bros_ci95": [
+        0.0279,
+        0.0508
+      ]
+    },
     "oracle": {
       "f1_per_seed": [
         0.8546,
@@ -251,6 +395,16 @@
       "pooled_gain_significant": false,
       "no_template_significantly_worse": false,
       "passes": false
+    },
+    "fill_in_both": {
+      "pooled_gain_significant": true,
+      "no_template_significantly_worse": false,
+      "passes": false
+    },
+    "router_both": {
+      "pooled_gain_significant": true,
+      "no_template_significantly_worse": true,
+      "passes": true
     }
   }
 }

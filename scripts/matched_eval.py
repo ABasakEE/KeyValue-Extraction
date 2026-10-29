@@ -30,7 +30,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from zero_shot_kv import ROOT, norm, prf, sbert_embedder, tok_f1  # noqa: E402
-from zero_shot_kv_v2 import assign_fields, read_rows, schema_fields, schema_texts  # noqa: E402
+from zero_shot_kv_v2 import assign_both, assign_fields, read_rows, schema_fields, schema_texts  # noqa: E402
 
 sys.path.insert(0, str(ROOT / "src"))
 FOLDS = {0: "Amendment", 1: "Dissemination_Report", 2: "Short-Form"}
@@ -138,16 +138,18 @@ def main() -> None:
 
     from data.vrdu_loader import load_vrdu
 
-    examples, _, _ = load_vrdu(ROOT / "data" / "vrdu", "registration-form")
-    text = {e.guid: DocText(e.words, e.page_ids) for e in examples}
-
+    # SBERT first, then the dataset, keeping only the sampled documents: the host has ~1 GB of free commit memory
+    embed = sbert_embedder()
     v2 = Path(args.v2_dir)
     docs = {d["doc_id"].split("/", 1)[1]: d for d in json.loads((v2 / "manifest.json").read_text(encoding="utf-8"))
             if d["dataset"] == "registration-form"}
+    examples, _, _ = load_vrdu(ROOT / "data" / "vrdu", "registration-form")
+    text = {e.guid: DocText(e.words, e.page_ids) for e in examples if e.guid in docs}
+    del examples
+
     rows = read_rows([str(p) for p in sorted(v2.glob("preds_*.jsonl"))])
     desc = json.loads((v2 / "schema_desc.json").read_text(encoding="utf-8")).get("registration-form", {})
     fields = schema_fields("registration-form")
-    embed = sbert_embedder()
     field_emb = {mode: embed(schema_texts(mode, fields, desc)) for mode in ("key", "named")}
 
     bros_metrics = json.loads((Path(args.bros_dir) / "metrics.json").read_text())
@@ -181,8 +183,10 @@ def main() -> None:
             dump.append(rec)
             for s in SEEDS:
                 per_doc[f"bros_seed{s}"].append(span_counts(bros[s][g]["pred"], gold))
-            for mode in ("key", "named"):
-                assigned = assign_fields(rows[docs[g]["doc_id"]], mode, fields, field_emb[mode], embed, True)
+            for mode in ("key", "named", "both"):
+                rs = rows[docs[g]["doc_id"]]
+                assigned = (assign_both(rs, fields, field_emb, embed, True) if mode == "both"
+                            else assign_fields(rs, mode, fields, field_emb[mode], embed, True))
                 spans = vlm_spans(text[g], assigned)
                 rec[f"vlm_{mode}"] = spans
                 grounding[f"{mode}_values"] += len(assigned)

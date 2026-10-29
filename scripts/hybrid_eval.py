@@ -12,6 +12,9 @@ Systems (each built separately with BROS seed 13 and seed 42, compared against t
 * ``router``   per field, the source (BROS, VLM key, VLM named) with the best pooled F1 for that field on the other
                two templates (ties and fields without gold there: BROS); applied to the held-out template.
 
+Study 11 adds ``fill_in_both`` and ``router_both``: the same rules with the mode-free VLM mapping ``vlm_both``
+(key and named candidates pooled per field, best similarity wins), so no VLM mode is chosen per template.
+
 Pass rule (pre-declared): a usable hybrid (fill_in or router) is worth pursuing if, pooled over the 300 documents,
 its F1 minus BROS F1 (mean over seeds, paired bootstrap) has a 95% interval above 0, and on no single template
 is that interval entirely below 0.
@@ -78,11 +81,11 @@ def pooled_f1(records: list[dict], source: str, field: str | None = None) -> flo
     return f1_of(c), c[2]
 
 
-def fit_router(train: list[dict], bros: str) -> dict[str, str]:
+def fit_router(train: list[dict], bros: str, vlm_sources: tuple[str, ...] = VLM_MODES) -> dict[str, str]:
     fields = sorted({s[0] for r in train for s in r["gold"]})
     choice = {}
     for f in fields:
-        scores = [(pooled_f1(train, src, f)[0], -i, src) for i, src in enumerate([bros, *VLM_MODES])]
+        scores = [(pooled_f1(train, src, f)[0], -i, src) for i, src in enumerate([bros, *vlm_sources])]
         best = max(scores)
         choice[f] = best[2] if best[0] > 0 else bros
     return choice
@@ -106,12 +109,18 @@ def main() -> None:
         for s in SEEDS:
             bros = f"bros_seed{s}"
             router = fit_router(train, bros)
+            router_both = fit_router(train, bros, ("vlm_both",))
             decisions[fold][f"router_seed{s}"] = router
+            decisions[fold][f"router_both_seed{s}"] = router_both
             for r in test:
                 sources = {bros: r[bros], **{m: r[m] for m in VLM_MODES}}
                 per_doc[f"bros_seed{s}"][fold].append(span_counts(r[bros], r["gold"]))
                 per_doc[f"fill_in_seed{s}"][fold].append(span_counts(fill_in(r[bros], r[mode]), r["gold"]))
                 per_doc[f"router_seed{s}"][fold].append(span_counts(route(router, sources, bros), r["gold"]))
+                # study 11: mode-free VLM mapping, no per-template mode choice
+                per_doc[f"fill_in_both_seed{s}"][fold].append(span_counts(fill_in(r[bros], r["vlm_both"]), r["gold"]))
+                per_doc[f"router_both_seed{s}"][fold].append(
+                    span_counts(route(router_both, {bros: r[bros], "vlm_both": r["vlm_both"]}, bros), r["gold"]))
                 per_doc[f"oracle_seed{s}"][fold].append(oracle_counts(r["gold"], sources, [bros, *VLM_MODES]))
 
     report: dict = {"rules": __doc__.split("Usage:")[0].strip(), "decisions": decisions, "by_template": {}, "pooled": {}}
@@ -119,7 +128,7 @@ def main() -> None:
     def summarise(sel: dict[str, list[dict]]) -> dict:
         boot = paired_bootstrap(sel, "_micro")
         out = {}
-        for name in ("bros", "fill_in", "router", "oracle"):
+        for name in ("bros", "fill_in", "router", "fill_in_both", "router_both", "oracle"):
             f1s = [f1_of([sum(x["_micro"][i] for x in sel[f"{name}_seed{s}"]) for i in range(3)]) for s in SEEDS]
             entry = {"f1_per_seed": [round(v, 4) for v in f1s], "f1_mean": round(float(np.mean(f1s)), 4)}
             if name != "bros":
@@ -135,7 +144,7 @@ def main() -> None:
     report["pooled"] = summarise({k: [x for f in folds for x in v[f]] for k, v in per_doc.items()})
 
     verdict = {}
-    for name in ("fill_in", "router"):
+    for name in ("fill_in", "router", "fill_in_both", "router_both"):
         pooled_ok = report["pooled"][name]["minus_bros_ci95"][0] > 0
         no_loss = all(report["by_template"][t][name]["minus_bros_ci95"][1] >= 0 for t in report["by_template"])
         verdict[name] = {"pooled_gain_significant": pooled_ok, "no_template_significantly_worse": no_loss,

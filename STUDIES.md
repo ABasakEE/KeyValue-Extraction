@@ -28,6 +28,7 @@ Conventions:
 | 8 | One-answer-per-field decoding (post-hoc) | CPU | 2026-10-29 | Raises F1 on every template; Short-Form registrant 96.5, decoy picked 0/100 |
 | 9 | Stage B: grounded, matched VLM vs BROS | CPU | 2026-10-29 | Under the strict matched metric BROS wins overall (~70 vs 61); errors are complementary: VLM wins role fields, BROS wins signature/date fields and span boundaries |
 | 10 | Hybrid feasibility (oracle, fill-in, cross-template router) | CPU | 2026-10-29 | Ceiling is large (oracle +16 F1) but neither pre-registered rule passes; the VLM key/named choice does not transfer across templates |
+| 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
 
 ---
 
@@ -367,3 +368,55 @@ with the same seed; paired bootstrap over documents. **Rules and pass criterion 
   documents with BROS predictions already dumped; only the VLM would need to run on them).
 
 **Evidence:** `results/hybrid_eval/metrics.json` (includes every per-fold decision); `results/matched_eval/spans.jsonl`.
+
+---
+
+## 11. Mode-free VLM mapping, hybrids re-tested — CPU, 2026-10-29
+
+**Question:** study 10 failed partly because the VLM key/named mode chosen on two templates was wrong for the
+third. Does a mapping that needs no mode choice make the hybrid rules work?
+
+**Setup (registered before running):** `vlm_both` = candidates from key mode (raw key vs field name) and named
+mode (generated name + description vs field name + description), each scored in its own mode, pooled per field;
+under one-answer-per-field the single most similar candidate wins regardless of mode (ties: key).
+`assign_both` in `scripts/zero_shot_kv_v2.py`; grounded and scored by `scripts/matched_eval.py`; hybrids
+`fill_in_both` and `router_both` (router chooses per field between BROS and `vlm_both` on the other two
+templates) in `scripts/hybrid_eval.py`. **Same pass rule as study 10.** Caveat stated up front: this is another
+post-hoc variant on the same 300 documents as studies 8–10.
+
+**Validity checks:** all study 9 and study 10 numbers re-computed identically (sanity F1s, every system).
+
+**VLM alone (exact-span F1):** the mode-free mapping is *not* better than the single modes. Pooled 57.2
+[54.8–59.7] vs key 57.9 and named 61.2. On Short-Form it scores 41.6, between key (33.4) and named (56.6):
+pooling candidates lets the raw-key "Name" (the filer) out-match the named item-8 registrant, so Short-Form
+`registrant_name` falls to 6.0 (named alone: 61.6). **The decoy comes back** under max-similarity pooling.
+
+**Hybrids (Δ vs BROS, mean of seeds, paired bootstrap 95% CI):**
+
+| Template | BROS | Fill-in (both) | Δ | **Router (both)** | **Δ** |
+|---|---|---|---|---|---|
+| Amendment | 83.9 | 82.2 | −1.6 [−2.7, −0.5] | 83.2 | −0.6 [−2.5, +1.2] |
+| Dissemination_Report | 66.4 | 72.2 | +5.9 [+4.2, +7.6] | 73.0 | **+6.6** [+5.0, +8.4] |
+| Short-Form | 60.1 | 61.0 | +0.9 [−1.2, +3.0] | 66.1 | **+6.0** [+3.6, +8.3] |
+| **Pooled (300 docs)** | 69.8 | 71.2 | +1.5 [+0.4, +2.5] | **73.6** | **+3.9** [+2.8, +5.1] |
+
+**Verdict under the pre-registered rule: `router_both` passes** (pooled gain significant; no template
+significantly worse). Fill-in (both) still fails (significantly worse on Amendment).
+
+**What the router learned** (fitted on two templates, applied to the third; identical across all three folds
+for both seeds, apart from `registration_num` on Amendment): **VLM for `foreign_principle_name` and
+`registrant_name`; BROS for `file_date`, `signer_name`, `signer_title`** (and `registration_num`). That is the
+division suggested by studies 9–10: the VLM for role/wording fields, BROS for layout-regular fields.
+
+**Conclusions:**
+- A simple, interpretable hybrid (field-level routing learned on other templates) beats template-trained BROS on
+  unseen templates: **+3.9 F1 pooled**, +6.6 on Dissemination and +6.0 on Short-Form, no significant loss on
+  Amendment. Most of the gain is `foreign_principle_name`, which BROS never predicts.
+- It still captures only a quarter of the oracle ceiling (+16.2): Short-Form registrant stays poor (the mode-free
+  mapping reintroduces the decoy), and signature-block fields remain BROS-only.
+- **This is the fourth post-hoc variant on the same 300 documents** (studies 8–11). The result is a hypothesis
+  until a confirmatory run on fresh documents (the 1,615 unused UTL test documents) with every rule frozen as
+  is, so it must not be reported as a final number yet.
+
+**Evidence:** `results/matched_eval/metrics.json` (adds `vlm_both`), `results/matched_eval/spans.jsonl`,
+`results/hybrid_eval/metrics.json` (verdicts and per-fold router decisions).

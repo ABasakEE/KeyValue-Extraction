@@ -290,6 +290,22 @@ def assign_fields(rs: list[dict], mode: str, fields: list[str], field_emb, embed
     return assigned
 
 
+def assign_both(rs: list[dict], fields: list[str], field_emb: dict, embed,
+                one_per_field: bool) -> dict[str, list[tuple[float, str, int | None]]]:
+    """Mode-free mapping: candidates from key mode and named mode, each scored in its own mode, pooled per field.
+
+    With ``one_per_field`` the single most similar candidate per field wins regardless of mode (ties: key first).
+    Added in study 11 because the key/named choice did not transfer across templates (study 10).
+    """
+    merged: dict[str, list] = defaultdict(list)
+    for mode in ("key", "named"):
+        for f, c in assign_fields(rs, mode, fields, field_emb[mode], embed, False).items():
+            merged[f] += c
+    if one_per_field:
+        return {f: [max(c, key=lambda x: x[0])] for f, c in merged.items()}
+    return dict(merged)
+
+
 def score_v2(docs: list[dict], rows: dict[str, list[dict]], schema_desc: dict, embed,
              one_per_field: bool = False) -> dict:
     """``one_per_field``: keep only the highest-similarity candidate per (document, field); ties go to the earlier one.
@@ -512,6 +528,13 @@ def cmd_selftest(_args) -> None:
     assert m["named"]["short_form_registrant"] == {"docs": 1, "predicted_registrant": 1, "correct": 1, "picked_decoy": 0}
     assert m["docs_complete"] == 1 and m["stats"]["Short-Form"]["extract_truncated"] == 1
     assert score_v2([doc], {"d1": rows["d1"][:1]}, desc, embed)["docs_complete"] == 0  # incomplete docs are not scored
+
+    # assign_both: the long foreign-principal key fails in key mode alone but is recovered via its named item
+    fs = ["foreign_principle_name", "registrant_name", "signer_name"]
+    emb = {m: embed(schema_texts(m, fs, desc["registration-form"])) for m in ("key", "named")}
+    assert "foreign_principle_name" not in assign_fields(rows["d1"], "key", fs, emb["key"], embed, True)
+    both = assign_both(rows["d1"], fs, emb, embed, True)
+    assert both["foreign_principle_name"][0][1] == "Masdar", both
 
     # one_per_field: a vaguely named filer item and the real registrant both map to registrant_name;
     # unconstrained scoring keeps both (decoy picked), the rule keeps only the closer match
