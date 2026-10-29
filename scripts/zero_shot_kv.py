@@ -174,9 +174,9 @@ def load_image(page: dict):
 
     if page["pdf_page"] is None:
         return Image.open(page["image"]).convert("RGB")
-    import fitz  # PyMuPDF
+    import pymupdf
 
-    with fitz.open(page["image"]) as doc:
+    with pymupdf.open(page["image"]) as doc:
         pix = doc[page["pdf_page"]].get_pixmap(dpi=150)
         return Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
 
