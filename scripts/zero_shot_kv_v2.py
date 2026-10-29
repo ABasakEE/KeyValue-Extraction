@@ -7,8 +7,8 @@ Changes from v1 (scripts/zero_shot_kv.py, kept as is for reproducibility):
   and 97% of ad-buy gold values; page 1 alone covered 60% / 46%). Same documents as v1.
 * Longer generation (2048 tokens; v1's 768 truncated 75% of ad-buy pages) and the
   prompt asks the model to skip empty fields.
-* Naming step: the same model, text-only, turns each extracted pair into
-  <item><src>n</src><field>snake_case</field><desc>...</desc><value>...</value></item>,
+* Naming step: the same model, text-only, one short prompt per pair (batched per page), answers
+  <field>snake_case</field><desc>...</desc><value>...</value> (one line per piece),
   splitting combined values (name + address, date ranges).
 * Schema descriptions: the model describes each VRDU field from the list of field
   names alone (no document or template text), so the schema side is template-blind.
@@ -36,21 +36,21 @@ from zero_shot_kv import (
 )
 
 EXTRACT_PROMPT = PROMPT + "\nDo not output keys whose value is empty or blank."
+# One pair per prompt: on Kaggle the 3B model ignored a many-pairs-in-one-answer tagged format,
+# but followed a single short tagged answer reliably (schema descriptions: 19/20 parsed).
 NAMING_PROMPT = (
-    "Below are key-value pairs extracted from one page of a document. For each pair, give its field a short "
-    "canonical name in snake_case and a one-sentence description of the information it holds. Describe the "
-    "information generically, in your own words; do not copy the wording of the key. If a value combines separate "
-    "pieces of information (for example a name together with an address, or a start date and an end date), split "
-    "it into one item per piece. Copy value text exactly from the pair. Output only lines of the form:\n"
-    "<item><src>PAIR NUMBER</src><field>snake_case_name</field><desc>DESCRIPTION</desc><value>VALUE TEXT</value></item>"
+    "A key-value pair was extracted from a document.\nKey: {key}\nValue: {value}\n"
+    "Give the field a short canonical name in snake_case and a one-sentence description of the information it "
+    "holds, in your own words. If the value combines separate pieces of information (for example a name and an "
+    "address, or a start date and an end date), write one line per piece with the part of the value it covers. "
+    "Output only lines of the form:\n<field>snake_case_name</field><desc>DESCRIPTION</desc><value>VALUE TEXT</value>"
 )
 DESC_RE = re.compile(r"<desc>(.*?)(?:</desc>|$)", re.S)
 
 
 # ---------------------------------------------------------------- prompts & parsing
-def naming_prompt(pairs: list[list[str]]) -> str:
-    listing = "\n".join(f"{i}. <key>{k}</key><value>{v}</value>" for i, (k, v) in enumerate(pairs, 1))
-    return f"{NAMING_PROMPT}\n\nPairs:\n{listing}"
+def naming_prompt(key: str, value: str) -> str:
+    return NAMING_PROMPT.format(key=key, value=value)
 
 
 def _tag(block: str, name: str) -> str:
@@ -58,19 +58,23 @@ def _tag(block: str, name: str) -> str:
     return m.group(1).strip() if m else ""
 
 
-def parse_items(text: str, pairs: list[list[str]]) -> list[list]:
-    """[src, field, desc, value] items; value falls back to the source pair's value when left empty.
+def _snake(name: str) -> str:
+    return re.sub(r"[^0-9a-z]+", "_", name.lower()).strip("_")
 
-    Each item starts at a <src> tag; the <item> wrapper is optional and the other tags may come in any order,
-    because small models drift from the requested format (v1 saw the <pair> wrapper dropped).
+
+def parse_named(text: str, pair_value: str) -> list[list[str]]:
+    """[field, desc, value] lines for one pair; value falls back to the pair's value.
+
+    A line starts at <field>; if the model drops the <field> tags, the text before <desc> is taken as the name.
     """
-    items = []
-    for block in re.split(r"(?=<src>)", text)[1:]:
-        src, field = _tag(block, "src"), _tag(block, "field")
-        if src.isdigit() and field and 1 <= int(src) <= len(pairs):
-            i = int(src)
-            items.append([i, field, _tag(block, "desc"), _tag(block, "value") or pairs[i - 1][1]])
-    return items
+    blocks = re.split(r"(?=<field>)", text)[1:] if "<field>" in text else [text]
+    out = []
+    for block in blocks:
+        field = _tag(block, "field") or (block.split("<desc>")[0] if "<desc>" in block else "")
+        field = _snake(re.sub(r"<[^>]+>", " ", field))
+        if field:
+            out.append([field, _tag(block, "desc"), _tag(block, "value") or pair_value])
+    return out
 
 
 def field_desc_prompt(fields: list[str], field: str) -> str:
@@ -152,6 +156,25 @@ class VLM:
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_id, torch_dtype=getattr(torch, dtype), attn_implementation="sdpa").to(device).eval()
         self.proc = AutoProcessor.from_pretrained(model_id, min_pixels=256 * 28 * 28, max_pixels=max_pixels)
+        self.proc.tokenizer.padding_side = "left"  # batched generation needs left padding
+
+    def batch_text(self, prompts: list[str], max_new_tokens: int, batch_size: int = 16) -> list[tuple[str, int]]:
+        """Text-only prompts generated in padded batches; returns (text, generated token count) per prompt."""
+        import torch
+
+        pad = self.proc.tokenizer.pad_token_id
+        out_all = []
+        for s in range(0, len(prompts), batch_size):
+            texts = [self.proc.apply_chat_template([{"role": "user", "content": [{"type": "text", "text": p}]}],
+                                                   tokenize=False, add_generation_prompt=True)
+                     for p in prompts[s:s + batch_size]]
+            inputs = self.proc(text=texts, padding=True, return_tensors="pt").to(self.device)
+            with torch.no_grad():
+                out = self.model.generate(**inputs, max_new_tokens=max_new_tokens, do_sample=False)
+            new = out[:, inputs["input_ids"].shape[1]:]
+            texts_out = self.proc.batch_decode(new, skip_special_tokens=True)
+            out_all += [(t, int((row != pad).sum())) for t, row in zip(texts_out, new)]
+        return out_all
 
     def __call__(self, prompt: str, image=None, max_new_tokens: int = 1024) -> tuple[str, int]:
         import torch
@@ -178,8 +201,11 @@ def process_unit(gen, doc: dict, page: dict, max_new_tokens: int, naming_max_new
         row["raw"], row["extract_tokens"] = gen(EXTRACT_PROMPT, image=image, max_new_tokens=max_new_tokens)
         row["pairs"] = parse_pairs(row["raw"])
         if row["pairs"]:
-            row["naming_raw"], row["naming_tokens"] = gen(naming_prompt(row["pairs"]), max_new_tokens=naming_max_new_tokens)
-            row["items"] = parse_items(row["naming_raw"], row["pairs"])
+            named = gen.batch_text([naming_prompt(k, v) for k, v in row["pairs"]], naming_max_new_tokens)
+            row["naming_raw"] = "\n---\n".join(t for t, _ in named)
+            row["naming_tokens"] = max(n for _, n in named)
+            row["items"] = [[i, *item] for i, ((k, v), (t, _)) in enumerate(zip(row["pairs"], named), 1)
+                            for item in parse_named(t, v)]
     except Exception as e:  # one bad page must not kill a multi-hour run
         row["error"] = f"{type(e).__name__}: {e}"
     row["extract_truncated"] = row["extract_tokens"] >= max_new_tokens
@@ -372,17 +398,16 @@ def cmd_selftest(_args) -> None:
 
     import numpy as np
 
-    pairs = [["Name of Registrant", "Acme Corp, 1 Main St, Springfield"], ["Dates", "01/02/20 - 03/04/20"]]
-    raw = ("<item><src>1</src><field>registrant_name</field><desc>Organization that registers.</desc><value>Acme Corp</value></item>\n"
-           "<item><src>1</src><field>registrant_address</field><desc>Its address.</desc><value>1 Main St, Springfield</value></item>\n"
-           "<item><src>2</src><field>start_date</field><desc>Start.</desc><value></value></item>\n"
-           "<item><src>9</src><field>bogus</field><desc>x</desc><value>y</value></item>")
-    items = parse_items(raw, pairs)
-    assert [it[1] for it in items] == ["registrant_name", "registrant_address", "start_date"], items
-    assert items[2][3] == "01/02/20 - 03/04/20"  # empty value falls back to the source pair
-    loose = ("<src>2</src><desc>End.</desc><value>03/04/20</value><field>end_date</field>\n"   # no <item>, any order
-             "<item><src>x</src><field>bad</field></item><src>1</src><value>Acme</value>")       # bad src / no field
-    assert parse_items(loose, pairs) == [[2, "end_date", "End.", "03/04/20"]], parse_items(loose, pairs)
+    split = ("<field>registrant_name</field><desc>Organization that registers.</desc><value>Acme Corp</value>\n"
+             "<field>registrant_address</field><desc>Its address.</desc><value>1 Main St, Springfield</value>")
+    assert parse_named(split, "Acme Corp, 1 Main St, Springfield") == [
+        ["registrant_name", "Organization that registers.", "Acme Corp"],
+        ["registrant_address", "Its address.", "1 Main St, Springfield"]]
+    assert parse_named("<field>Start Date</field><desc>Start.</desc>", "01/02/20") == [["start_date", "Start.", "01/02/20"]]
+    # formats seen on Kaggle: no <field> tags, name written before <desc>
+    assert parse_named("invoice_number<desc>Invoice number</desc><value>963706-1</value>", "x") == [
+        ["invoice_number", "Invoice number", "963706-1"]]
+    assert parse_named("1. ReceivedBy_NSD_FARA no tags at all", "x") == []
     assert parse_desc("<desc>The date the form was filed.</desc>", "file_date") == "The date the form was filed."
     assert parse_desc("Sure! <desc>Date of filing", "file_date") == "Date of filing"            # unclosed tag
     assert parse_desc("\nfile_date: The filing date.\nMore text", "file_date") == "The filing date."  # no tags
@@ -426,7 +451,11 @@ def cmd_selftest(_args) -> None:
                 if image is not None:
                     assert image.size[0] > 100, "page did not render"
                     return "<key>Name of Registrant</key><value>Acme</value>", 10
-                return "<item><src>1</src><field>registrant_name</field><desc>Org.</desc><value>Acme</value></item>", 10
+                raise AssertionError("naming must use batch_text")
+
+            def batch_text(self, prompts, max_new_tokens):
+                assert all("Key: " in p and "Value: " in p for p in prompts)
+                return [("<field>registrant_name</field><desc>Org.</desc><value>Acme</value>", 12)] * len(prompts)
 
         docs = [d for d in build_manifest(None, vrdu, 1, 0, 2) if d["dataset"] == "registration-form"][:1]
         assert len(docs[0]["pages"]) >= 1 and docs[0]["gold"]["fields"]
@@ -434,8 +463,8 @@ def cmd_selftest(_args) -> None:
             path = Path(tmp) / "preds.jsonl"
             with open(path, "w", encoding="utf-8") as fh:
                 for p in docs[0]["pages"]:
-                    r = process_unit(Stub(), docs[0], p, 2048, 1536)
-                    assert r["error"] is None and r["items"], r
+                    r = process_unit(Stub(), docs[0], p, 2048, 160)
+                    assert r["error"] is None and r["items"] == [[1, "registrant_name", "Org.", "Acme"]], r
                     fh.write(json.dumps(r) + "\n")
             got = read_rows([str(path)])
             assert len(got[docs[0]["doc_id"]]) == len(docs[0]["pages"])
@@ -464,7 +493,7 @@ def main() -> None:
         if name == "run":
             p.add_argument("--manifest", required=True)
             p.add_argument("--max-new-tokens", type=int, default=2048)
-            p.add_argument("--naming-max-new-tokens", type=int, default=1536)
+            p.add_argument("--naming-max-new-tokens", type=int, default=160)  # per pair
             p.add_argument("--shard", type=int, default=0)
             p.add_argument("--num-shards", type=int, default=1)
             p.add_argument("--limit", type=int, default=0)
