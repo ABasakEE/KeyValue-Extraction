@@ -27,6 +27,7 @@ Conventions:
 | 7 | Zero-shot v2 (whole doc + LM naming) | GPU | 2026-10-29 | Naming fixes wording mismatches (Short-Form `foreign_principle_name` 4 → 85) but lowers precision |
 | 8 | One-answer-per-field decoding (post-hoc) | CPU | 2026-10-29 | Raises F1 on every template; Short-Form registrant 96.5, decoy picked 0/100 |
 | 9 | Stage B: grounded, matched VLM vs BROS | CPU | 2026-10-29 | Under the strict matched metric BROS wins overall (~70 vs 61); errors are complementary: VLM wins role fields, BROS wins signature/date fields and span boundaries |
+| 10 | Hybrid feasibility (oracle, fill-in, cross-template router) | CPU | 2026-10-29 | Ceiling is large (oracle +16 F1) but neither pre-registered rule passes; the VLM key/named choice does not transfer across templates |
 
 ---
 
@@ -316,3 +317,53 @@ annotation convention, e.g. extra words or a combined address), then location.
   test-set selection. MTL-side comparison not run (BROS per-document MTL predictions were never dumped).
 
 **Evidence:** `results/matched_eval/metrics.json`; `scripts/matched_eval.py` (selftest: `python scripts/matched_eval.py selftest`).
+
+---
+
+## 10. Hybrid feasibility: oracle, fill-in, cross-template router — CPU, 2026-10-29
+
+**Question:** study 9 found complementary errors. Is a BROS + VLM hybrid worth pursuing, and can its gain be
+captured without looking at the test template?
+
+**Setup:** `scripts/hybrid_eval.py` on the per-document spans saved by `scripts/matched_eval.py` (same 300
+documents, gold, and exact-span F1 as study 9). Each hybrid is built with BROS seed 13 and seed 42 and compared
+with the same seed; paired bootstrap over documents. **Rules and pass criterion registered here before running:**
+- **Oracle** (upper bound, uses gold): per (document, field), the source with more correct spans.
+- **Fill-in** (no parameters): BROS spans, plus VLM spans for fields BROS predicted nothing for in that document;
+  VLM mode (key / named) chosen by pooled VLM F1 on the other two templates.
+- **Router** (leave-one-template-out): per field, the source (BROS, VLM key, VLM named) with the best pooled F1 on
+  the other two templates, applied to the held-out template.
+- **Pass:** fill-in or router beats BROS pooled with a 95% interval above 0, and no template's interval lies
+  entirely below 0.
+
+**Results (exact-span F1, mean of the two BROS seeds; Δ = hybrid − BROS, paired bootstrap 95% CI):**
+
+| Template | BROS | Fill-in | Δ fill-in | Router | Δ router | Oracle (bound) | Δ oracle |
+|---|---|---|---|---|---|---|---|
+| Amendment | 83.9 | 82.3 | −1.5 [−2.6, −0.5] | 83.3 | −0.6 [−2.4, +1.3] | 91.0 | +7.2 [+5.3, +9.1] |
+| Dissemination_Report | 66.4 | 71.8 | **+5.5** [+3.7, +7.3] | 70.0 | +3.6 [+1.6, +5.5] | 83.2 | +16.9 [+14.5, +19.1] |
+| Short-Form | 60.1 | 60.2 | +0.1 [−0.6, +0.8] | 49.2 | −10.9 [−13.6, −8.0] | 84.6 | +24.5 [+21.8, +27.2] |
+| **Pooled (300 docs)** | 69.8 | 71.4 | **+1.6** [+0.7, +2.5] | 67.4 | −2.3 [−3.8, −0.9] | **85.9** | **+16.2** [+14.7, +17.8] |
+
+**Verdict under the pre-registered rule:** neither usable hybrid passes. Fill-in gains significantly pooled
+(+1.6) but is significantly worse on Amendment (−1.5); the router loses pooled and badly on Short-Form.
+
+**Why (from the recorded decisions):**
+- **The VLM mode choice does not transfer across templates.** Both rules pick the VLM mode (key vs named) on the
+  other two templates. For Short-Form, Amendment + Dissemination favour *key*, but Short-Form needs *named*
+  (study 8: key 48.2 vs named 71.3). So fill-in adds key-mode `foreign_principle_name` on Short-Form (4% F1
+  there) instead of named (58%), and the router routes registrant/file_date to the wrong mode (−10.9).
+- **BROS's Short-Form errors are confident wrong predictions, not abstentions.** It predicts the decoy as
+  registrant, so fill-in (which only fills fields BROS left empty) cannot replace it.
+- **On Amendment, fill-in's extra VLM spans are mostly false positives** where BROS abstained correctly.
+
+**Conclusions:**
+- **The hybrid is worth pursuing:** a perfect per-field choice would gain +16 F1 pooled (+24.5 on Short-Form).
+  The gain exists, but the simple rules here can't capture it on an unseen template.
+- What is missing is (1) a VLM mapping that needs no per-template mode choice, and (2) a signal for when BROS is
+  confidently wrong (agreement between the two systems, or BROS token confidences, which the dumps don't contain).
+- Caveat: studies 8–10 all evaluate post-hoc choices on the same 300 documents. Before any final hybrid claim, a
+  confirmatory run on documents not used in these studies is needed (the UTL test sets contain 1,615 other
+  documents with BROS predictions already dumped; only the VLM would need to run on them).
+
+**Evidence:** `results/hybrid_eval/metrics.json` (includes every per-fold decision); `results/matched_eval/spans.jsonl`.

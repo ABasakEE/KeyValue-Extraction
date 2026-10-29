@@ -156,6 +156,7 @@ def main() -> None:
                     "sanity": {}, "folds": {}}
     pooled: dict[str, list[dict]] = defaultdict(list)
     grounding = Counter()
+    dump = []  # per-document spans of every system, for downstream CPU studies (scripts/hybrid_eval.py)
 
     for fold, template in FOLDS.items():
         bros = {}
@@ -175,11 +176,15 @@ def main() -> None:
         per_doc: dict[str, list[dict]] = defaultdict(list)
         for g in matched:
             gold = bros[SEEDS[0]][g]["gold"]
+            rec = {"fold": fold, "template": template, "guid": g, "gold": gold,
+                   **{f"bros_seed{s}": bros[s][g]["pred"] for s in SEEDS}}
+            dump.append(rec)
             for s in SEEDS:
                 per_doc[f"bros_seed{s}"].append(span_counts(bros[s][g]["pred"], gold))
             for mode in ("key", "named"):
                 assigned = assign_fields(rows[docs[g]["doc_id"]], mode, fields, field_emb[mode], embed, True)
                 spans = vlm_spans(text[g], assigned)
+                rec[f"vlm_{mode}"] = spans
                 grounding[f"{mode}_values"] += len(assigned)
                 grounding[f"{mode}_grounded"] += len(spans)
                 per_doc[f"vlm_{mode}"].append(span_counts(spans, gold))
@@ -209,6 +214,8 @@ def main() -> None:
     report["grounding"] = dict(grounding)
     Path(args.out).parent.mkdir(parents=True, exist_ok=True)
     Path(args.out).write_text(json.dumps(report, indent=2), encoding="utf-8")
+    spans_path = Path(args.out).with_name("spans.jsonl")
+    spans_path.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in dump), encoding="utf-8")
     print(json.dumps({k: report[k] for k in ("sanity", "pooled", "grounding")}, indent=2))
 
 

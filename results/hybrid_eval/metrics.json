@@ -1,0 +1,256 @@
+{
+  "rules": "Hybrid feasibility study (CPU): is combining Track-1 BROS with the zero-shot VLM worth pursuing?\n\nReads the per-document spans written by scripts/matched_eval.py (same 100 documents per UTL fold, same gold,\nexact entity-span F1). Every rule below was fixed before any hybrid result was computed.\n\nSystems (each built separately with BROS seed 13 and seed 42, compared against the same seed):\n* ``oracle``   per (document, field), the source with more correct spans (ties: fewer predictions, then BROS).\n               An upper bound; it uses the gold labels, so it is never a usable system.\n* ``fill_in``  BROS spans, plus VLM spans for fields BROS predicted nothing for in that document (VLM spans\n               overlapping a BROS span are dropped). The VLM mode (key / named) is chosen by pooled VLM F1 on the\n               other two templates.\n* ``router``   per field, the source (BROS, VLM key, VLM named) with the best pooled F1 for that field on the other\n               two templates (ties and fields without gold there: BROS); applied to the held-out template.\n\nPass rule (pre-declared): a usable hybrid (fill_in or router) is worth pursuing if, pooled over the 300 documents,\nits F1 minus BROS F1 (mean over seeds, paired bootstrap) has a 95% interval above 0, and on no single template\nis that interval entirely below 0.",
+  "decisions": {
+    "0": {
+      "fill_in_vlm_mode": "vlm_named",
+      "router_seed13": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_named",
+        "registrant_name": "vlm_named",
+        "registration_num": "vlm_key",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "router_seed42": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_named",
+        "registrant_name": "vlm_named",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      }
+    },
+    "1": {
+      "fill_in_vlm_mode": "vlm_named",
+      "router_seed13": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_named",
+        "registrant_name": "vlm_named",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "router_seed42": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_named",
+        "registrant_name": "vlm_named",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      }
+    },
+    "2": {
+      "fill_in_vlm_mode": "vlm_key",
+      "router_seed13": {
+        "file_date": "vlm_key",
+        "foreign_principle_name": "vlm_key",
+        "registrant_name": "vlm_key",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "router_seed42": {
+        "file_date": "vlm_key",
+        "foreign_principle_name": "vlm_key",
+        "registrant_name": "vlm_key",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      }
+    }
+  },
+  "by_template": {
+    "Amendment": {
+      "bros": {
+        "f1_per_seed": [
+          0.8356,
+          0.8418
+        ],
+        "f1_mean": 0.8387
+      },
+      "fill_in": {
+        "f1_per_seed": [
+          0.8208,
+          0.8262
+        ],
+        "f1_mean": 0.8235,
+        "minus_bros": -0.0153,
+        "minus_bros_ci95": [
+          -0.0259,
+          -0.005
+        ]
+      },
+      "router": {
+        "f1_per_seed": [
+          0.8323,
+          0.834
+        ],
+        "f1_mean": 0.8331,
+        "minus_bros": -0.0058,
+        "minus_bros_ci95": [
+          -0.0242,
+          0.0127
+        ]
+      },
+      "oracle": {
+        "f1_per_seed": [
+          0.9166,
+          0.9043
+        ],
+        "f1_mean": 0.9104,
+        "minus_bros": 0.0718,
+        "minus_bros_ci95": [
+          0.0526,
+          0.0914
+        ]
+      }
+    },
+    "Dissemination_Report": {
+      "bros": {
+        "f1_per_seed": [
+          0.6276,
+          0.7
+        ],
+        "f1_mean": 0.6638
+      },
+      "fill_in": {
+        "f1_per_seed": [
+          0.699,
+          0.7371
+        ],
+        "f1_mean": 0.7181,
+        "minus_bros": 0.0548,
+        "minus_bros_ci95": [
+          0.0367,
+          0.0727
+        ]
+      },
+      "router": {
+        "f1_per_seed": [
+          0.6774,
+          0.7223
+        ],
+        "f1_mean": 0.6998,
+        "minus_bros": 0.0365,
+        "minus_bros_ci95": [
+          0.0163,
+          0.0552
+        ]
+      },
+      "oracle": {
+        "f1_per_seed": [
+          0.8151,
+          0.8485
+        ],
+        "f1_mean": 0.8318,
+        "minus_bros": 0.1686,
+        "minus_bros_ci95": [
+          0.1454,
+          0.1908
+        ]
+      }
+    },
+    "Short-Form": {
+      "bros": {
+        "f1_per_seed": [
+          0.6017,
+          0.6009
+        ],
+        "f1_mean": 0.6013
+      },
+      "fill_in": {
+        "f1_per_seed": [
+          0.6052,
+          0.5993
+        ],
+        "f1_mean": 0.6023,
+        "minus_bros": 0.0009,
+        "minus_bros_ci95": [
+          -0.0063,
+          0.0078
+        ]
+      },
+      "router": {
+        "f1_per_seed": [
+          0.4982,
+          0.4866
+        ],
+        "f1_mean": 0.4924,
+        "minus_bros": -0.1086,
+        "minus_bros_ci95": [
+          -0.1355,
+          -0.0796
+        ]
+      },
+      "oracle": {
+        "f1_per_seed": [
+          0.8445,
+          0.8466
+        ],
+        "f1_mean": 0.8456,
+        "minus_bros": 0.2449,
+        "minus_bros_ci95": [
+          0.2176,
+          0.2717
+        ]
+      }
+    }
+  },
+  "pooled": {
+    "bros": {
+      "f1_per_seed": [
+        0.6856,
+        0.7094
+      ],
+      "f1_mean": 0.6975
+    },
+    "fill_in": {
+      "f1_per_seed": [
+        0.7076,
+        0.72
+      ],
+      "f1_mean": 0.7138,
+      "minus_bros": 0.0162,
+      "minus_bros_ci95": [
+        0.0074,
+        0.0246
+      ]
+    },
+    "router": {
+      "f1_per_seed": [
+        0.6684,
+        0.6789
+      ],
+      "f1_mean": 0.6737,
+      "minus_bros": -0.0234,
+      "minus_bros_ci95": [
+        -0.0384,
+        -0.0092
+      ]
+    },
+    "oracle": {
+      "f1_per_seed": [
+        0.8546,
+        0.8639
+      ],
+      "f1_mean": 0.8592,
+      "minus_bros": 0.1617,
+      "minus_bros_ci95": [
+        0.1469,
+        0.1775
+      ]
+    }
+  },
+  "verdict": {
+    "fill_in": {
+      "pooled_gain_significant": true,
+      "no_template_significantly_worse": false,
+      "passes": false
+    },
+    "router": {
+      "pooled_gain_significant": false,
+      "no_template_significantly_worse": false,
+      "passes": false
+    }
+  }
+}
