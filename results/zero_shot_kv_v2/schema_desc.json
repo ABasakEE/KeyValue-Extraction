@@ -1,0 +1,25 @@
+{
+  "registration-form": {
+    "file_date": "The file_date field holds the date when the document was filed or processed.",
+    "foreign_principle_name": "The foreign principle name refers to the name of the individual or entity that holds foreign ownership or control over the registrant.",
+    "registrant_name": "The registrant_name field holds the name of the entity or individual who registered or filed the document.",
+    "registration_num": "Registration number associated with the document.",
+    "signer_name": "The signer_name field holds the name of the person who signed the document.",
+    "signer_title": "The signer_title field holds the title or position of the person who signed the document."
+  },
+  "ad-buy-form": {
+    "advertiser": "The field 'advertiser' holds the name or identifier of the company or entity that is responsible for the advertising campaign.",
+    "agency": "The agency field holds information about the advertising agency responsible for the campaign.",
+    "contract_num": "The contract number is a unique identifier for a specific advertising contract.",
+    "flight_from": "The field 'flight_from' holds the starting location of a flight.",
+    "flight_to": "The field 'flight_to' holds the destination or final location of a flight.",
+    "gross_amount": "The gross_amount field holds the total amount of money associated with the document's advertising or marketing campaign.",
+    "product": "The field 'product' holds information about the specific product or service being advertised in the document.",
+    "tv_address": "TV address associated with the document.",
+    "channel": "The channel field holds information about the specific media channel or platform where the advertisement is being aired.",
+    "program_desc": "The field 'program_desc' holds a description of the program being advertised.",
+    "program_start_date": "The program_start_date field holds the start date of a program in the document.",
+    "program_end_date": "The program_end_date field holds the end date of the program associated with the document.",
+    "sub_amount": "Sub-amount details for a specific transaction or service within the document."
+  }
+}

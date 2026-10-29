@@ -51,30 +51,17 @@
             0.315
           ]
         },
-        "channel": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "n_pred": 24,
-          "n_gold": 0,
-          "value_recall": null,
-          "f1_ci95": [
-            0.0,
-            0.0
-          ]
-        },
         "contract_num": {
-          "precision": 0.4675,
+          "precision": 0.3396,
           "recall": 0.3673,
-          "f1": 0.4114,
+          "f1": 0.3529,
           "tp": 36,
-          "n_pred": 77,
+          "n_pred": 106,
           "n_gold": 98,
           "value_recall": 0.7449,
           "f1_ci95": [
-            0.3152,
-            0.5087
+            0.2684,
+            0.4403
           ]
         },
         "flight_from": {
@@ -104,68 +91,29 @@
           ]
         },
         "gross_amount": {
-          "precision": 0.3409,
-          "recall": 0.2778,
-          "f1": 0.3061,
-          "tp": 15,
-          "n_pred": 44,
+          "precision": 0.3469,
+          "recall": 0.3148,
+          "f1": 0.3301,
+          "tp": 17,
+          "n_pred": 49,
           "n_gold": 54,
           "value_recall": 0.5,
           "f1_ci95": [
-            0.1956,
-            0.404
+            0.2195,
+            0.4248
           ]
         },
         "product": {
-          "precision": 0.4085,
-          "recall": 0.7128,
-          "f1": 0.5194,
-          "tp": 67,
-          "n_pred": 164,
+          "precision": 0.4138,
+          "recall": 0.766,
+          "f1": 0.5373,
+          "tp": 72,
+          "n_pred": 174,
           "n_gold": 94,
           "value_recall": 0.7872,
           "f1_ci95": [
-            0.4598,
-            0.5812
-          ]
-        },
-        "program_desc": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "n_pred": 9,
-          "n_gold": 0,
-          "value_recall": null,
-          "f1_ci95": [
-            0.0,
-            0.0
-          ]
-        },
-        "program_end_date": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "n_pred": 57,
-          "n_gold": 0,
-          "value_recall": null,
-          "f1_ci95": [
-            0.0,
-            0.0
-          ]
-        },
-        "program_start_date": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "n_pred": 104,
-          "n_gold": 0,
-          "value_recall": null,
-          "f1_ci95": [
-            0.0,
-            0.0
+            0.4825,
+            0.5992
           ]
         },
         "property": {
@@ -181,42 +129,29 @@
             0.3538
           ]
         },
-        "sub_amount": {
-          "precision": 0.0,
-          "recall": 0.0,
-          "f1": 0.0,
-          "tp": 0,
-          "n_pred": 28,
-          "n_gold": 0,
-          "value_recall": null,
-          "f1_ci95": [
-            0.0,
-            0.0
-          ]
-        },
         "tv_address": {
-          "precision": 0.1176,
+          "precision": 0.0513,
           "recall": 0.0238,
-          "f1": 0.0396,
+          "f1": 0.0325,
           "tp": 2,
-          "n_pred": 17,
+          "n_pred": 39,
           "n_gold": 84,
           "value_recall": 0.2143,
           "f1_ci95": [
             0.0,
-            0.0981
+            0.0806
           ]
         },
         "_micro": {
-          "precision": 0.2653,
-          "recall": 0.3602,
-          "f1": 0.3056,
-          "tp": 264,
-          "n_pred": 995,
+          "precision": 0.323,
+          "recall": 0.3697,
+          "f1": 0.3448,
+          "tp": 271,
+          "n_pred": 839,
           "n_gold": 733,
           "f1_ci95": [
-            0.2784,
-            0.3335
+            0.3147,
+            0.3757
           ]
         }
       }

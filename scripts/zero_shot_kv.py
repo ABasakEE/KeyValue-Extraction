@@ -253,6 +253,17 @@ def cmd_run(args) -> None:
 
 
 # ---------------------------------------------------------------- scoring
+def page_level_fields(meta_path: Path) -> list[str]:
+    """Schema fields from a VRDU meta.json, minus line-item table fields.
+
+    Line-item gold is excluded from scoring, so those fields must not absorb predictions either
+    (they did until v2: every ad-buy end date mapped to program_end_date, leaving flight_to empty).
+    """
+    meta = json.loads(meta_path.read_text())
+    pattern = meta.get("entity_appearance_pattern", {})
+    return [n for n in meta["entity_name_to_match_func"] if isinstance(n, str) and pattern.get(n) != "line_item"]
+
+
 def sbert_embedder():
     from sentence_transformers import SentenceTransformer
 
@@ -300,8 +311,7 @@ def score(pages: list[dict], preds: dict[str, dict], embed) -> dict:
     meta_fields = {}
     for ds in fields_by_ds:
         meta = ROOT / "data" / "vrdu" / ds / "main" / "meta.json"
-        names = list(json.loads(meta.read_text())["entity_name_to_match_func"]) if meta.exists() else fields_by_ds[ds]
-        meta_fields[ds] = [n for n in names if isinstance(n, str)]
+        meta_fields[ds] = page_level_fields(meta) if meta.exists() else fields_by_ds[ds]
     field_emb = {ds: embed([f.replace("_", " ") for f in fs]) for ds, fs in meta_fields.items()}
 
     per_field = defaultdict(Counter)  # (dataset, template, field) -> tp/n_pred/n_gold/value_found

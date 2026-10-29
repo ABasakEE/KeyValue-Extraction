@@ -32,7 +32,7 @@ from pathlib import Path
 
 from zero_shot_kv import (
     FIELD_SIM_THRESHOLD, MATCH_THRESHOLD, PROMPT, ROOT, bootstrap_f1_ci, funsd_pages, greedy_match, load_image,
-    norm, parse_pairs, prf, sbert_embedder, short_form_filer, tok_f1, vrdu_pages,
+    norm, page_level_fields, parse_pairs, prf, sbert_embedder, short_form_filer, tok_f1, vrdu_pages,
 )
 
 EXTRACT_PROMPT = PROMPT + "\nDo not output keys whose value is empty or blank."
@@ -123,7 +123,7 @@ def parse_desc(text: str, field: str) -> str:
 def schema_fields(dataset: str, docs: list[dict] | None = None) -> list[str]:
     meta = ROOT / "data" / "vrdu" / dataset / "main" / "meta.json"
     if meta.exists():
-        return [n for n in json.loads(meta.read_text())["entity_name_to_match_func"] if isinstance(n, str)]
+        return page_level_fields(meta)
     return sorted({f for d in docs or [] if d["dataset"] == dataset for f in d["gold"]["fields"]})
 
 
@@ -491,6 +491,9 @@ def cmd_selftest(_args) -> None:
 
     # end to end with a stub model on real data, if present: manifest, page rendering, naming, resume
     vrdu = ROOT / "data" / "vrdu"
+    if (vrdu / "ad-buy-form" / "main" / "meta.json").exists():
+        ad = schema_fields("ad-buy-form")
+        assert "flight_to" in ad and "program_end_date" not in ad and "channel" not in ad, ad
     if (vrdu / "registration-form" / "main").exists():
         class Stub:
             def __call__(self, prompt, image=None, max_new_tokens=0):
