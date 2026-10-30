@@ -1,0 +1,149 @@
+{
+  "documents": 10000,
+  "templates": 50,
+  "instances_per_template": [
+    200
+  ],
+  "official_unseen_template_split": {
+    "train_inds": 40,
+    "dev_inds": 10
+  },
+  "official_split_disjoint": true,
+  "fields_templates_with_text": {
+    "DATE": 49,
+    "NUMBER": 44,
+    "SELLER_ADDRESS": 41,
+    "TOTAL": 40,
+    "TITLE": 37,
+    "SELLER_NAME": 34,
+    "SUB_TOTAL": 34,
+    "BUYER": 31,
+    "DUE_DATE": 29,
+    "NOTE": 26,
+    "SELLER_EMAIL": 22,
+    "TOTAL_WORDS": 20,
+    "TAX": 19,
+    "PAYMENT_DETAILS": 13,
+    "CONDITIONS": 12,
+    "DISCOUNT": 12,
+    "SEND_TO": 9,
+    "BILL_TO": 8,
+    "GSTIN": 7,
+    "PO_NUMBER": 7,
+    "SELLER_SITE": 7,
+    "GSTIN_SELLER": 5,
+    "AMOUNT_DUE": 4,
+    "GSTIN_BUYER": 3,
+    "GST(18%)": 3,
+    "GST(9%)": 2,
+    "GST(1%)": 1,
+    "GST(20%)": 1,
+    "GST(12%)": 1,
+    "GST(5%)": 1,
+    "GST(7%)": 1
+  },
+  "core_fields_ge_29_templates": [
+    "BUYER",
+    "DATE",
+    "DUE_DATE",
+    "NUMBER",
+    "SELLER_ADDRESS",
+    "SELLER_NAME",
+    "TOTAL",
+    "SUB_TOTAL",
+    "TITLE"
+  ],
+  "label_prefix_examples": {
+    "DATE": [
+      "Date: 20-Mar-2008",
+      "Invoice Date: 23-Feb-2014",
+      "Date: 03-Mar-2002",
+      "Invoice Date: 12-Oct-1994"
+    ],
+    "NUMBER": [
+      "INVOICE # INV17967327",
+      "INVOICE ID INV16291505",
+      "INVOICE ID 5Y3M7d-590",
+      "INVOICE ID INV36598508"
+    ],
+    "TOTAL": [
+      "TOTAL : 734.33 EUR",
+      "TOTAL : 653.95 $",
+      "TOTAL : 1377.77 $",
+      "TOTAL : 995.15 USD"
+    ],
+    "BUYER": [
+      "Bill to:Denise Perez",
+      "Bill to:Suzanne Sandoval",
+      "Bill to:Robyn Johnson",
+      "Buyer :Andrew White"
+    ]
+  },
+  "hf_box_is_flipped_original_block_box_rate": 1.0,
+  "hf_tag_id_to_classes": {
+    "0": [
+      "SELLER_SITE"
+    ],
+    "1": [
+      "TOTAL"
+    ],
+    "2": [
+      "TOTAL_WORDS"
+    ],
+    "3": [
+      "DATE"
+    ],
+    "4": [
+      "DUE_DATE"
+    ],
+    "5": [
+      "BUYER"
+    ],
+    "6": [
+      "SELLER_NAME"
+    ],
+    "8": [
+      "BILL_TO"
+    ],
+    "9": [
+      "SEND_TO"
+    ],
+    "12": [
+      "NUMBER"
+    ],
+    "13": [
+      "AMOUNT_DUE",
+      "CONDITIONS",
+      "DISCOUNT",
+      "GST(1%)",
+      "GST(12%)",
+      "GST(18%)",
+      "GST(20%)",
+      "GST(5%)",
+      "GST(7%)",
+      "GST(9%)",
+      "GSTIN",
+      "GSTIN_BUYER",
+      "GSTIN_SELLER",
+      "NOTE",
+      "PAYMENT_DETAILS",
+      "PO_NUMBER",
+      "SELLER_ADDRESS",
+      "SELLER_EMAIL",
+      "SUB_TOTAL",
+      "TAX",
+      "TITLE"
+    ]
+  },
+  "hf_tag_ids_lumping_several_classes": [
+    13
+  ],
+  "mean_words_per_block": 5.4,
+  "image_sizes": {
+    "595x841": 50
+  },
+  "max_box_extent_seen": [
+    595,
+    828
+  ]
+}

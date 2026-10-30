@@ -30,6 +30,7 @@ Conventions:
 | 10 | Hybrid feasibility (oracle, fill-in, cross-template router) | CPU | 2026-10-29 | Ceiling is large (oracle +16 F1) but neither pre-registered rule passes; the VLM key/named choice does not transfer across templates |
 | 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
 | 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
+| 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
 
 ---
 
@@ -491,3 +492,48 @@ included; BROS is the N = 200 Track-1 model. The study-10 oracle ceiling was not
 
 **Evidence:** `results/confirm_v2/` (manifest, raw outputs, schema descriptions, grounded spans, `confirm.json`).
 Notebook `notebooks/kaggle_confirm_hybrid.ipynb`; scoring `scripts/confirm_eval.py`.
+
+---
+
+## 13. Dataset audit: can the held-out-template protocol be reproduced elsewhere? — CPU, 2026-10-30
+
+**Question:** the hybrid (studies 10–12) was only tested on 3 VRDU registration templates. Which public dataset
+supports a leave-one-template-out test with a named-field schema and gold annotations?
+
+**Requirements:** known template labels; ≥ 4 templates (so each fold's router sees ≥ 3 others); a shared named
+field schema; gold annotations that can be scored against both BROS tokens and VLM output.
+
+**Candidates checked (data downloaded to `data/`, gitignored; `scripts/audit_fatura.py`):**
+
+| Dataset | Result |
+|---|---|
+| **VRDU ad-buy** (already local) | **Rejected.** No template labels; the three official unknown-template test sets share ~95% of their documents (146 of ~155), so they cannot serve as folds. LiLT's gap there is only 1.85 F1 (UTL 90.6), so little to fix. |
+| **FATURA** (Zenodo 10371464, CC-BY-4.0, 691 MB, 10,000 invoices) | **Compatible with adaptations**, see below. |
+| CORD-v2 (Hugging Face, CC-BY-4.0) | Rejected: no template/merchant labels; nested menu-item schema. |
+| SROIE, WildReceipt (Hugging Face) | Rejected: the hub entries are loading scripts with no data. |
+| FUNSD / XFUND | Rejected: question/answer labels only, no named-field schema or template labels. |
+
+**FATURA findings:**
+- **Templates:** 50 templates × 200 instances (all IDs 1–50, uniform), 595 × 841 px images, and an official
+  template-disjoint split (`Strat2_Split.txt`: 40 train / 10 test templates, disjoint).
+- **Shared schema:** 31 field classes with text, but only **9 core fields exist in ≥ 29 of 50 templates**: DATE (49),
+  NUMBER (44), SELLER_ADDRESS (41), TOTAL (40), TITLE (37), SELLER_NAME (34), SUB_TOTAL (34), BUYER (31),
+  DUE_DATE (29). The rest are rarer (e.g. DISCOUNT 12, GSTIN 7).
+- **Wording varies by template, as in VRDU:** DATE is `Date:` or `Invoice Date:`; NUMBER is `INVOICE #` or `INVOICE ID`;
+  BUYER is `Bill to:` or `Buyer :`, and the similar blocks `BILL_TO` / `SEND_TO` are separate classes.
+- **Gold is block-level, and the block text includes its label** (`"TOTAL : 734.33 EUR"`, `"Date: 20-Mar-2008"`),
+  one box per class per document (mean 5.4 words per block). There are no word-level boxes, and no unlabelled
+  words other than the TABLE/LOGO regions. VRDU gold is value-only with word-level boxes, so scoring must be at
+  block level (predicted value → grounded words → enclosing block).
+- **The Hugging Face-format files are unusable for the schema:** tag id 13 lumps 21 classes (SELLER_ADDRESS, TITLE,
+  SUB_TOTAL, NOTE, TAX, …). Tokens must be rebuilt from `Original_Format` (all classes, block text split on
+  whitespace, block box). The conversion is exact: HF boxes equal the original boxes with y flipped
+  (y_img = 841 − y_orig), matched for 100% of 300,000+ blocks.
+- **Risk:** data is synthetic (Faker values, clean rendering), so scores may saturate for both systems.
+
+**Conclusion:** FATURA is the only checked dataset that supports leave-one-template-out with a shared field
+schema, with far more templates (50) than VRDU registration (3), which would also allow k-fold template groups
+(e.g. 5 folds × 10 templates). Required adaptations: tokens from `Original_Format`; block-level scoring;
+restrict to the 9 core fields; BROS sees block-level boxes (a coarser layout signal than VRDU).
+
+**Evidence:** `results/fatura_audit/summary.json`; `scripts/audit_fatura.py`.
