@@ -142,6 +142,8 @@ class TrainConfig:
     gradient_checkpointing: bool = False
     max_folds: int | None = None
     regimes: tuple = ("MTL", "UTL")
+    dump_probs: bool = False                 # also write test_probs.jsonl (per-word field probabilities) for routing studies
+    dump_probs_guids: str | None = None      # JSON list of document ids to keep (default: all test documents)
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -282,8 +284,13 @@ def predict(
     loader: DataLoader,
     device: torch.device,
     desc: str | None = None,
+    return_probs: bool = False,
 ):
-    """Predict token labels with multi-page sliding window soft-voting aggregation."""
+    """Predict token labels with multi-page sliding window soft-voting aggregation.
+
+    With ``return_probs`` a third value is returned: [(doc_guid, (n_words, n_classes) tensor)] of the window-averaged
+    class probabilities behind each argmax (words no window covered are all zeros and predicted 'O').
+    """
     classifier.model.eval()
     doc_scores: dict[str, torch.Tensor] = {}
     doc_counts: dict[str, torch.Tensor] = {}
@@ -340,6 +347,9 @@ def predict(
         predictions.append(pred_tags)
         references.append(doc_refs[doc_guid])
 
+    if return_probs:
+        probs = [(g, doc_scores[g] / doc_counts[g].clamp(min=1).unsqueeze(1)) for g in doc_order]
+        return predictions, references, probs
     return predictions, references
 
 
@@ -368,6 +378,23 @@ def dump_test_entities(path: Path, examples: list, predictions: list, references
         for (guid, words), pred, ref in zip(docs.items(), predictions, references):
             row = {"guid": guid, "template": templates[guid], "gold": spans(ref, words), "pred": spans(pred, words)}
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
+
+
+def dump_test_probs(path: Path, probs: list, id2label: dict, keep: set[str] | None = None) -> None:
+    """Per document and word, BROS's probability (integer percent) of each field, B- and I- tags merged.
+
+    One JSON line per document: {"guid", "fields": [...], "p": [[percent per field] per word]}. Routing studies use it
+    to ask how sure the model is of a span, and how plausible it finds a span proposed by another system.
+    """
+    fields = sorted({l.split("-", 1)[1] for l in id2label.values() if l != "O"})
+    cols = {f: [i for i, l in id2label.items() if l != "O" and l.split("-", 1)[1] == f] for f in fields}
+    with open(path, "w", encoding="utf-8") as fh:
+        for guid, p in probs:
+            if keep is not None and guid not in keep:
+                continue
+            per_field = torch.stack([p[:, cols[f]].sum(dim=1) for f in fields], dim=1)
+            fh.write(json.dumps({"guid": guid, "fields": fields,
+                                 "p": (per_field.clamp(0, 1) * 100).round().to(torch.int64).tolist()}) + "\n")
 
 
 @torch.no_grad()
@@ -920,7 +947,9 @@ def train_one(
             "cross_check": cross_check(test_pred, test_ref, id2label),
         }
     else:
-        test_pred, test_ref = predict(model, test_loader, device, desc=f"{pfx}Test eval".strip())
+        want_probs = bool(getattr(config, "dump_probs", False)) and checkpoint_dir is not None
+        test_out = predict(model, test_loader, device, desc=f"{pfx}Test eval".strip(), return_probs=want_probs)
+        test_pred, test_ref = test_out[0], test_out[1]
         id2label = model.model.config.id2label
         scores = entity_f1(test_pred, test_ref, id2label)
         res = {
@@ -932,6 +961,10 @@ def train_one(
         }
         if checkpoint_dir is not None:
             dump_test_entities(checkpoint_dir / "test_entities.jsonl", test_examples, test_pred, test_ref, id2label)
+            if want_probs:
+                guids = getattr(config, "dump_probs_guids", None)
+                keep = set(json.loads(Path(guids).read_text(encoding="utf-8"))) if guids else None
+                dump_test_probs(checkpoint_dir / "test_probs.jsonl", test_out[2], id2label, keep)
 
     if device.type == "cuda":
         # max_memory_reserved is what nvidia-smi sees; use it to decide whether two runs fit on one GPU

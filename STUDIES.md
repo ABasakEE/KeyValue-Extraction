@@ -33,6 +33,7 @@ Conventions:
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
 | 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
 | 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | 2026-10-31 | Registered rule passes only at K=1, where the router merely matches the VLM alone; at K=2 it is significantly worse than BROS (-2.6); K>=5 neutral. Oracle headroom exists but a static per-field router captures none |
+| 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
 
 ---
 
@@ -730,3 +731,60 @@ are not stored in the current dumps), a margin-based router that sends a field t
 folds is clearly positive, and a real-scan dataset with a field the VLM handles consistently better than a trained model.
 
 **Evidence:** `results/fatura_v2_sweep/` (`sweep.json`, `posthoc.json`, 40 BROS run directories with span dumps).
+
+---
+
+## 16. Per-document routing signal on FATURA and VRDU, with seed replication — GPU (Kaggle T4 × 2), registered 2026-10-31
+
+**Questions:** (1) Study 15 left oracle headroom (+16.0 / +5.1 / +2.3 F1 at K = 2 / 5 / 10 seen templates on FATURA;
+about +16 on VRDU) that a static per-field router captured none of. Does BROS's own per-word field probability give a
+per-document signal that captures some of it, on both datasets? (2) Is the static router's K = 2 loss (−2.6) real, or noise
+from which two templates BROS happened to see?
+
+**Signals** (from BROS's soft-voted field probabilities, B and I tags merged; `test_probs.jsonl`, integer percents):
+*confidence* = mean probability of field f over BROS's own predicted span; *endorsement* = mean probability of f over the
+VLM's proposed span (how plausible BROS itself finds it).
+
+**Rules (registered before any run; `scripts/routing_eval.py`):** with one VLM span per field (`vlm_both`):
+- **G (gate):** if BROS predicted a span for f with confidence < τ, replace it with the VLM span; BROS silent → stay silent.
+- **E (endorse):** G, plus fill a silent field with the VLM span when endorsement ≥ κ.
+- **H (hybrid):** the static per-field router of studies 10–15 first, then G on the remaining fields. **Added because VRDU's
+  main gain is a field BROS never predicts (`foreign_principle_name`), which G cannot touch by construction** (decided before
+  any result, from the structure of studies 10–12).
+- τ ∈ {.5,.6,.7,.8,.9,.95,.99}, κ ∈ {.1,.3,.5}, chosen per seed only on the **other** folds' documents (dev + confirm) by pooled
+  F1; ties go to fewer replacements. Claims use the held-out fold's confirm documents only.
+
+**Runs:**
+- **FATURA:** BROS (Track-1 recipe unchanged) on K = 2 and 5 seen templates with 5 seeds (13, 42, 7, 21, 99) and K = 10 with seeds
+  13, 42; 10 invoices per template; the 5 folds of study 14; tested on the 200 evaluated invoices per fold: 60 runs. VLM
+  outputs re-used from study 14 (`results/fatura_v1/spans.jsonl`).
+- **VRDU:** Track-1 BROS (`configs/vrdu_track1_bros_probs.yaml`, identical recipe, seeds 13, 42) on the 3 unseen-template folds, saving probabilities
+  for the 600 VLM-evaluated documents: the 300 original (dev, used in studies 8–11) and the 300 fresh (confirm, study 12). VLM outputs
+  re-used from studies 7 and 12.
+- Smoke tests for both datasets (real BROS, one epoch, probability dump checked) run first in the notebook
+  `notebooks/kaggle_routing_signal.ipynb`.
+
+**Intervals:** two-level bootstrap, 1000 draws: seeds are resampled (the draw of seen templates / training run) and clusters
+(FATURA: templates; VRDU: documents, since it has only 3 templates).
+
+**Registered success criteria:**
+- **FATURA, rule G:** pooled G − BROS lower interval bound > 0 at K = 2 or K = 5, **and** upper bound ≥ 0 at every K. Seed replication
+  (question 2): the static router's K = 2 loss counts as replicated only if its interval upper bound is < 0 with the 5 seeds.
+- **VRDU, rule H:** pooled H − BROS lower bound > 0 **and** no template's upper bound < 0.
+- G, E and H are also reported on both datasets as descriptive results, with the static router, fill-in, the oracle and the VLM alone.
+
+**Descriptive diagnostics (not criteria):** AUROC of BROS's confidence for "this span is correct"; share of oracle headroom
+captured; per-seed deltas; chosen τ/κ; per-fold results.
+
+**Checks done before the run:** unit test of the soft-vote and dump (`tests/test_predict_probs.py`); self-test of the rules,
+AUROC and verdicts; a dry run on the real VLM outputs with fake BROS runs whose behaviour was planted (K = 2 gate +13.8, endorse
++17.5; K = 5, 10 exactly 0.0; VRDU hybrid +16.1; alignment 0 mismatches) and both command-line paths.
+
+**Limits stated up front:** FATURA is synthetic; the *family* of rules was chosen after seeing studies 14–15 (the BROS runs, the
+confidences and the parameter fits are new); BROS confidences under template shift may be poorly calibrated (the AUROC will
+show it); 5 seeds is still small and VRDU has 2; VRDU's intervals cover documents of 3 templates, not new templates in
+general; the VRDU dev documents were used when choosing among variants in earlier studies.
+
+**Results:** *pending*
+
+**Evidence:** `results/routing_v3/` (after the run).

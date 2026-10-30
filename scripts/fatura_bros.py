@@ -20,6 +20,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "src"))
+sys.path.insert(0, str(ROOT / "scripts"))
 
 from data import fatura_loader as fl  # noqa: E402
 
@@ -52,12 +53,17 @@ def main() -> None:
     ap.add_argument("--k-list", default="", help="study 15: comma-separated numbers of seen templates to train on, e.g. 1,2,5,10")
     ap.add_argument("--per-template", type=int, default=10)
     ap.add_argument("--test-set", choices=["all", "eval"], default="all")
+    ap.add_argument("--seeds", default="", help="comma-separated seeds, overriding the config (study 16 uses 5 for K=2,5)")
+    ap.add_argument("--dump-probs", action="store_true", help="also write test_probs.jsonl (per-word field probabilities)")
     args = ap.parse_args()
 
     import torch
     from train import TrainConfig, train_single_seed
 
     config = TrainConfig.from_yaml(ROOT / args.config)
+    if args.seeds:
+        config.seeds = tuple(int(x) for x in args.seeds.split(","))
+    config.dump_probs = args.dump_probs
     out = Path(args.out or config.output_dir)
     held = fl.folds()
     ks = [int(k) for k in args.k_list.split(",") if k.strip()] or [0]
@@ -83,6 +89,10 @@ def main() -> None:
     if args.smoke:
         run_dir = (out / f"K{ks[0]}" if ks[0] else out) / "fold0" / f"seed_{config.seeds[0]}"
         assert (run_dir / "result.json").exists() and (run_dir / "test_entities.jsonl").exists(), list(run_dir.glob("*"))
+        if args.dump_probs:
+            from routing_eval import validate_probs
+            n = validate_probs(run_dir / "test_probs.jsonl", {g: len(d["words"]) for g, d in docs.items()})
+            assert n == 6, n
         print("[+] fatura_bros smoke passed:", sorted(p.name for p in run_dir.glob("*")))
 
 
