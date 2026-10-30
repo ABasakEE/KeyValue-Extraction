@@ -112,7 +112,9 @@ class TokenClassifier:
             "max_length": self.max_length,
             "return_tensors": "pt",
         }
-        if boxes_batch is not None:
+        # Only LayoutLMv3's tokenizer (LiLT) takes boxes. BROS builds its bbox tensor from word_ids below, and
+        # transformers 4.51.3 rejects the stray keyword from a plain fast tokenizer.
+        if boxes_batch is not None and self.backbone != "bros":
             tokenize_kwargs["boxes"] = boxes_batch
 
         # LayoutLMv3Tokenizer natively accepts list[list[str]] when boxes is provided and
