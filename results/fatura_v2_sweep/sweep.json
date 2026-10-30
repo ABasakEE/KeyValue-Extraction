@@ -1,0 +1,3441 @@
+{
+  "rules": "* Reference: K = 40 / 200 invoices is study 14 (BROS 99.9%).\n* A setting \"has a template gap\" if BROS's pooled F1 there is below 90%.\n* The hybrid is judged helpful in the data-starved regime if at least one setting has a template gap AND the router\n  passes the study-14 rule there (pooled router - BROS 95% template-bootstrap interval above 0, no fold's interval\n  entirely below 0). If BROS stays at or above 90% for every K, FATURA cannot test the hybrid.\nNothing else is a pass criterion; per-field and per-K detail is descriptive.",
+  "summary": {
+    "40": {
+      "bros_f1": 0.9986,
+      "router_f1": 0.9986,
+      "router_minus_bros": 0.0,
+      "router_ci95": [
+        0.0,
+        0.0
+      ],
+      "router_passes": false,
+      "oracle_minus_bros": 0.0003,
+      "fill_in_minus_bros": -0.0225,
+      "vlm_both_f1": 0.5964
+    },
+    "1": {
+      "bros_f1": 0.3253,
+      "router_f1": 0.5852,
+      "router_minus_bros": 0.2599,
+      "router_ci95": [
+        0.1977,
+        0.3187
+      ],
+      "router_passes": true,
+      "oracle_minus_bros": 0.3902,
+      "fill_in_minus_bros": 0.256,
+      "vlm_both_f1": 0.5964
+    },
+    "2": {
+      "bros_f1": 0.6921,
+      "router_f1": 0.6657,
+      "router_minus_bros": -0.0264,
+      "router_ci95": [
+        -0.0497,
+        -0.0052
+      ],
+      "router_passes": false,
+      "oracle_minus_bros": 0.16,
+      "fill_in_minus_bros": 0.0196,
+      "vlm_both_f1": 0.5964
+    },
+    "5": {
+      "bros_f1": 0.9079,
+      "router_f1": 0.9078,
+      "router_minus_bros": -0.0001,
+      "router_ci95": [
+        -0.0036,
+        0.0035
+      ],
+      "router_passes": false,
+      "oracle_minus_bros": 0.0511,
+      "fill_in_minus_bros": -0.0121,
+      "vlm_both_f1": 0.5964
+    },
+    "10": {
+      "bros_f1": 0.9588,
+      "router_f1": 0.9588,
+      "router_minus_bros": 0.0,
+      "router_ci95": [
+        0.0,
+        0.0
+      ],
+      "router_passes": false,
+      "oracle_minus_bros": 0.0231,
+      "fill_in_minus_bros": -0.0183,
+      "vlm_both_f1": 0.5964
+    }
+  },
+  "verdict": {
+    "settings_with_template_gap": [
+      "1",
+      "2"
+    ],
+    "settings_where_router_passes": [
+      "1"
+    ],
+    "helpful_in_starved_regime": true,
+    "helpful_settings": [
+      "1"
+    ],
+    "fatura_can_test_hybrid": true
+  },
+  "settings": {
+    "40": {
+      "n_train_invoices": 200,
+      "n_seen_templates": 40,
+      "alignment": {},
+      "by_fold": {
+        "fold0": {
+          "n_docs": 100,
+          "router": {
+            "f1": 1.0,
+            "bros_f1": 1.0,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9901,
+            "bros_f1": 1.0,
+            "minus_bros": -0.0099,
+            "minus_bros_template_ci95": [
+              -0.0231,
+              -0.0018
+            ],
+            "minus_bros_document_ci95": [
+              -0.0146,
+              -0.0059
+            ]
+          },
+          "oracle": {
+            "f1": 1.0,
+            "bros_f1": 1.0,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.6557,
+            "bros_f1": 1.0,
+            "minus_bros": -0.3443,
+            "minus_bros_template_ci95": [
+              -0.4109,
+              -0.2836
+            ],
+            "minus_bros_document_ci95": [
+              -0.3782,
+              -0.3096
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5987,
+            "bros_f1": 1.0,
+            "minus_bros": -0.4013,
+            "minus_bros_template_ci95": [
+              -0.4681,
+              -0.3413
+            ],
+            "minus_bros_document_ci95": [
+              -0.4401,
+              -0.3642
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6837,
+            "bros_f1": 1.0,
+            "minus_bros": -0.3163,
+            "minus_bros_template_ci95": [
+              -0.3813,
+              -0.2593
+            ],
+            "minus_bros_document_ci95": [
+              -0.3529,
+              -0.2789
+            ]
+          }
+        },
+        "fold1": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9992,
+            "bros_f1": 0.9992,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9574,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.0418,
+            "minus_bros_template_ci95": [
+              -0.0727,
+              -0.0159
+            ],
+            "minus_bros_document_ci95": [
+              -0.052,
+              -0.0319
+            ]
+          },
+          "oracle": {
+            "f1": 0.9992,
+            "bros_f1": 0.9992,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5978,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.4014,
+            "minus_bros_template_ci95": [
+              -0.4678,
+              -0.3337
+            ],
+            "minus_bros_document_ci95": [
+              -0.4474,
+              -0.3593
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5148,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.4844,
+            "minus_bros_template_ci95": [
+              -0.55,
+              -0.4293
+            ],
+            "minus_bros_document_ci95": [
+              -0.5258,
+              -0.4472
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6276,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.3716,
+            "minus_bros_template_ci95": [
+              -0.4313,
+              -0.3192
+            ],
+            "minus_bros_document_ci95": [
+              -0.4117,
+              -0.3327
+            ]
+          }
+        },
+        "fold2": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9992,
+            "bros_f1": 0.9992,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9722,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.027,
+            "minus_bros_template_ci95": [
+              -0.0597,
+              -0.0043
+            ],
+            "minus_bros_document_ci95": [
+              -0.0372,
+              -0.0169
+            ]
+          },
+          "oracle": {
+            "f1": 0.9996,
+            "bros_f1": 0.9992,
+            "minus_bros": 0.0004,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0013
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0012
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5735,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.4257,
+            "minus_bros_template_ci95": [
+              -0.5015,
+              -0.3671
+            ],
+            "minus_bros_document_ci95": [
+              -0.4762,
+              -0.3819
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5076,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.4916,
+            "minus_bros_template_ci95": [
+              -0.5353,
+              -0.4529
+            ],
+            "minus_bros_document_ci95": [
+              -0.5365,
+              -0.4519
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.583,
+            "bros_f1": 0.9992,
+            "minus_bros": -0.4162,
+            "minus_bros_template_ci95": [
+              -0.4718,
+              -0.3659
+            ],
+            "minus_bros_document_ci95": [
+              -0.461,
+              -0.377
+            ]
+          }
+        },
+        "fold3": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9967,
+            "bros_f1": 0.9967,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9801,
+            "bros_f1": 0.9967,
+            "minus_bros": -0.0166,
+            "minus_bros_template_ci95": [
+              -0.0415,
+              -0.0009
+            ],
+            "minus_bros_document_ci95": [
+              -0.0259,
+              -0.0085
+            ]
+          },
+          "oracle": {
+            "f1": 0.9978,
+            "bros_f1": 0.9967,
+            "minus_bros": 0.0011,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0033
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0025
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5049,
+            "bros_f1": 0.9967,
+            "minus_bros": -0.4918,
+            "minus_bros_template_ci95": [
+              -0.6199,
+              -0.3864
+            ],
+            "minus_bros_document_ci95": [
+              -0.5438,
+              -0.4377
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4778,
+            "bros_f1": 0.9967,
+            "minus_bros": -0.5189,
+            "minus_bros_template_ci95": [
+              -0.6503,
+              -0.411
+            ],
+            "minus_bros_document_ci95": [
+              -0.575,
+              -0.4632
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.5413,
+            "bros_f1": 0.9967,
+            "minus_bros": -0.4554,
+            "minus_bros_template_ci95": [
+              -0.5833,
+              -0.3537
+            ],
+            "minus_bros_document_ci95": [
+              -0.5098,
+              -0.4011
+            ]
+          }
+        },
+        "fold4": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9978,
+            "bros_f1": 0.9978,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9779,
+            "bros_f1": 0.9978,
+            "minus_bros": -0.0199,
+            "minus_bros_template_ci95": [
+              -0.0469,
+              -0.0033
+            ],
+            "minus_bros_document_ci95": [
+              -0.0286,
+              -0.0121
+            ]
+          },
+          "oracle": {
+            "f1": 0.9978,
+            "bros_f1": 0.9978,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.4721,
+            "bros_f1": 0.9978,
+            "minus_bros": -0.5257,
+            "minus_bros_template_ci95": [
+              -0.6649,
+              -0.3946
+            ],
+            "minus_bros_document_ci95": [
+              -0.5878,
+              -0.4696
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4814,
+            "bros_f1": 0.9978,
+            "minus_bros": -0.5164,
+            "minus_bros_template_ci95": [
+              -0.6282,
+              -0.4124
+            ],
+            "minus_bros_document_ci95": [
+              -0.5697,
+              -0.4702
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.53,
+            "bros_f1": 0.9978,
+            "minus_bros": -0.4678,
+            "minus_bros_template_ci95": [
+              -0.5946,
+              -0.3449
+            ],
+            "minus_bros_document_ci95": [
+              -0.527,
+              -0.4153
+            ]
+          }
+        }
+      },
+      "pooled": {
+        "router": {
+          "f1": 0.9986,
+          "bros_f1": 0.9986,
+          "minus_bros": 0.0,
+          "minus_bros_template_ci95": [
+            0.0,
+            0.0
+          ],
+          "minus_bros_document_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "fill_in": {
+          "f1": 0.9761,
+          "bros_f1": 0.9986,
+          "minus_bros": -0.0225,
+          "minus_bros_template_ci95": [
+            -0.0334,
+            -0.013
+          ],
+          "minus_bros_document_ci95": [
+            -0.0267,
+            -0.0187
+          ]
+        },
+        "oracle": {
+          "f1": 0.9989,
+          "bros_f1": 0.9986,
+          "minus_bros": 0.0003,
+          "minus_bros_template_ci95": [
+            0.0,
+            0.0008
+          ],
+          "minus_bros_document_ci95": [
+            0.0001,
+            0.0006
+          ]
+        },
+        "vlm_key": {
+          "f1": 0.5644,
+          "bros_f1": 0.9986,
+          "minus_bros": -0.4342,
+          "minus_bros_template_ci95": [
+            -0.4826,
+            -0.3923
+          ],
+          "minus_bros_document_ci95": [
+            -0.4577,
+            -0.4134
+          ]
+        },
+        "vlm_named": {
+          "f1": 0.519,
+          "bros_f1": 0.9986,
+          "minus_bros": -0.4796,
+          "minus_bros_template_ci95": [
+            -0.5199,
+            -0.4457
+          ],
+          "minus_bros_document_ci95": [
+            -0.5006,
+            -0.4584
+          ]
+        },
+        "vlm_both": {
+          "f1": 0.5964,
+          "bros_f1": 0.9986,
+          "minus_bros": -0.4022,
+          "minus_bros_template_ci95": [
+            -0.4457,
+            -0.3626
+          ],
+          "minus_bros_document_ci95": [
+            -0.4235,
+            -0.3814
+          ]
+        }
+      },
+      "per_field_f1": {
+        "buyer": {
+          "bros": 0.9911,
+          "router": 0.9911,
+          "vlm_both": 0.543
+        },
+        "date": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.8498
+        },
+        "due_date": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.7678
+        },
+        "number": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.4253
+        },
+        "seller_address": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.6649
+        },
+        "seller_name": {
+          "bros": 0.9955,
+          "router": 0.9955,
+          "vlm_both": 0.1419
+        },
+        "sub_total": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.8506
+        },
+        "title": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.0
+        },
+        "total": {
+          "bros": 0.9988,
+          "router": 0.9988,
+          "vlm_both": 0.6822
+        }
+      },
+      "router_tables": {
+        "fold0": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold1": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold2": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold3": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold4": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        }
+      },
+      "verdict": {
+        "pooled_gain_significant": false,
+        "no_fold_significantly_worse": true,
+        "passes": false
+      },
+      "n_confirm_docs": 500
+    },
+    "1": {
+      "n_train_invoices": 10,
+      "n_seen_templates": 1,
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0,
+        "runs_found": 10
+      },
+      "by_fold": {
+        "fold0": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.6805,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.2778,
+            "minus_bros_template_ci95": [
+              0.2145,
+              0.3389
+            ],
+            "minus_bros_document_ci95": [
+              0.2467,
+              0.3091
+            ]
+          },
+          "fill_in": {
+            "f1": 0.6205,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.2178,
+            "minus_bros_template_ci95": [
+              0.1523,
+              0.2873
+            ],
+            "minus_bros_document_ci95": [
+              0.1911,
+              0.2454
+            ]
+          },
+          "oracle": {
+            "f1": 0.7844,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.3817,
+            "minus_bros_template_ci95": [
+              0.3301,
+              0.437
+            ],
+            "minus_bros_document_ci95": [
+              0.3538,
+              0.4092
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.6557,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.253,
+            "minus_bros_template_ci95": [
+              0.1603,
+              0.3415
+            ],
+            "minus_bros_document_ci95": [
+              0.2139,
+              0.293
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5987,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.196,
+            "minus_bros_template_ci95": [
+              0.116,
+              0.2634
+            ],
+            "minus_bros_document_ci95": [
+              0.153,
+              0.2356
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6837,
+            "bros_f1": 0.4027,
+            "minus_bros": 0.281,
+            "minus_bros_template_ci95": [
+              0.1999,
+              0.3643
+            ],
+            "minus_bros_document_ci95": [
+              0.2395,
+              0.3213
+            ]
+          }
+        },
+        "fold1": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.6044,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.5685,
+            "minus_bros_template_ci95": [
+              0.4827,
+              0.6541
+            ],
+            "minus_bros_document_ci95": [
+              0.521,
+              0.6127
+            ]
+          },
+          "fill_in": {
+            "f1": 0.5894,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.5535,
+            "minus_bros_template_ci95": [
+              0.4824,
+              0.6241
+            ],
+            "minus_bros_document_ci95": [
+              0.5095,
+              0.5939
+            ]
+          },
+          "oracle": {
+            "f1": 0.6888,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.6529,
+            "minus_bros_template_ci95": [
+              0.5958,
+              0.7122
+            ],
+            "minus_bros_document_ci95": [
+              0.6091,
+              0.6937
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5978,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.5619,
+            "minus_bros_template_ci95": [
+              0.4878,
+              0.6404
+            ],
+            "minus_bros_document_ci95": [
+              0.5132,
+              0.6068
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5148,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.4789,
+            "minus_bros_template_ci95": [
+              0.417,
+              0.5434
+            ],
+            "minus_bros_document_ci95": [
+              0.4358,
+              0.5178
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6276,
+            "bros_f1": 0.0359,
+            "minus_bros": 0.5917,
+            "minus_bros_template_ci95": [
+              0.5261,
+              0.6588
+            ],
+            "minus_bros_document_ci95": [
+              0.5483,
+              0.6321
+            ]
+          }
+        },
+        "fold2": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.5733,
+            "bros_f1": 0.179,
+            "minus_bros": 0.3943,
+            "minus_bros_template_ci95": [
+              0.3254,
+              0.4575
+            ],
+            "minus_bros_document_ci95": [
+              0.3497,
+              0.4365
+            ]
+          },
+          "fill_in": {
+            "f1": 0.5701,
+            "bros_f1": 0.179,
+            "minus_bros": 0.3911,
+            "minus_bros_template_ci95": [
+              0.3387,
+              0.4449
+            ],
+            "minus_bros_document_ci95": [
+              0.3532,
+              0.4264
+            ]
+          },
+          "oracle": {
+            "f1": 0.6869,
+            "bros_f1": 0.179,
+            "minus_bros": 0.5079,
+            "minus_bros_template_ci95": [
+              0.446,
+              0.5657
+            ],
+            "minus_bros_document_ci95": [
+              0.4658,
+              0.5494
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5735,
+            "bros_f1": 0.179,
+            "minus_bros": 0.3945,
+            "minus_bros_template_ci95": [
+              0.3172,
+              0.4767
+            ],
+            "minus_bros_document_ci95": [
+              0.3415,
+              0.4458
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5076,
+            "bros_f1": 0.179,
+            "minus_bros": 0.3286,
+            "minus_bros_template_ci95": [
+              0.2727,
+              0.398
+            ],
+            "minus_bros_document_ci95": [
+              0.2801,
+              0.3766
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.583,
+            "bros_f1": 0.179,
+            "minus_bros": 0.404,
+            "minus_bros_template_ci95": [
+              0.3366,
+              0.48
+            ],
+            "minus_bros_document_ci95": [
+              0.3526,
+              0.4533
+            ]
+          }
+        },
+        "fold3": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.5324,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.225,
+            "minus_bros_template_ci95": [
+              0.1184,
+              0.3114
+            ],
+            "minus_bros_document_ci95": [
+              0.174,
+              0.2763
+            ]
+          },
+          "fill_in": {
+            "f1": 0.5596,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.2522,
+            "minus_bros_template_ci95": [
+              0.1881,
+              0.3115
+            ],
+            "minus_bros_document_ci95": [
+              0.2193,
+              0.2854
+            ]
+          },
+          "oracle": {
+            "f1": 0.6691,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.3617,
+            "minus_bros_template_ci95": [
+              0.278,
+              0.4345
+            ],
+            "minus_bros_document_ci95": [
+              0.3249,
+              0.401
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5049,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.1975,
+            "minus_bros_template_ci95": [
+              0.0909,
+              0.2894
+            ],
+            "minus_bros_document_ci95": [
+              0.1432,
+              0.2523
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4778,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.1704,
+            "minus_bros_template_ci95": [
+              0.057,
+              0.2726
+            ],
+            "minus_bros_document_ci95": [
+              0.1177,
+              0.2295
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.5413,
+            "bros_f1": 0.3074,
+            "minus_bros": 0.2339,
+            "minus_bros_template_ci95": [
+              0.1218,
+              0.3265
+            ],
+            "minus_bros_document_ci95": [
+              0.1809,
+              0.2886
+            ]
+          }
+        },
+        "fold4": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.5195,
+            "bros_f1": 0.4819,
+            "minus_bros": 0.0376,
+            "minus_bros_template_ci95": [
+              -0.0551,
+              0.1299
+            ],
+            "minus_bros_document_ci95": [
+              -0.0085,
+              0.0793
+            ]
+          },
+          "fill_in": {
+            "f1": 0.5628,
+            "bros_f1": 0.4819,
+            "minus_bros": 0.0809,
+            "minus_bros_template_ci95": [
+              0.0262,
+              0.1449
+            ],
+            "minus_bros_document_ci95": [
+              0.0566,
+              0.1075
+            ]
+          },
+          "oracle": {
+            "f1": 0.7231,
+            "bros_f1": 0.4819,
+            "minus_bros": 0.2412,
+            "minus_bros_template_ci95": [
+              0.1772,
+              0.3053
+            ],
+            "minus_bros_document_ci95": [
+              0.2094,
+              0.2725
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.4721,
+            "bros_f1": 0.4819,
+            "minus_bros": -0.0098,
+            "minus_bros_template_ci95": [
+              -0.1369,
+              0.0925
+            ],
+            "minus_bros_document_ci95": [
+              -0.0705,
+              0.0464
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4814,
+            "bros_f1": 0.4819,
+            "minus_bros": -0.0005,
+            "minus_bros_template_ci95": [
+              -0.1144,
+              0.1067
+            ],
+            "minus_bros_document_ci95": [
+              -0.0563,
+              0.0511
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.53,
+            "bros_f1": 0.4819,
+            "minus_bros": 0.0481,
+            "minus_bros_template_ci95": [
+              -0.0649,
+              0.1498
+            ],
+            "minus_bros_document_ci95": [
+              -0.0102,
+              0.099
+            ]
+          }
+        }
+      },
+      "pooled": {
+        "router": {
+          "f1": 0.5852,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.2599,
+          "minus_bros_template_ci95": [
+            0.1977,
+            0.3187
+          ],
+          "minus_bros_document_ci95": [
+            0.2341,
+            0.2824
+          ]
+        },
+        "fill_in": {
+          "f1": 0.5813,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.256,
+          "minus_bros_template_ci95": [
+            0.2068,
+            0.3072
+          ],
+          "minus_bros_document_ci95": [
+            0.2355,
+            0.274
+          ]
+        },
+        "oracle": {
+          "f1": 0.7155,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.3902,
+          "minus_bros_template_ci95": [
+            0.3407,
+            0.4365
+          ],
+          "minus_bros_document_ci95": [
+            0.3689,
+            0.4095
+          ]
+        },
+        "vlm_key": {
+          "f1": 0.5644,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.2391,
+          "minus_bros_template_ci95": [
+            0.171,
+            0.3042
+          ],
+          "minus_bros_document_ci95": [
+            0.2105,
+            0.2655
+          ]
+        },
+        "vlm_named": {
+          "f1": 0.519,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.1937,
+          "minus_bros_template_ci95": [
+            0.1343,
+            0.2503
+          ],
+          "minus_bros_document_ci95": [
+            0.1674,
+            0.2204
+          ]
+        },
+        "vlm_both": {
+          "f1": 0.5964,
+          "bros_f1": 0.3253,
+          "minus_bros": 0.2711,
+          "minus_bros_template_ci95": [
+            0.2049,
+            0.3311
+          ],
+          "minus_bros_document_ci95": [
+            0.2418,
+            0.2962
+          ]
+        }
+      },
+      "per_field_f1": {
+        "buyer": {
+          "bros": 0.1209,
+          "router": 0.5442,
+          "vlm_both": 0.543
+        },
+        "date": {
+          "bros": 0.2858,
+          "router": 0.7799,
+          "vlm_both": 0.8498
+        },
+        "due_date": {
+          "bros": 0.3098,
+          "router": 0.7525,
+          "vlm_both": 0.7678
+        },
+        "number": {
+          "bros": 0.5191,
+          "router": 0.3835,
+          "vlm_both": 0.4253
+        },
+        "seller_address": {
+          "bros": 0.1452,
+          "router": 0.6567,
+          "vlm_both": 0.6649
+        },
+        "seller_name": {
+          "bros": 0.1513,
+          "router": 0.1178,
+          "vlm_both": 0.1419
+        },
+        "sub_total": {
+          "bros": 0.4837,
+          "router": 0.8468,
+          "vlm_both": 0.8506
+        },
+        "title": {
+          "bros": 0.269,
+          "router": 0.269,
+          "vlm_both": 0.0
+        },
+        "total": {
+          "bros": 0.329,
+          "router": 0.6827,
+          "vlm_both": 0.6822
+        }
+      },
+      "router_tables": {
+        "fold0": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed13",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "vlm_both"
+          }
+        },
+        "fold1": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed13",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "vlm_both"
+          }
+        },
+        "fold2": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed13",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "vlm_both"
+          }
+        },
+        "fold3": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "vlm_both",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "vlm_both"
+          }
+        },
+        "fold4": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed13",
+            "seller_address": "vlm_both",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "vlm_both",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "vlm_both"
+          }
+        }
+      },
+      "verdict": {
+        "pooled_gain_significant": true,
+        "no_fold_significantly_worse": true,
+        "passes": true
+      },
+      "n_confirm_docs": 500,
+      "invoices_scored": 1000
+    },
+    "2": {
+      "n_train_invoices": 20,
+      "n_seen_templates": 2,
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0,
+        "runs_found": 10
+      },
+      "by_fold": {
+        "fold0": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.6572,
+            "bros_f1": 0.6662,
+            "minus_bros": -0.009,
+            "minus_bros_template_ci95": [
+              -0.0261,
+              0.0067
+            ],
+            "minus_bros_document_ci95": [
+              -0.0196,
+              0.0014
+            ]
+          },
+          "fill_in": {
+            "f1": 0.7044,
+            "bros_f1": 0.6662,
+            "minus_bros": 0.0382,
+            "minus_bros_template_ci95": [
+              0.0021,
+              0.0804
+            ],
+            "minus_bros_document_ci95": [
+              0.0235,
+              0.054
+            ]
+          },
+          "oracle": {
+            "f1": 0.8618,
+            "bros_f1": 0.6662,
+            "minus_bros": 0.1956,
+            "minus_bros_template_ci95": [
+              0.1393,
+              0.2713
+            ],
+            "minus_bros_document_ci95": [
+              0.169,
+              0.222
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.6557,
+            "bros_f1": 0.6662,
+            "minus_bros": -0.0105,
+            "minus_bros_template_ci95": [
+              -0.1072,
+              0.1109
+            ],
+            "minus_bros_document_ci95": [
+              -0.057,
+              0.0351
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5987,
+            "bros_f1": 0.6662,
+            "minus_bros": -0.0675,
+            "minus_bros_template_ci95": [
+              -0.1754,
+              0.0399
+            ],
+            "minus_bros_document_ci95": [
+              -0.1165,
+              -0.0199
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6837,
+            "bros_f1": 0.6662,
+            "minus_bros": 0.0175,
+            "minus_bros_template_ci95": [
+              -0.0746,
+              0.1316
+            ],
+            "minus_bros_document_ci95": [
+              -0.0289,
+              0.0619
+            ]
+          }
+        },
+        "fold1": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.7342,
+            "bros_f1": 0.7461,
+            "minus_bros": -0.0119,
+            "minus_bros_template_ci95": [
+              -0.041,
+              0.018
+            ],
+            "minus_bros_document_ci95": [
+              -0.0329,
+              0.0085
+            ]
+          },
+          "fill_in": {
+            "f1": 0.7518,
+            "bros_f1": 0.7461,
+            "minus_bros": 0.0057,
+            "minus_bros_template_ci95": [
+              -0.0151,
+              0.0327
+            ],
+            "minus_bros_document_ci95": [
+              -0.0038,
+              0.0152
+            ]
+          },
+          "oracle": {
+            "f1": 0.8991,
+            "bros_f1": 0.7461,
+            "minus_bros": 0.153,
+            "minus_bros_template_ci95": [
+              0.1128,
+              0.1986
+            ],
+            "minus_bros_document_ci95": [
+              0.1345,
+              0.1726
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5978,
+            "bros_f1": 0.7461,
+            "minus_bros": -0.1483,
+            "minus_bros_template_ci95": [
+              -0.1889,
+              -0.1023
+            ],
+            "minus_bros_document_ci95": [
+              -0.1948,
+              -0.1044
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5148,
+            "bros_f1": 0.7461,
+            "minus_bros": -0.2313,
+            "minus_bros_template_ci95": [
+              -0.3133,
+              -0.1314
+            ],
+            "minus_bros_document_ci95": [
+              -0.28,
+              -0.1845
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6276,
+            "bros_f1": 0.7461,
+            "minus_bros": -0.1185,
+            "minus_bros_template_ci95": [
+              -0.1859,
+              -0.0315
+            ],
+            "minus_bros_document_ci95": [
+              -0.1674,
+              -0.0748
+            ]
+          }
+        },
+        "fold2": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.6364,
+            "bros_f1": 0.6631,
+            "minus_bros": -0.0267,
+            "minus_bros_template_ci95": [
+              -0.0806,
+              0.0295
+            ],
+            "minus_bros_document_ci95": [
+              -0.0537,
+              -0.0025
+            ]
+          },
+          "fill_in": {
+            "f1": 0.6904,
+            "bros_f1": 0.6631,
+            "minus_bros": 0.0273,
+            "minus_bros_template_ci95": [
+              0.0004,
+              0.0516
+            ],
+            "minus_bros_document_ci95": [
+              0.0162,
+              0.0399
+            ]
+          },
+          "oracle": {
+            "f1": 0.8363,
+            "bros_f1": 0.6631,
+            "minus_bros": 0.1732,
+            "minus_bros_template_ci95": [
+              0.1349,
+              0.2079
+            ],
+            "minus_bros_document_ci95": [
+              0.1556,
+              0.1893
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5735,
+            "bros_f1": 0.6631,
+            "minus_bros": -0.0896,
+            "minus_bros_template_ci95": [
+              -0.1768,
+              -0.0113
+            ],
+            "minus_bros_document_ci95": [
+              -0.1443,
+              -0.0428
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5076,
+            "bros_f1": 0.6631,
+            "minus_bros": -0.1555,
+            "minus_bros_template_ci95": [
+              -0.2304,
+              -0.0852
+            ],
+            "minus_bros_document_ci95": [
+              -0.2042,
+              -0.1101
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.583,
+            "bros_f1": 0.6631,
+            "minus_bros": -0.0801,
+            "minus_bros_template_ci95": [
+              -0.1567,
+              -0.0074
+            ],
+            "minus_bros_document_ci95": [
+              -0.1304,
+              -0.0358
+            ]
+          }
+        },
+        "fold3": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.6991,
+            "bros_f1": 0.7263,
+            "minus_bros": -0.0272,
+            "minus_bros_template_ci95": [
+              -0.0678,
+              0.0103
+            ],
+            "minus_bros_document_ci95": [
+              -0.0494,
+              -0.0049
+            ]
+          },
+          "fill_in": {
+            "f1": 0.7272,
+            "bros_f1": 0.7263,
+            "minus_bros": 0.0009,
+            "minus_bros_template_ci95": [
+              -0.008,
+              0.0106
+            ],
+            "minus_bros_document_ci95": [
+              -0.0045,
+              0.0065
+            ]
+          },
+          "oracle": {
+            "f1": 0.8414,
+            "bros_f1": 0.7263,
+            "minus_bros": 0.1151,
+            "minus_bros_template_ci95": [
+              0.0847,
+              0.1421
+            ],
+            "minus_bros_document_ci95": [
+              0.1023,
+              0.13
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5049,
+            "bros_f1": 0.7263,
+            "minus_bros": -0.2214,
+            "minus_bros_template_ci95": [
+              -0.3484,
+              -0.11
+            ],
+            "minus_bros_document_ci95": [
+              -0.2792,
+              -0.1644
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4778,
+            "bros_f1": 0.7263,
+            "minus_bros": -0.2485,
+            "minus_bros_template_ci95": [
+              -0.3853,
+              -0.131
+            ],
+            "minus_bros_document_ci95": [
+              -0.3066,
+              -0.1922
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.5413,
+            "bros_f1": 0.7263,
+            "minus_bros": -0.185,
+            "minus_bros_template_ci95": [
+              -0.3141,
+              -0.0865
+            ],
+            "minus_bros_document_ci95": [
+              -0.2394,
+              -0.1269
+            ]
+          }
+        },
+        "fold4": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.5965,
+            "bros_f1": 0.6499,
+            "minus_bros": -0.0534,
+            "minus_bros_template_ci95": [
+              -0.1258,
+              0.0212
+            ],
+            "minus_bros_document_ci95": [
+              -0.0886,
+              -0.0216
+            ]
+          },
+          "fill_in": {
+            "f1": 0.6835,
+            "bros_f1": 0.6499,
+            "minus_bros": 0.0336,
+            "minus_bros_template_ci95": [
+              0.0039,
+              0.0719
+            ],
+            "minus_bros_document_ci95": [
+              0.018,
+              0.0514
+            ]
+          },
+          "oracle": {
+            "f1": 0.8218,
+            "bros_f1": 0.6499,
+            "minus_bros": 0.1719,
+            "minus_bros_template_ci95": [
+              0.1127,
+              0.2365
+            ],
+            "minus_bros_document_ci95": [
+              0.145,
+              0.1956
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.4721,
+            "bros_f1": 0.6499,
+            "minus_bros": -0.1778,
+            "minus_bros_template_ci95": [
+              -0.3528,
+              -0.0244
+            ],
+            "minus_bros_document_ci95": [
+              -0.2497,
+              -0.1154
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4814,
+            "bros_f1": 0.6499,
+            "minus_bros": -0.1685,
+            "minus_bros_template_ci95": [
+              -0.3204,
+              -0.0251
+            ],
+            "minus_bros_document_ci95": [
+              -0.2353,
+              -0.107
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.53,
+            "bros_f1": 0.6499,
+            "minus_bros": -0.1199,
+            "minus_bros_template_ci95": [
+              -0.2834,
+              0.0284
+            ],
+            "minus_bros_document_ci95": [
+              -0.1888,
+              -0.0585
+            ]
+          }
+        }
+      },
+      "pooled": {
+        "router": {
+          "f1": 0.6657,
+          "bros_f1": 0.6921,
+          "minus_bros": -0.0264,
+          "minus_bros_template_ci95": [
+            -0.0497,
+            -0.0052
+          ],
+          "minus_bros_document_ci95": [
+            -0.0366,
+            -0.0166
+          ]
+        },
+        "fill_in": {
+          "f1": 0.7117,
+          "bros_f1": 0.6921,
+          "minus_bros": 0.0196,
+          "minus_bros_template_ci95": [
+            0.0073,
+            0.0333
+          ],
+          "minus_bros_document_ci95": [
+            0.0144,
+            0.0251
+          ]
+        },
+        "oracle": {
+          "f1": 0.8521,
+          "bros_f1": 0.6921,
+          "minus_bros": 0.16,
+          "minus_bros_template_ci95": [
+            0.1377,
+            0.1854
+          ],
+          "minus_bros_document_ci95": [
+            0.1514,
+            0.1695
+          ]
+        },
+        "vlm_key": {
+          "f1": 0.5644,
+          "bros_f1": 0.6921,
+          "minus_bros": -0.1277,
+          "minus_bros_template_ci95": [
+            -0.1811,
+            -0.0748
+          ],
+          "minus_bros_document_ci95": [
+            -0.1525,
+            -0.1037
+          ]
+        },
+        "vlm_named": {
+          "f1": 0.519,
+          "bros_f1": 0.6921,
+          "minus_bros": -0.1731,
+          "minus_bros_template_ci95": [
+            -0.2252,
+            -0.1219
+          ],
+          "minus_bros_document_ci95": [
+            -0.1983,
+            -0.1506
+          ]
+        },
+        "vlm_both": {
+          "f1": 0.5964,
+          "bros_f1": 0.6921,
+          "minus_bros": -0.0957,
+          "minus_bros_template_ci95": [
+            -0.1474,
+            -0.045
+          ],
+          "minus_bros_document_ci95": [
+            -0.1194,
+            -0.074
+          ]
+        }
+      },
+      "per_field_f1": {
+        "buyer": {
+          "bros": 0.5226,
+          "router": 0.4378,
+          "vlm_both": 0.543
+        },
+        "date": {
+          "bros": 0.793,
+          "router": 0.7572,
+          "vlm_both": 0.8498
+        },
+        "due_date": {
+          "bros": 0.7784,
+          "router": 0.8001,
+          "vlm_both": 0.7678
+        },
+        "number": {
+          "bros": 0.7305,
+          "router": 0.7305,
+          "vlm_both": 0.4253
+        },
+        "seller_address": {
+          "bros": 0.7502,
+          "router": 0.6728,
+          "vlm_both": 0.6649
+        },
+        "seller_name": {
+          "bros": 0.3441,
+          "router": 0.2783,
+          "vlm_both": 0.1419
+        },
+        "sub_total": {
+          "bros": 0.8229,
+          "router": 0.7879,
+          "vlm_both": 0.8506
+        },
+        "title": {
+          "bros": 0.6472,
+          "router": 0.6472,
+          "vlm_both": 0.0
+        },
+        "total": {
+          "bros": 0.6834,
+          "router": 0.6262,
+          "vlm_both": 0.6822
+        }
+      },
+      "router_tables": {
+        "fold0": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold1": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold2": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "vlm_both",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold3": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold4": {
+          "bros_seed13": {
+            "buyer": "vlm_both",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "vlm_both",
+            "sub_total": "vlm_both",
+            "title": "bros_seed13",
+            "total": "vlm_both"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "vlm_both",
+            "due_date": "vlm_both",
+            "number": "bros_seed42",
+            "seller_address": "vlm_both",
+            "seller_name": "bros_seed42",
+            "sub_total": "vlm_both",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        }
+      },
+      "verdict": {
+        "pooled_gain_significant": false,
+        "no_fold_significantly_worse": true,
+        "passes": false
+      },
+      "n_confirm_docs": 500,
+      "invoices_scored": 1000
+    },
+    "5": {
+      "n_train_invoices": 50,
+      "n_seen_templates": 5,
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0,
+        "runs_found": 10
+      },
+      "by_fold": {
+        "fold0": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9299,
+            "bros_f1": 0.9299,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.916,
+            "bros_f1": 0.9299,
+            "minus_bros": -0.0139,
+            "minus_bros_template_ci95": [
+              -0.0267,
+              -0.001
+            ],
+            "minus_bros_document_ci95": [
+              -0.0196,
+              -0.0083
+            ]
+          },
+          "oracle": {
+            "f1": 0.9629,
+            "bros_f1": 0.9299,
+            "minus_bros": 0.033,
+            "minus_bros_template_ci95": [
+              0.0168,
+              0.0512
+            ],
+            "minus_bros_document_ci95": [
+              0.0268,
+              0.0397
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.6557,
+            "bros_f1": 0.9299,
+            "minus_bros": -0.2742,
+            "minus_bros_template_ci95": [
+              -0.3383,
+              -0.2105
+            ],
+            "minus_bros_document_ci95": [
+              -0.3085,
+              -0.2394
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5987,
+            "bros_f1": 0.9299,
+            "minus_bros": -0.3312,
+            "minus_bros_template_ci95": [
+              -0.3869,
+              -0.2744
+            ],
+            "minus_bros_document_ci95": [
+              -0.3684,
+              -0.2944
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6837,
+            "bros_f1": 0.9299,
+            "minus_bros": -0.2462,
+            "minus_bros_template_ci95": [
+              -0.3033,
+              -0.1871
+            ],
+            "minus_bros_document_ci95": [
+              -0.2817,
+              -0.2107
+            ]
+          }
+        },
+        "fold1": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.889,
+            "bros_f1": 0.889,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.8718,
+            "bros_f1": 0.889,
+            "minus_bros": -0.0172,
+            "minus_bros_template_ci95": [
+              -0.031,
+              -0.0054
+            ],
+            "minus_bros_document_ci95": [
+              -0.0222,
+              -0.0126
+            ]
+          },
+          "oracle": {
+            "f1": 0.9601,
+            "bros_f1": 0.889,
+            "minus_bros": 0.0711,
+            "minus_bros_template_ci95": [
+              0.0519,
+              0.094
+            ],
+            "minus_bros_document_ci95": [
+              0.062,
+              0.0815
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5978,
+            "bros_f1": 0.889,
+            "minus_bros": -0.2912,
+            "minus_bros_template_ci95": [
+              -0.3652,
+              -0.2202
+            ],
+            "minus_bros_document_ci95": [
+              -0.3379,
+              -0.2474
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5148,
+            "bros_f1": 0.889,
+            "minus_bros": -0.3742,
+            "minus_bros_template_ci95": [
+              -0.4504,
+              -0.3068
+            ],
+            "minus_bros_document_ci95": [
+              -0.4188,
+              -0.3324
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6276,
+            "bros_f1": 0.889,
+            "minus_bros": -0.2614,
+            "minus_bros_template_ci95": [
+              -0.32,
+              -0.2091
+            ],
+            "minus_bros_document_ci95": [
+              -0.3046,
+              -0.2214
+            ]
+          }
+        },
+        "fold2": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9244,
+            "bros_f1": 0.9244,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9029,
+            "bros_f1": 0.9244,
+            "minus_bros": -0.0215,
+            "minus_bros_template_ci95": [
+              -0.0395,
+              -0.0059
+            ],
+            "minus_bros_document_ci95": [
+              -0.0293,
+              -0.0138
+            ]
+          },
+          "oracle": {
+            "f1": 0.9723,
+            "bros_f1": 0.9244,
+            "minus_bros": 0.0479,
+            "minus_bros_template_ci95": [
+              0.0264,
+              0.0704
+            ],
+            "minus_bros_document_ci95": [
+              0.0393,
+              0.057
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5735,
+            "bros_f1": 0.9244,
+            "minus_bros": -0.3509,
+            "minus_bros_template_ci95": [
+              -0.413,
+              -0.2913
+            ],
+            "minus_bros_document_ci95": [
+              -0.3992,
+              -0.3074
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5076,
+            "bros_f1": 0.9244,
+            "minus_bros": -0.4168,
+            "minus_bros_template_ci95": [
+              -0.4672,
+              -0.3685
+            ],
+            "minus_bros_document_ci95": [
+              -0.4624,
+              -0.374
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.583,
+            "bros_f1": 0.9244,
+            "minus_bros": -0.3414,
+            "minus_bros_template_ci95": [
+              -0.3918,
+              -0.2881
+            ],
+            "minus_bros_document_ci95": [
+              -0.3885,
+              -0.2997
+            ]
+          }
+        },
+        "fold3": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.928,
+            "bros_f1": 0.928,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9266,
+            "bros_f1": 0.928,
+            "minus_bros": -0.0014,
+            "minus_bros_template_ci95": [
+              -0.0121,
+              0.0069
+            ],
+            "minus_bros_document_ci95": [
+              -0.0073,
+              0.0042
+            ]
+          },
+          "oracle": {
+            "f1": 0.9651,
+            "bros_f1": 0.928,
+            "minus_bros": 0.0371,
+            "minus_bros_template_ci95": [
+              0.0178,
+              0.0584
+            ],
+            "minus_bros_document_ci95": [
+              0.0289,
+              0.0454
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5049,
+            "bros_f1": 0.928,
+            "minus_bros": -0.4231,
+            "minus_bros_template_ci95": [
+              -0.545,
+              -0.3251
+            ],
+            "minus_bros_document_ci95": [
+              -0.4773,
+              -0.3704
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4778,
+            "bros_f1": 0.928,
+            "minus_bros": -0.4502,
+            "minus_bros_template_ci95": [
+              -0.5836,
+              -0.3415
+            ],
+            "minus_bros_document_ci95": [
+              -0.5059,
+              -0.3939
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.5413,
+            "bros_f1": 0.928,
+            "minus_bros": -0.3867,
+            "minus_bros_template_ci95": [
+              -0.5125,
+              -0.2872
+            ],
+            "minus_bros_document_ci95": [
+              -0.4425,
+              -0.3326
+            ]
+          }
+        },
+        "fold4": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.8662,
+            "bros_f1": 0.8678,
+            "minus_bros": -0.0016,
+            "minus_bros_template_ci95": [
+              -0.0178,
+              0.0179
+            ],
+            "minus_bros_document_ci95": [
+              -0.0086,
+              0.0058
+            ]
+          },
+          "fill_in": {
+            "f1": 0.8604,
+            "bros_f1": 0.8678,
+            "minus_bros": -0.0074,
+            "minus_bros_template_ci95": [
+              -0.0206,
+              0.0024
+            ],
+            "minus_bros_document_ci95": [
+              -0.013,
+              -0.0019
+            ]
+          },
+          "oracle": {
+            "f1": 0.9352,
+            "bros_f1": 0.8678,
+            "minus_bros": 0.0674,
+            "minus_bros_template_ci95": [
+              0.0449,
+              0.0906
+            ],
+            "minus_bros_document_ci95": [
+              0.0575,
+              0.0787
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.4721,
+            "bros_f1": 0.8678,
+            "minus_bros": -0.3957,
+            "minus_bros_template_ci95": [
+              -0.546,
+              -0.2734
+            ],
+            "minus_bros_document_ci95": [
+              -0.458,
+              -0.3385
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4814,
+            "bros_f1": 0.8678,
+            "minus_bros": -0.3864,
+            "minus_bros_template_ci95": [
+              -0.5068,
+              -0.2733
+            ],
+            "minus_bros_document_ci95": [
+              -0.4402,
+              -0.3328
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.53,
+            "bros_f1": 0.8678,
+            "minus_bros": -0.3378,
+            "minus_bros_template_ci95": [
+              -0.4692,
+              -0.2261
+            ],
+            "minus_bros_document_ci95": [
+              -0.3961,
+              -0.2846
+            ]
+          }
+        }
+      },
+      "pooled": {
+        "router": {
+          "f1": 0.9078,
+          "bros_f1": 0.9079,
+          "minus_bros": -0.0001,
+          "minus_bros_template_ci95": [
+            -0.0036,
+            0.0035
+          ],
+          "minus_bros_document_ci95": [
+            -0.0015,
+            0.0013
+          ]
+        },
+        "fill_in": {
+          "f1": 0.8958,
+          "bros_f1": 0.9079,
+          "minus_bros": -0.0121,
+          "minus_bros_template_ci95": [
+            -0.0185,
+            -0.0061
+          ],
+          "minus_bros_document_ci95": [
+            -0.0148,
+            -0.0095
+          ]
+        },
+        "oracle": {
+          "f1": 0.959,
+          "bros_f1": 0.9079,
+          "minus_bros": 0.0511,
+          "minus_bros_template_ci95": [
+            0.0406,
+            0.0615
+          ],
+          "minus_bros_document_ci95": [
+            0.0468,
+            0.0553
+          ]
+        },
+        "vlm_key": {
+          "f1": 0.5644,
+          "bros_f1": 0.9079,
+          "minus_bros": -0.3435,
+          "minus_bros_template_ci95": [
+            -0.3881,
+            -0.3044
+          ],
+          "minus_bros_document_ci95": [
+            -0.3664,
+            -0.3232
+          ]
+        },
+        "vlm_named": {
+          "f1": 0.519,
+          "bros_f1": 0.9079,
+          "minus_bros": -0.3889,
+          "minus_bros_template_ci95": [
+            -0.4298,
+            -0.3522
+          ],
+          "minus_bros_document_ci95": [
+            -0.4101,
+            -0.3667
+          ]
+        },
+        "vlm_both": {
+          "f1": 0.5964,
+          "bros_f1": 0.9079,
+          "minus_bros": -0.3115,
+          "minus_bros_template_ci95": [
+            -0.354,
+            -0.2747
+          ],
+          "minus_bros_document_ci95": [
+            -0.3335,
+            -0.2905
+          ]
+        }
+      },
+      "per_field_f1": {
+        "buyer": {
+          "bros": 0.6395,
+          "router": 0.6205,
+          "vlm_both": 0.543
+        },
+        "date": {
+          "bros": 0.9664,
+          "router": 0.9664,
+          "vlm_both": 0.8498
+        },
+        "due_date": {
+          "bros": 0.9814,
+          "router": 0.9814,
+          "vlm_both": 0.7678
+        },
+        "number": {
+          "bros": 0.9476,
+          "router": 0.9476,
+          "vlm_both": 0.4253
+        },
+        "seller_address": {
+          "bros": 0.9395,
+          "router": 0.9395,
+          "vlm_both": 0.6649
+        },
+        "seller_name": {
+          "bros": 0.8183,
+          "router": 0.8183,
+          "vlm_both": 0.1419
+        },
+        "sub_total": {
+          "bros": 0.9513,
+          "router": 0.9513,
+          "vlm_both": 0.8506
+        },
+        "title": {
+          "bros": 0.9932,
+          "router": 0.9932,
+          "vlm_both": 0.0
+        },
+        "total": {
+          "bros": 0.9042,
+          "router": 0.9042,
+          "vlm_both": 0.6822
+        }
+      },
+      "router_tables": {
+        "fold0": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold1": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold2": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold3": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold4": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "vlm_both",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        }
+      },
+      "verdict": {
+        "pooled_gain_significant": false,
+        "no_fold_significantly_worse": true,
+        "passes": false
+      },
+      "n_confirm_docs": 500,
+      "invoices_scored": 1000
+    },
+    "10": {
+      "n_train_invoices": 100,
+      "n_seen_templates": 10,
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0,
+        "runs_found": 10
+      },
+      "by_fold": {
+        "fold0": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.974,
+            "bros_f1": 0.974,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9689,
+            "bros_f1": 0.974,
+            "minus_bros": -0.0051,
+            "minus_bros_template_ci95": [
+              -0.0193,
+              0.0071
+            ],
+            "minus_bros_document_ci95": [
+              -0.0104,
+              0.0002
+            ]
+          },
+          "oracle": {
+            "f1": 0.9953,
+            "bros_f1": 0.974,
+            "minus_bros": 0.0213,
+            "minus_bros_template_ci95": [
+              0.0088,
+              0.0355
+            ],
+            "minus_bros_document_ci95": [
+              0.0165,
+              0.0265
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.6557,
+            "bros_f1": 0.974,
+            "minus_bros": -0.3183,
+            "minus_bros_template_ci95": [
+              -0.3862,
+              -0.2558
+            ],
+            "minus_bros_document_ci95": [
+              -0.3532,
+              -0.2821
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5987,
+            "bros_f1": 0.974,
+            "minus_bros": -0.3753,
+            "minus_bros_template_ci95": [
+              -0.4402,
+              -0.3165
+            ],
+            "minus_bros_document_ci95": [
+              -0.4142,
+              -0.3382
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6837,
+            "bros_f1": 0.974,
+            "minus_bros": -0.2903,
+            "minus_bros_template_ci95": [
+              -0.3578,
+              -0.2336
+            ],
+            "minus_bros_document_ci95": [
+              -0.3262,
+              -0.2536
+            ]
+          }
+        },
+        "fold1": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9567,
+            "bros_f1": 0.9567,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9243,
+            "bros_f1": 0.9567,
+            "minus_bros": -0.0324,
+            "minus_bros_template_ci95": [
+              -0.0569,
+              -0.0106
+            ],
+            "minus_bros_document_ci95": [
+              -0.0408,
+              -0.0242
+            ]
+          },
+          "oracle": {
+            "f1": 0.9835,
+            "bros_f1": 0.9567,
+            "minus_bros": 0.0268,
+            "minus_bros_template_ci95": [
+              0.0145,
+              0.0409
+            ],
+            "minus_bros_document_ci95": [
+              0.0209,
+              0.0332
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5978,
+            "bros_f1": 0.9567,
+            "minus_bros": -0.3589,
+            "minus_bros_template_ci95": [
+              -0.4378,
+              -0.2813
+            ],
+            "minus_bros_document_ci95": [
+              -0.4069,
+              -0.3148
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5148,
+            "bros_f1": 0.9567,
+            "minus_bros": -0.4419,
+            "minus_bros_template_ci95": [
+              -0.5136,
+              -0.3741
+            ],
+            "minus_bros_document_ci95": [
+              -0.4842,
+              -0.4019
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.6276,
+            "bros_f1": 0.9567,
+            "minus_bros": -0.3291,
+            "minus_bros_template_ci95": [
+              -0.3907,
+              -0.2696
+            ],
+            "minus_bros_document_ci95": [
+              -0.3706,
+              -0.2896
+            ]
+          }
+        },
+        "fold2": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9854,
+            "bros_f1": 0.9854,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9555,
+            "bros_f1": 0.9854,
+            "minus_bros": -0.0299,
+            "minus_bros_template_ci95": [
+              -0.0619,
+              -0.0082
+            ],
+            "minus_bros_document_ci95": [
+              -0.0399,
+              -0.0201
+            ]
+          },
+          "oracle": {
+            "f1": 0.9924,
+            "bros_f1": 0.9854,
+            "minus_bros": 0.007,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.015
+            ],
+            "minus_bros_document_ci95": [
+              0.004,
+              0.0102
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5735,
+            "bros_f1": 0.9854,
+            "minus_bros": -0.4119,
+            "minus_bros_template_ci95": [
+              -0.4905,
+              -0.3522
+            ],
+            "minus_bros_document_ci95": [
+              -0.4616,
+              -0.3682
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.5076,
+            "bros_f1": 0.9854,
+            "minus_bros": -0.4778,
+            "minus_bros_template_ci95": [
+              -0.5243,
+              -0.4401
+            ],
+            "minus_bros_document_ci95": [
+              -0.5233,
+              -0.4388
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.583,
+            "bros_f1": 0.9854,
+            "minus_bros": -0.4024,
+            "minus_bros_template_ci95": [
+              -0.461,
+              -0.3525
+            ],
+            "minus_bros_document_ci95": [
+              -0.4483,
+              -0.3619
+            ]
+          }
+        },
+        "fold3": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9445,
+            "bros_f1": 0.9445,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9321,
+            "bros_f1": 0.9445,
+            "minus_bros": -0.0124,
+            "minus_bros_template_ci95": [
+              -0.0267,
+              -0.0025
+            ],
+            "minus_bros_document_ci95": [
+              -0.018,
+              -0.0072
+            ]
+          },
+          "oracle": {
+            "f1": 0.9807,
+            "bros_f1": 0.9445,
+            "minus_bros": 0.0362,
+            "minus_bros_template_ci95": [
+              0.0181,
+              0.0581
+            ],
+            "minus_bros_document_ci95": [
+              0.0281,
+              0.0437
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.5049,
+            "bros_f1": 0.9445,
+            "minus_bros": -0.4396,
+            "minus_bros_template_ci95": [
+              -0.5601,
+              -0.3436
+            ],
+            "minus_bros_document_ci95": [
+              -0.4922,
+              -0.3872
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4778,
+            "bros_f1": 0.9445,
+            "minus_bros": -0.4667,
+            "minus_bros_template_ci95": [
+              -0.5881,
+              -0.3577
+            ],
+            "minus_bros_document_ci95": [
+              -0.5217,
+              -0.4146
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.5413,
+            "bros_f1": 0.9445,
+            "minus_bros": -0.4032,
+            "minus_bros_template_ci95": [
+              -0.5259,
+              -0.3027
+            ],
+            "minus_bros_document_ci95": [
+              -0.4569,
+              -0.3511
+            ]
+          }
+        },
+        "fold4": {
+          "n_docs": 100,
+          "router": {
+            "f1": 0.9337,
+            "bros_f1": 0.9337,
+            "minus_bros": 0.0,
+            "minus_bros_template_ci95": [
+              0.0,
+              0.0
+            ],
+            "minus_bros_document_ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "fill_in": {
+            "f1": 0.9195,
+            "bros_f1": 0.9337,
+            "minus_bros": -0.0142,
+            "minus_bros_template_ci95": [
+              -0.0406,
+              0.0087
+            ],
+            "minus_bros_document_ci95": [
+              -0.0245,
+              -0.0039
+            ]
+          },
+          "oracle": {
+            "f1": 0.9567,
+            "bros_f1": 0.9337,
+            "minus_bros": 0.023,
+            "minus_bros_template_ci95": [
+              0.012,
+              0.0353
+            ],
+            "minus_bros_document_ci95": [
+              0.017,
+              0.0287
+            ]
+          },
+          "vlm_key": {
+            "f1": 0.4721,
+            "bros_f1": 0.9337,
+            "minus_bros": -0.4616,
+            "minus_bros_template_ci95": [
+              -0.5994,
+              -0.3403
+            ],
+            "minus_bros_document_ci95": [
+              -0.5234,
+              -0.4069
+            ]
+          },
+          "vlm_named": {
+            "f1": 0.4814,
+            "bros_f1": 0.9337,
+            "minus_bros": -0.4523,
+            "minus_bros_template_ci95": [
+              -0.5635,
+              -0.3475
+            ],
+            "minus_bros_document_ci95": [
+              -0.505,
+              -0.4051
+            ]
+          },
+          "vlm_both": {
+            "f1": 0.53,
+            "bros_f1": 0.9337,
+            "minus_bros": -0.4037,
+            "minus_bros_template_ci95": [
+              -0.5254,
+              -0.2887
+            ],
+            "minus_bros_document_ci95": [
+              -0.4602,
+              -0.3528
+            ]
+          }
+        }
+      },
+      "pooled": {
+        "router": {
+          "f1": 0.9588,
+          "bros_f1": 0.9588,
+          "minus_bros": 0.0,
+          "minus_bros_template_ci95": [
+            0.0,
+            0.0
+          ],
+          "minus_bros_document_ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "fill_in": {
+          "f1": 0.9405,
+          "bros_f1": 0.9588,
+          "minus_bros": -0.0183,
+          "minus_bros_template_ci95": [
+            -0.0281,
+            -0.0091
+          ],
+          "minus_bros_document_ci95": [
+            -0.0221,
+            -0.0146
+          ]
+        },
+        "oracle": {
+          "f1": 0.9819,
+          "bros_f1": 0.9588,
+          "minus_bros": 0.0231,
+          "minus_bros_template_ci95": [
+            0.0163,
+            0.03
+          ],
+          "minus_bros_document_ci95": [
+            0.0205,
+            0.0259
+          ]
+        },
+        "vlm_key": {
+          "f1": 0.5644,
+          "bros_f1": 0.9588,
+          "minus_bros": -0.3944,
+          "minus_bros_template_ci95": [
+            -0.4396,
+            -0.3529
+          ],
+          "minus_bros_document_ci95": [
+            -0.4168,
+            -0.3736
+          ]
+        },
+        "vlm_named": {
+          "f1": 0.519,
+          "bros_f1": 0.9588,
+          "minus_bros": -0.4398,
+          "minus_bros_template_ci95": [
+            -0.4791,
+            -0.4054
+          ],
+          "minus_bros_document_ci95": [
+            -0.4602,
+            -0.4186
+          ]
+        },
+        "vlm_both": {
+          "f1": 0.5964,
+          "bros_f1": 0.9588,
+          "minus_bros": -0.3624,
+          "minus_bros_template_ci95": [
+            -0.4034,
+            -0.325
+          ],
+          "minus_bros_document_ci95": [
+            -0.3834,
+            -0.3425
+          ]
+        }
+      },
+      "per_field_f1": {
+        "buyer": {
+          "bros": 0.7617,
+          "router": 0.7617,
+          "vlm_both": 0.543
+        },
+        "date": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.8498
+        },
+        "due_date": {
+          "bros": 0.9966,
+          "router": 0.9966,
+          "vlm_both": 0.7678
+        },
+        "number": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.4253
+        },
+        "seller_address": {
+          "bros": 0.9976,
+          "router": 0.9976,
+          "vlm_both": 0.6649
+        },
+        "seller_name": {
+          "bros": 0.9122,
+          "router": 0.9122,
+          "vlm_both": 0.1419
+        },
+        "sub_total": {
+          "bros": 0.9935,
+          "router": 0.9935,
+          "vlm_both": 0.8506
+        },
+        "title": {
+          "bros": 1.0,
+          "router": 1.0,
+          "vlm_both": 0.0
+        },
+        "total": {
+          "bros": 0.9303,
+          "router": 0.9303,
+          "vlm_both": 0.6822
+        }
+      },
+      "router_tables": {
+        "fold0": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold1": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold2": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold3": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        },
+        "fold4": {
+          "bros_seed13": {
+            "buyer": "bros_seed13",
+            "date": "bros_seed13",
+            "due_date": "bros_seed13",
+            "number": "bros_seed13",
+            "seller_address": "bros_seed13",
+            "seller_name": "bros_seed13",
+            "sub_total": "bros_seed13",
+            "title": "bros_seed13",
+            "total": "bros_seed13"
+          },
+          "bros_seed42": {
+            "buyer": "bros_seed42",
+            "date": "bros_seed42",
+            "due_date": "bros_seed42",
+            "number": "bros_seed42",
+            "seller_address": "bros_seed42",
+            "seller_name": "bros_seed42",
+            "sub_total": "bros_seed42",
+            "title": "bros_seed42",
+            "total": "bros_seed42"
+          }
+        }
+      },
+      "verdict": {
+        "pooled_gain_significant": false,
+        "no_fold_significantly_worse": true,
+        "passes": false
+      },
+      "n_confirm_docs": 500,
+      "invoices_scored": 1000
+    }
+  }
+}

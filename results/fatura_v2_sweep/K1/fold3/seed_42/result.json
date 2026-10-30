@@ -1,0 +1,125 @@
+{
+  "test": {
+    "precision": 0.637,
+    "recall": 0.0674,
+    "f1": 0.1219,
+    "support": 12005,
+    "truncated_words": 0,
+    "per_type": {
+      "buyer": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 140
+      },
+      "date": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 200
+      },
+      "due_date": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 100
+      },
+      "number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 200
+      },
+      "seller_address": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 160
+      },
+      "seller_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 140
+      },
+      "sub_total": {
+        "precision": 0.6045,
+        "recall": 0.5786,
+        "f1": 0.5912,
+        "support": 140
+      },
+      "title": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 180
+      },
+      "total": {
+        "precision": 1.0,
+        "recall": 0.1,
+        "f1": 0.1818,
+        "support": 120
+      }
+    }
+  },
+  "best_val_f1": 0.5714,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.8942,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.555,
+      "val_f1": 0.0065
+    },
+    {
+      "epoch": 3,
+      "train_loss": 2.1219,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.7044,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 5,
+      "train_loss": 1.3285,
+      "val_f1": 0.0067
+    },
+    {
+      "epoch": 6,
+      "train_loss": 1.093,
+      "val_f1": 0.4585
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.8978,
+      "val_f1": 0.5714
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.7526,
+      "val_f1": 0.5714
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.6345,
+      "val_f1": 0.5714
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.5322,
+      "val_f1": 0.5714
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 1714,
+    "total_i_tags": 9755,
+    "rate": 0.1757
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.1219 == independent F1=0.1219 (delta 0.00e+00)\n  lenient-IOB2 F1=0.1500 (spread 0.0281)\n  malformed I- tags: 1714/9755 (17.6%)",
+  "peak_gpu_mem_gb": 7.89
+}

@@ -1,0 +1,37 @@
+[
+  {
+    "epoch": 1,
+    "train_loss": 2.3682,
+    "val_f1": 0.0
+  },
+  {
+    "epoch": 2,
+    "train_loss": 1.2211,
+    "val_f1": 0.3171
+  },
+  {
+    "epoch": 3,
+    "train_loss": 0.3866,
+    "val_f1": 0.9417
+  },
+  {
+    "epoch": 4,
+    "train_loss": 0.0725,
+    "val_f1": 1.0
+  },
+  {
+    "epoch": 5,
+    "train_loss": 0.0269,
+    "val_f1": 1.0
+  },
+  {
+    "epoch": 6,
+    "train_loss": 0.0192,
+    "val_f1": 1.0
+  },
+  {
+    "epoch": 7,
+    "train_loss": 0.0164,
+    "val_f1": 1.0
+  }
+]

@@ -1,0 +1,160 @@
+{
+  "test": {
+    "precision": 0.2802,
+    "recall": 0.0405,
+    "f1": 0.0707,
+    "support": 11494,
+    "truncated_words": 0,
+    "per_type": {
+      "buyer": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 80
+      },
+      "date": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 200
+      },
+      "due_date": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 140
+      },
+      "number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 140
+      },
+      "seller_address": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 160
+      },
+      "seller_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 80
+      },
+      "sub_total": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 100
+      },
+      "title": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 200
+      },
+      "total": {
+        "precision": 0.6892,
+        "recall": 0.3187,
+        "f1": 0.4359,
+        "support": 160
+      }
+    }
+  },
+  "best_val_f1": 0.6725,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.8963,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.5123,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.7159,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.2406,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.99,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.8127,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.6635,
+      "val_f1": 0.0057
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.5986,
+      "val_f1": 0.1233
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.5228,
+      "val_f1": 0.2368
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.4846,
+      "val_f1": 0.4444
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.4324,
+      "val_f1": 0.4444
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.3946,
+      "val_f1": 0.4391
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.3635,
+      "val_f1": 0.6427
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.3437,
+      "val_f1": 0.6725
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.3274,
+      "val_f1": 0.6632
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.2909,
+      "val_f1": 0.6427
+    },
+    {
+      "epoch": 17,
+      "train_loss": 0.275,
+      "val_f1": 0.661
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 1997,
+    "total_i_tags": 7433,
+    "rate": 0.2687
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.0707 == independent F1=0.0707 (delta 0.00e+00)\n  lenient-IOB2 F1=0.0454 (spread 0.0254)\n  malformed I- tags: 1997/7433 (26.9%)",
+  "peak_gpu_mem_gb": 7.89
+}
