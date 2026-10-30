@@ -120,6 +120,19 @@ def train_val_sample(held_out: list[int], seed: int, fold: int, n_train: int = 2
     return train, rng.sample(left, n_val)
 
 
+def starved_sample(held_out: list[int], seed: int, fold: int, k: int, per_template: int = 10, n_val: int = 50,
+                   n_instances: int = 200) -> tuple[list[str], list[str]]:
+    """Training invoices from only ``k`` seen templates (``per_template`` each), plus a disjoint validation set drawn
+    from those same templates, so BROS has seen few layouts (study 15). Held-out templates are never used."""
+    rng = random.Random(seed * 1000 + fold * 10 + k)
+    seen = [t for t in range(1, 51) if t not in held_out]
+    chosen = sorted(rng.sample(seen, k))
+    train = [f"Template{t}_Instance{i}" for t in chosen for i in rng.sample(range(n_instances), per_template)]
+    taken = set(train)
+    left = [f"Template{t}_Instance{i}" for t in chosen for i in range(n_instances) if f"Template{t}_Instance{i}" not in taken]
+    return train, rng.sample(left, min(n_val, len(left)))
+
+
 def _selftest() -> None:
     f = folds()
     flat = [t for fold in f for t in fold]
@@ -131,6 +144,13 @@ def _selftest() -> None:
         tr, va = train_val_sample(held, 13, 0)
         assert len(tr) == 200 and len(va) == 50 and not set(tr) & set(va)
         assert not {int(re.match(r"Template(\d+)_", g).group(1)) for g in tr + va} & set(held)
+    for k in (1, 2, 5, 10):
+        for held in f:
+            tr, va = starved_sample(held, 13, 2, k)
+            tpl = lambda ids: {int(re.match(r"Template(\d+)_", g).group(1)) for g in ids}
+            assert len(tr) == 10 * k and len(va) == 50 and not set(tr) & set(va), (k, len(tr), len(va))
+            assert len(tpl(tr)) == k and tpl(va) <= tpl(tr) and not tpl(tr + va) & set(held)
+    assert starved_sample(f[0], 13, 0, 5) == starved_sample(f[0], 13, 0, 5) != starved_sample(f[0], 42, 0, 5)
     toy = {"TOTAL": {"bbox": [[300, 100], [400, 120]], "text": "TOTAL : 5.00 EUR"},
            "DATE": {"bbox": [[10, 700], [110, 712]], "text": "Date: 03-Jan-1994"},
            "NOTE": {"bbox": [[10, 400], [90, 410]], "text": "Thank you"}, "TABLE": [{"bbox": [[0, 0], [1, 1]]}]}

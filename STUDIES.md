@@ -32,6 +32,7 @@ Conventions:
 | 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
 | 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
+| 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
 
 ---
 
@@ -634,3 +635,37 @@ scans (FATURA is synthetic).
 
 **Evidence:** `results/fatura_v1/` (`eval.json`, `spans.jsonl`, `manifest.json`, raw VLM outputs, BROS runs and span
 dumps); notebook `notebooks/kaggle_fatura_hybrid.ipynb`.
+
+---
+
+## 15. Router with data-starved BROS on FATURA — GPU (Kaggle T4 × 2), registered 2026-10-31
+
+**Question:** study 14 found no headroom for a hybrid because BROS scored 99.9% on unseen templates with 200 training
+invoices from 40 templates. If BROS has seen few templates, a template gap should appear: does the router then beat
+BROS, as it did on VRDU (studies 10–12)?
+
+**Setup (registered before running; `scripts/fatura_bros.py --k-list`, `scripts/fatura_sweep.py`, notebook
+`notebooks/kaggle_fatura_sweep.ipynb`):**
+- **BROS (trained):** Track-1 recipe unchanged, trained on **K = 1, 2, 5, 10 seen templates** (chosen at random from
+  the fold's 40 seen templates by seed), **10 invoices per template** (10, 20, 50, 100 invoices), 50 validation
+  invoices from the same seen templates (disjoint), seeds 13 and 42, the 5 folds of study 14: 40 runs. Tested on the 200
+  evaluated invoices (dev + confirm) of each fold's 10 held-out templates. K = 40 with 200 invoices is study 14.
+- **VLM:** not re-run; the study-14 VLM outputs (`results/fatura_v1/spans.jsonl`) are re-used unchanged.
+- **Scoring (CPU):** the study-14 analysis per K: router fitted on the other four folds' invoices (dev + confirm),
+  applied to the held-out fold's confirm invoices; exact block-span F1; template-bootstrap intervals; oracle,
+  fill-in, VLM alone.
+- **Registered success rule:** at least one K with BROS pooled F1 below 90% (a template gap) where the router beats BROS
+  (pooled 95% template-bootstrap interval above 0, and no fold's interval entirely below 0). If BROS stays at or above
+  90% for every K, FATURA cannot test the hybrid. Per-K and per-field detail is descriptive.
+- **Pipeline check done before the run:** with fake BROS dumps whose weaknesses were planted (K = 1 never predicts
+  date, due_date, total; K = 2 never predicts date) the scoring routed exactly those fields to the real VLM and
+  reported a positive, significant gain; with perfect fake BROS (K = 5, 10) it reported 0.0.
+
+**Limits stated up front:** FATURA is synthetic; the choice of which K templates BROS sees varies only over 2 seeds
+(template-bootstrap intervals cover the held-out templates, not the seen-template draw); BROS sees block-level boxes
+only; the VLM's key-value formulation cannot express unlabeled blocks (study 14), which caps what the router can gain on
+`title` and `seller_name`.
+
+**Results:** *pending*
+
+**Evidence:** `results/fatura_v2_sweep/` (after the run).
