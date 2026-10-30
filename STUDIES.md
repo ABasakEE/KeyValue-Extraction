@@ -32,7 +32,7 @@ Conventions:
 | 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
 | 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
-| 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
+| 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | 2026-10-31 | Registered rule passes only at K=1, where the router merely matches the VLM alone; at K=2 it is significantly worse than BROS (-2.6); K>=5 neutral. Oracle headroom exists but a static per-field router captures none |
 
 ---
 
@@ -666,6 +666,67 @@ BROS, as it did on VRDU (studies 10–12)?
 only; the VLM's key-value formulation cannot express unlabeled blocks (study 14), which caps what the router can gain on
 `title` and `seller_name`.
 
-**Results:** *pending*
+**Run:** all 40 BROS runs completed; 0 alignment mismatches between the dumps and the loader gold; 1,000 invoices
+scored per setting. The scoring dry run with planted faults (above) behaved as the real run did.
 
-**Evidence:** `results/fatura_v2_sweep/` (after the run).
+**Results (exact block-span micro F1, 500 confirm invoices; Δ = router − BROS, template-bootstrap 95% CI):**
+
+| Seen templates K | Train invoices | BROS F1 | Router F1 | Δ vs BROS [95% CI] | Registered "gap" (BROS < 90%) | Router passes | Oracle − BROS | Fill-in − BROS |
+|---|---|---|---|---|---|---|---|---|
+| 1 | 10 | **32.5** | 58.5 | **+26.0** [+19.8, +31.9] | yes | **yes** | +39.0 | +25.6 |
+| 2 | 20 | 69.2 | 66.6 | **−2.6** [−5.0, −0.5] | yes | **no (worse)** | +16.0 | +2.0 |
+| 5 | 50 | 90.8 | 90.8 | −0.0 [−0.4, +0.4] | no (just above) | no | +5.1 | −1.2 |
+| 10 | 100 | 95.9 | 95.9 | +0.0 [0.0, 0.0] | no | no | +2.3 | −1.8 |
+| 40 (study 14) | 200 | 99.9 | 99.9 | +0.0 [0.0, 0.0] | no | no | +0.0 | −2.2 |
+
+VLM alone: 59.6 at every K (its outputs are fixed). **Registered rule: satisfied** (K = 1 has a template gap and the
+router passes: `helpful_in_starved_regime = true`).
+
+**Exploratory post-hoc analysis (written after seeing the results; `scripts/fatura_sweep_posthoc.py`,
+`results/fatura_v2_sweep/posthoc.json`):**
+
+| K | BROS | VLM alone | Router | Router − VLM alone [95% CI] | Better single system | Router share of oracle headroom | BROS per-run F1 min / max / std |
+|---|---|---|---|---|---|---|---|
+| 1 | 32.5 | 59.6 | 58.5 | −1.1 [−2.5, +0.4] | VLM | 67% | 0.0 / 57.1 / 19.8 |
+| 2 | 69.2 | 59.6 | 66.6 | +6.9 [+2.9, +11.1] | BROS | −17% | 57.4 / 82.3 / 7.6 |
+| 5 | 90.8 | 59.6 | 90.8 | +31.1 | BROS | 0% | 86.4 / 96.7 / 3.4 |
+| 10 | 95.9 | 59.6 | 95.9 | +36.2 | BROS | 0% | 91.1 / 99.1 / 2.7 |
+| 40 | 99.9 | 59.6 | 99.9 | +40.2 | BROS | 0% | 99.6 / 100.0 / 0.2 |
+
+**What the results show:**
+1. **BROS's unseen-template F1 is a smooth function of the number of seen templates** (32.5 → 69.2 → 90.8 → 95.9 → 99.9),
+   and its run-to-run spread collapses with it (std 19.8 → 0.2). One BROS run trained on a single template scored 0.0.
+2. **The K = 1 "pass" is the VLM beating a near-useless BROS, not a hybrid advantage.** The router sends 7–8 of 9 fields
+   to the VLM and ends at 58.5, indistinguishable from the VLM alone (−1.1 [−2.5, +0.4]). It does not beat the better single
+   system at any K; at K = 2 it is worse than BROS and at K ≥ 5 it equals BROS.
+3. **At K = 2, where BROS has a clear gap (69.2%) the router hurts (−2.6, interval entirely below 0).** There BROS and the VLM
+   are close on most fields (e.g. date 79.3 vs 85.0, due_date 77.8 vs 76.8, total 68.3 vs 68.2, buyer 52.3 vs 54.3) and BROS's
+   quality depends on which two templates it saw, so field choices fitted on other folds transfer poorly (different
+   field sets are routed in different folds).
+4. **Headroom exists, but a static per-field router captures none of it** (oracle +16.0, +5.1, +2.3 at K = 2, 5, 10;
+   router −17%, 0%, 0%). The complementarity is per document, not per field.
+5. **Naive fill-in helps only when BROS is nearly broken** (+25.6 at K = 1) and hurts from K = 5 up (−1.2 to −2.2).
+
+**Comparison with VRDU (studies 10–12):** at a similar coverage (VRDU: BROS ≈ 70% after seeing two templates; FATURA K = 2:
+69.2%) the router helped on VRDU (+3.8 on fresh documents) but not on FATURA (−2.6). Interpretation (a hypothesis
+consistent with the per-field tables, not tested directly): the VRDU gain came from fields where BROS fails and the
+VLM wins *consistently across templates* (`foreign_principle_name` 5 → 55). FATURA's failures with few seen templates are
+diffuse (every field degrades somewhat), the VLM is weaker on several fields (`title` 0.0, `seller_name` 14.2,
+`number` 42.5), and no field is reliably VLM-favoured.
+
+**Conclusions for the generalization claim:**
+- The hybrid is **safe where the trained model is strong** (K ≥ 5: no harm, repeated across 5 folds and 50 templates) and
+  **not reliable where it is mid-strength** (K = 2: significantly worse than BROS).
+- The VRDU gain does **not** generalise as "a router helps whenever BROS is weak"; it needs a field that is consistently
+  better handled by the zero-shot VLM. Report the VRDU result with that scope.
+- Where BROS is almost useless (K = 1) the useful finding is that a zero-shot VLM (59.6) beats it, not that routing adds value.
+
+**Limits:** FATURA is synthetic; 2 seeds, so which K templates BROS sees varies little and the intervals cover only the
+held-out templates; the 90% gap threshold is arbitrary (K = 5 sits at 90.8%); the exploratory table was produced after
+seeing the registered results.
+
+**Next (not run):** a per-document routing signal (agreement between systems or BROS token confidences; BROS confidences
+are not stored in the current dumps), a margin-based router that sends a field to the VLM only when its advantage on other
+folds is clearly positive, and a real-scan dataset with a field the VLM handles consistently better than a trained model.
+
+**Evidence:** `results/fatura_v2_sweep/` (`sweep.json`, `posthoc.json`, 40 BROS run directories with span dumps).

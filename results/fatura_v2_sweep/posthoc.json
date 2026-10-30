@@ -1,0 +1,173 @@
+{
+  "note": "exploratory, written after the registered sweep results were seen",
+  "reference_k40": {
+    "bros_f1": 0.9986,
+    "vlm_f1": 0.5964,
+    "router_f1": 0.9986,
+    "oracle_f1": 0.9989,
+    "router_minus_vlm": 0.4022,
+    "router_minus_vlm_ci95": [
+      0.3626,
+      0.4457
+    ],
+    "router_minus_bros_ci95": [
+      0.0,
+      0.0
+    ],
+    "oracle_headroom_over_bros": 0.0003,
+    "router_share_of_headroom": 0.0,
+    "better_single_system": "bros",
+    "router_minus_better_single": 0.0,
+    "bros_f1_per_fold_seed": {
+      "fold0_seed13": 1.0,
+      "fold0_seed42": 1.0,
+      "fold1_seed13": 0.9984,
+      "fold1_seed42": 1.0,
+      "fold2_seed13": 0.9984,
+      "fold2_seed42": 1.0,
+      "fold3_seed13": 0.9978,
+      "fold3_seed42": 0.9956,
+      "fold4_seed13": 0.9956,
+      "fold4_seed42": 1.0
+    },
+    "bros_f1_run_min": 0.9956,
+    "bros_f1_run_max": 1.0,
+    "bros_f1_run_std": 0.0017
+  },
+  "K1": {
+    "bros_f1": 0.3253,
+    "vlm_f1": 0.5964,
+    "router_f1": 0.5852,
+    "oracle_f1": 0.7155,
+    "router_minus_vlm": -0.0112,
+    "router_minus_vlm_ci95": [
+      -0.0247,
+      0.0042
+    ],
+    "router_minus_bros_ci95": [
+      0.1977,
+      0.3187
+    ],
+    "oracle_headroom_over_bros": 0.3902,
+    "router_share_of_headroom": 0.666,
+    "better_single_system": "vlm",
+    "router_minus_better_single": -0.0112,
+    "bros_f1_per_fold_seed": {
+      "fold0_seed13": 0.4676,
+      "fold0_seed42": 0.3378,
+      "fold1_seed13": 0.0718,
+      "fold1_seed42": 0.0,
+      "fold2_seed13": 0.025,
+      "fold2_seed42": 0.333,
+      "fold3_seed13": 0.4866,
+      "fold3_seed42": 0.1283,
+      "fold4_seed13": 0.3924,
+      "fold4_seed42": 0.5714
+    },
+    "bros_f1_run_min": 0.0,
+    "bros_f1_run_max": 0.5714,
+    "bros_f1_run_std": 0.1978
+  },
+  "K2": {
+    "bros_f1": 0.6921,
+    "vlm_f1": 0.5964,
+    "router_f1": 0.6657,
+    "oracle_f1": 0.8521,
+    "router_minus_vlm": 0.0694,
+    "router_minus_vlm_ci95": [
+      0.0286,
+      0.1106
+    ],
+    "router_minus_bros_ci95": [
+      -0.0497,
+      -0.0052
+    ],
+    "oracle_headroom_over_bros": 0.16,
+    "router_share_of_headroom": -0.165,
+    "better_single_system": "bros",
+    "router_minus_better_single": -0.0264,
+    "bros_f1_per_fold_seed": {
+      "fold0_seed13": 0.6135,
+      "fold0_seed42": 0.7189,
+      "fold1_seed13": 0.7206,
+      "fold1_seed42": 0.7716,
+      "fold2_seed13": 0.6082,
+      "fold2_seed42": 0.718,
+      "fold3_seed13": 0.8234,
+      "fold3_seed42": 0.6292,
+      "fold4_seed13": 0.5739,
+      "fold4_seed42": 0.726
+    },
+    "bros_f1_run_min": 0.5739,
+    "bros_f1_run_max": 0.8234,
+    "bros_f1_run_std": 0.0762
+  },
+  "K5": {
+    "bros_f1": 0.9079,
+    "vlm_f1": 0.5964,
+    "router_f1": 0.9078,
+    "oracle_f1": 0.959,
+    "router_minus_vlm": 0.3114,
+    "router_minus_vlm_ci95": [
+      0.2745,
+      0.3549
+    ],
+    "router_minus_bros_ci95": [
+      -0.0036,
+      0.0035
+    ],
+    "oracle_headroom_over_bros": 0.0511,
+    "router_share_of_headroom": -0.003,
+    "better_single_system": "bros",
+    "router_minus_better_single": -0.0001,
+    "bros_f1_per_fold_seed": {
+      "fold0_seed13": 0.9518,
+      "fold0_seed42": 0.908,
+      "fold1_seed13": 0.904,
+      "fold1_seed42": 0.874,
+      "fold2_seed13": 0.9672,
+      "fold2_seed42": 0.8817,
+      "fold3_seed13": 0.9126,
+      "fold3_seed42": 0.9433,
+      "fold4_seed13": 0.8715,
+      "fold4_seed42": 0.864
+    },
+    "bros_f1_run_min": 0.864,
+    "bros_f1_run_max": 0.9672,
+    "bros_f1_run_std": 0.0344
+  },
+  "K10": {
+    "bros_f1": 0.9588,
+    "vlm_f1": 0.5964,
+    "router_f1": 0.9588,
+    "oracle_f1": 0.9819,
+    "router_minus_vlm": 0.3624,
+    "router_minus_vlm_ci95": [
+      0.325,
+      0.4034
+    ],
+    "router_minus_bros_ci95": [
+      0.0,
+      0.0
+    ],
+    "oracle_headroom_over_bros": 0.0232,
+    "router_share_of_headroom": 0.0,
+    "better_single_system": "bros",
+    "router_minus_better_single": 0.0,
+    "bros_f1_per_fold_seed": {
+      "fold0_seed13": 0.9868,
+      "fold0_seed42": 0.9611,
+      "fold1_seed13": 0.9667,
+      "fold1_seed42": 0.9466,
+      "fold2_seed13": 0.9797,
+      "fold2_seed42": 0.9912,
+      "fold3_seed13": 0.9779,
+      "fold3_seed42": 0.9111,
+      "fold4_seed13": 0.9565,
+      "fold4_seed42": 0.911
+    },
+    "bros_f1_run_min": 0.911,
+    "bros_f1_run_max": 0.9912,
+    "bros_f1_run_std": 0.0272
+  }
+}
