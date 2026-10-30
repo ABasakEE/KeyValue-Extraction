@@ -31,7 +31,7 @@ Conventions:
 | 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
 | 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
-| 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | registered 2026-10-30 | *pending (Kaggle run)* |
+| 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
 
 ---
 
@@ -577,6 +577,60 @@ still beat BROS on unseen templates when the dataset, schema and layout style al
 saturate, leaving the router little to gain; BROS sees block-level boxes only; five folds of ten templates give a
 coarser fold structure than VRDU's leave-one-template-out.
 
-**Results:** *pending*
+**Run:** 10 BROS runs (~390 s each) and 1,000 VLM pages (~38 s/page averaged over templates), 0 errors; 28
+extraction and 175 naming outputs hit their token limits. The Kaggle push worked. Scores below are from a local
+re-score (see "Process notes").
 
-**Evidence:** `results/fatura_v1/` (after the run).
+**Validity:**
+- BROS on the confirm invoices vs all 2,000 held-out invoices: 99.6–100% vs 99.50–99.98% for all 10 runs. The
+  interval is degenerate (collapses to 100%) because BROS is saturated, so the "inside interval" flag is
+  uninformative here.
+- The BROS dump's gold equals the loader's gold on all 2,000 documents (an order-sensitive comparison in my check
+  first reported 2,000 mismatches; the dump lists spans sorted by field, the loader in reading order; fixed).
+- VLM dev vs confirm F1 agree per fold (68.9/68.4, 66.0/62.8, 58.3/58.3, 51.6/54.1, 52.9/53.0).
+
+**Results (exact block-span micro F1, 500 confirm invoices; Δ = system − BROS, template-bootstrap 95% CI):**
+
+| System | Pooled F1 | Δ vs BROS [95% CI] |
+|---|---|---|
+| **BROS** (mean of 2 seeds) | **99.9** | — |
+| **Router** | 99.9 | **+0.0** [0.0, 0.0] |
+| Oracle (ceiling) | 99.9 | +0.0 [0.0, +0.1] |
+| Fill-in | 97.6 | **−2.2** [−3.3, −1.3] |
+| VLM alone (`vlm_both` / key / named) | 59.6 / 56.4 / 51.9 | −41 / −43 / −48 (all CIs below −36) |
+
+Per fold: BROS 100.0 / 99.9 / 99.9 / 99.7 / 99.8; VLM `vlm_both` 68.4 / 62.8 / 58.3 / 54.1 / 53.0.
+In every fold the router sent **no field to the VLM** (BROS had the higher pooled F1 on the other folds for all 9).
+
+**Per field (pooled F1, BROS vs VLM):** date 100.0 vs 85.0, sub_total 100.0 vs 85.1, due_date 100.0 vs 76.8,
+total 99.9 vs 68.2, seller_address 100.0 vs 66.5, buyer 99.1 vs 54.3, number 100.0 vs 42.5, seller_name 99.6 vs 14.2,
+title 100.0 vs 0.0.
+
+**Verdict under the registered rule: not passed** (pooled gain 0.0, interval [0.0, 0.0]; no fold significantly worse).
+
+**Interpretation:**
+- **A ceiling effect, as registered as a risk:** at 200 training invoices from 40 seen templates, BROS has no
+  template-shift problem on FATURA (99.9% on unseen templates, against 58–85% on VRDU registration templates).
+  The oracle shows nothing can be gained, so the experiment cannot confirm or refute the hybrid's value on a new
+  schema. It is not evidence against it.
+- **The router did no harm.** Fitted on other folds' invoices it learned that BROS beats the VLM on every field and
+  reduced to BROS exactly. The naive fill-in lost 2.2 F1 (significant in all five folds): when BROS predicts
+  nothing for a field it is usually because that template has no such block, and the VLM then fills a false one.
+- **Why the VLM scores low (diagnostic, not a registered test):** it reads the content (91–97% of the gold block's
+  words appear in its raw output for date, totals, number, due date, address) but the key-value formulation has no
+  slot for blocks without a label: `title` 0.0 and `seller_name` 14.2 (only 26% of its words reach the extracted
+  pairs; in the inspected example the company name is never output). Exact whole-block matching is also strict.
+  A block-oriented prompt was not tested.
+- **Generality of studies 10–12:** the VRDU hybrid gain applies where the trained model has a real template gap.
+  Where it has none, the learned router degrades safely to the trained model.
+
+**Process notes:** VLM-only scores differ by ≤ 0.32 points between the Kaggle scoring and the local re-score (sentence
+embeddings on GPU vs CPU flip a few near-ties); router, fill-in, oracle, BROS numbers and the verdict are identical.
+The committed `eval.json` is the local re-score.
+
+**Next (not run):** make BROS data-starved so a template gap appears (few invoices and/or few seen templates) and
+re-use the existing VLM outputs, so only cheap BROS runs are needed; a block-oriented VLM prompt; a dataset with real
+scans (FATURA is synthetic).
+
+**Evidence:** `results/fatura_v1/` (`eval.json`, `spans.jsonl`, `manifest.json`, raw VLM outputs, BROS runs and span
+dumps); notebook `notebooks/kaggle_fatura_hybrid.ipynb`.

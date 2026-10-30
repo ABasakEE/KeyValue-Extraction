@@ -148,6 +148,11 @@ def vlm_records(docs: dict, manifest: list[dict], rows: dict, desc: dict, embed)
     return recs, {"documents_incomplete": miss}
 
 
+def same_spans(a: list, b: list) -> bool:
+    """The BROS dump lists spans sorted by field, the loader in reading order: compare as sets of spans."""
+    return sorted(map(tuple, a)) == sorted(map(tuple, b))
+
+
 def attach_bros(recs: list[dict], docs: dict, bros_dir: Path) -> dict:
     """Adds bros_seed<s> spans to each record; returns alignment and full-test-set reference numbers."""
     info = {"gold_alignment_mismatches": 0, "bros_missing": 0, "full_test_f1": {}}
@@ -165,7 +170,7 @@ def attach_bros(recs: list[dict], docs: dict, bros_dir: Path) -> dict:
             if row is None:
                 info["bros_missing"] += 1
                 continue
-            info["gold_alignment_mismatches"] += row["gold"] != docs[r["guid"]]["gold"]
+            info["gold_alignment_mismatches"] += not same_spans(row["gold"], docs[r["guid"]]["gold"])
             r[f"bros_seed{s}"] = row["pred"]
     return info
 
@@ -277,6 +282,8 @@ def _selftest() -> None:
     v = verdict({"fold0": {"router": {"minus_bros_template_ci95": [-0.01, 0.04]}}}, {"router": {"minus_bros_template_ci95": [0.01, 0.05]}})
     assert v["passes"]
     assert not verdict({"fold0": {"router": {"minus_bros_template_ci95": [-0.05, -0.01]}}}, {"router": {"minus_bros_template_ci95": [0.01, 0.05]}})["passes"]
+    assert same_spans([["a", 0, 2, "x"], ["b", 3, 4, "y"]], [["b", 3, 4, "y"], ["a", 0, 2, "x"]])
+    assert not same_spans([["a", 0, 2, "x"]], [["a", 0, 3, "x"]])
     m = build_manifest(Path("/x"), 20, 1)
     assert len(m) == 1000 and Counter(d["split"] for d in m) == {"dev": 500, "confirm": 500}
     assert Counter(d["fold"] for d in m) == {f: 200 for f in range(5)} and len({d["doc_id"] for d in m}) == 1000
