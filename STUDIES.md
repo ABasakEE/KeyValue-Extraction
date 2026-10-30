@@ -31,6 +31,7 @@ Conventions:
 | 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
 | 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
+| 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | registered 2026-10-30 | *pending (Kaggle run)* |
 
 ---
 
@@ -537,3 +538,45 @@ schema, with far more templates (50) than VRDU registration (3), which would als
 restrict to the 9 core fields; BROS sees block-level boxes (a coarser layout signal than VRDU).
 
 **Evidence:** `results/fatura_audit/summary.json`; `scripts/audit_fatura.py`.
+
+---
+
+## 14. BROS + zero-shot VLM hybrid on a new dataset: FATURA, held-out template folds — GPU (Kaggle T4 × 2), registered 2026-10-30
+
+**Question:** does the study 10–12 hybrid (a per-field router between template-trained BROS and a zero-shot VLM)
+still beat BROS on unseen templates when the dataset, schema and layout style all change?
+
+**Setup (registered before running; code in `src/data/fatura_loader.py`, `scripts/fatura_bros.py`,
+`scripts/fatura_eval.py`; notebook `notebooks/kaggle_fatura_hybrid.ipynb`; dataset audit in study 13):**
+- **Data:** FATURA, 50 templates × 200 invoices. Tokens rebuilt from `Original_Format` (words of each text block
+  share the block's box; verified against the independent HF files on 2,734 blocks); 9 core fields present in ≥ 29
+  templates: buyer, date, due_date, number, seller_address, seller_name, sub_total, title, total.
+- **Folds:** 5 × 10 templates. Fold 0 = the dataset's official unseen-template test set (templates 2, 4, 7, 10, 12,
+  25, 32, 39, 49, 50); folds 1–4 = the other 40 templates shuffled with seed 0.
+- **BROS (trained):** Track-1 recipe unchanged (`configs/fatura_bros.yaml`). Per fold and seed (13, 42): 200 training
+  invoices spread evenly over the 40 seen templates, 50 validation invoices from the same seen templates (disjoint),
+  test on all 2,000 invoices of the 10 held-out templates. 10 runs. No held-out-template invoice is ever used.
+- **VLM (zero-shot, frozen from study 7):** same extraction and per-pair naming prompts and code, schema
+  descriptions written by the model from the 9 field names alone, one answer per field, mode-free `vlm_both`
+  mapping. 20 invoices per template (seed 1) = 1,000 pages: 10 *dev* (debugging the new block-level scoring only)
+  and 10 *confirm* (all claims) per template.
+- **Block-level scoring (new for this dataset, since gold blocks include their label):** a VLM value is grounded to
+  words (exact match, else fuzzy ≥ 0.5 token F1) and then to the whole text block containing it; one field per
+  block (higher similarity wins). Metric: exact block-span micro F1. BROS spans are scored as emitted.
+- **Router:** per field, BROS or `vlm_both`, whichever has the higher pooled F1 on the *other four folds'* invoices
+  (dev and confirm); applied to the held-out fold's confirm invoices. Also fill-in (BROS + VLM blocks for fields BROS
+  left empty), the oracle ceiling, and the VLM alone.
+- **Intervals:** the primary interval resamples *templates* (clusters of 10 per fold, 50 pooled); invoice-level
+  intervals are reported alongside for comparison with studies 8–12.
+- **Pass (registered):** pooled router − BROS (mean of the two seeds) has a 95% template-bootstrap interval above 0,
+  and no fold's interval lies entirely below 0.
+- **Validity checks:** BROS's F1 on the confirm invoices vs its F1 on all 2,000 held-out invoices; BROS dump gold
+  equals the loader gold; VLM dev vs confirm F1.
+
+**Known risks stated up front:** FATURA is synthetic (generated values, clean rendering), so BROS and/or the VLM may
+saturate, leaving the router little to gain; BROS sees block-level boxes only; five folds of ten templates give a
+coarser fold structure than VRDU's leave-one-template-out.
+
+**Results:** *pending*
+
+**Evidence:** `results/fatura_v1/` (after the run).

@@ -1,0 +1,23 @@
+# Track-1 BROS recipe (unchanged from configs/vrdu_track1_bros.yaml) applied to FATURA fold training.
+# Used by scripts/fatura_bros.py; the fold/seed loop and the sampling live there.
+backbone: bros
+dataset: fatura
+data_root: data/fatura/raw/invoices_dataset_final
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13, 42]
+n_train: 200
+save_weights: false
+output_dir: results/fatura_v1/bros

@@ -443,8 +443,9 @@ def cmd_prepare(args) -> None:
 def cmd_describe_schema(args) -> None:
     gen = VLM(args.model, args.device, args.dtype, args.max_pixels)
     out = {}
-    for ds in ("registration-form", "ad-buy-form"):
-        fields = schema_fields(ds)
+    fields_by_ds = (json.loads(Path(args.fields_file).read_text(encoding="utf-8")) if args.fields_file
+                    else {ds: schema_fields(ds) for ds in ("registration-form", "ad-buy-form")})
+    for ds, fields in fields_by_ds.items():
         if not fields:
             continue  # no known schema for this dataset: nothing to describe
         out[ds] = {}
@@ -626,6 +627,8 @@ def main() -> None:
         p.add_argument("--dtype", default="float16")
         p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28)
         p.add_argument("--out", required=True)
+        if name == "describe-schema":
+            p.add_argument("--fields-file", default=None, help='JSON {"dataset": [field names]} instead of the VRDU schemas')
         if name == "run":
             p.add_argument("--manifest", required=True)
             p.add_argument("--max-new-tokens", type=int, default=2048)
