@@ -1,0 +1,105 @@
+{
+  "test": {
+    "precision": 0.9947,
+    "recall": 0.9975,
+    "f1": 0.9961,
+    "support": 118186,
+    "truncated_words": 0,
+    "per_type": {
+      "buyer": {
+        "precision": 0.9964,
+        "recall": 0.9757,
+        "f1": 0.9859,
+        "support": 1400
+      },
+      "date": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2000
+      },
+      "due_date": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1000
+      },
+      "number": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 2000
+      },
+      "seller_address": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1600
+      },
+      "seller_name": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1400
+      },
+      "sub_total": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1400
+      },
+      "title": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "support": 1800
+      },
+      "total": {
+        "precision": 0.9456,
+        "recall": 1.0,
+        "f1": 0.9721,
+        "support": 1200
+      }
+    }
+  },
+  "best_val_f1": 1.0,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.1555,
+      "val_f1": 0.1823
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.707,
+      "val_f1": 0.9493
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1276,
+      "val_f1": 1.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0201,
+      "val_f1": 1.0
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0147,
+      "val_f1": 1.0
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0114,
+      "val_f1": 1.0
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 41,
+    "total_i_tags": 52094,
+    "rate": 0.0008
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9961 == independent F1=0.9961 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9946 (spread 0.0015)\n  malformed I- tags: 41/52094 (0.1%)",
+  "peak_gpu_mem_gb": 7.86
+}

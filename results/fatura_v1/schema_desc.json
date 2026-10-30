@@ -1,0 +1,13 @@
+{
+  "fatura": {
+    "buyer": "The field 'buyer' holds the name or identifier of the person or entity making the purchase.",
+    "date": "The 'date' field holds the date when the transaction or event occurred.",
+    "due_date": "The 'due_date' field holds the date by which the transaction or service is expected to be completed or paid for.",
+    "number": "The field 'number' holds the unique identifier or reference number for the transaction.",
+    "seller_address": "The seller's address is recorded in the 'seller_address' field of the document.",
+    "seller_name": "The seller's name as provided in the document.",
+    "sub_total": "The 'sub_total' field holds the subtotal amount of a transaction.",
+    "title": "The field 'title' holds the title of the document being processed.",
+    "total": "The field 'total' holds the final amount or sum of all items in the document."
+  }
+}

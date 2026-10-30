@@ -1,0 +1,1238 @@
+{
+  "rules": "(STUDIES.md study 14), all inherited from studies 8-12 except where noted:\n* VLM: frozen v2 pipeline; one answer per field; `vlm_both` (key + named candidates pooled, best similarity wins).\n* Grounding (new, block-level): value -> first exact word match (else fuzzy >= 0.5 token F1) -> the whole text block\n  containing it; a block can hold one field (higher similarity wins). Gold = blocks of the 9 core fields.\n* Metric: exact block-span micro F1 (a predicted span counts only if it equals a gold block).\n* Router: per field, BROS or `vlm_both`, whichever has the higher pooled F1 on the other folds' documents (dev and\n  confirm); applied to the held-out fold's confirm documents only. Fill-in: BROS + VLM blocks for fields BROS left empty.\n* Primary interval: cluster bootstrap over templates (resample templates, keep all their documents), 1000 draws.\n  Document-level intervals are reported as well. Dev documents are for debugging only; claims use confirm documents.\n* Pass: pooled router - BROS (mean of the two BROS seeds) has a 95% interval above 0, and no fold's interval lies\n  entirely below 0.",
+  "documents": {
+    "manifest": 1000,
+    "scored": 1000,
+    "documents_incomplete": 0
+  },
+  "run_stats": {
+    "Template49": {
+      "pages": 20,
+      "extract_truncated": 2,
+      "naming_truncated": 2,
+      "errors": 0,
+      "pairs": 529,
+      "items": 645,
+      "mean_seconds_per_page": 46.5
+    },
+    "Template23": {
+      "pages": 20,
+      "extract_truncated": 2,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 344,
+      "items": 362,
+      "mean_seconds_per_page": 36.0
+    },
+    "Template1": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 447,
+      "items": 565,
+      "mean_seconds_per_page": 42.8
+    },
+    "Template6": {
+      "pages": 20,
+      "extract_truncated": 1,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 452,
+      "items": 539,
+      "mean_seconds_per_page": 40.9
+    },
+    "Template12": {
+      "pages": 20,
+      "extract_truncated": 1,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 683,
+      "items": 768,
+      "mean_seconds_per_page": 57.6
+    },
+    "Template25": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 479,
+      "items": 601,
+      "mean_seconds_per_page": 36.7
+    },
+    "Template17": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 8,
+      "errors": 0,
+      "pairs": 127,
+      "items": 199,
+      "mean_seconds_per_page": 32.6
+    },
+    "Template4": {
+      "pages": 20,
+      "extract_truncated": 3,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 507,
+      "items": 691,
+      "mean_seconds_per_page": 48.6
+    },
+    "Template36": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 326,
+      "items": 419,
+      "mean_seconds_per_page": 30.8
+    },
+    "Template9": {
+      "pages": 20,
+      "extract_truncated": 3,
+      "naming_truncated": 2,
+      "errors": 0,
+      "pairs": 321,
+      "items": 353,
+      "mean_seconds_per_page": 39.3
+    },
+    "Template15": {
+      "pages": 20,
+      "extract_truncated": 2,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 408,
+      "items": 472,
+      "mean_seconds_per_page": 41.9
+    },
+    "Template48": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 485,
+      "items": 536,
+      "mean_seconds_per_page": 46.9
+    },
+    "Template24": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 433,
+      "items": 477,
+      "mean_seconds_per_page": 36.2
+    },
+    "Template32": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 2,
+      "errors": 0,
+      "pairs": 476,
+      "items": 517,
+      "mean_seconds_per_page": 38.2
+    },
+    "Template50": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 498,
+      "items": 603,
+      "mean_seconds_per_page": 42.1
+    },
+    "Template16": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 299,
+      "items": 329,
+      "mean_seconds_per_page": 32.8
+    },
+    "Template22": {
+      "pages": 20,
+      "extract_truncated": 2,
+      "naming_truncated": 16,
+      "errors": 0,
+      "pairs": 384,
+      "items": 569,
+      "mean_seconds_per_page": 41.7
+    },
+    "Template37": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 272,
+      "items": 364,
+      "mean_seconds_per_page": 32.8
+    },
+    "Template30": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 18,
+      "errors": 0,
+      "pairs": 271,
+      "items": 372,
+      "mean_seconds_per_page": 33.1
+    },
+    "Template29": {
+      "pages": 20,
+      "extract_truncated": 2,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 598,
+      "items": 714,
+      "mean_seconds_per_page": 57.5
+    },
+    "Template35": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 394,
+      "items": 443,
+      "mean_seconds_per_page": 38.7
+    },
+    "Template11": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 280,
+      "items": 314,
+      "mean_seconds_per_page": 27.3
+    },
+    "Template2": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 283,
+      "items": 361,
+      "mean_seconds_per_page": 31.2
+    },
+    "Template41": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 2,
+      "errors": 0,
+      "pairs": 386,
+      "items": 455,
+      "mean_seconds_per_page": 35.9
+    },
+    "Template42": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 128,
+      "items": 175,
+      "mean_seconds_per_page": 29.1
+    },
+    "Template47": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 17,
+      "errors": 0,
+      "pairs": 314,
+      "items": 423,
+      "mean_seconds_per_page": 31.4
+    },
+    "Template7": {
+      "pages": 20,
+      "extract_truncated": 1,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 231,
+      "items": 255,
+      "mean_seconds_per_page": 23.2
+    },
+    "Template44": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 208,
+      "items": 220,
+      "mean_seconds_per_page": 26.7
+    },
+    "Template5": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 511,
+      "items": 577,
+      "mean_seconds_per_page": 42.0
+    },
+    "Template31": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 474,
+      "items": 533,
+      "mean_seconds_per_page": 36.4
+    },
+    "Template43": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 459,
+      "items": 514,
+      "mean_seconds_per_page": 41.2
+    },
+    "Template3": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 511,
+      "items": 565,
+      "mean_seconds_per_page": 40.3
+    },
+    "Template27": {
+      "pages": 20,
+      "extract_truncated": 5,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 895,
+      "items": 956,
+      "mean_seconds_per_page": 58.4
+    },
+    "Template8": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 7,
+      "errors": 0,
+      "pairs": 416,
+      "items": 485,
+      "mean_seconds_per_page": 36.6
+    },
+    "Template20": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 353,
+      "items": 384,
+      "mean_seconds_per_page": 28.7
+    },
+    "Template26": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 15,
+      "errors": 0,
+      "pairs": 189,
+      "items": 309,
+      "mean_seconds_per_page": 27.4
+    },
+    "Template38": {
+      "pages": 20,
+      "extract_truncated": 1,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 467,
+      "items": 559,
+      "mean_seconds_per_page": 47.1
+    },
+    "Template19": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 348,
+      "items": 383,
+      "mean_seconds_per_page": 26.7
+    },
+    "Template28": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 422,
+      "items": 517,
+      "mean_seconds_per_page": 38.6
+    },
+    "Template45": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 6,
+      "errors": 0,
+      "pairs": 346,
+      "items": 429,
+      "mean_seconds_per_page": 33.9
+    },
+    "Template46": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 11,
+      "errors": 0,
+      "pairs": 442,
+      "items": 540,
+      "mean_seconds_per_page": 48.2
+    },
+    "Template10": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 1,
+      "errors": 0,
+      "pairs": 353,
+      "items": 467,
+      "mean_seconds_per_page": 39.9
+    },
+    "Template39": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 3,
+      "errors": 0,
+      "pairs": 304,
+      "items": 395,
+      "mean_seconds_per_page": 37.1
+    },
+    "Template21": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 8,
+      "errors": 0,
+      "pairs": 195,
+      "items": 260,
+      "mean_seconds_per_page": 31.0
+    },
+    "Template13": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 417,
+      "items": 456,
+      "mean_seconds_per_page": 36.4
+    },
+    "Template14": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 0,
+      "errors": 0,
+      "pairs": 291,
+      "items": 322,
+      "mean_seconds_per_page": 34.3
+    },
+    "Template33": {
+      "pages": 20,
+      "extract_truncated": 3,
+      "naming_truncated": 8,
+      "errors": 0,
+      "pairs": 110,
+      "items": 181,
+      "mean_seconds_per_page": 38.5
+    },
+    "Template18": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 10,
+      "errors": 0,
+      "pairs": 256,
+      "items": 394,
+      "mean_seconds_per_page": 33.1
+    },
+    "Template34": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 10,
+      "errors": 0,
+      "pairs": 191,
+      "items": 291,
+      "mean_seconds_per_page": 31.0
+    },
+    "Template40": {
+      "pages": 20,
+      "extract_truncated": 0,
+      "naming_truncated": 20,
+      "errors": 0,
+      "pairs": 273,
+      "items": 431,
+      "mean_seconds_per_page": 35.0
+    }
+  },
+  "validity": {
+    "gold_alignment_mismatches": 2000,
+    "bros_missing": 0,
+    "per_fold": {
+      "fold0": {
+        "bros_seed13": {
+          "confirm_f1": 1.0,
+          "confirm_ci95": [
+            1.0,
+            1.0
+          ],
+          "full_test_f1": 0.9994,
+          "full_test_inside_ci": false
+        },
+        "bros_seed42": {
+          "confirm_f1": 1.0,
+          "confirm_ci95": [
+            1.0,
+            1.0
+          ],
+          "full_test_f1": 0.9996,
+          "full_test_inside_ci": false
+        },
+        "vlm_both_dev_f1": 0.6889,
+        "vlm_both_confirm_f1": 0.6869
+      },
+      "fold1": {
+        "bros_seed13": {
+          "confirm_f1": 0.9984,
+          "confirm_ci95": [
+            0.9947,
+            1.0
+          ],
+          "full_test_f1": 0.9965,
+          "full_test_inside_ci": true
+        },
+        "bros_seed42": {
+          "confirm_f1": 1.0,
+          "confirm_ci95": [
+            1.0,
+            1.0
+          ],
+          "full_test_f1": 0.9987,
+          "full_test_inside_ci": false
+        },
+        "vlm_both_dev_f1": 0.6604,
+        "vlm_both_confirm_f1": 0.6276
+      },
+      "fold2": {
+        "bros_seed13": {
+          "confirm_f1": 0.9984,
+          "confirm_ci95": [
+            0.9949,
+            1.0
+          ],
+          "full_test_f1": 0.9984,
+          "full_test_inside_ci": true
+        },
+        "bros_seed42": {
+          "confirm_f1": 1.0,
+          "confirm_ci95": [
+            1.0,
+            1.0
+          ],
+          "full_test_f1": 0.9998,
+          "full_test_inside_ci": false
+        },
+        "vlm_both_dev_f1": 0.5826,
+        "vlm_both_confirm_f1": 0.5844
+      },
+      "fold3": {
+        "bros_seed13": {
+          "confirm_f1": 0.9978,
+          "confirm_ci95": [
+            0.9947,
+            1.0
+          ],
+          "full_test_f1": 0.9961,
+          "full_test_inside_ci": true
+        },
+        "bros_seed42": {
+          "confirm_f1": 0.9956,
+          "confirm_ci95": [
+            0.987,
+            1.0
+          ],
+          "full_test_f1": 0.995,
+          "full_test_inside_ci": true
+        },
+        "vlm_both_dev_f1": 0.5152,
+        "vlm_both_confirm_f1": 0.5404
+      },
+      "fold4": {
+        "bros_seed13": {
+          "confirm_f1": 0.9956,
+          "confirm_ci95": [
+            0.9862,
+            1.0
+          ],
+          "full_test_f1": 0.9969,
+          "full_test_inside_ci": true
+        },
+        "bros_seed42": {
+          "confirm_f1": 1.0,
+          "confirm_ci95": [
+            1.0,
+            1.0
+          ],
+          "full_test_f1": 0.9996,
+          "full_test_inside_ci": false
+        },
+        "vlm_both_dev_f1": 0.5295,
+        "vlm_both_confirm_f1": 0.53
+      }
+    }
+  },
+  "by_fold": {
+    "fold0": {
+      "n_docs": 100,
+      "router": {
+        "f1": 1.0,
+        "bros_f1": 1.0,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "fill_in": {
+        "f1": 0.9901,
+        "bros_f1": 1.0,
+        "minus_bros": -0.0099,
+        "minus_bros_template_ci95": [
+          -0.0231,
+          -0.0018
+        ],
+        "minus_bros_document_ci95": [
+          -0.0146,
+          -0.0059
+        ]
+      },
+      "oracle": {
+        "f1": 1.0,
+        "bros_f1": 1.0,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "vlm_key": {
+        "f1": 0.6584,
+        "bros_f1": 1.0,
+        "minus_bros": -0.3416,
+        "minus_bros_template_ci95": [
+          -0.4076,
+          -0.2822
+        ],
+        "minus_bros_document_ci95": [
+          -0.3757,
+          -0.3063
+        ]
+      },
+      "vlm_named": {
+        "f1": 0.5987,
+        "bros_f1": 1.0,
+        "minus_bros": -0.4013,
+        "minus_bros_template_ci95": [
+          -0.4681,
+          -0.3413
+        ],
+        "minus_bros_document_ci95": [
+          -0.4401,
+          -0.3642
+        ]
+      },
+      "vlm_both": {
+        "f1": 0.6869,
+        "bros_f1": 1.0,
+        "minus_bros": -0.3131,
+        "minus_bros_template_ci95": [
+          -0.3782,
+          -0.2573
+        ],
+        "minus_bros_document_ci95": [
+          -0.3493,
+          -0.2755
+        ]
+      }
+    },
+    "fold1": {
+      "n_docs": 100,
+      "router": {
+        "f1": 0.9992,
+        "bros_f1": 0.9992,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "fill_in": {
+        "f1": 0.9574,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.0418,
+        "minus_bros_template_ci95": [
+          -0.0727,
+          -0.0159
+        ],
+        "minus_bros_document_ci95": [
+          -0.052,
+          -0.0319
+        ]
+      },
+      "oracle": {
+        "f1": 0.9992,
+        "bros_f1": 0.9992,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "vlm_key": {
+        "f1": 0.5978,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.4014,
+        "minus_bros_template_ci95": [
+          -0.4678,
+          -0.3337
+        ],
+        "minus_bros_document_ci95": [
+          -0.4474,
+          -0.3593
+        ]
+      },
+      "vlm_named": {
+        "f1": 0.5167,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.4825,
+        "minus_bros_template_ci95": [
+          -0.5475,
+          -0.4264
+        ],
+        "minus_bros_document_ci95": [
+          -0.5229,
+          -0.4445
+        ]
+      },
+      "vlm_both": {
+        "f1": 0.6276,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.3716,
+        "minus_bros_template_ci95": [
+          -0.4313,
+          -0.3192
+        ],
+        "minus_bros_document_ci95": [
+          -0.4117,
+          -0.3327
+        ]
+      }
+    },
+    "fold2": {
+      "n_docs": 100,
+      "router": {
+        "f1": 0.9992,
+        "bros_f1": 0.9992,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "fill_in": {
+        "f1": 0.9722,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.027,
+        "minus_bros_template_ci95": [
+          -0.0597,
+          -0.0043
+        ],
+        "minus_bros_document_ci95": [
+          -0.0372,
+          -0.0169
+        ]
+      },
+      "oracle": {
+        "f1": 0.9996,
+        "bros_f1": 0.9992,
+        "minus_bros": 0.0004,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0013
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0012
+        ]
+      },
+      "vlm_key": {
+        "f1": 0.5735,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.4257,
+        "minus_bros_template_ci95": [
+          -0.5015,
+          -0.3671
+        ],
+        "minus_bros_document_ci95": [
+          -0.4762,
+          -0.3819
+        ]
+      },
+      "vlm_named": {
+        "f1": 0.5091,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.4901,
+        "minus_bros_template_ci95": [
+          -0.5337,
+          -0.4505
+        ],
+        "minus_bros_document_ci95": [
+          -0.535,
+          -0.4504
+        ]
+      },
+      "vlm_both": {
+        "f1": 0.5844,
+        "bros_f1": 0.9992,
+        "minus_bros": -0.4148,
+        "minus_bros_template_ci95": [
+          -0.4703,
+          -0.3648
+        ],
+        "minus_bros_document_ci95": [
+          -0.4599,
+          -0.3757
+        ]
+      }
+    },
+    "fold3": {
+      "n_docs": 100,
+      "router": {
+        "f1": 0.9967,
+        "bros_f1": 0.9967,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "fill_in": {
+        "f1": 0.9801,
+        "bros_f1": 0.9967,
+        "minus_bros": -0.0166,
+        "minus_bros_template_ci95": [
+          -0.0415,
+          -0.0009
+        ],
+        "minus_bros_document_ci95": [
+          -0.0259,
+          -0.0085
+        ]
+      },
+      "oracle": {
+        "f1": 0.9978,
+        "bros_f1": 0.9967,
+        "minus_bros": 0.0011,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0033
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0025
+        ]
+      },
+      "vlm_key": {
+        "f1": 0.5059,
+        "bros_f1": 0.9967,
+        "minus_bros": -0.4908,
+        "minus_bros_template_ci95": [
+          -0.6193,
+          -0.3859
+        ],
+        "minus_bros_document_ci95": [
+          -0.5429,
+          -0.4367
+        ]
+      },
+      "vlm_named": {
+        "f1": 0.4764,
+        "bros_f1": 0.9967,
+        "minus_bros": -0.5203,
+        "minus_bros_template_ci95": [
+          -0.652,
+          -0.4122
+        ],
+        "minus_bros_document_ci95": [
+          -0.5765,
+          -0.4651
+        ]
+      },
+      "vlm_both": {
+        "f1": 0.5404,
+        "bros_f1": 0.9967,
+        "minus_bros": -0.4563,
+        "minus_bros_template_ci95": [
+          -0.5833,
+          -0.3533
+        ],
+        "minus_bros_document_ci95": [
+          -0.5102,
+          -0.4017
+        ]
+      }
+    },
+    "fold4": {
+      "n_docs": 100,
+      "router": {
+        "f1": 0.9978,
+        "bros_f1": 0.9978,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "fill_in": {
+        "f1": 0.9779,
+        "bros_f1": 0.9978,
+        "minus_bros": -0.0199,
+        "minus_bros_template_ci95": [
+          -0.0469,
+          -0.0033
+        ],
+        "minus_bros_document_ci95": [
+          -0.0286,
+          -0.0121
+        ]
+      },
+      "oracle": {
+        "f1": 0.9978,
+        "bros_f1": 0.9978,
+        "minus_bros": 0.0,
+        "minus_bros_template_ci95": [
+          0.0,
+          0.0
+        ],
+        "minus_bros_document_ci95": [
+          0.0,
+          0.0
+        ]
+      },
+      "vlm_key": {
+        "f1": 0.4712,
+        "bros_f1": 0.9978,
+        "minus_bros": -0.5266,
+        "minus_bros_template_ci95": [
+          -0.6649,
+          -0.396
+        ],
+        "minus_bros_document_ci95": [
+          -0.5889,
+          -0.4709
+        ]
+      },
+      "vlm_named": {
+        "f1": 0.4809,
+        "bros_f1": 0.9978,
+        "minus_bros": -0.5169,
+        "minus_bros_template_ci95": [
+          -0.6285,
+          -0.4139
+        ],
+        "minus_bros_document_ci95": [
+          -0.5706,
+          -0.4709
+        ]
+      },
+      "vlm_both": {
+        "f1": 0.53,
+        "bros_f1": 0.9978,
+        "minus_bros": -0.4678,
+        "minus_bros_template_ci95": [
+          -0.5946,
+          -0.3449
+        ],
+        "minus_bros_document_ci95": [
+          -0.527,
+          -0.4153
+        ]
+      }
+    }
+  },
+  "pooled": {
+    "router": {
+      "f1": 0.9986,
+      "bros_f1": 0.9986,
+      "minus_bros": 0.0,
+      "minus_bros_template_ci95": [
+        0.0,
+        0.0
+      ],
+      "minus_bros_document_ci95": [
+        0.0,
+        0.0
+      ]
+    },
+    "fill_in": {
+      "f1": 0.9761,
+      "bros_f1": 0.9986,
+      "minus_bros": -0.0225,
+      "minus_bros_template_ci95": [
+        -0.0334,
+        -0.013
+      ],
+      "minus_bros_document_ci95": [
+        -0.0267,
+        -0.0187
+      ]
+    },
+    "oracle": {
+      "f1": 0.9989,
+      "bros_f1": 0.9986,
+      "minus_bros": 0.0003,
+      "minus_bros_template_ci95": [
+        0.0,
+        0.0008
+      ],
+      "minus_bros_document_ci95": [
+        0.0001,
+        0.0006
+      ]
+    },
+    "vlm_key": {
+      "f1": 0.5651,
+      "bros_f1": 0.9986,
+      "minus_bros": -0.4335,
+      "minus_bros_template_ci95": [
+        -0.4821,
+        -0.3911
+      ],
+      "minus_bros_document_ci95": [
+        -0.4568,
+        -0.413
+      ]
+    },
+    "vlm_named": {
+      "f1": 0.5193,
+      "bros_f1": 0.9986,
+      "minus_bros": -0.4793,
+      "minus_bros_template_ci95": [
+        -0.5202,
+        -0.4452
+      ],
+      "minus_bros_document_ci95": [
+        -0.5002,
+        -0.4584
+      ]
+    },
+    "vlm_both": {
+      "f1": 0.5972,
+      "bros_f1": 0.9986,
+      "minus_bros": -0.4014,
+      "minus_bros_template_ci95": [
+        -0.4444,
+        -0.3614
+      ],
+      "minus_bros_document_ci95": [
+        -0.4223,
+        -0.3803
+      ]
+    }
+  },
+  "per_field_f1": {
+    "buyer": {
+      "bros": 0.9911,
+      "router": 0.9911,
+      "vlm_both": 0.5442
+    },
+    "date": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.8498
+    },
+    "due_date": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.7678
+    },
+    "number": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.4282
+    },
+    "seller_address": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.6694
+    },
+    "seller_name": {
+      "bros": 0.9955,
+      "router": 0.9955,
+      "vlm_both": 0.1419
+    },
+    "sub_total": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.8487
+    },
+    "title": {
+      "bros": 1.0,
+      "router": 1.0,
+      "vlm_both": 0.0
+    },
+    "total": {
+      "bros": 0.9988,
+      "router": 0.9988,
+      "vlm_both": 0.6822
+    }
+  },
+  "router_tables": {
+    "fold0": {
+      "bros_seed13": {
+        "buyer": "bros_seed13",
+        "date": "bros_seed13",
+        "due_date": "bros_seed13",
+        "number": "bros_seed13",
+        "seller_address": "bros_seed13",
+        "seller_name": "bros_seed13",
+        "sub_total": "bros_seed13",
+        "title": "bros_seed13",
+        "total": "bros_seed13"
+      },
+      "bros_seed42": {
+        "buyer": "bros_seed42",
+        "date": "bros_seed42",
+        "due_date": "bros_seed42",
+        "number": "bros_seed42",
+        "seller_address": "bros_seed42",
+        "seller_name": "bros_seed42",
+        "sub_total": "bros_seed42",
+        "title": "bros_seed42",
+        "total": "bros_seed42"
+      }
+    },
+    "fold1": {
+      "bros_seed13": {
+        "buyer": "bros_seed13",
+        "date": "bros_seed13",
+        "due_date": "bros_seed13",
+        "number": "bros_seed13",
+        "seller_address": "bros_seed13",
+        "seller_name": "bros_seed13",
+        "sub_total": "bros_seed13",
+        "title": "bros_seed13",
+        "total": "bros_seed13"
+      },
+      "bros_seed42": {
+        "buyer": "bros_seed42",
+        "date": "bros_seed42",
+        "due_date": "bros_seed42",
+        "number": "bros_seed42",
+        "seller_address": "bros_seed42",
+        "seller_name": "bros_seed42",
+        "sub_total": "bros_seed42",
+        "title": "bros_seed42",
+        "total": "bros_seed42"
+      }
+    },
+    "fold2": {
+      "bros_seed13": {
+        "buyer": "bros_seed13",
+        "date": "bros_seed13",
+        "due_date": "bros_seed13",
+        "number": "bros_seed13",
+        "seller_address": "bros_seed13",
+        "seller_name": "bros_seed13",
+        "sub_total": "bros_seed13",
+        "title": "bros_seed13",
+        "total": "bros_seed13"
+      },
+      "bros_seed42": {
+        "buyer": "bros_seed42",
+        "date": "bros_seed42",
+        "due_date": "bros_seed42",
+        "number": "bros_seed42",
+        "seller_address": "bros_seed42",
+        "seller_name": "bros_seed42",
+        "sub_total": "bros_seed42",
+        "title": "bros_seed42",
+        "total": "bros_seed42"
+      }
+    },
+    "fold3": {
+      "bros_seed13": {
+        "buyer": "bros_seed13",
+        "date": "bros_seed13",
+        "due_date": "bros_seed13",
+        "number": "bros_seed13",
+        "seller_address": "bros_seed13",
+        "seller_name": "bros_seed13",
+        "sub_total": "bros_seed13",
+        "title": "bros_seed13",
+        "total": "bros_seed13"
+      },
+      "bros_seed42": {
+        "buyer": "bros_seed42",
+        "date": "bros_seed42",
+        "due_date": "bros_seed42",
+        "number": "bros_seed42",
+        "seller_address": "bros_seed42",
+        "seller_name": "bros_seed42",
+        "sub_total": "bros_seed42",
+        "title": "bros_seed42",
+        "total": "bros_seed42"
+      }
+    },
+    "fold4": {
+      "bros_seed13": {
+        "buyer": "bros_seed13",
+        "date": "bros_seed13",
+        "due_date": "bros_seed13",
+        "number": "bros_seed13",
+        "seller_address": "bros_seed13",
+        "seller_name": "bros_seed13",
+        "sub_total": "bros_seed13",
+        "title": "bros_seed13",
+        "total": "bros_seed13"
+      },
+      "bros_seed42": {
+        "buyer": "bros_seed42",
+        "date": "bros_seed42",
+        "due_date": "bros_seed42",
+        "number": "bros_seed42",
+        "seller_address": "bros_seed42",
+        "seller_name": "bros_seed42",
+        "sub_total": "bros_seed42",
+        "title": "bros_seed42",
+        "total": "bros_seed42"
+      }
+    }
+  },
+  "verdict": {
+    "pooled_gain_significant": false,
+    "no_fold_significantly_worse": true,
+    "passes": false
+  },
+  "n_confirm_docs": 500
+}
