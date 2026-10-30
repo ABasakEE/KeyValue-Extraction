@@ -29,7 +29,7 @@ Conventions:
 | 9 | Stage B: grounded, matched VLM vs BROS | CPU | 2026-10-29 | Under the strict matched metric BROS wins overall (~70 vs 61); errors are complementary: VLM wins role fields, BROS wins signature/date fields and span boundaries |
 | 10 | Hybrid feasibility (oracle, fill-in, cross-template router) | CPU | 2026-10-29 | Ceiling is large (oracle +16 F1) but neither pre-registered rule passes; the VLM key/named choice does not transfer across templates |
 | 11 | Mode-free VLM mapping + hybrids re-tested | CPU | 2026-10-29 | The cross-template router with the mode-free mapping passes: +3.9 F1 over BROS pooled, never significantly worse; needs confirmation on fresh documents |
-| 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-29 | *pending (Kaggle run)* |
+| 12 | Confirmation of the study-11 hybrid on fresh documents | GPU | 2026-10-30 | **Confirmed:** router beats BROS by +3.8 F1 [+2.6, +5.0] pooled (study 11: +3.9); almost all of it from `foreign_principle_name` |
 
 ---
 
@@ -424,7 +424,7 @@ division suggested by studies 9–10: the VLM for role/wording fields, BROS for 
 
 ---
 
-## 12. Confirmation of the study-11 hybrid on fresh documents — GPU (Kaggle T4 × 2), registered 2026-10-29
+## 12. Confirmation of the study-11 hybrid on fresh documents — GPU (Kaggle T4 × 2), run 2026-10-30
 
 **Question:** does the study-11 router (VLM for role fields, BROS for the rest; +3.9 F1 on the 300 documents it
 was chosen on) still beat Track-1 BROS on unseen-template documents never used before?
@@ -441,6 +441,53 @@ one-answer-per-field, the mode-free `vlm_both` mapping, the study-9 grounding, a
 Notebook `notebooks/kaggle_confirm_hybrid.ipynb`; scoring `scripts/confirm_eval.py` (a dry run on the old spans
 reproduces study 11 exactly).
 
-**Results:** *pending*
+**Run:** 609 page images, 300/300 documents complete, 0 errors, ~20–25 s/page. The Kaggle push failed
+(expired token); the output files were downloaded and everything below was re-checked locally.
 
-**Evidence:** `results/confirm_v2/` (after the run).
+**Validity (all passed):**
+- All 300 documents are new (0 overlap with the studies 6–11 sample); `confirm.json` recomputes identically from
+  the saved spans.
+- BROS on the fresh sample: F1 lies inside the fresh 95% interval of its full-test-set F1 for all 6 runs
+  (e.g. Dissemination 65.7 vs 65.8 and 73.5 vs 73.5), so the sample is representative.
+- VLM on the fresh sample overlaps the old sample's interval for all 9 (template × mode) cases
+  (e.g. Short-Form `vlm_both` 40.4 vs 41.6), so the pipeline behaved as in study 11.
+
+**Results (exact-span F1, mean of the two BROS seeds; Δ = router − BROS, paired bootstrap 95% CI):**
+
+| Template | BROS | Router (primary) | Δ primary | Δ secondary |
+|---|---|---|---|---|
+| Amendment | 85.2 | 84.1 | −1.0 [−2.7, +0.5] | −0.3 [−1.8, +1.3] |
+| Dissemination_Report | 69.6 | 75.9 | **+6.3** [+4.5, +8.0] | **+6.3** [+4.5, +8.0] |
+| Short-Form | 57.2 | 63.6 | **+6.4** [+4.1, +8.8] | **+6.4** [+4.1, +8.8] |
+| **Pooled (300 new docs)** | 70.5 | **74.3** | **+3.8** [+2.6, +5.0] | **+4.0** [+2.9, +5.2] |
+
+Study 11 on the original 300 documents: +3.9 [+2.8, +5.1]. **The effect replicated almost exactly.**
+
+**Verdict:** the pre-registered rule passes for both the primary (frozen tables) and the secondary (router
+re-fitted on the fresh other-template documents): pooled gain significant, no template significantly worse.
+
+**Where the gain comes from (pooled, primary router, exact-span F1):**
+
+| Field | BROS | Router | Δ |
+|---|---|---|---|
+| `foreign_principle_name` | 5.1 | 55.3 | **+50.2** |
+| `registrant_name` | 59.6 | 63.6 | +3.9 |
+| `registration_num` | 97.8 | 96.8 | −1.0 |
+| `file_date`, `signer_name`, `signer_title` | (BROS) | (BROS) | 0.0 |
+
+**Conclusions:**
+- **The hybrid is confirmed:** a per-field router learned on other templates, sending `foreign_principle_name`
+  and `registrant_name` to the zero-shot VLM and the other fields to template-trained BROS, beats BROS by about
+  +4 F1 on unseen templates, on documents not used to choose any rule.
+- **The gain is essentially one field.** `foreign_principle_name` goes from 5% to 55% (BROS almost never
+  predicts it); `registrant_name` adds only +3.9 (Short-Form registrant stays weak after grounding and
+  span-boundary mismatch, study 9). The gap to the study-10 oracle (+16) is mostly still open.
+- **The router is almost a two-field switch:** the re-fitted secondary tables equal the frozen primary tables in
+  5 of 6 fold × seed cases, so the secondary result shows the procedure is stable, but it is not an
+  independent test of a richer rule.
+
+**Limits:** the same 3 VRDU registration templates (new documents, not new templates); ad-buy and FUNSD not
+included; BROS is the N = 200 Track-1 model. The study-10 oracle ceiling was not re-measured on the fresh documents.
+
+**Evidence:** `results/confirm_v2/` (manifest, raw outputs, schema descriptions, grounded spans, `confirm.json`).
+Notebook `notebooks/kaggle_confirm_hybrid.ipynb`; scoring `scripts/confirm_eval.py`.
