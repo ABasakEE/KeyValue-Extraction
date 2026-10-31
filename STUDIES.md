@@ -38,6 +38,7 @@ Conventions:
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
 | 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | registered 2026-11-01 | *pending (CPU run on the legacy checkpoints; confirmation on the study-19 checkpoints when available)* |
+| 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | registered 2026-11-01 | *pending (Kaggle run)* |
 
 ---
 
@@ -912,3 +913,25 @@ Precision / recall, windowed inference, mean of 3 seeds: links base 41.2 / 46.0,
 **Results:** *pending*
 
 **Evidence:** `results/xfund_dedupe/` (after the run).
+
+---
+
+## 21. Step-matched control for windowed joint training — GPU (Kaggle T4 × 2), registered 2026-11-01
+
+**Question:** study 19 found that training on entity-aligned windows beats truncated training by +4.2 end-to-end link F1 (3/3 seeds) but flagged a confound: the windows arm saw 1,537 windows per epoch against 634 forms (2.42x; measured on the actual train split with the study-19 windowing) over the same 22 epochs, about 8,470 gradient steps against about 3,500. Is the gain better coverage of the long forms, or just more steps (and overlapping windows acting as augmentation)?
+
+**Control (`configs/xfund_joint_lilt_matched.yaml`, notebook `notebooks/kaggle_matched_steps.ipynb`):** the study-19 `base` recipe (truncated forms, 3-stage curriculum, batch 4) with the curriculum epoch caps raised from 8 / 6 / 8 to 19 / 15 / 19 (53 epochs of 159 steps, about 8,430 steps, within 1% of the windows arm). Seeds 13 / 21 / 42, same code, same end-to-end evaluation (`scripts/xfund_e2e_eval.py`). The study-19 `base` and `windows` results are read from the repo, not retrained. In study 19 both arms ran all 22 epochs (early stopping never fired); with longer schedules the control may stop early, and the epochs actually run are reported.
+
+**Registered criteria (primary cell: link F1, windowed inference, all 250 forms; seed-matched differences, study-19 windows minus control):**
+- *coverage matters*: mean delta >= +2.0 points and > 0 in every seed.
+- *steps explain it*: |mean delta| < 1.0 point, or the sign differs across seeds, or the control is ahead.
+- Descriptive: control minus study-19 base (what the extra steps alone buy); entity F1; single-window link F1; the sibling-free subset.
+- If the control matches or beats the windows arm, the study-19 claim "windows help" is withdrawn as a coverage claim and reduces to "longer training helps".
+
+**Checks done before the run:** the matched config differs from `xfund_joint_lilt.yaml` only in the epoch caps, `epochs` and `output_dir` (diffed); notebook cell 3 asserts the schedule and that the study-19 reference files exist; cells 5-6 executed locally against a fake control (windows minus a copy of base reproduced +4.2; control minus base = 0.0); the training and evaluation code paths are those smoke-tested in study 19.
+
+**Limits stated up front:** 3 seeds (no interval, only seed-matched deltas); the control and the study-19 arms are separate Kaggle runs; matching the number of steps does not match the number of distinct examples or the learning-rate schedule shape across phases; the control is the legacy-recipe feature set retrained with current code, as in study 19; LiLT, not BROS; training time unmeasured (about the same compute as the windows arm).
+
+**Results:** *pending*
+
+**Evidence:** `results/xfund_e2e_matched/` (after the run).
