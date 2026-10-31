@@ -1,0 +1,10 @@
+{
+  "base": {
+    "train_returncode": 0,
+    "eval_returncode": 0
+  },
+  "windows": {
+    "train_returncode": 0,
+    "eval_returncode": 0
+  }
+}
