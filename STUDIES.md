@@ -37,6 +37,7 @@ Conventions:
 | 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
+| 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | registered 2026-11-01 | *pending (CPU run on the legacy checkpoints; confirmation on the study-19 checkpoints when available)* |
 
 ---
 
@@ -883,3 +884,31 @@ Precision / recall, windowed inference, mean of 3 seeds: links base 41.2 / 46.0,
 **Limits:** 3 seeds, so only seed-matched deltas, no interval; the windows arm sees about 3x as many training examples per epoch (3.25x in the 16-form smoke sample; overlapping windows also act as augmentation) over the same 22 epochs, so "more gradient steps" is not separated from "better coverage"; LiLT, not BROS; link endpoints are matched on word range only; the edge-dropping rule is a heuristic and the cross-window duplicate hypothesis in finding 3 is not tested; the new checkpoints' weights were not pushed, so no gold-entity score exists for them; the legacy reference is one seed.
 
 **Evidence:** `results/xfund_e2e/{summary,base_e2e,windows_e2e,run_status}.json`, per-seed `base/` and `windows/`, `legacy_checkpoints.json` (seed 13).
+
+---
+
+## 20. Cross-window entity deduplication for end-to-end XFUND linking — CPU, registered 2026-11-01
+
+**Question:** study 19 found that windowed inference over-predicts entities (legacy seed 13: 15,707 predicted vs 13,007 gold, precision 67 at recall 81) and conjectured that the same entity is predicted with slightly different spans by overlapping windows, which exact-span scoring counts as wrong. Does collapsing those duplicates raise end-to-end link and entity F1?
+
+**Strategies (`merge_windows` in `src/e2e_link.py`; all use the same cached per-window model output, so only the merge differs; stride 128, windows of 510 tokens):**
+- `edge_drop` (baseline = the rule used so far): drop an entity touching a window edge that is not the document edge; keep everything else.
+- `center` (primary): drop nothing; same-type predictions that share a word form a cluster; the one furthest from its window edge represents it (ties: earliest window); links are remapped to the representative and self-links removed.
+- `edge_drop+center` (secondary): both.
+
+**Data and checkpoints:** XFUND val, 250 forms, the same gold as studies 17 and 19 (all annotated links; entities typed). Primary run: the three legacy checkpoints (`results/xfund_joint_lilt/seed_{13,21,42}`) on this machine. Confirmation, with the same criteria and no new variants: the six study-19 checkpoints once the Kaggle outputs are downloaded.
+
+**Registered criteria (primary cell: link F1, windowed inference, all forms, `center` minus `edge_drop`, seed-matched):**
+- *dedupe helps*: mean delta >= +1.0 point and >= 0 in every seed.
+- *no better*: mean delta < +0.5 point or a negative seed.
+- Descriptive: entity precision / recall / F1, number of predicted entities, `edge_drop+center`, the sibling-free subset.
+
+**Sanity check (must pass before reading anything else):** `edge_drop` on the cached output reproduces the earlier legacy seed-13 numbers in `results/xfund_e2e/legacy_checkpoints.json` (link F1 0.3857, entity F1 0.7347).
+
+**Checks done before the run:** model-free unit test of the three strategies on a synthetic two-window form (`tests/test_e2e_link.py::test_merge`), including that a single window is unaffected.
+
+**Limits stated up front:** the legacy checkpoints are not the study-19 models; clustering on shared words can merge two distinct gold entities that a fragment overlaps; the centrality rule is one heuristic among several (confidence-based choice needs probabilities the model code does not return); link endpoints are matched on word range; the dedupe conjecture is tested only through its effect on F1.
+
+**Results:** *pending*
+
+**Evidence:** `results/xfund_dedupe/` (after the run).

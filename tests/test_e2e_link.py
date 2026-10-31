@@ -15,12 +15,28 @@ for p in (str(ROOT / "src"), str(ROOT)):
 
 from data.xfund_loader import ID2LABEL, LABEL_LIST, load_xfund_split  # noqa: E402
 from data.xfund_windows import sub_example, window_examples, word_windows  # noqa: E402
-from e2e_link import gold_structure, link_entities, predict_document, predict_window  # noqa: E402
+from e2e_link import gold_structure, link_entities, merge_windows, predict_document, predict_window  # noqa: E402
 from models.joint_extractor import prepare_entity_batch  # noqa: E402
 from train import TrainConfig, build_model  # noqa: E402
 
 
+def test_merge() -> None:
+    """Two overlapping windows over a 100-word form; B sees the answer more centrally than A and A cuts the question."""
+    raw = [{"wa": 0, "wb": 60, "ents": [["answer", 40, 50], ["question", 52, 60]], "pairs": [[0, 1]]},
+           {"wa": 30, "wb": 100, "ents": [["answer", 11, 22], ["question", 22, 30], ["header", 11, 22]], "pairs": [[0, 1]]}]
+    ents, links = merge_windows(raw, 100, "edge_drop")     # A's cut question is dropped; both answers survive
+    assert ents == {("answer", 40, 50), ("answer", 41, 52), ("question", 52, 60), ("header", 41, 52)}, ents
+    assert links == {((41, 52), (52, 60))}, links
+    ents, links = merge_windows(raw, 100, "center")        # same-type overlaps collapse onto the most central one
+    assert ents == {("answer", 41, 52), ("question", 52, 60), ("header", 41, 52)}, ents
+    assert links == {((41, 52), (52, 60))}, links
+    assert merge_windows(raw, 100, "edge_drop+center") == (ents, links)
+    one = [{"wa": 0, "wb": 100, "ents": [["answer", 0, 5], ["question", 95, 100]], "pairs": [[0, 1]]}]
+    assert merge_windows(one, 100, "edge_drop") == merge_windows(one, 100, "center") == ({("answer", 0, 5), ("question", 95, 100)}, {((0, 5), (95, 100))})
+
+
 def main() -> None:
+    test_merge()
     cfg = TrainConfig.from_yaml(ROOT / "configs" / "xfund_joint_lilt.yaml")
     torch.manual_seed(0)
     model = build_model(cfg, len(LABEL_LIST), ID2LABEL).eval()

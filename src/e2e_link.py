@@ -71,23 +71,64 @@ def predict_window(model, ex) -> tuple[list[Entity], set[tuple[int, int]]]:
     return kept, pairs
 
 
-def predict_document(model, ex, windows: list[tuple[int, int]] | None = None) -> tuple[set[Entity], set[Link]]:
-    """Predicted entities and links in whole-document word coordinates.
+def predict_windows(model, ex, windows: list[tuple[int, int]] | None = None) -> list[dict]:
+    """Raw per-window output, JSON-serialisable: [{wa, wb, ents: [(type, a, b)] (window-local), pairs: [(i, j)]}].
 
-    ``windows=None`` is the single 512-token reading the earlier checkpoints were evaluated with.  With windows, an entity
-    touching a window edge that is not the document edge may be cut in half, so it is dropped (the overlap re-predicts it).
-    """
+    ``windows=None`` is one window over the whole form (cut at 512 tokens by the encoder)."""
     n = len(ex.words)
-    entities: set[Entity] = set()
-    links: set[Link] = set()
+    out = []
     for wa, wb in (windows or [(0, n)]):
-        win = sub_example(ex, wa, wb, with_entities=False)
-        ents, pairs = predict_window(model, win)
-        keep = [not (windows and ((a == 0 and wa > 0) or (b == wb - wa and wb < n))) for _, a, b in ents]
-        glob = [(t, a + wa, b + wa) for t, a, b in ents]
-        entities |= {e for e, k in zip(glob, keep) if k}
-        links |= {((glob[i][1], glob[i][2]), (glob[j][1], glob[j][2])) for i, j in pairs if keep[i] and keep[j]}
-    return entities, links
+        ents, pairs = predict_window(model, sub_example(ex, wa, wb, with_entities=False))
+        out.append({"wa": wa, "wb": wb, "ents": [list(e) for e in ents], "pairs": [list(p) for p in pairs]})
+    return out
+
+
+def merge_windows(raw: list[dict], n: int, strategy: str = "edge_drop") -> tuple[set[Entity], set[Link]]:
+    """Whole-document entities and links from per-window output.
+
+    ``edge_drop``: an entity touching a window edge that is not the document edge may be cut in half, so it is dropped
+    (the overlap re-predicts it); everything else is kept, so one entity predicted slightly differently by two windows
+    appears twice.  ``center``: nothing is dropped; same-type predictions that share a word form one cluster, and the one
+    furthest from its window edge represents it (ties: earliest window); links follow their entities.
+    ``edge_drop+center``: both.
+    """
+    assert strategy in ("edge_drop", "center", "edge_drop+center"), strategy
+    cands = []  # (window, local index, type, a, b, distance to the nearest cut edge)
+    for w, win in enumerate(raw):
+        wa, wb = win["wa"], win["wb"]
+        for i, (t, a, b) in enumerate(win["ents"]):
+            left = float("inf") if wa == 0 else a
+            right = float("inf") if wb == n else (wb - wa) - b
+            cands.append((w, i, t, a + wa, b + wa, min(left, right)))
+    if strategy != "center":
+        cands = [c for c in cands if c[5] > 0]
+    rep = {(w, i): (t, a, b) for w, i, t, a, b, _ in cands}                  # candidate -> its (possibly merged) entity
+    if strategy != "edge_drop":
+        cands.sort(key=lambda c: (c[2], c[3]))
+        cluster: list = []
+        def flush():
+            if cluster:
+                win = max(cluster, key=lambda c: (c[5], -c[0]))
+                for c in cluster:
+                    rep[(c[0], c[1])] = (win[2], win[3], win[4])
+        end = -1
+        for c in cands:
+            if cluster and (c[2] != cluster[0][2] or c[3] >= end):
+                flush(); cluster = []
+            end = max(end, c[4]) if cluster else c[4]
+            cluster.append(c)
+        flush()
+    links: set[Link] = set()
+    for w, win in enumerate(raw):
+        for i, j in win["pairs"]:
+            if (w, i) in rep and (w, j) in rep and rep[(w, i)] != rep[(w, j)]:
+                links.add(((rep[(w, i)][1], rep[(w, i)][2]), (rep[(w, j)][1], rep[(w, j)][2])))
+    return set(rep.values()), links
+
+
+def predict_document(model, ex, windows: list[tuple[int, int]] | None = None, strategy: str = "edge_drop") -> tuple[set[Entity], set[Link]]:
+    """Predicted entities and links in whole-document word coordinates (see merge_windows for the strategies)."""
+    return merge_windows(predict_windows(model, ex, windows), len(ex.words), strategy)
 
 
 def gold_structure(ex) -> tuple[set[Entity], set[Link]]:
