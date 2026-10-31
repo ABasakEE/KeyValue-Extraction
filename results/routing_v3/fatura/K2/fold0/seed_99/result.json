@@ -1,0 +1,150 @@
+{
+  "test": {
+    "precision": 0.7023,
+    "recall": 0.4027,
+    "f1": 0.5119,
+    "support": 13919,
+    "truncated_words": 0,
+    "per_type": {
+      "buyer": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 160
+      },
+      "date": {
+        "precision": 0.6803,
+        "recall": 1.0,
+        "f1": 0.8097,
+        "support": 200
+      },
+      "due_date": {
+        "precision": 0.85,
+        "recall": 0.85,
+        "f1": 0.85,
+        "support": 140
+      },
+      "number": {
+        "precision": 1.0,
+        "recall": 0.375,
+        "f1": 0.5455,
+        "support": 160
+      },
+      "seller_address": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 180
+      },
+      "seller_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 180
+      },
+      "sub_total": {
+        "precision": 0.5968,
+        "recall": 0.8222,
+        "f1": 0.6916,
+        "support": 180
+      },
+      "title": {
+        "precision": 0.6525,
+        "recall": 0.6417,
+        "f1": 0.6471,
+        "support": 120
+      },
+      "total": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 180
+      }
+    }
+  },
+  "best_val_f1": 0.9389,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2.8459,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2.1643,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 3,
+      "train_loss": 1.5696,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 4,
+      "train_loss": 1.1206,
+      "val_f1": 0.2566
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.7658,
+      "val_f1": 0.4497
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.5046,
+      "val_f1": 0.569
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.3642,
+      "val_f1": 0.6772
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.2812,
+      "val_f1": 0.7885
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.2208,
+      "val_f1": 0.7885
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.1774,
+      "val_f1": 0.8279
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.149,
+      "val_f1": 0.8545
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.125,
+      "val_f1": 0.9389
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.1073,
+      "val_f1": 0.9389
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0898,
+      "val_f1": 0.9389
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0772,
+      "val_f1": 0.9389
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 615,
+    "total_i_tags": 5138,
+    "rate": 0.1197
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5119 == independent F1=0.5119 (delta 0.00e+00)\n  lenient-IOB2 F1=0.4706 (spread 0.0413)\n  malformed I- tags: 615/5138 (12.0%)",
+  "peak_gpu_mem_gb": 7.86
+}

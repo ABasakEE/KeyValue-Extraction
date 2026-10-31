@@ -1,0 +1,1973 @@
+{
+  "settings": {
+    "2": {
+      "seeds": [
+        13,
+        42,
+        7,
+        21,
+        99
+      ],
+      "n_confirm_docs": 500,
+      "f1": {
+        "bros": 0.666,
+        "static": 0.6885,
+        "gate": 0.681,
+        "endorse": 0.6957,
+        "hybrid": 0.6921,
+        "fill_in": 0.6936,
+        "oracle": 0.8482,
+        "vlm": 0.5964
+      },
+      "vs_bros": {
+        "static": {
+          "delta": 0.0225,
+          "ci95": [
+            -0.0206,
+            0.0733
+          ]
+        },
+        "gate": {
+          "delta": 0.0149,
+          "ci95": [
+            0.0008,
+            0.0319
+          ]
+        },
+        "endorse": {
+          "delta": 0.0297,
+          "ci95": [
+            0.0127,
+            0.048
+          ]
+        },
+        "hybrid": {
+          "delta": 0.0261,
+          "ci95": [
+            -0.0192,
+            0.0772
+          ]
+        },
+        "fill_in": {
+          "delta": 0.0276,
+          "ci95": [
+            0.0103,
+            0.046
+          ]
+        },
+        "oracle": {
+          "delta": 0.1822,
+          "ci95": [
+            0.1489,
+            0.2207
+          ]
+        },
+        "vlm": {
+          "delta": -0.0697,
+          "ci95": [
+            -0.1364,
+            -0.0025
+          ]
+        }
+      },
+      "per_seed_delta": {
+        "static": {
+          "13": -0.0339,
+          "42": -0.0188,
+          "7": 0.0607,
+          "21": 0.0139,
+          "99": 0.0905
+        },
+        "gate": {
+          "13": 0.0059,
+          "42": 0.007,
+          "7": 0.0357,
+          "21": 0.011,
+          "99": 0.0151
+        },
+        "endorse": {
+          "13": 0.0232,
+          "42": 0.0143,
+          "7": 0.05,
+          "21": 0.0208,
+          "99": 0.0401
+        },
+        "hybrid": {
+          "13": -0.0322,
+          "42": -0.0177,
+          "7": 0.0658,
+          "21": 0.0177,
+          "99": 0.0968
+        },
+        "fill_in": {
+          "13": 0.0339,
+          "42": 0.0054,
+          "7": 0.0412,
+          "21": 0.0168,
+          "99": 0.0407
+        },
+        "oracle": {
+          "13": 0.1804,
+          "42": 0.1396,
+          "7": 0.2156,
+          "21": 0.1567,
+          "99": 0.2187
+        },
+        "vlm": {
+          "13": -0.0754,
+          "42": -0.1161,
+          "7": -0.0153,
+          "21": -0.127,
+          "99": -0.0144
+        }
+      },
+      "chosen_params": {
+        "fold0_seed13": {
+          "routed": [
+            "buyer",
+            "date"
+          ],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold0_seed42": {
+          "routed": [
+            "due_date",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold0_seed7": {
+          "routed": [
+            "buyer",
+            "seller_address",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold0_seed21": {
+          "routed": [
+            "buyer",
+            "seller_address"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold0_seed99": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed13": {
+          "routed": [
+            "buyer",
+            "date",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold1_seed42": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold1_seed7": {
+          "routed": [
+            "buyer",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed21": {
+          "routed": [
+            "buyer",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed99": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.95,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.95,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold2_seed13": {
+          "routed": [
+            "date",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold2_seed42": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold2_seed7": {
+          "routed": [
+            "buyer",
+            "date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold2_seed21": {
+          "routed": [
+            "buyer",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold2_seed99": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed13": {
+          "routed": [
+            "buyer",
+            "date",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed42": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold3_seed7": {
+          "routed": [
+            "buyer",
+            "date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed21": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed99": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed13": {
+          "routed": [
+            "buyer",
+            "seller_name",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed42": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed7": {
+          "routed": [
+            "buyer",
+            "date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed21": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold4_seed99": {
+          "routed": [
+            "buyer",
+            "date",
+            "due_date",
+            "seller_address",
+            "sub_total",
+            "total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        }
+      },
+      "oracle_headroom": 0.1822,
+      "share_of_headroom": {
+        "static": 0.123,
+        "gate": 0.082,
+        "endorse": 0.163,
+        "hybrid": 0.143
+      },
+      "gate_vs_static": {
+        "delta": -0.0075,
+        "ci95": [
+          -0.0516,
+          0.0304
+        ]
+      },
+      "hybrid_vs_static": {
+        "delta": 0.0036,
+        "ci95": [
+          -0.0033,
+          0.0104
+        ]
+      },
+      "confidence_signal": {
+        "auroc": 0.8442,
+        "n_spans": 31071,
+        "share_correct": 0.6954
+      },
+      "by_fold": {
+        "fold0": {
+          "static": {
+            "delta": 0.0614,
+            "ci95": [
+              -0.0,
+              0.1441
+            ]
+          },
+          "gate": {
+            "delta": 0.0128,
+            "ci95": [
+              -0.0037,
+              0.0321
+            ]
+          },
+          "endorse": {
+            "delta": 0.0328,
+            "ci95": [
+              0.0102,
+              0.0558
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0679,
+            "ci95": [
+              0.0036,
+              0.1462
+            ]
+          },
+          "bros_f1": 0.6025
+        },
+        "fold1": {
+          "static": {
+            "delta": 0.0368,
+            "ci95": [
+              -0.0219,
+              0.1349
+            ]
+          },
+          "gate": {
+            "delta": 0.0261,
+            "ci95": [
+              -0.0054,
+              0.0802
+            ]
+          },
+          "endorse": {
+            "delta": 0.0352,
+            "ci95": [
+              -0.0037,
+              0.1007
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0411,
+            "ci95": [
+              -0.0177,
+              0.142
+            ]
+          },
+          "bros_f1": 0.7028
+        },
+        "fold2": {
+          "static": {
+            "delta": 0.04,
+            "ci95": [
+              -0.0316,
+              0.1214
+            ]
+          },
+          "gate": {
+            "delta": 0.0194,
+            "ci95": [
+              -0.0111,
+              0.0546
+            ]
+          },
+          "endorse": {
+            "delta": 0.0348,
+            "ci95": [
+              -0.0009,
+              0.0793
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0396,
+            "ci95": [
+              -0.0409,
+              0.1265
+            ]
+          },
+          "bros_f1": 0.6217
+        },
+        "fold3": {
+          "static": {
+            "delta": -0.0141,
+            "ci95": [
+              -0.0865,
+              0.0577
+            ]
+          },
+          "gate": {
+            "delta": 0.0067,
+            "ci95": [
+              -0.0415,
+              0.0601
+            ]
+          },
+          "endorse": {
+            "delta": 0.0139,
+            "ci95": [
+              -0.0357,
+              0.0691
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0083,
+            "ci95": [
+              -0.0845,
+              0.0766
+            ]
+          },
+          "bros_f1": 0.7141
+        },
+        "fold4": {
+          "static": {
+            "delta": -0.0117,
+            "ci95": [
+              -0.0946,
+              0.0626
+            ]
+          },
+          "gate": {
+            "delta": 0.0067,
+            "ci95": [
+              -0.016,
+              0.0328
+            ]
+          },
+          "endorse": {
+            "delta": 0.0307,
+            "ci95": [
+              -0.0012,
+              0.0605
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0105,
+            "ci95": [
+              -0.0926,
+              0.0635
+            ]
+          },
+          "bros_f1": 0.6927
+        }
+      },
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0
+      },
+      "invoices": 1000
+    },
+    "5": {
+      "seeds": [
+        13,
+        42,
+        7,
+        21,
+        99
+      ],
+      "n_confirm_docs": 500,
+      "f1": {
+        "bros": 0.8977,
+        "static": 0.8943,
+        "gate": 0.8964,
+        "endorse": 0.8979,
+        "hybrid": 0.893,
+        "fill_in": 0.8868,
+        "oracle": 0.9563,
+        "vlm": 0.5964
+      },
+      "vs_bros": {
+        "static": {
+          "delta": -0.0034,
+          "ci95": [
+            -0.0126,
+            0.0019
+          ]
+        },
+        "gate": {
+          "delta": -0.0013,
+          "ci95": [
+            -0.0066,
+            0.0028
+          ]
+        },
+        "endorse": {
+          "delta": 0.0002,
+          "ci95": [
+            -0.0061,
+            0.005
+          ]
+        },
+        "hybrid": {
+          "delta": -0.0047,
+          "ci95": [
+            -0.0139,
+            0.0018
+          ]
+        },
+        "fill_in": {
+          "delta": -0.0108,
+          "ci95": [
+            -0.0181,
+            -0.0033
+          ]
+        },
+        "oracle": {
+          "delta": 0.0586,
+          "ci95": [
+            0.039,
+            0.087
+          ]
+        },
+        "vlm": {
+          "delta": -0.3013,
+          "ci95": [
+            -0.3528,
+            -0.2495
+          ]
+        }
+      },
+      "per_seed_delta": {
+        "static": {
+          "13": 0.0,
+          "42": -0.0003,
+          "7": 0.0,
+          "21": -0.0137,
+          "99": -0.0032
+        },
+        "gate": {
+          "13": -0.0031,
+          "42": -0.0,
+          "7": -0.0042,
+          "21": 0.0004,
+          "99": 0.0007
+        },
+        "endorse": {
+          "13": -0.0039,
+          "42": 0.0016,
+          "7": -0.0013,
+          "21": 0.0021,
+          "99": 0.0024
+        },
+        "hybrid": {
+          "13": -0.0031,
+          "42": -0.0004,
+          "7": -0.0042,
+          "21": -0.0133,
+          "99": -0.0024
+        },
+        "fill_in": {
+          "13": -0.0132,
+          "42": -0.011,
+          "7": -0.0062,
+          "21": -0.0105,
+          "99": -0.0133
+        },
+        "oracle": {
+          "13": 0.0438,
+          "42": 0.0583,
+          "7": 0.0517,
+          "21": 0.1032,
+          "99": 0.0362
+        },
+        "vlm": {
+          "13": -0.3251,
+          "42": -0.298,
+          "7": -0.3024,
+          "21": -0.2434,
+          "99": -0.3377
+        }
+      },
+      "chosen_params": {
+        "fold0_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold0_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold0_seed7": {
+          "routed": [],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.9,
+            "kappa": null
+          }
+        },
+        "fold0_seed21": {
+          "routed": [],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold0_seed99": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold1_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold1_seed7": {
+          "routed": [],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold1_seed21": {
+          "routed": [
+            "buyer"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed99": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold2_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold2_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.7,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.7,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.7,
+            "kappa": null
+          }
+        },
+        "fold2_seed7": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold2_seed21": {
+          "routed": [
+            "buyer",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold2_seed99": {
+          "routed": [
+            "buyer"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold3_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold3_seed7": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold3_seed21": {
+          "routed": [
+            "buyer",
+            "due_date",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.9,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.9,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold3_seed99": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold4_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed42": {
+          "routed": [
+            "buyer"
+          ],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed7": {
+          "routed": [],
+          "gate": {
+            "tau": 0.95,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.95,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.95,
+            "kappa": null
+          }
+        },
+        "fold4_seed21": {
+          "routed": [
+            "buyer",
+            "due_date",
+            "sub_total"
+          ],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        },
+        "fold4_seed99": {
+          "routed": [],
+          "gate": {
+            "tau": 0.6,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.6,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.6,
+            "kappa": null
+          }
+        }
+      },
+      "oracle_headroom": 0.0586,
+      "share_of_headroom": {
+        "static": -0.058,
+        "gate": -0.022,
+        "endorse": 0.003,
+        "hybrid": -0.08
+      },
+      "gate_vs_static": {
+        "delta": 0.0022,
+        "ci95": [
+          -0.0061,
+          0.0134
+        ]
+      },
+      "hybrid_vs_static": {
+        "delta": -0.0013,
+        "ci95": [
+          -0.0063,
+          0.0021
+        ]
+      },
+      "confidence_signal": {
+        "auroc": 0.7555,
+        "n_spans": 35098,
+        "share_correct": 0.8833
+      },
+      "by_fold": {
+        "fold0": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": -0.0069,
+            "ci95": [
+              -0.0225,
+              0.0009
+            ]
+          },
+          "endorse": {
+            "delta": -0.0061,
+            "ci95": [
+              -0.0215,
+              0.0016
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0069,
+            "ci95": [
+              -0.0225,
+              0.0009
+            ]
+          },
+          "bros_f1": 0.8876
+        },
+        "fold1": {
+          "static": {
+            "delta": 0.0042,
+            "ci95": [
+              -0.0044,
+              0.0213
+            ]
+          },
+          "gate": {
+            "delta": 0.0032,
+            "ci95": [
+              -0.0026,
+              0.0151
+            ]
+          },
+          "endorse": {
+            "delta": 0.0035,
+            "ci95": [
+              -0.0066,
+              0.0207
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0058,
+            "ci95": [
+              -0.0037,
+              0.0234
+            ]
+          },
+          "bros_f1": 0.8831
+        },
+        "fold2": {
+          "static": {
+            "delta": -0.0022,
+            "ci95": [
+              -0.0184,
+              0.0138
+            ]
+          },
+          "gate": {
+            "delta": -0.0064,
+            "ci95": [
+              -0.0263,
+              0.007
+            ]
+          },
+          "endorse": {
+            "delta": -0.0054,
+            "ci95": [
+              -0.0258,
+              0.008
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0066,
+            "ci95": [
+              -0.0274,
+              0.0127
+            ]
+          },
+          "bros_f1": 0.9327
+        },
+        "fold3": {
+          "static": {
+            "delta": -0.0055,
+            "ci95": [
+              -0.0212,
+              0.0008
+            ]
+          },
+          "gate": {
+            "delta": 0.002,
+            "ci95": [
+              -0.0042,
+              0.0102
+            ]
+          },
+          "endorse": {
+            "delta": 0.0047,
+            "ci95": [
+              -0.0021,
+              0.0145
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0035,
+            "ci95": [
+              -0.02,
+              0.0082
+            ]
+          },
+          "bros_f1": 0.9098
+        },
+        "fold4": {
+          "static": {
+            "delta": -0.0114,
+            "ci95": [
+              -0.0383,
+              0.0101
+            ]
+          },
+          "gate": {
+            "delta": 0.0019,
+            "ci95": [
+              -0.0156,
+              0.0146
+            ]
+          },
+          "endorse": {
+            "delta": 0.0044,
+            "ci95": [
+              -0.0119,
+              0.0187
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0102,
+            "ci95": [
+              -0.0393,
+              0.015
+            ]
+          },
+          "bros_f1": 0.8802
+        }
+      },
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0
+      },
+      "invoices": 1000
+    },
+    "10": {
+      "seeds": [
+        13,
+        42
+      ],
+      "n_confirm_docs": 500,
+      "f1": {
+        "bros": 0.9588,
+        "static": 0.9588,
+        "gate": 0.9575,
+        "endorse": 0.958,
+        "hybrid": 0.9575,
+        "fill_in": 0.9405,
+        "oracle": 0.9819,
+        "vlm": 0.5964
+      },
+      "vs_bros": {
+        "static": {
+          "delta": 0.0,
+          "ci95": [
+            0.0,
+            0.0
+          ]
+        },
+        "gate": {
+          "delta": -0.0012,
+          "ci95": [
+            -0.0039,
+            0.0
+          ]
+        },
+        "endorse": {
+          "delta": -0.0008,
+          "ci95": [
+            -0.0036,
+            0.001
+          ]
+        },
+        "hybrid": {
+          "delta": -0.0012,
+          "ci95": [
+            -0.0039,
+            0.0
+          ]
+        },
+        "fill_in": {
+          "delta": -0.0182,
+          "ci95": [
+            -0.0285,
+            -0.0082
+          ]
+        },
+        "oracle": {
+          "delta": 0.0232,
+          "ci95": [
+            0.011,
+            0.037
+          ]
+        },
+        "vlm": {
+          "delta": -0.3624,
+          "ci95": [
+            -0.4121,
+            -0.3201
+          ]
+        }
+      },
+      "per_seed_delta": {
+        "static": {
+          "13": 0.0,
+          "42": 0.0
+        },
+        "gate": {
+          "13": -0.0003,
+          "42": -0.0022
+        },
+        "endorse": {
+          "13": 0.0002,
+          "42": -0.0017
+        },
+        "hybrid": {
+          "13": -0.0003,
+          "42": -0.0022
+        },
+        "fill_in": {
+          "13": -0.0195,
+          "42": -0.017
+        },
+        "oracle": {
+          "13": 0.0147,
+          "42": 0.0316
+        },
+        "vlm": {
+          "13": -0.3776,
+          "42": -0.3472
+        }
+      },
+      "chosen_params": {
+        "fold0_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold0_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold1_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold1_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold2_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold2_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.3
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        },
+        "fold3_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold3_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed13": {
+          "routed": [],
+          "gate": {
+            "tau": 0.5,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.5,
+            "kappa": 0.5
+          },
+          "hybrid": {
+            "tau": 0.5,
+            "kappa": null
+          }
+        },
+        "fold4_seed42": {
+          "routed": [],
+          "gate": {
+            "tau": 0.8,
+            "kappa": null
+          },
+          "endorse": {
+            "tau": 0.8,
+            "kappa": 0.1
+          },
+          "hybrid": {
+            "tau": 0.8,
+            "kappa": null
+          }
+        }
+      },
+      "oracle_headroom": 0.0231,
+      "share_of_headroom": {
+        "static": 0.0,
+        "gate": -0.056,
+        "endorse": -0.035,
+        "hybrid": -0.056
+      },
+      "gate_vs_static": {
+        "delta": -0.0012,
+        "ci95": [
+          -0.0039,
+          0.0
+        ]
+      },
+      "hybrid_vs_static": {
+        "delta": -0.0012,
+        "ci95": [
+          -0.0039,
+          0.0
+        ]
+      },
+      "confidence_signal": {
+        "auroc": 0.6959,
+        "n_spans": 13786,
+        "share_correct": 0.9507
+      },
+      "by_fold": {
+        "fold0": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": -0.0033,
+            "ci95": [
+              -0.0104,
+              0.0
+            ]
+          },
+          "endorse": {
+            "delta": -0.003,
+            "ci95": [
+              -0.0091,
+              0.0
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0033,
+            "ci95": [
+              -0.0104,
+              0.0
+            ]
+          },
+          "bros_f1": 0.974
+        },
+        "fold1": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "endorse": {
+            "delta": 0.0016,
+            "ci95": [
+              0.0,
+              0.0051
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "bros_f1": 0.9567
+        },
+        "fold2": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": -0.0024,
+            "ci95": [
+              -0.0093,
+              0.0
+            ]
+          },
+          "endorse": {
+            "delta": -0.0024,
+            "ci95": [
+              -0.0093,
+              0.0
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0024,
+            "ci95": [
+              -0.0093,
+              0.0
+            ]
+          },
+          "bros_f1": 0.9854
+        },
+        "fold3": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "endorse": {
+            "delta": -0.0003,
+            "ci95": [
+              -0.0014,
+              0.0
+            ]
+          },
+          "hybrid": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "bros_f1": 0.9445
+        },
+        "fold4": {
+          "static": {
+            "delta": 0.0,
+            "ci95": [
+              0.0,
+              0.0
+            ]
+          },
+          "gate": {
+            "delta": -0.0004,
+            "ci95": [
+              -0.0048,
+              0.0024
+            ]
+          },
+          "endorse": {
+            "delta": 0.0005,
+            "ci95": [
+              -0.0051,
+              0.0057
+            ]
+          },
+          "hybrid": {
+            "delta": -0.0004,
+            "ci95": [
+              -0.0048,
+              0.0024
+            ]
+          },
+          "bros_f1": 0.9337
+        }
+      },
+      "alignment": {
+        "alignment_mismatches": 0,
+        "missing": 0
+      },
+      "invoices": 1000
+    }
+  },
+  "verdict": {
+    "gate_gains_at_K": [
+      "2"
+    ],
+    "gate_never_significantly_worse": true,
+    "passes": true,
+    "static_router_K2_loss_replicated": false
+  }
+}
