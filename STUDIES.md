@@ -35,6 +35,8 @@ Conventions:
 | 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | 2026-10-31 | Registered rule passes only at K=1, where the router merely matches the VLM alone; at K=2 it is significantly worse than BROS (-2.6); K>=5 neutral. Oracle headroom exists but a static per-field router captures none |
 | 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
 | 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
+| 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
+| 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
 
 ---
 
@@ -811,3 +813,55 @@ general; the VRDU dev documents were used when choosing among variants in earlie
 **Findings:** (1) the 65.5 reproduces exactly but ignores the 38% of links cut off by truncation; counting them as misses gives about 50. (2) Inference-only link-aware windowing recovers about 10 points (59.8); the token-space ceiling was 89.6% of links. (3) XFUND val is already nearly template-disjoint by the text proxy; removing the 16 documents with a train sibling costs under 1 point. (4) 62% of val documents do not fit in 512 tokens (84 of 250 do).
 
 **Limits:** entity spans and types are gold, so these are not end-to-end link F1; the sibling test is text-only and within-language; no retraining on windows; LiLT, not BROS. Seeds 13 and 21 F1 values were recovered from the log of a run that crashed (OOM) before writing its output, so only F1 is stored for them (`results/xfund_link_eval/summary.json`); seed 42 is in `seed42.json`. The "windowed, visible gold" cells in that file are invalid (the code intersects predictions with the visible gold, forcing precision to 1.0) and must not be used.
+
+---
+
+## 18. Are BROS's and the VLM's errors correlated? — CPU, 2026-10-31
+
+**Question:** study 16's gate gained little. Hypothesis (stated before the run): when BROS is wrong the VLM is wrong too, so no per-document signal can help much. Is the VLM less often right where BROS is wrong?
+
+**Method (`scripts/error_correlation.py`, reuses the study-16 dumps; no new model runs):** per gold span, BROS right = exact (field, start, end) match, VLM right likewise; lift = P(VLM right | BROS missed) / P(VLM right | BROS right) (1 = independent). Per BROS-predicted span: wrong/right, the VLM's span for that field right/wrong, and BROS's confidence (mean field probability over its span; split at 0.7). Intervals: cluster bootstrap (FATURA: templates; VRDU: documents), seeds pooled within cluster, 500 draws.
+
+**Results:**
+
+| Setting | Gold spans | BROS recall | VLM recall | P(VLM right ∣ BROS missed) | P(VLM right ∣ BROS right) | Lift [95% CI] | BROS-only / VLM-only / both wrong |
+|---|---|---|---|---|---|---|---|
+| VRDU (600 docs, 2 seeds) | 5,750 | 63.7 | 56.4 | 32.4 | 70.1 | **0.46 [0.43, 0.50]** | 19.0 / 11.8 / 24.6 |
+| VRDU confirm only | 2,870 | 64.2 | 56.7 | 32.3 | 70.3 | 0.46 [0.41, 0.51] | 19.1 / 11.6 / 24.2 |
+| FATURA K=2 | 33,900 | 63.7 | 48.0 | 41.7 | 51.7 | 0.81 [0.74, 0.88] | 30.8 / 15.1 / 21.2 |
+| FATURA K=5 | 33,900 | 91.5 | 48.0 | 33.3 | 49.4 | 0.67 [0.57, 0.79] | 46.3 / 2.9 / 5.7 |
+| FATURA K=10 | 13,560 | 96.7 | 48.0 | 25.1 | 48.8 | 0.51 [0.27, 0.82] | 49.5 / 0.8 / 2.5 |
+
+Where BROS's prediction is wrong, the VLM's span for that field is right 22% (VRDU) / 38% (K=2) / 25% (K=5) / 19% (K=10) of the time, against 70% / 52% / 49% / 49% where BROS is right. Spans with BROS confidence < 0.7 are 5.1% of VRDU predictions (68% of them wrong, VLM right on 26% of those) and 32% / 7.5% / 2.0% of FATURA K = 2 / 5 / 10 predictions.
+
+**Findings:** (1) The errors are positively correlated at every setting (lift < 1, interval excludes 1 except K=10's upper end of 0.82): the VLM is less reliable exactly where BROS fails, strongest on VRDU (lift 0.46). (2) The correlation is partial, not total: the VLM is still right on a quarter to two fifths of BROS's misses, which is the headroom the oracle measures. (3) Plausible reading of the weak gate (an inference from these rates, not tested): replacing a low-confidence span gains only when BROS is wrong and the VLM right, which is about a quarter to two fifths of the wrong spans, while the low-confidence spans BROS got right can only be lost. (4) FATURA K=2 is the least correlated setting (lift 0.81), consistent with it being the one setting where the hybrid gained.
+
+**Limits:** exact-span matching; the VLM output is one fixed run per document; FATURA is synthetic and VRDU has 3 templates (intervals resample documents there); correlation is not causation (hard documents may hurt both models); descriptive study, no registered criteria.
+
+**Evidence:** `results/error_corr/{fatura,vrdu}.json`, `scripts/error_correlation.py` (self-test included).
+
+---
+
+## 19. Windowed joint training and end-to-end XFUND link F1 — GPU (Kaggle T4 × 2), registered 2026-10-31
+
+**Question:** study 17 measured link F1 on the *saved* joint-LiLT checkpoints with **gold** entity spans and types: 65.5 on the links visible in 512 tokens, 49.9 counting the cut-off links as misses, 59.8 with inference-only windows. What is the *end-to-end* link F1 (entities from the model's own tags), and does **training** on entity-aligned windows improve it?
+
+**Arms (3 seeds 13 / 21 / 42, same code and config, only `form_window` differs):**
+- `base`: `configs/xfund_joint_lilt.yaml` (3-stage curriculum, documents truncated at 512 tokens).
+- `windows`: `configs/xfund_joint_lilt_windows.yaml` (training and validation on 510-subword entity-aligned windows, stride 255; test stays whole-document).
+- The old checkpoints were trained with an older feature set (12-D spatial features; current code gives 16-D), so they are *not* the base arm; they are scored with the same end-to-end code as a CPU reference (`results/xfund_e2e/legacy_checkpoints.json`).
+
+**Evaluation (`scripts/xfund_e2e_eval.py`):** 250 val forms (es/fr/de/it/pt); entities are the BIO spans of the model's own predictions; the relation head links those spans (`src/e2e_link.py`, checked equal to `JointFormExtractor.forward` by `tests/test_e2e_link.py`). Two readings: `single` (first 512 tokens) and `windowed` (510-token windows, stride 128; an entity touching a window edge that is not the document edge is dropped; links unioned). Gold = every annotated link (links touching an untagged "other" entity can never be found; their count is reported). A link is correct if both endpoints match the word ranges of a linked gold pair; entity F1 is typed.
+
+**Registered criteria (primary cell: link F1, windowed inference, all documents, seed-matched differences):**
+- *windows help*: mean delta (windows - base) >= +2.0 points and > 0 in every seed.
+- *no better*: |mean delta| < 1.0 point, or the sign differs across seeds.
+- Secondary, descriptive: entity F1; `single` vs `windowed` inference within each arm (the inference-only effect on end-to-end linking); the gap to study 17's gold-entity numbers; the sibling-free subset (234 of 250 documents).
+
+**Checks done before the run:** unit tests of windowing and of the relation half against `forward` (`tests/test_e2e_link.py`); end-to-end evaluation smoke-run on 4 documents; summary self-test.
+
+**Limits stated up front:** 3 seeds (no interval is claimed, only seed-matched deltas); LiLT, not BROS; entity-type mismatches are ignored for links; the window-edge rule is a heuristic; the base arm is retrained with the current code, so absolute numbers are not comparable to the earlier 65.5; sibling-free is a text-only proxy; training time is unmeasured.
+
+**Results:** *pending*
+
+**Evidence:** `results/xfund_e2e/` (after the run).

@@ -1,0 +1,152 @@
+{
+  "K2": {
+    "gold_spans": 33900,
+    "bros_recall": 0.6373,
+    "vlm_recall": 0.4804,
+    "both_right": 0.3293,
+    "bros_only": 0.3081,
+    "vlm_only": 0.1511,
+    "both_wrong": 0.2116,
+    "p_vlm_right_given_bros_missed": 0.4166,
+    "p_vlm_right_given_bros_right": 0.5167,
+    "lift": 0.8064,
+    "bros_preds": 31071,
+    "bros_precision": 0.6954,
+    "p_vlm_right_given_bros_pred_wrong": 0.3767,
+    "p_vlm_right_given_bros_pred_right": 0.5167,
+    "low_conf_lt_0.7": {
+      "share_of_preds": 0.3191,
+      "share_wrong": 0.6909,
+      "p_vlm_right_given_wrong": 0.3787
+    },
+    "ci95": {
+      "lift": [
+        0.7395,
+        0.8766
+      ],
+      "p_vlm_right_given_bros_missed": [
+        0.3768,
+        0.4654
+      ],
+      "p_vlm_right_given_bros_right": [
+        0.4669,
+        0.5704
+      ],
+      "p_vlm_right_given_bros_pred_wrong": [
+        0.3262,
+        0.4357
+      ]
+    },
+    "clusters": 50,
+    "seeds": [
+      13,
+      42,
+      7,
+      21,
+      99
+    ],
+    "alignment": {
+      "alignment_mismatches": 0,
+      "missing": 0
+    }
+  },
+  "K5": {
+    "gold_spans": 33900,
+    "bros_recall": 0.9145,
+    "vlm_recall": 0.4804,
+    "both_right": 0.4519,
+    "bros_only": 0.4626,
+    "vlm_only": 0.0285,
+    "both_wrong": 0.057,
+    "p_vlm_right_given_bros_missed": 0.3331,
+    "p_vlm_right_given_bros_right": 0.4941,
+    "lift": 0.6741,
+    "bros_preds": 35098,
+    "bros_precision": 0.8833,
+    "p_vlm_right_given_bros_pred_wrong": 0.2484,
+    "p_vlm_right_given_bros_pred_right": 0.4941,
+    "low_conf_lt_0.7": {
+      "share_of_preds": 0.0753,
+      "share_wrong": 0.6107,
+      "p_vlm_right_given_wrong": 0.3327
+    },
+    "ci95": {
+      "lift": [
+        0.5685,
+        0.7879
+      ],
+      "p_vlm_right_given_bros_missed": [
+        0.2825,
+        0.3911
+      ],
+      "p_vlm_right_given_bros_right": [
+        0.4515,
+        0.5418
+      ],
+      "p_vlm_right_given_bros_pred_wrong": [
+        0.1909,
+        0.3124
+      ]
+    },
+    "clusters": 50,
+    "seeds": [
+      13,
+      42,
+      7,
+      21,
+      99
+    ],
+    "alignment": {
+      "alignment_mismatches": 0,
+      "missing": 0
+    }
+  },
+  "K10": {
+    "gold_spans": 13560,
+    "bros_recall": 0.9665,
+    "vlm_recall": 0.4804,
+    "both_right": 0.472,
+    "bros_only": 0.4945,
+    "vlm_only": 0.0084,
+    "both_wrong": 0.0251,
+    "p_vlm_right_given_bros_missed": 0.2511,
+    "p_vlm_right_given_bros_right": 0.4883,
+    "lift": 0.5142,
+    "bros_preds": 13786,
+    "bros_precision": 0.9507,
+    "p_vlm_right_given_bros_pred_wrong": 0.1912,
+    "p_vlm_right_given_bros_pred_right": 0.4883,
+    "low_conf_lt_0.7": {
+      "share_of_preds": 0.0204,
+      "share_wrong": 0.6477,
+      "p_vlm_right_given_wrong": 0.3022
+    },
+    "ci95": {
+      "lift": [
+        0.2727,
+        0.821
+      ],
+      "p_vlm_right_given_bros_missed": [
+        0.1335,
+        0.4056
+      ],
+      "p_vlm_right_given_bros_right": [
+        0.4464,
+        0.535
+      ],
+      "p_vlm_right_given_bros_pred_wrong": [
+        0.0841,
+        0.2961
+      ]
+    },
+    "clusters": 50,
+    "seeds": [
+      13,
+      42
+    ],
+    "alignment": {
+      "alignment_mismatches": 0,
+      "missing": 0
+    }
+  }
+}

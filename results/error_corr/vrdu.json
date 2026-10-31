@@ -1,0 +1,94 @@
+{
+  "all": {
+    "gold_spans": 5750,
+    "bros_recall": 0.6365,
+    "vlm_recall": 0.5642,
+    "both_right": 0.4464,
+    "bros_only": 0.1901,
+    "vlm_only": 0.1177,
+    "both_wrong": 0.2457,
+    "p_vlm_right_given_bros_missed": 0.3239,
+    "p_vlm_right_given_bros_right": 0.7014,
+    "lift": 0.4618,
+    "bros_preds": 4686,
+    "bros_precision": 0.781,
+    "p_vlm_right_given_bros_pred_wrong": 0.2242,
+    "p_vlm_right_given_bros_pred_right": 0.7014,
+    "low_conf_lt_0.7": {
+      "share_of_preds": 0.0514,
+      "share_wrong": 0.6805,
+      "p_vlm_right_given_wrong": 0.2622
+    },
+    "ci95": {
+      "lift": [
+        0.4259,
+        0.5019
+      ],
+      "p_vlm_right_given_bros_missed": [
+        0.2993,
+        0.3516
+      ],
+      "p_vlm_right_given_bros_right": [
+        0.6821,
+        0.7187
+      ],
+      "p_vlm_right_given_bros_pred_wrong": [
+        0.1889,
+        0.259
+      ]
+    },
+    "clusters": 600,
+    "seeds": [
+      13,
+      42
+    ],
+    "alignment": {
+      "alignment_mismatches": 0,
+      "missing": 0
+    }
+  },
+  "confirm": {
+    "gold_spans": 2870,
+    "bros_recall": 0.6422,
+    "vlm_recall": 0.5672,
+    "both_right": 0.4516,
+    "bros_only": 0.1906,
+    "vlm_only": 0.1157,
+    "both_wrong": 0.2422,
+    "p_vlm_right_given_bros_missed": 0.3233,
+    "p_vlm_right_given_bros_right": 0.7032,
+    "lift": 0.4597,
+    "bros_preds": 2357,
+    "bros_precision": 0.7819,
+    "p_vlm_right_given_bros_pred_wrong": 0.2276,
+    "p_vlm_right_given_bros_pred_right": 0.7032,
+    "low_conf_lt_0.7": {
+      "share_of_preds": 0.0509,
+      "share_wrong": 0.6417,
+      "p_vlm_right_given_wrong": 0.2338
+    },
+    "ci95": {
+      "lift": [
+        0.4085,
+        0.5147
+      ],
+      "p_vlm_right_given_bros_missed": [
+        0.2883,
+        0.3592
+      ],
+      "p_vlm_right_given_bros_right": [
+        0.6775,
+        0.7285
+      ],
+      "p_vlm_right_given_bros_pred_wrong": [
+        0.1823,
+        0.2807
+      ]
+    },
+    "clusters": 300,
+    "seeds": [
+      13,
+      42
+    ]
+  }
+}

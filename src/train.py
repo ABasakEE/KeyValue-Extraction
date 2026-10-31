@@ -118,6 +118,8 @@ class TrainConfig:
     sliding_window: bool = False
     window_size: int = 384
     window_overlap: int = 128
+    form_window: int = 0                   # > 0: train/validate on entity-aligned word windows of this many subwords (XFUND)
+    form_window_stride: int = 255
     coordinate_jitter: bool = False
     jitter_shift: int = 80
     jitter_scale_min: float = 0.85
@@ -554,6 +556,15 @@ def train_one(
         train_examples = chunk_vrdu_examples(train_examples, window_size=w_size, overlap=w_overlap)
         val_examples = chunk_vrdu_examples(val_examples, window_size=w_size, overlap=w_overlap)
         test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap)
+    if getattr(config, "form_window", 0):
+        # test stays whole-document: the windowed end-to-end score comes from scripts/xfund_e2e_eval.py
+        try:
+            from data.xfund_windows import window_examples
+        except ImportError:
+            from src.data.xfund_windows import window_examples
+        train_examples = window_examples(train_examples, model.tokenizer, config.form_window, config.form_window_stride)
+        val_examples = window_examples(val_examples, model.tokenizer, config.form_window, config.form_window_stride)
+        print(f"  {pfx}[form windows] {len(train_examples)} train / {len(val_examples)} val windows", flush=True)
 
     anc_mode = getattr(config, "anchor_mode", "content_box" if getattr(config, "relative_coords", False) else "none")
     is_dann = getattr(config, "adversarial_dann", False)
