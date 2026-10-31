@@ -1,0 +1,57 @@
+{
+ "note": "seeds 13 and 21 are F1 values recovered from the log of a run that crashed (OOM); seed 42 is from seed42.json",
+ "window": 510,
+ "stride": 128,
+ "f1": {
+  "13": {
+   "all|single|visible": 0.669,
+   "all|single|full": 0.5092,
+   "all|windowed|visible": 0.8141,
+   "all|windowed|full": 0.6088,
+   "sibling_free|single|visible": 0.665,
+   "sibling_free|single|full": 0.501,
+   "sibling_free|windowed|visible": 0.8102,
+   "sibling_free|windowed|full": 0.6029
+  },
+  "21": {
+   "all|single|visible": 0.6517,
+   "all|single|full": 0.4952,
+   "all|windowed|visible": 0.8009,
+   "all|windowed|full": 0.5948,
+   "sibling_free|single|visible": 0.6456,
+   "sibling_free|single|full": 0.4855,
+   "sibling_free|windowed|visible": 0.7955,
+   "sibling_free|windowed|full": 0.5871
+  },
+  "42": {
+   "all|single|visible": 0.6446,
+   "all|single|full": 0.4925,
+   "all|windowed|visible": 0.8117,
+   "all|windowed|full": 0.5894,
+   "sibling_free|single|visible": 0.6373,
+   "sibling_free|single|full": 0.4822,
+   "sibling_free|windowed|visible": 0.8076,
+   "sibling_free|windowed|full": 0.5819
+  }
+ },
+ "mean": {
+  "all|single|visible": 0.6551,
+  "all|single|full": 0.499,
+  "all|windowed|visible": 0.8089,
+  "all|windowed|full": 0.5977,
+  "sibling_free|single|visible": 0.6493,
+  "sibling_free|single|full": 0.4896,
+  "sibling_free|windowed|visible": 0.8044,
+  "sibling_free|windowed|full": 0.5906
+ },
+ "std": {
+  "all|single|visible": 0.0126,
+  "all|single|full": 0.009,
+  "all|windowed|visible": 0.007,
+  "all|windowed|full": 0.01,
+  "sibling_free|single|visible": 0.0142,
+  "sibling_free|single|full": 0.01,
+  "sibling_free|windowed|visible": 0.0078,
+  "sibling_free|windowed|full": 0.0109
+ }
+}

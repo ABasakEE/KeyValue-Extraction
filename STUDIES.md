@@ -34,6 +34,7 @@ Conventions:
 | 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
 | 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | 2026-10-31 | Registered rule passes only at K=1, where the router merely matches the VLM alone; at K=2 it is significantly worse than BROS (-2.6); K>=5 neutral. Oracle headroom exists but a static per-field router captures none |
 | 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
+| 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
 
 ---
 
@@ -788,3 +789,25 @@ general; the VRDU dev documents were used when choosing among variants in earlie
 **Results:** *pending*
 
 **Evidence:** `results/routing_v3/` (after the run).
+
+---
+
+## 17. Link F1 of the saved XFUND joint-LiLT checkpoints on held-out forms — CPU, 2026-10-31
+
+**Question:** how good is a real key-value *linker* on unseen forms, and how much of the reported 65.5 is an artefact of truncation or of the evaluation set-up?
+
+**Data:** XFUND es/fr/de/it/pt val (250 documents, 9,064 unique gold links), from the Hugging Face mirror `FrancophonIA/XFUND` (the official GitHub release host failed TLS here); the visible-word count equals the `support` in the saved metrics (46,180). Checkpoints: `results/xfund_joint_lilt/seed_{13,21,42}`.
+
+**Method (`scripts/xfund_link_eval.py`):** the linker is given the annotation's entity spans and types, as `predict_joint` does (so these are upper bounds for end-to-end linking). *single* = one 512-token window; *windowed* = entity-aligned 510-token windows, stride 128, predicted links unioned. Gold sets: *visible* (what metrics.json scored: 5,605 links) and *full* (all 9,062 links with distinct endpoints; cut-off links count as misses). Sibling-free = 234 of 250 val documents with no train document of question-text Jaccard >= 0.5 in the same language.
+
+**Results (link F1, mean ± sd over 3 seeds):**
+
+| Condition | All 250 docs | Sibling-free (234) |
+|---|---|---|
+| single window, visible gold (reproduces metrics.json: 65.5) | 65.5 ± 1.3 | 64.9 ± 1.4 |
+| single window, **full gold** | **49.9 ± 0.9** | 49.0 ± 1.0 |
+| **windowed, full gold** | **59.8 ± 1.0** | 59.1 ± 1.1 |
+
+**Findings:** (1) the 65.5 reproduces exactly but ignores the 38% of links cut off by truncation; counting them as misses gives about 50. (2) Inference-only link-aware windowing recovers about 10 points (59.8); the token-space ceiling was 89.6% of links. (3) XFUND val is already nearly template-disjoint by the text proxy; removing the 16 documents with a train sibling costs under 1 point. (4) 62% of val documents do not fit in 512 tokens (84 of 250 do).
+
+**Limits:** entity spans and types are gold, so these are not end-to-end link F1; the sibling test is text-only and within-language; no retraining on windows; LiLT, not BROS. Seeds 13 and 21 F1 values were recovered from the log of a run that crashed (OOM) before writing its output, so only F1 is stored for them (`results/xfund_link_eval/summary.json`); seed 42 is in `seed42.json`. The "windowed, visible gold" cells in that file are invalid (the code intersects predictions with the visible gold, forcing precision to 1.0) and must not be used.

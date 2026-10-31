@@ -1,0 +1,76 @@
+{
+  "window": 510,
+  "stride": 128,
+  "n_val": 250,
+  "n_sibling_free": 234,
+  "seeds": {
+    "42": {
+      "all|single|visible": {
+        "precision": 0.6454,
+        "recall": 0.6437,
+        "f1": 0.6446,
+        "gold": 5605,
+        "pred": 5590
+      },
+      "all|single|full": {
+        "precision": 0.6454,
+        "recall": 0.3981,
+        "f1": 0.4925,
+        "gold": 9062,
+        "pred": 5590
+      },
+      "all|windowed|visible": {
+        "precision": 1.0,
+        "recall": 0.6831,
+        "f1": 0.8117,
+        "gold": 5605,
+        "pred": 3829
+      },
+      "all|windowed|full": {
+        "precision": 0.5842,
+        "recall": 0.5947,
+        "f1": 0.5894,
+        "gold": 9062,
+        "pred": 9225
+      },
+      "sibling_free|single|visible": {
+        "precision": 0.6379,
+        "recall": 0.6368,
+        "f1": 0.6373,
+        "gold": 5115,
+        "pred": 5106
+      },
+      "sibling_free|single|full": {
+        "precision": 0.6379,
+        "recall": 0.3876,
+        "f1": 0.4822,
+        "gold": 8402,
+        "pred": 5106
+      },
+      "sibling_free|windowed|visible": {
+        "precision": 1.0,
+        "recall": 0.6772,
+        "f1": 0.8076,
+        "gold": 5115,
+        "pred": 3464
+      },
+      "sibling_free|windowed|full": {
+        "precision": 0.5774,
+        "recall": 0.5864,
+        "f1": 0.5819,
+        "gold": 8402,
+        "pred": 8533
+      }
+    }
+  },
+  "mean_f1": {
+    "all|single|visible": 0.6446,
+    "all|single|full": 0.4925,
+    "all|windowed|visible": 0.8117,
+    "all|windowed|full": 0.5894,
+    "sibling_free|single|visible": 0.6373,
+    "sibling_free|single|full": 0.4822,
+    "sibling_free|windowed|visible": 0.8076,
+    "sibling_free|windowed|full": 0.5819
+  }
+}
