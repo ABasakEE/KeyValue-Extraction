@@ -36,7 +36,7 @@ Conventions:
 | 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
 | 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
-| 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
+| 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
 
 ---
 
@@ -862,6 +862,24 @@ Where BROS's prediction is wrong, the VLM's span for that field is right 22% (VR
 
 **Limits stated up front:** 3 seeds (no interval is claimed, only seed-matched deltas); LiLT, not BROS; entity-type mismatches are ignored for links; the window-edge rule is a heuristic; the base arm is retrained with the current code, so absolute numbers are not comparable to the earlier 65.5; sibling-free is a text-only proxy; training time is unmeasured.
 
-**Results:** *pending*
+**Results (3 seeds, F1 in points; Kaggle T4 x2, both arms 22 epochs, all return codes 0):**
 
-**Evidence:** `results/xfund_e2e/` (after the run).
+| Cell (all 250 val forms) | base | windows | delta mean | delta per seed (13 / 21 / 42) |
+|---|---|---|---|---|
+| **link F1, windowed inference (primary)** | 43.5 | **47.7** | **+4.2** | +4.8 / +4.7 / +3.2 |
+| link F1, single 512 window | 39.6 | 41.7 | +2.1 | +1.9 / +1.9 / +2.3 |
+| entity F1 (typed), windowed inference | 73.0 | 75.9 | +2.9 | +2.8 / +3.2 / +2.6 |
+| entity F1, single 512 window | 62.8 | 64.1 | +1.3 | +1.1 / +1.5 / +1.3 |
+| link F1, windowed, sibling-free (234 forms) | 42.6 | 46.6 | +4.0 | +4.5 / +4.3 / +3.2 |
+
+Precision / recall, windowed inference, mean of 3 seeds: links base 41.2 / 46.0, windows 47.2 / 48.2; entities base 66.4 / 81.2, windows 70.2 / 82.7. The train-time whole-document test metric (gold entities, first 512 tokens, visible links only) is 66.4 link F1 (base) vs 70.2 (windows). 36 of 9,062 gold links touch an untagged "other" entity and can never be found.
+
+**Verdict (registered criteria):** *windows help* is met (mean delta +4.2 >= +2.0 and positive in every seed); *no better* is not.
+
+**Reference (CPU, legacy checkpoints trained with the older 12-D feature set; only seed 13 finished before the run was killed, `results/xfund_e2e/legacy_checkpoints.json`):** end-to-end link F1 34.2 (single) / 38.6 (windowed), entity F1 62.9 / 73.5. The same seed-13 checkpoint scored 50.9 / 60.9 link F1 with gold entities in study 17, so predicted entities cost about 16 to 22 points. The retrained base arm (39.6 / 43.5) is not weaker than the legacy one.
+
+**Findings:** (1) Training on entity-aligned windows improves end-to-end link F1 by about 4 points over truncated training, consistently across seeds; the gain is larger with windowed inference (+4.2) than with the single window (+2.1), so the two fixes add up. (2) End-to-end linking from the model's own entities reaches only 47.7 F1 (precision 47, recall 48): far below the 65.5 headline from studies 17's starting point, and below the 59.8 gold-entity figure. (3) Entity errors are the larger cost: windowed inference predicts many more entities than exist (legacy seed 13: 15,707 predicted vs 13,007 gold, precision 67 at recall 81), consistent with the same entity being predicted with slightly different spans in overlapping windows; exact-span matching then counts those as wrong. (4) Even among the links whose both endpoints exist, roughly a third are still missed: with entity recall 83%, about 69% of links have both endpoints found if the two events are independent, versus a link recall of 48% (an arithmetic estimate, not measured).
+
+**Limits:** 3 seeds, so only seed-matched deltas, no interval; the windows arm sees about 3x as many training examples per epoch (3.25x in the 16-form smoke sample; overlapping windows also act as augmentation) over the same 22 epochs, so "more gradient steps" is not separated from "better coverage"; LiLT, not BROS; link endpoints are matched on word range only; the edge-dropping rule is a heuristic and the cross-window duplicate hypothesis in finding 3 is not tested; the new checkpoints' weights were not pushed, so no gold-entity score exists for them; the legacy reference is one seed.
+
+**Evidence:** `results/xfund_e2e/{summary,base_e2e,windows_e2e,run_status}.json`, per-seed `base/` and `windows/`, `legacy_checkpoints.json` (seed 13).
