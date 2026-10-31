@@ -1,0 +1,30 @@
+<section id="preprocess" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Preprocessing and template-disjoint splits</h2>
+<div style="display:flex;gap:48px;flex:1">
+<div style="flex:1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:30px;font-weight:600;color:#2A78D6">Preprocessing</h3>
+<ol style="font-size:26px;line-height:1.45;color:#2D3748">
+<li>Word boxes scaled to integers in 0–1000; inverted boxes repaired</li>
+<li>BIO tags per word; only the first sub-word is scored</li>
+<li>Long documents cut into 384-word windows, 128 overlap</li>
+<li>Graph models: LiLT features + Delaunay edges cached per window</li>
+<li>Training-time coordinate jitter and content-box anchoring</li>
+</ol>
+</div>
+<div style="flex:1.1;display:flex;flex-direction:column;gap:16px">
+<h3 style="font-size:30px;font-weight:600;color:#2A78D6">Splits (VRDU Registration)</h3>
+<table style="font-size:24px;color:#2D3748">
+<tr style="background:#E9EEF5"><th style="width:22%">Setting</th><th style="width:46%">How the split is built</th><th style="width:32%">Train / val / test</th></tr>
+<tr><td><b>MTL</b></td><td>Stratified by template: 20% test, 15% val</td><td>200 / 286 / 381</td></tr>
+<tr><td><b>UTL</b></td><td>One template held out as the whole test set</td><td>200 / 180 / 709</td></tr>
+</table>
+<div style="display:flex;flex-direction:column;gap:10px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:12px">
+<p style="font-size:24px;line-height:1.45;color:#2D3748"><b>Matched size:</b> both settings train on exactly N = 200 documents, so the amount of data is the same on both sides of the gap.</p>
+<p style="font-size:24px;line-height:1.45;color:#2D3748"><b>Leakage check:</b> every split asserts no test template appears in train or validation.</p>
+<p style="font-size:24px;line-height:1.45;color:#2D3748"><b>Runs:</b> 3 folds × 3 seeds (13, 21, 42) per setting.</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 11 / 18</p>
+<aside>The split protocol is the core of the project. In UTL each fold holds out one template completely. VRDU’s own unseen-template validation sets contain the target template, so we use a strict version that removes it from validation too. The example sizes shown are for the fold where Amendment is held out.</aside>
+</section>

@@ -1,0 +1,21 @@
+{
+  "v": 4,
+  "createdOnFiles": {"v": 1, "at": "2026-10-26T12:00:00Z"},
+  "lists": "css",
+  "title": "Cross-Template Key-Value Extraction — IE 643 Intensive Assessment",
+  "cover": "cover",
+  "order": ["cover", "outline", "problem", "workflow", "before", "after", "approach-lilt", "approach-link", "approach-gnn", "data", "preprocess", "setup", "res-gap", "res-entity", "res-gnn", "res-link", "conclusion", "novelty", "refs1", "refs2"],
+  "sections": {
+    "s1": {"description": "Title, outline, the task and how we got here", "start": "cover"},
+    "s2": {"description": "Work before and after the prep-presentation review", "start": "before"},
+    "s3": {"description": "The three model families we built", "start": "approach-lilt"},
+    "s4": {"description": "Data, preprocessing, splits and training setup", "start": "data"},
+    "s5": {"description": "Quantitative and qualitative results", "start": "res-gap"},
+    "s6": {"description": "Conclusions, novelty plan and references", "start": "conclusion"}
+  },
+  "faces": {
+    "source-serif-4": {"family": "Source Serif 4", "href": "https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@400..700&display=swap"},
+    "ibm-plex-sans": {"family": "IBM Plex Sans", "href": "https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&display=swap"}
+  },
+  "designSystems": []
+}

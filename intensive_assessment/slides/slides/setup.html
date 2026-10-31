@@ -1,0 +1,30 @@
+<section id="setup" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Experimental setup</h2>
+<div style="display:flex;gap:48px;flex:1">
+<div style="flex:1.4;display:flex;flex-direction:column">
+<table style="font-size:24px;color:#2D3748">
+<tr style="background:#E9EEF5"><th style="width:26%">Setting</th><th style="width:40%">LiLT models</th><th style="width:34%">Graph models</th></tr>
+<tr><td>Optimizer</td><td>AdamW, LR 5e-5, decay 0.01</td><td>AdamW, LR 1e-3, decay 1e-4</td></tr>
+<tr><td>LR schedule</td><td>OneCycle, 10% warm-up, linear anneal</td><td>Constant</td></tr>
+<tr><td>Epochs</td><td>20; XFUND curriculum 8 / 6 / 8</td><td>20 (matched), 30 (ablations)</td></tr>
+<tr><td>Batch size</td><td>4 documents</td><td>4 (matched), 16 (ablations)</td></tr>
+<tr><td>Stopping</td><td>Patience 3, min gain 0.001</td><td>Best validation checkpoint</td></tr>
+<tr><td>Grad clipping</td><td>Norm 1.0</td><td>Norm 1.0 (ablations)</td></tr>
+<tr><td>Seeds</td><td>13, 21, 42</td><td>13, 42</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:28px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:28px;font-weight:600;color:#2A78D6">Metrics</h3>
+<p style="font-size:24px;line-height:1.45;color:#2D3748">Entity F1: strict IOB2 spans, micro-averaged (seqeval), checked by a second implementation. Linking F1: exact key-value pair match. Gap = mean MTL F1 − mean UTL F1.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:28px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:28px;font-weight:600;color:#2A78D6">Hardware</h3>
+<p style="font-size:24px;line-height:1.45;color:#2D3748">Kaggle, 2 × NVIDIA Tesla T4 (16 GB). Seeds and folds run in parallel, one process per GPU. FP32 training.</p>
+</div>
+<p style="font-size:24px;color:#4A5568">Code: github.com/ABasakEE/KeyValue-Extraction</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 12 / 18</p>
+<aside>All transformer runs share one training loop and one metric implementation, so differences between settings come from the data split alone. The graph models train on cached features, which is why they can use a larger learning rate.</aside>
+</section>

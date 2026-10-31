@@ -1,0 +1,35 @@
+<section id="approach-link" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:36px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Approach 2: joint tagging and key-value linking</h2>
+<div style="display:flex;gap:40px;flex:1">
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#16202E;padding:28px;border-radius:16px">
+<p style="font-size:24px;color:#BFC8D6">Biaffine score for key i → value j</p>
+<p style="font-size:30px;color:#F6F5F0;font-family:'Source Serif 4', Georgia, serif">s(i→j) = hᵢᵀ W tⱼ + w · [hᵢ ; tⱼ ; φ(bᵢ, bⱼ)]</p>
+<p style="font-size:24px;color:#BFC8D6">hᵢ, tⱼ: entity vectors through 768→128 MLPs · φ: 16-D pair features</p>
+</div>
+<table style="font-size:24px;color:#2D3748">
+<tr><th style="width:30%">Group</th><th style="width:12%">Dims</th><th style="width:58%">Features</th></tr>
+<tr><td>Geometry</td><td>5</td><td>dx, dy, distance, cos θ, sin θ</td></tr>
+<tr><td>Containment</td><td>5</td><td>x/y overlap, disjointness, “below” flag</td></tr>
+<tr><td>Line of sight</td><td>2</td><td>no box blocks the horizontal / vertical ray</td></tr>
+<tr><td>Typography</td><td>4</td><td>height and area ratios, z-scored heights</td></tr>
+</table>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:20px">
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:28px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:28px;font-weight:600;color:#2A78D6">Loss</h3>
+<p style="font-size:26px;line-height:1.4;color:#2D3748">L = L(tag) + λ · L(link), λ = 1. Links use focal loss (γ = 2, α = 0.75) because true pairs are rare among all entity pairs.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:28px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:28px;font-weight:600;color:#2A78D6">Decoding</h3>
+<p style="font-size:26px;line-height:1.4;color:#2D3748">Soft type prior (question→answer, header→question). Each value keeps only its best key, if p ≥ 0.5.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:28px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:28px;font-weight:600;color:#2A78D6">3-phase curriculum</h3>
+<p style="font-size:26px;line-height:1.4;color:#2D3748">① tagging only → ② encoder frozen, train the link head on gold spans → ③ joint, encoder LR × 0.2</p>
+</div>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 8 / 18</p>
+<aside>Tagging tells us which words are keys and values, but it doesn’t say which value belongs to which key. The relation head scores every ordered pair of entities. The bilinear term compares what the two entities say, and the linear term adds 16 spatial relations we designed by hand. When we trained everything jointly from the start it was unstable, so we moved to a three-phase curriculum. We use focal loss because only a few percent of entity pairs are real links.</aside>
+</section>

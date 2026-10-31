@@ -1,0 +1,17 @@
+<section id="data" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:28px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Datasets</h2>
+<table style="font-size:24px;color:#2D3748">
+<tr style="background:#E9EEF5"><th style="width:22%">Dataset</th><th style="width:20%">Size</th><th style="width:33%">Templates / labels</th><th style="width:25%">Role</th></tr>
+<tr><td><b>VRDU Registration</b></td><td>1,915 docs</td><td>Amendment 709, Dissemination 417, Short-Form 789; 6 fields</td><td>Main seen vs unseen test</td></tr>
+<tr><td><b>VRDU Ad-Buy</b></td><td>641 docs</td><td>Official unseen-template splits; 9 fields</td><td>Second template-shift test</td></tr>
+<tr><td><b>FUNSD</b></td><td>149 / 50 docs</td><td>Header, question, answer + links</td><td>Pipeline check, linking</td></tr>
+<tr><td><b>XFUND</b></td><td>5 languages</td><td>Same labels as FUNSD + links</td><td>Multilingual linking</td></tr>
+<tr><td><b>Synthetic</b> (ours)</td><td>100 / 30 docs</td><td>7 form families, Augraphy noise</td><td>Pipeline stress test</td></tr>
+</table>
+<div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+<img src="/_blob/2fd5f8e7787bfb48d816cfeb44a07e41" alt="Four synthetic forms from our generator, an invoice, a medical intake form, a shipping manifest with scan noise, and a FARA registration form, with question, answer and header boxes and key-value links drawn on" style="width:836px;height:240px;object-fit:contain;background:#FCFCFB;border-radius:12px">
+<p style="font-size:24px;color:#4A5568">Four of our seven synthetic form families, with their key-value labels drawn on</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 10 / 18</p>
+<aside>VRDU registration forms (FARA filings) are our main benchmark because the three templates really are different. Registration documents average 949 words and Ad-Buy documents 1,524, and most run to several pages. The Ad-Buy forms (DeepForm) look much more alike, and that turned out to matter. FUNSD and XFUND (Spanish, French, German, Italian, Portuguese) have key-value link labels, which VRDU doesn’t, so we used them for the linking model. We wrote the synthetic generator ourselves to stress-test the pipeline. All inputs are form images with OCR words and boxes; for VRDU we align the labels to its released OCR tokens by character offsets.</aside>
+</section>

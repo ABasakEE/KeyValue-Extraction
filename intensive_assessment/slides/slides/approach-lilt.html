@@ -1,0 +1,45 @@
+<section id="approach-lilt" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Approach 1: LiLT token classifier</h2>
+<div style="display:flex;align-items:stretch">
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:12px">
+<p style="font-size:26px;font-weight:600">OCR words + boxes</p>
+<p style="font-size:24px;color:#4A5568">boxes scaled to 0–1000</p>
+</div>
+<x-connector style="width:48px;color:#898781"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:12px">
+<p style="font-size:26px;font-weight:600">Windows</p>
+<p style="font-size:24px;color:#4A5568">384 words, step 256</p>
+</div>
+<x-connector style="width:48px;color:#898781"></x-connector>
+<div style="flex:1.3;display:flex;flex-direction:column;gap:6px;background:#E9EEF5;padding:24px;border:1px solid #BFD0E6;border-radius:12px">
+<p style="font-size:26px;font-weight:600">LiLT encoder</p>
+<p style="font-size:24px;color:#4A5568">text stream + layout stream, 768-D</p>
+</div>
+<x-connector style="width:48px;color:#898781"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:12px">
+<p style="font-size:26px;font-weight:600">Linear head</p>
+<p style="font-size:24px;color:#4A5568">13 BIO tags</p>
+</div>
+<x-connector style="width:48px;color:#898781"></x-connector>
+<div style="flex:1;display:flex;flex-direction:column;gap:6px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:12px">
+<p style="font-size:26px;font-weight:600">Soft voting</p>
+<p style="font-size:24px;color:#4A5568">sum word softmax over windows</p>
+</div>
+</div>
+<div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:28px">
+<div style="display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:30px;font-weight:600;color:#2A78D6">Why LiLT</h3>
+<p style="font-size:26px;line-height:1.45;color:#2D3748">Keeps layout in its own stream next to a pretrained text encoder, so layout and language are learned separately. Checkpoint: SCUT-DLVCLab/lilt-roberta-en-base.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:30px;font-weight:600;color:#2A78D6">Why windows</h3>
+<p style="font-size:26px;line-height:1.45;color:#2D3748">Registration forms average 949 words over several pages. At 512 tokens most words were never seen; overlapping windows cover them all.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:12px">
+<h3 style="font-size:30px;font-weight:600;color:#2A78D6">Training signal</h3>
+<p style="font-size:26px;line-height:1.45;color:#2D3748">Cross-entropy on the first sub-word of each word; other sub-words ignored. Coordinate jitter (±80 shift, 0.85–1.15 scale) during training.</p>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 7 / 18</p>
+<aside>This is our main baseline. LiLT runs a separate layout transformer next to the text transformer and lets the two share attention. We tag every word with a BIO label over the six registration fields. Long documents get split into overlapping windows, and when a word shows up in two windows we add up its predicted probabilities before taking the argmax.</aside>
+</section>
