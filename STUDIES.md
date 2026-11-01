@@ -37,7 +37,7 @@ Conventions:
 | 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
-| 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | registered 2026-11-01 | *pending (CPU run on the legacy checkpoints; confirmation on the study-19 checkpoints when available)* |
+| 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | 2026-11-01 | **No better (registered criterion):** dedup raises entity F1 by +1.4 (precision 66.5 -> 70.6, recall -2.2) but link F1 changes by -0.35 (negative in all 3 seeds); with the edge rule kept it is +0.06. Over-prediction is only part of the entity problem: 14.4k entities still predicted vs 13.0k gold. Legacy checkpoints only; confirmation on study-19 models pending |
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | registered 2026-11-01 | *pending (Kaggle run)* |
 
 ---
@@ -910,9 +910,23 @@ Precision / recall, windowed inference, mean of 3 seeds: links base 41.2 / 46.0,
 
 **Limits stated up front:** the legacy checkpoints are not the study-19 models; clustering on shared words can merge two distinct gold entities that a fragment overlaps; the centrality rule is one heuristic among several (confidence-based choice needs probabilities the model code does not return); link endpoints are matched on word range; the dedupe conjecture is tested only through its effect on F1.
 
-**Results:** *pending*
+**Results (legacy checkpoints, 3 seeds, 250 forms, F1 in points; sanity check passed: `edge_drop` equals the earlier seed-13 numbers 38.57 / 73.47 exactly):**
 
-**Evidence:** `results/xfund_dedupe/` (after the run).
+| Strategy | link F1 | link P / R | entity F1 | entity P / R | predicted entities (gold 13,007) |
+|---|---|---|---|---|---|
+| `edge_drop` (baseline) | 38.2 | 37.0 / 39.6 | 72.8 | 66.5 / 80.4 | 15,730 |
+| `center` (primary) | 37.9 | 37.2 / 38.6 | 74.2 | 70.6 / 78.2 | 14,399 |
+| `edge_drop+center` | 38.3 | 38.2 / 38.4 | 74.5 | 71.0 / 78.2 | 14,318 |
+
+Seed-matched deltas versus `edge_drop` (seeds 13 / 21 / 42): `center` link F1 -0.37 / -0.34 / -0.34 (mean -0.35), entity F1 +1.18 / +1.51 / +1.64; `edge_drop+center` link F1 +0.00 / +0.09 / +0.10 (mean +0.06), entity F1 +1.42 / +1.71 / +1.84.
+
+**Verdict (registered criteria, primary cell = link F1, `center` minus `edge_drop`):** *dedupe helps* is not met (mean delta -0.35 < +1.0, every seed negative); *no better* is met.
+
+**Findings:** (1) The duplication conjecture is partly right for entities: collapsing overlapping same-type predictions removes about 1,300 entities and raises entity precision by about 4 points, at the cost of about 2 points of recall (a representative with the wrong span replaces a correct one, or two distinct entities are merged). (2) It does not move link F1: the precision gain and the recall loss cancel, and with the edge rule kept the change is +0.06. (3) Over-prediction is not the main bottleneck: even after deduplication about 11% more entities are predicted than exist (14.3k vs 13.0k) at precision 71 and recall 78, so boundary and type errors dominate the remaining entity gap, and link F1 stays between 37.9 and 38.3 whatever the merge rule. (4) The cheap merge-rule route to better end-to-end linking is closed on these checkpoints; gains have to come from the model (training, or a stronger encoder or linker).
+
+**Limits:** legacy checkpoints (older feature set), not the study-19 models; centrality is one heuristic (confidence-based selection, which could keep the better span, needs probabilities the model code does not return); clustering on shared words can merge distinct gold entities; the registered confirmation on the study-19 checkpoints has not been run because their weights are not in the repo.
+
+**Evidence:** `results/xfund_dedupe/legacy.json` (the per-window cache under `results/xfund_dedupe/cache/` is local, not committed).
 
 ---
 

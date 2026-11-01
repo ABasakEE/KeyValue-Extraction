@@ -1,0 +1,283 @@
+{
+  "tag": "legacy",
+  "stride": 128,
+  "n_val": 250,
+  "seeds": {
+    "13": {
+      "edge_drop": {
+        "all|entity": {
+          "precision": 0.6715,
+          "recall": 0.8109,
+          "f1": 0.7347,
+          "gold": 13007,
+          "pred": 15707
+        },
+        "all|link": {
+          "precision": 0.3677,
+          "recall": 0.4056,
+          "f1": 0.3857,
+          "gold": 9062,
+          "pred": 9998
+        },
+        "sibling_free|entity": {
+          "precision": 0.6644,
+          "recall": 0.8085,
+          "f1": 0.7294,
+          "gold": 12098,
+          "pred": 14722
+        },
+        "sibling_free|link": {
+          "precision": 0.3601,
+          "recall": 0.3985,
+          "f1": 0.3783,
+          "gold": 8402,
+          "pred": 9297
+        }
+      },
+      "center": {
+        "all|entity": {
+          "precision": 0.709,
+          "recall": 0.7882,
+          "f1": 0.7465,
+          "gold": 13007,
+          "pred": 14460
+        },
+        "all|link": {
+          "precision": 0.3702,
+          "recall": 0.3945,
+          "f1": 0.382,
+          "gold": 9062,
+          "pred": 9656
+        },
+        "sibling_free|entity": {
+          "precision": 0.7031,
+          "recall": 0.7851,
+          "f1": 0.7419,
+          "gold": 12098,
+          "pred": 13508
+        },
+        "sibling_free|link": {
+          "precision": 0.3639,
+          "recall": 0.3888,
+          "f1": 0.3759,
+          "gold": 8402,
+          "pred": 8978
+        }
+      },
+      "edge_drop+center": {
+        "all|entity": {
+          "precision": 0.7133,
+          "recall": 0.7883,
+          "f1": 0.7489,
+          "gold": 13007,
+          "pred": 14375
+        },
+        "all|link": {
+          "precision": 0.3788,
+          "recall": 0.3927,
+          "f1": 0.3857,
+          "gold": 9062,
+          "pred": 9395
+        },
+        "sibling_free|entity": {
+          "precision": 0.7075,
+          "recall": 0.7852,
+          "f1": 0.7443,
+          "gold": 12098,
+          "pred": 13427
+        },
+        "sibling_free|link": {
+          "precision": 0.3727,
+          "recall": 0.3869,
+          "f1": 0.3797,
+          "gold": 8402,
+          "pred": 8722
+        }
+      }
+    },
+    "21": {
+      "edge_drop": {
+        "all|entity": {
+          "precision": 0.6602,
+          "recall": 0.8039,
+          "f1": 0.725,
+          "gold": 13007,
+          "pred": 15838
+        },
+        "all|link": {
+          "precision": 0.3506,
+          "recall": 0.3913,
+          "f1": 0.3698,
+          "gold": 9062,
+          "pred": 10115
+        },
+        "sibling_free|entity": {
+          "precision": 0.6509,
+          "recall": 0.7994,
+          "f1": 0.7176,
+          "gold": 12098,
+          "pred": 14857
+        },
+        "sibling_free|link": {
+          "precision": 0.3399,
+          "recall": 0.3817,
+          "f1": 0.3596,
+          "gold": 8402,
+          "pred": 9434
+        }
+      },
+      "center": {
+        "all|entity": {
+          "precision": 0.7033,
+          "recall": 0.781,
+          "f1": 0.7401,
+          "gold": 13007,
+          "pred": 14445
+        },
+        "all|link": {
+          "precision": 0.3527,
+          "recall": 0.3813,
+          "f1": 0.3664,
+          "gold": 9062,
+          "pred": 9796
+        },
+        "sibling_free|entity": {
+          "precision": 0.6949,
+          "recall": 0.7763,
+          "f1": 0.7333,
+          "gold": 12098,
+          "pred": 13516
+        },
+        "sibling_free|link": {
+          "precision": 0.3428,
+          "recall": 0.3725,
+          "f1": 0.357,
+          "gold": 8402,
+          "pred": 9132
+        }
+      },
+      "edge_drop+center": {
+        "all|entity": {
+          "precision": 0.7072,
+          "recall": 0.7807,
+          "f1": 0.7421,
+          "gold": 13007,
+          "pred": 14359
+        },
+        "all|link": {
+          "precision": 0.3633,
+          "recall": 0.3784,
+          "f1": 0.3707,
+          "gold": 9062,
+          "pred": 9438
+        },
+        "sibling_free|entity": {
+          "precision": 0.6987,
+          "recall": 0.7759,
+          "f1": 0.7353,
+          "gold": 12098,
+          "pred": 13435
+        },
+        "sibling_free|link": {
+          "precision": 0.3535,
+          "recall": 0.3694,
+          "f1": 0.3613,
+          "gold": 8402,
+          "pred": 8781
+        }
+      }
+    },
+    "42": {
+      "edge_drop": {
+        "all|entity": {
+          "precision": 0.6632,
+          "recall": 0.7978,
+          "f1": 0.7243,
+          "gold": 13007,
+          "pred": 15646
+        },
+        "all|link": {
+          "precision": 0.39,
+          "recall": 0.3923,
+          "f1": 0.3912,
+          "gold": 9062,
+          "pred": 9115
+        },
+        "sibling_free|entity": {
+          "precision": 0.6562,
+          "recall": 0.7949,
+          "f1": 0.7189,
+          "gold": 12098,
+          "pred": 14655
+        },
+        "sibling_free|link": {
+          "precision": 0.3817,
+          "recall": 0.3841,
+          "f1": 0.3829,
+          "gold": 8402,
+          "pred": 8454
+        }
+      },
+      "center": {
+        "all|entity": {
+          "precision": 0.7074,
+          "recall": 0.7774,
+          "f1": 0.7407,
+          "gold": 13007,
+          "pred": 14293
+        },
+        "all|link": {
+          "precision": 0.3935,
+          "recall": 0.3821,
+          "f1": 0.3878,
+          "gold": 9062,
+          "pred": 8800
+        },
+        "sibling_free|entity": {
+          "precision": 0.7016,
+          "recall": 0.7735,
+          "f1": 0.7358,
+          "gold": 12098,
+          "pred": 13338
+        },
+        "sibling_free|link": {
+          "precision": 0.3854,
+          "recall": 0.3736,
+          "f1": 0.3794,
+          "gold": 8402,
+          "pred": 8144
+        }
+      },
+      "edge_drop+center": {
+        "all|entity": {
+          "precision": 0.711,
+          "recall": 0.7774,
+          "f1": 0.7427,
+          "gold": 13007,
+          "pred": 14220
+        },
+        "all|link": {
+          "precision": 0.4051,
+          "recall": 0.38,
+          "f1": 0.3922,
+          "gold": 9062,
+          "pred": 8502
+        },
+        "sibling_free|entity": {
+          "precision": 0.7052,
+          "recall": 0.7735,
+          "f1": 0.7378,
+          "gold": 12098,
+          "pred": 13270
+        },
+        "sibling_free|link": {
+          "precision": 0.3971,
+          "recall": 0.3713,
+          "f1": 0.3838,
+          "gold": 8402,
+          "pred": 7856
+        }
+      }
+    }
+  }
+}
