@@ -1,0 +1,197 @@
+{
+  "stride": 128,
+  "n_val": 250,
+  "n_sibling_free": 234,
+  "seeds": {
+    "13": {
+      "all|single|entity": {
+        "precision": 0.7423,
+        "recall": 0.5442,
+        "f1": 0.628,
+        "gold": 13007,
+        "pred": 9537
+      },
+      "all|single|link": {
+        "precision": 0.5431,
+        "recall": 0.3273,
+        "f1": 0.4085,
+        "gold": 9062,
+        "pred": 5461
+      },
+      "sibling_free|single|entity": {
+        "precision": 0.7339,
+        "recall": 0.5359,
+        "f1": 0.6194,
+        "gold": 12098,
+        "pred": 8834
+      },
+      "sibling_free|single|link": {
+        "precision": 0.5311,
+        "recall": 0.3149,
+        "f1": 0.3954,
+        "gold": 8402,
+        "pred": 4982
+      },
+      "all|windowed|entity": {
+        "precision": 0.6473,
+        "recall": 0.8107,
+        "f1": 0.7198,
+        "gold": 13007,
+        "pred": 16291
+      },
+      "all|windowed|link": {
+        "precision": 0.4197,
+        "recall": 0.4747,
+        "f1": 0.4455,
+        "gold": 9062,
+        "pred": 10251
+      },
+      "sibling_free|windowed|entity": {
+        "precision": 0.6392,
+        "recall": 0.807,
+        "f1": 0.7134,
+        "gold": 12098,
+        "pred": 15273
+      },
+      "sibling_free|windowed|link": {
+        "precision": 0.4093,
+        "recall": 0.4643,
+        "f1": 0.435,
+        "gold": 8402,
+        "pred": 9532
+      },
+      "gold_links_total": 9062,
+      "gold_links_with_untagged_endpoint": 36
+    },
+    "21": {
+      "all|single|entity": {
+        "precision": 0.7637,
+        "recall": 0.5403,
+        "f1": 0.6329,
+        "gold": 13007,
+        "pred": 9203
+      },
+      "all|single|link": {
+        "precision": 0.5324,
+        "recall": 0.3208,
+        "f1": 0.4004,
+        "gold": 9062,
+        "pred": 5460
+      },
+      "sibling_free|single|entity": {
+        "precision": 0.7561,
+        "recall": 0.5326,
+        "f1": 0.625,
+        "gold": 12098,
+        "pred": 8521
+      },
+      "sibling_free|single|link": {
+        "precision": 0.5249,
+        "recall": 0.3115,
+        "f1": 0.3909,
+        "gold": 8402,
+        "pred": 4986
+      },
+      "all|windowed|entity": {
+        "precision": 0.6841,
+        "recall": 0.8122,
+        "f1": 0.7426,
+        "gold": 13007,
+        "pred": 15443
+      },
+      "all|windowed|link": {
+        "precision": 0.4193,
+        "recall": 0.4676,
+        "f1": 0.4421,
+        "gold": 9062,
+        "pred": 10106
+      },
+      "sibling_free|windowed|entity": {
+        "precision": 0.6769,
+        "recall": 0.8087,
+        "f1": 0.7369,
+        "gold": 12098,
+        "pred": 14455
+      },
+      "sibling_free|windowed|link": {
+        "precision": 0.4108,
+        "recall": 0.4599,
+        "f1": 0.434,
+        "gold": 8402,
+        "pred": 9406
+      },
+      "gold_links_total": 9062,
+      "gold_links_with_untagged_endpoint": 36
+    },
+    "42": {
+      "all|single|entity": {
+        "precision": 0.7614,
+        "recall": 0.5446,
+        "f1": 0.635,
+        "gold": 13007,
+        "pred": 9302
+      },
+      "all|single|link": {
+        "precision": 0.5563,
+        "recall": 0.3144,
+        "f1": 0.4017,
+        "gold": 9062,
+        "pred": 5121
+      },
+      "sibling_free|single|entity": {
+        "precision": 0.7549,
+        "recall": 0.537,
+        "f1": 0.6276,
+        "gold": 12098,
+        "pred": 8607
+      },
+      "sibling_free|single|link": {
+        "precision": 0.5496,
+        "recall": 0.3042,
+        "f1": 0.3916,
+        "gold": 8402,
+        "pred": 4651
+      },
+      "all|windowed|entity": {
+        "precision": 0.6749,
+        "recall": 0.8081,
+        "f1": 0.7355,
+        "gold": 13007,
+        "pred": 15575
+      },
+      "all|windowed|link": {
+        "precision": 0.4439,
+        "recall": 0.4589,
+        "f1": 0.4513,
+        "gold": 9062,
+        "pred": 9369
+      },
+      "sibling_free|windowed|entity": {
+        "precision": 0.6677,
+        "recall": 0.8041,
+        "f1": 0.7296,
+        "gold": 12098,
+        "pred": 14570
+      },
+      "sibling_free|windowed|link": {
+        "precision": 0.4364,
+        "recall": 0.45,
+        "f1": 0.4431,
+        "gold": 8402,
+        "pred": 8664
+      },
+      "gold_links_total": 9062,
+      "gold_links_with_untagged_endpoint": 36
+    }
+  },
+  "mean_f1": {
+    "all|single|entity": 0.632,
+    "all|single|link": 0.4035,
+    "sibling_free|single|entity": 0.624,
+    "sibling_free|single|link": 0.3926,
+    "all|windowed|entity": 0.7326,
+    "all|windowed|link": 0.4463,
+    "sibling_free|windowed|entity": 0.7266,
+    "sibling_free|windowed|link": 0.4374
+  }
+}
