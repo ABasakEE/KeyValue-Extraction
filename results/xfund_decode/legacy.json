@@ -1,0 +1,195 @@
+{
+  "seeds": [
+    13,
+    21,
+    42
+  ],
+  "n_val_selection": 111,
+  "n_test": 250,
+  "selected": [
+    0.4,
+    true,
+    "hard",
+    0
+  ],
+  "selection_pooled_f1": {
+    "default": 0.6376,
+    "selected": 0.647
+  },
+  "test": {
+    "default": {
+      "13": 0.6088,
+      "21": 0.5948,
+      "42": 0.5894
+    },
+    "selected": {
+      "13": 0.6272,
+      "21": 0.6164,
+      "42": 0.6214
+    }
+  },
+  "sweeps": {
+    "threshold": {
+      "[0.3, True, 'trained', 0]": {
+        "13": 0.569,
+        "21": 0.5687,
+        "42": 0.5494
+      },
+      "[0.4, True, 'trained', 0]": {
+        "13": 0.5979,
+        "21": 0.5917,
+        "42": 0.5794
+      },
+      "[0.5, True, 'trained', 0]": {
+        "13": 0.6088,
+        "21": 0.5948,
+        "42": 0.5894
+      },
+      "[0.6, True, 'trained', 0]": {
+        "13": 0.5823,
+        "21": 0.567,
+        "42": 0.5632
+      },
+      "[0.7, True, 'trained', 0]": {
+        "13": 0.4972,
+        "21": 0.4887,
+        "42": 0.4938
+      }
+    },
+    "one_to_one": {
+      "[0.5, True, 'trained', 0]": {
+        "13": 0.6088,
+        "21": 0.5948,
+        "42": 0.5894
+      },
+      "[0.5, False, 'trained', 0]": {
+        "13": 0.4956,
+        "21": 0.4758,
+        "42": 0.4555
+      }
+    },
+    "prior": {
+      "[0.5, True, 'trained', 0]": {
+        "13": 0.6088,
+        "21": 0.5948,
+        "42": 0.5894
+      },
+      "[0.5, True, 'none', 0]": {
+        "13": 0.3014,
+        "21": 0.2851,
+        "42": 0.2866
+      },
+      "[0.5, True, 'qq_free', 0]": {
+        "13": 0.5059,
+        "21": 0.5004,
+        "42": 0.4988
+      },
+      "[0.5, True, 'hard', 0]": {
+        "13": 0.6202,
+        "21": 0.6023,
+        "42": 0.6091
+      }
+    },
+    "nearness_K": {
+      "[0.5, True, 'trained', 0]": {
+        "13": 0.6088,
+        "21": 0.5948,
+        "42": 0.5894
+      },
+      "[0.5, True, 'trained', 5]": {
+        "13": 0.5254,
+        "21": 0.5234,
+        "42": 0.5088
+      },
+      "[0.5, True, 'trained', 10]": {
+        "13": 0.582,
+        "21": 0.5774,
+        "42": 0.5651
+      }
+    }
+  },
+  "delta_per_seed": [
+    0.0185,
+    0.0216,
+    0.032
+  ],
+  "delta_mean": 0.024,
+  "verdict": {
+    "decode_levers_matter": true,
+    "representation_limited": false
+  },
+  "selected_pooled_test_pr": {
+    "precision": 0.6774,
+    "recall": 0.5744
+  },
+  "default_pooled_test_pr": {
+    "precision": 0.6029,
+    "recall": 0.5924
+  },
+  "group_recall_seed13": {
+    "default": {
+      "geometry: partner above": {
+        "found": 139,
+        "total": 462,
+        "recall": 0.3009
+      },
+      "geometry: partner below": {
+        "found": 2655,
+        "total": 5270,
+        "recall": 0.5038
+      },
+      "geometry: same line, partner right": {
+        "found": 2628,
+        "total": 3319,
+        "recall": 0.7918
+      },
+      "type: answer -> answer": {
+        "found": 0,
+        "total": 27,
+        "recall": 0.0
+      },
+      "type: question -> answer": {
+        "found": 4861,
+        "total": 7325,
+        "recall": 0.6636
+      },
+      "type: question -> question": {
+        "found": 561,
+        "total": 1657,
+        "recall": 0.3386
+      }
+    },
+    "selected": {
+      "geometry: partner above": {
+        "found": 171,
+        "total": 462,
+        "recall": 0.3701
+      },
+      "geometry: partner below": {
+        "found": 2419,
+        "total": 5270,
+        "recall": 0.459
+      },
+      "geometry: same line, partner right": {
+        "found": 2649,
+        "total": 3319,
+        "recall": 0.7981
+      },
+      "type: answer -> answer": {
+        "found": 0,
+        "total": 27,
+        "recall": 0.0
+      },
+      "type: question -> answer": {
+        "found": 5242,
+        "total": 7325,
+        "recall": 0.7156
+      },
+      "type: question -> question": {
+        "found": 0,
+        "total": 1657,
+        "recall": 0.0
+      }
+    }
+  }
+}

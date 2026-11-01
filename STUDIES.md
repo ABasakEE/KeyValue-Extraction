@@ -40,7 +40,7 @@ Conventions:
 | 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | 2026-11-01 | **No better (registered criterion):** dedup raises entity F1 by +1.4 (precision 66.5 -> 70.6, recall -2.2) but link F1 changes by -0.35 (negative in all 3 seeds); with the edge rule kept it is +0.06. Over-prediction is only part of the entity problem: 14.4k entities still predicted vs 13.0k gold. Legacy checkpoints only; confirmation on study-19 models pending |
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 | 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
-| 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | registered 2026-11-01 | *pending (CPU run on the legacy checkpoints)* |
+| 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), all by precision (60.3 -> 67.7) at the price of dropping every question->question link (recall 34 -> 0). It does not recover the downward links (recall 50 -> 46). One-to-one, the trained prior and long-range candidates all matter; the remaining gap to the reachable ceiling is not a decode problem |
 
 ---
 
@@ -1033,6 +1033,31 @@ Control, windowed inference, mean of 3 seeds: link precision / recall 42.8 / 46.
 
 **Limits stated up front:** legacy checkpoints (older feature set) and gold entities only; the checkpoints were trained with the current decoding and prior, so a retrained model could respond differently (removing the prior at decode time only removes what the biaffine part learned to compensate); the selection split was used for early stopping of these checkpoints; no decode change can reach the 10% of links that no window contains; 3 seeds, no interval; 120 variants are searched on the selection split, which is why the report split decides.
 
-**Results:** *pending*
+**Results (legacy checkpoints, gold entities, windowed; sanity check passed: V0 on the report split = 0.6088 / 0.5948 / 0.5894, equal to study 22):**
 
-**Evidence:** `results/xfund_decode/` (after the run).
+Selected on the 111-form selection split (pooled F1 63.76 for V0 -> 64.70): **threshold 0.4, one-to-one on, hard type mask, no nearness limit.**
+
+| Report split (250 forms) | V0 (0.5, one-to-one, prior as trained) | selected | delta per seed (13 / 21 / 42) |
+|---|---|---|---|
+| link F1, mean of 3 seeds | 59.8 | **62.2** | **+2.4** (+1.85 / +2.16 / +3.20) |
+| per-seed link F1 | 60.9 / 59.5 / 58.9 | 62.7 / 61.6 / 62.1 | |
+| pooled precision / recall | 60.3 / 59.2 | **67.7** / 57.4 | |
+
+**Verdict (registered criteria):** *decode-time levers matter* is met (mean +2.4 >= +2.0, no negative seed); *representation-limited* (< +1.0) is not.
+
+One-factor sweeps on the report split (link F1, mean of 3 seeds, others at V0):
+
+| Factor | Values |
+|---|---|
+| threshold | 0.3: 56.2 · 0.4: 59.0 · **0.5: 59.8** · 0.6: 57.1 · 0.7: 49.3 |
+| one-to-one | on: 59.8 · **off: 47.6** |
+| type prior | trained: 59.8 · **none: 29.1** · question->question unpenalised: 50.2 · **hard: 61.1** |
+| nearness limit (K nearest same-type) | none: 59.8 · K=10: 57.5 · K=5: 51.9 |
+
+Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; question->question 33.9 -> **0.0**; same-line partner on the right 79.2 -> 79.8; partner above 30.1 -> 37.0; **partner below 50.4 -> 45.9**.
+
+**Findings:** (1) A decode-only change gains +2.4 link F1 with no retraining, consistently across seeds, but it is a precision gain bought by giving up a link class: the hard mask forbids all question->question pairs (18% of the gold links, recall 34 before), and the model's question->question predictions were net harmful at this operating point (removing the -5 penalty only for them, `qq_free`, costs 9.6 points). (2) The selected variant does not fix the weakness found in study 22: recall for partners below the source falls from 50 to 46. (3) One-to-one decoding is essential (off: -12.2), the trained type prior is doing real work (none: -30.7), and the nearness limit hurts because many true partners are far (K=10: -2.3, K=5: -7.9). (4) The threshold 0.5 is near-optimal for the trained model; 0.4 helps only together with the hard mask. (5) So a cheap +2.4 exists, but the bulk of the distance to the reachable ceiling (recall 66% of reachable links, precision 60%) is not recovered by any decode rule in this grid; whether an encoder change would recover it is untested.
+
+**Limits:** legacy checkpoints and gold entities only; the checkpoints were trained with the current decoding and prior, so a retrained model could respond differently; the selection split was also used for these checkpoints' early stopping; 120 variants searched on 111 forms (the report split decides, and it agrees in sign and size on every seed); group recalls are for seed 13 only; dropping question->question links changes what is predicted, and whether that is acceptable is a task-definition choice (they are scored in this study); no interval.
+
+**Evidence:** `results/xfund_decode/legacy.json`, `scripts/xfund_decode_study.py`.
