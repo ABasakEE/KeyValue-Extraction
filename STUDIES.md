@@ -914,7 +914,7 @@ Precision / recall, windowed inference, mean of 3 seeds: links base 41.2 / 46.0,
 
 | Strategy | link F1 | link P / R | entity F1 | entity P / R | predicted entities (gold 13,007) |
 |---|---|---|---|---|---|
-| `edge_drop` (baseline) | 38.2 | 37.0 / 39.6 | 72.8 | 66.5 / 80.4 | 15,730 |
+| `edge_drop` (baseline) | 38.2 | 36.9 / 39.6 | 72.8 | 66.5 / 80.4 | 15,730 |
 | `center` (primary) | 37.9 | 37.2 / 38.6 | 74.2 | 70.6 / 78.2 | 14,399 |
 | `edge_drop+center` | 38.3 | 38.2 / 38.4 | 74.5 | 71.0 / 78.2 | 14,318 |
 
