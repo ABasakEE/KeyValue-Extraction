@@ -40,6 +40,7 @@ Conventions:
 | 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | 2026-11-01 | **No better (registered criterion):** dedup raises entity F1 by +1.4 (precision 66.5 -> 70.6, recall -2.2) but link F1 changes by -0.35 (negative in all 3 seeds); with the edge rule kept it is +0.06. Over-prediction is only part of the entity problem: 14.4k entities still predicted vs 13.0k gold. Legacy checkpoints only; confirmation on study-19 models pending |
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 | 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
+| 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | registered 2026-11-01 | *pending (CPU run on the legacy checkpoints)* |
 
 ---
 
@@ -1003,3 +1004,35 @@ Control, windowed inference, mean of 3 seeds: link precision / recall 42.8 / 46.
 **Limits:** legacy checkpoints (older feature set), gold entities, LiLT only; rank and direction are defined by box-centre geometry (not text); the "another type" class uses the predicted partner's gold type; the analysis cannot say whether a different encoder would change these proportions, only where the current errors sit; correlated categories (vertical links are also the question->question links and the far partners), so the rows are not independent causes.
 
 **Evidence:** `results/xfund_link_errors/legacy.json`, `scripts/xfund_link_errors.py`.
+
+---
+
+## 23. Decode-time levers for gold-entity linking — CPU, registered 2026-11-01
+
+**Question:** study 22 showed that gold-entity link errors are mostly downward links (72% of misses) and question->question links (30%), that wrong partners are rarely the nearest candidate, and that 37% of wrong partners are of the wrong type. Are the missing links already scored correctly or nearly so and lost in the decoding and type rules (then a fix needs no retraining and the encoder is not the bottleneck), or is the information not in the scores (then the encoder arms are justified)?
+
+**Suspect found in the code:** the soft type prior added inside the relation head (`logits + soft_priors`) allows only question->answer, header->question and header->answer; every other pair gets -5. Question->question is 18% of the gold links and is penalised by it. The prior is therefore baked into the logits the model returns, and can be undone at decode time.
+
+**Data:** the three legacy checkpoints (`results/xfund_joint_lilt/seed_{13,21,42}`), gold entity spans and types, windowed (510 tokens, stride 128) as in studies 17 and 22. The model runs once per window and its relation logits are cached; every variant is a re-decode of the same cache (`scripts/xfund_decode_study.py`). **Selection split:** the 111 forms carved from the training file (the same carve the checkpoints used, `load_xfund_dataset` seed 42). **Report split:** the 250 forms of the XFUND val file, as in all earlier studies.
+
+**Variants (fixed grid, 5 x 2 x 4 x 3 = 120; default V0 = 0.5 / one-to-one / prior as trained / no limit):**
+- threshold on the link probability: 0.3, 0.4, 0.5, 0.6, 0.7;
+- one-to-one decoding (each value keeps only its best-scoring key): on, off;
+- type prior: *as trained*; *none* (the -5 undone for every pair); *qq_free* (the -5 undone only for question->question pairs); *hard* (pairs outside the allowed set forbidden);
+- nearness limit: none, or only the K nearest same-type candidates by box-centre distance (the rank used in study 22), K = 5 or 10.
+
+**Selection and criteria (registered):** the variant with the highest pooled link F1 on the selection split (counts summed over the 3 seeds; ties: fewest non-default factors, then threshold closest to 0.5) is applied to all seeds on the report split. Primary cell: link F1 on the 250 forms, full gold (all annotated links), selected variant minus V0, seed-matched.
+- *decode-time levers matter* (decoding or type handling is the first thing to fix): mean delta >= +2.0 points and no negative seed.
+- *representation-limited* (the encoder arms are justified): mean delta < +1.0 point.
+- Between the two: inconclusive, reported as such.
+- Descriptive: one-factor sweeps on the report split (each factor varied alone from V0); recall of the question->question, question->answer, downward and same-line groups for V0 and the selected variant.
+
+**Sanity check (must pass first):** V0 on the report split reproduces the study-22 per-seed F1 (seed 13: 0.6088; seeds 21 and 42: 0.5948 and 0.5894).
+
+**Checks done before the run:** model-free self-test that the numpy decoder equals `BiaffineRelationClassifier.decode_predictions` on random logits (one-to-one on and off, several thresholds, diagonal included), that the prior algebra reproduces `build_soft_type_priors_from_labels`, and that the nearness rank equals study 22's.
+
+**Limits stated up front:** legacy checkpoints (older feature set) and gold entities only; the checkpoints were trained with the current decoding and prior, so a retrained model could respond differently (removing the prior at decode time only removes what the biaffine part learned to compensate); the selection split was used for early stopping of these checkpoints; no decode change can reach the 10% of links that no window contains; 3 seeds, no interval; 120 variants are searched on the selection split, which is why the report split decides.
+
+**Results:** *pending*
+
+**Evidence:** `results/xfund_decode/` (after the run).
