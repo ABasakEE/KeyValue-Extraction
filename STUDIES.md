@@ -38,7 +38,7 @@ Conventions:
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
 | 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | 2026-11-01 | **No better (registered criterion):** dedup raises entity F1 by +1.4 (precision 66.5 -> 70.6, recall -2.2) but link F1 changes by -0.35 (negative in all 3 seeds); with the edge rule kept it is +0.06. Over-prediction is only part of the entity problem: 14.4k entities still predicted vs 13.0k gold. Legacy checkpoints only; confirmation on study-19 models pending |
-| 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | registered 2026-11-01 | *pending (Kaggle run)* |
+| 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 
 ---
 
@@ -946,6 +946,22 @@ Seed-matched deltas versus `edge_drop` (seeds 13 / 21 / 42): `center` link F1 -0
 
 **Limits stated up front:** 3 seeds (no interval, only seed-matched deltas); the control and the study-19 arms are separate Kaggle runs; matching the number of steps does not match the number of distinct examples or the learning-rate schedule shape across phases; the control is the legacy-recipe feature set retrained with current code, as in study 19; LiLT, not BROS; training time unmeasured (about the same compute as the windows arm).
 
-**Results:** *pending*
+**Results (3 seeds, F1 in points; Kaggle T4 x2; train and eval return codes 0):**
 
-**Evidence:** `results/xfund_e2e_matched/` (after the run).
+| Cell (all 250 forms) | base (s19) | control | windows (s19) | windows - control | per seed (13 / 21 / 42) | control - base |
+|---|---|---|---|---|---|---|
+| **link F1, windowed inference (primary)** | 43.5 | 44.6 | **47.7** | **+3.1** | +4.0 / +3.4 / +1.8 | +1.2 |
+| link F1, single 512 window | 39.6 | 40.4 | 41.7 | +1.3 | +1.2 / +1.4 / +1.4 | +0.7 |
+| entity F1, windowed inference | 73.0 | 73.3 | 75.9 | +2.7 | +4.0 / +1.7 / +2.3 | +0.2 |
+| entity F1, single 512 window | 62.8 | 63.2 | 64.1 | +0.9 | +1.1 / +1.0 / +0.7 | +0.4 |
+| link F1, windowed, sibling-free | 42.6 | 43.7 | 46.6 | +2.8 | +3.9 / +2.9 / +1.8 | +1.1 |
+
+Control, windowed inference, mean of 3 seeds: link precision / recall 42.8 / 46.7, entity precision / recall 66.9 / 81.0. The control's curriculum ended by early stopping after 35 / 38 / 43 of 53 epochs (phases 8+15+12, 17+12+9, 19+15+9), i.e. about 5,570 / 6,040 / 6,840 steps against about 8,470 for the windows arm. Train-time whole-document test link F1 (gold entities, first 512 tokens): base 66.3, control 67.9, windows 70.2.
+
+**Verdict (registered criteria):** *coverage matters* is met (mean +3.1 >= +2.0, positive in every seed); *steps explain it* is not.
+
+**Findings:** (1) Most of the study-19 gain survives a longer-trained control: windows add about +3.1 end-to-end link F1 and +2.7 entity F1 beyond what extra training gives. (2) Extra training alone is worth about +1.2 link F1 (consistent across seeds, 0.8 to 1.4) and almost nothing for entity F1 (+0.2), so about 30% of the headline +4.2 was steps and about 70% was windows. (3) Entity F1 is where windows clearly win; the link-level gain is smaller and the weakest seed (42) is +1.8, just under the +2.0 bar on its own. (4) The control stopped early on validation, so more steps beyond about 35-43 epochs did not improve it; the matching of steps is therefore approximate (66 to 81% of the windows arm's), and part of the remaining +3.1 could still be steps the control chose not to take.
+
+**Limits:** 3 seeds, no interval; the control and the study-19 arms are separate Kaggle runs; step matching is incomplete because of early stopping; overlapping windows also act as augmentation, which this control does not separate from coverage; LiLT, not BROS.
+
+**Evidence:** `results/xfund_e2e_matched/{base_matched_e2e,summary_vs_windows,summary_steps_only,run_status}.json`, `base_matched/` (per-seed results and histories).
