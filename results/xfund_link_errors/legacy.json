@@ -1,0 +1,338 @@
+{
+  "n_val": 250,
+  "seeds": {
+    "13": {
+      "totals": {
+        "gold": 9062,
+        "found": 5426,
+        "spurious": 3338
+      },
+      "gold_links": {
+        "geometry: partner above": {
+          "found": 139,
+          "total": 462,
+          "recall": 0.3009
+        },
+        "geometry: partner below": {
+          "found": 2655,
+          "total": 5270,
+          "recall": 0.5038
+        },
+        "geometry: same line, partner left": {
+          "found": 4,
+          "total": 11,
+          "recall": 0.3636
+        },
+        "geometry: same line, partner right": {
+          "found": 2628,
+          "total": 3319,
+          "recall": 0.7918
+        },
+        "reachable: False": {
+          "found": 0,
+          "total": 937,
+          "recall": 0.0
+        },
+        "reachable: True": {
+          "found": 5426,
+          "total": 8125,
+          "recall": 0.6678
+        },
+        "true-partner rank: 0 (nearest)": {
+          "found": 1504,
+          "total": 2299,
+          "recall": 0.6542
+        },
+        "true-partner rank: 1": {
+          "found": 853,
+          "total": 1269,
+          "recall": 0.6722
+        },
+        "true-partner rank: 2-4": {
+          "found": 1359,
+          "total": 2068,
+          "recall": 0.6572
+        },
+        "true-partner rank: 5+": {
+          "found": 1710,
+          "total": 3426,
+          "recall": 0.4991
+        },
+        "type: answer -> answer": {
+          "found": 0,
+          "total": 27,
+          "recall": 0.0
+        },
+        "type: header -> question": {
+          "found": 1,
+          "total": 17,
+          "recall": 0.0588
+        },
+        "type: other -> answer": {
+          "found": 0,
+          "total": 5,
+          "recall": 0.0
+        },
+        "type: other -> other": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: other -> question": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: question -> answer": {
+          "found": 4861,
+          "total": 7325,
+          "recall": 0.6636
+        },
+        "type: question -> other": {
+          "found": 3,
+          "total": 15,
+          "recall": 0.2
+        },
+        "type: question -> question": {
+          "found": 561,
+          "total": 1657,
+          "recall": 0.3386
+        }
+      },
+      "spurious": {
+        "source has a different true partner": 2217,
+        "source has no true partner": 1119,
+        "reversed direction": 2
+      },
+      "spurious_wrong_partner_rank": {
+        "predicted partner of another type": 822,
+        "2-4": 234,
+        "1": 119,
+        "0 (nearest)": 113,
+        "5+": 929
+      }
+    },
+    "21": {
+      "totals": {
+        "gold": 9062,
+        "found": 5290,
+        "spurious": 3435
+      },
+      "gold_links": {
+        "geometry: partner above": {
+          "found": 138,
+          "total": 462,
+          "recall": 0.2987
+        },
+        "geometry: partner below": {
+          "found": 2521,
+          "total": 5270,
+          "recall": 0.4784
+        },
+        "geometry: same line, partner left": {
+          "found": 7,
+          "total": 11,
+          "recall": 0.6364
+        },
+        "geometry: same line, partner right": {
+          "found": 2624,
+          "total": 3319,
+          "recall": 0.7906
+        },
+        "reachable: False": {
+          "found": 0,
+          "total": 937,
+          "recall": 0.0
+        },
+        "reachable: True": {
+          "found": 5290,
+          "total": 8125,
+          "recall": 0.6511
+        },
+        "true-partner rank: 0 (nearest)": {
+          "found": 1517,
+          "total": 2299,
+          "recall": 0.6599
+        },
+        "true-partner rank: 1": {
+          "found": 857,
+          "total": 1269,
+          "recall": 0.6753
+        },
+        "true-partner rank: 2-4": {
+          "found": 1329,
+          "total": 2068,
+          "recall": 0.6426
+        },
+        "true-partner rank: 5+": {
+          "found": 1587,
+          "total": 3426,
+          "recall": 0.4632
+        },
+        "type: answer -> answer": {
+          "found": 0,
+          "total": 27,
+          "recall": 0.0
+        },
+        "type: header -> question": {
+          "found": 3,
+          "total": 17,
+          "recall": 0.1765
+        },
+        "type: other -> answer": {
+          "found": 0,
+          "total": 5,
+          "recall": 0.0
+        },
+        "type: other -> other": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: other -> question": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: question -> answer": {
+          "found": 4765,
+          "total": 7325,
+          "recall": 0.6505
+        },
+        "type: question -> other": {
+          "found": 2,
+          "total": 15,
+          "recall": 0.1333
+        },
+        "type: question -> question": {
+          "found": 520,
+          "total": 1657,
+          "recall": 0.3138
+        }
+      },
+      "spurious": {
+        "source has a different true partner": 2254,
+        "source has no true partner": 1179,
+        "reversed direction": 2
+      },
+      "spurious_wrong_partner_rank": {
+        "predicted partner of another type": 766,
+        "5+": 979,
+        "2-4": 264,
+        "1": 123,
+        "0 (nearest)": 122
+      }
+    },
+    "42": {
+      "totals": {
+        "gold": 9062,
+        "found": 5389,
+        "spurious": 3836
+      },
+      "gold_links": {
+        "geometry: partner above": {
+          "found": 134,
+          "total": 462,
+          "recall": 0.29
+        },
+        "geometry: partner below": {
+          "found": 2600,
+          "total": 5270,
+          "recall": 0.4934
+        },
+        "geometry: same line, partner left": {
+          "found": 4,
+          "total": 11,
+          "recall": 0.3636
+        },
+        "geometry: same line, partner right": {
+          "found": 2651,
+          "total": 3319,
+          "recall": 0.7987
+        },
+        "reachable: False": {
+          "found": 0,
+          "total": 937,
+          "recall": 0.0
+        },
+        "reachable: True": {
+          "found": 5389,
+          "total": 8125,
+          "recall": 0.6633
+        },
+        "true-partner rank: 0 (nearest)": {
+          "found": 1440,
+          "total": 2299,
+          "recall": 0.6264
+        },
+        "true-partner rank: 1": {
+          "found": 833,
+          "total": 1269,
+          "recall": 0.6564
+        },
+        "true-partner rank: 2-4": {
+          "found": 1357,
+          "total": 2068,
+          "recall": 0.6562
+        },
+        "true-partner rank: 5+": {
+          "found": 1759,
+          "total": 3426,
+          "recall": 0.5134
+        },
+        "type: answer -> answer": {
+          "found": 0,
+          "total": 27,
+          "recall": 0.0
+        },
+        "type: header -> question": {
+          "found": 3,
+          "total": 17,
+          "recall": 0.1765
+        },
+        "type: other -> answer": {
+          "found": 0,
+          "total": 5,
+          "recall": 0.0
+        },
+        "type: other -> other": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: other -> question": {
+          "found": 0,
+          "total": 8,
+          "recall": 0.0
+        },
+        "type: question -> answer": {
+          "found": 4779,
+          "total": 7325,
+          "recall": 0.6524
+        },
+        "type: question -> other": {
+          "found": 1,
+          "total": 15,
+          "recall": 0.0667
+        },
+        "type: question -> question": {
+          "found": 606,
+          "total": 1657,
+          "recall": 0.3657
+        }
+      },
+      "spurious": {
+        "source has a different true partner": 2500,
+        "source has no true partner": 1335,
+        "reversed direction": 1
+      },
+      "spurious_wrong_partner_rank": {
+        "predicted partner of another type": 995,
+        "2-4": 279,
+        "1": 136,
+        "5+": 991,
+        "0 (nearest)": 99
+      }
+    }
+  }
+}

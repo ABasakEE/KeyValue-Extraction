@@ -39,6 +39,7 @@ Conventions:
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
 | 20 | Cross-window entity deduplication for end-to-end XFUND linking | CPU | 2026-11-01 | **No better (registered criterion):** dedup raises entity F1 by +1.4 (precision 66.5 -> 70.6, recall -2.2) but link F1 changes by -0.35 (negative in all 3 seeds); with the edge rule kept it is +0.06. Over-prediction is only part of the entity problem: 14.4k entities still predicted vs 13.0k gold. Legacy checkpoints only; confirmation on study-19 models pending |
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
+| 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
 
 ---
 
@@ -965,3 +966,40 @@ Control, windowed inference, mean of 3 seeds: link precision / recall 42.8 / 46.
 **Limits:** 3 seeds, no interval; the control and the study-19 arms are separate Kaggle runs; step matching is incomplete because of early stopping; overlapping windows also act as augmentation, which this control does not separate from coverage; LiLT, not BROS.
 
 **Evidence:** `results/xfund_e2e_matched/{base_matched_e2e,summary_vs_windows,summary_steps_only,run_status}.json`, `base_matched/` (per-seed results and histories).
+
+---
+
+## 22. Where do gold-entity link errors come from? — CPU, 2026-11-01
+
+**Question (step 0 before designing a "stronger encoder" for linking):** with perfect entity spans and types, why does the joint-LiLT linker reach only about 60 F1? In particular, are the misses close-neighbour confusions (which a better layout mechanism such as BROS's relative-position attention could plausibly fix), long-range or vertical relations, or something about the link scheme?
+
+**Method (`scripts/xfund_link_errors.py`, descriptive, no registered criteria):** the three legacy checkpoints, gold entity spans and types, windowed inference (510 tokens, stride 128) as in study 17, all 250 val forms (9,062 gold links per seed, 5,368 found, 3,536 spurious on average). Every gold link is classified by endpoint types, by the geometry of the true partner relative to the source (centre offsets; "same line" if the vertical offset is under half the larger box height), by the rank of the true partner among same-type entities ordered by centre distance from the source (0 = nearest), and by whether any window contains both endpoints. Every spurious predicted link is classified as reversed direction, source with a different true partner (with the rank of the predicted partner, or "another type"), or source with no true partner.
+
+**Sanity check (passed):** seed 13 gives precision 61.9, recall 59.9, F1 60.88, equal to the study-17 windowed full-gold figure 0.6088; seeds 21 and 42 give 59.5 and 58.9 (pooled 59.8).
+
+**Gold links (pooled over the 3 seeds; "of misses" = share of the 3,694 missed links per seed):**
+
+| Group | Share of gold | Recall | Share of misses |
+|---|---|---|---|
+| partner below | 58.2% | **49.2** | 72% |
+| partner on the same line, to the right | 36.6% | 79.4 | 19% |
+| partner above | 5.1% | 29.7 | 9% |
+| type question -> answer | 80.8% | 65.6 | 68% |
+| type question -> question | 18.3% | **33.9** | 30% |
+| header -> question, answer -> answer, links touching "other" (rare) | 1.0% | 0 to 14 | ~2% |
+| endpoints not in one window (unreachable) | 10.3% | 0.0 | 25% |
+| reachable links | 89.7% | 66.1 | 75% |
+| true partner is the nearest same-type entity (rank 0) | 25.4% | 64.7 | |
+| true partner rank 1 | 14.0% | 66.8 | |
+| true partner rank 2-4 | 22.8% | 65.2 | |
+| true partner rank 5+ | 37.8% | 49.2 | |
+
+(The group rows overlap: geometry, type and reachability are separate cuts of the same links.)
+
+**Spurious links (per seed, 3,536):** 66% come from a source that has a different true partner, 34% from a source with no true partner at all, ~0% are reversed. For the wrong-partner cases (2,323), the predicted partner is at rank 0 in 4.8%, rank 1 in 5.4%, rank 2-4 in 11.1%, rank 5+ in 41.6%, and of another type than any true partner in 37.1%.
+
+**Findings:** (1) Vertical relations are the main loss: 58% of gold links point downward, recall 49 against 79 for same-line partners, and they account for 72% of all misses. (2) Question->question links (hierarchical keys, 18% of gold) are found only a third of the time and give 30% of the misses; they are also where the soft type prior is least informative, and 37% of wrong-partner predictions land on an entity of the wrong type, consistent with the model hedging between question and answer targets. (3) Close-neighbour confusion is not the main error: the nearest candidate is found only 65% of the time, the same as candidates 2-4, and only 10% of wrong partners are the nearest or second nearest; most wrong partners are far away (42%) or of the wrong type (37%). (4) About a quarter of the misses (10% of gold) cannot be found by any window, which no encoder fixes. (5) Taken together this does not point to a short-range geometry deficit that a relative-position attention encoder would repair; it points to structural disambiguation (which of several candidates down the page, and which link kind) and to the link scheme itself.
+
+**Limits:** legacy checkpoints (older feature set), gold entities, LiLT only; rank and direction are defined by box-centre geometry (not text); the "another type" class uses the predicted partner's gold type; the analysis cannot say whether a different encoder would change these proportions, only where the current errors sit; correlated categories (vertical links are also the question->question links and the far partners), so the rows are not independent causes.
+
+**Evidence:** `results/xfund_link_errors/legacy.json`, `scripts/xfund_link_errors.py`.
