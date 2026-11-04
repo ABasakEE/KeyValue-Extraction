@@ -1150,6 +1150,15 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 
 **Limits stated up front.** The 3B model may not follow the JSON-with-identifiers format (what the pilot gate catches); LMDX's strength came from first tuning the model on diverse synthetic form templates, which is not done here, so this tests the prompting and grounding recipe only; A2 - A0 bundles three changes (schema, OCR text, grounding) and cannot attribute the effect; the prompt is tuned on a 30-document pilot only; the dev documents were used in earlier VLM studies; VRDU registration forms only (no ad-buy, no FATURA); GPU time unmeasured; 1 model, 1 recipe.
 
+**Clarifications made while building, before any model output exists (2026-11-05; derived from gold properties and code, not from results):**
+1. *Reference arm:* A0 is `vlm_both`, the mapping used in the confirmed hybrid of studies 11 and 12 (`results/matched_eval/spans.jsonl`, `results/confirm_v2/matched/spans.jsonl`). `vlm_key` and `vlm_named` are not scored in the verdict.
+2. *Line -> word mapping:* VRDU OCR line `segments` are character offsets into the document text, the same space as the gold annotations. A verified value is mapped to words by character overlap inside its cited line, which is how the gold itself is aligned (so punctuation-only tokens such as `)` and `'` at the edges are included). If the exact text is not found in the cited line, the registered normalised-token containment is the fallback and is counted separately (`grounded_lenient`).
+3. *Multi-segment values:* segments are merged while contiguous; a later disjoint segment is ignored, because the gold alignment keeps only the first contiguous run of a disjoint value (counted as `grounded_disjoint_truncated`).
+4. *Verdict keys:* `strong_ge_5`, `weaker_ge_3`, `competitive_with_bros` as registered, plus `not_worse_than_bros_by_more_than_3` (a model far above BROS is not "within 3.0" but is not a failure either).
+5. *Samples* for A3 are drawn with temperature 0.5 and top-k 40; the deadline for the whole run is 10 hours.
+
+**Checks done before any GPU spend:** the self-test (identifier quantisation and collisions, parser, grounding verifier including hallucination rejection, punctuation-only words, disjoint segments, vote and overlap rules) passes; the **oracle grounding check** on 100 dev documents (gold values with their true line identifiers through the decode path) gives exact-span F1 **0.9969** (478 of 478 predicted spans correct against 481 gold; the 3 missing gold values consist only of whitespace); the pilot manifest has 30 documents (10 per template) with zero overlap with dev or confirm; the `run` loop (sharding, resume, field-format fallback) was exercised with a stub model; `gate` and `score` were exercised on a fabricated perfect model (0.9964); the notebook cells 5 and 6 were run on that data.
+
 **Results:** *pending*
 
 **Evidence:** `results/schema_guided_kv/` (after the run).
