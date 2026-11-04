@@ -41,6 +41,7 @@ Conventions:
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 | 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
 | 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), mostly a precision gain (60.3 -> 67.7); it forbids every question->question link (recall 34 -> 0) and does not recover the downward links (recall 50 -> 46). **Correction (same day, see addendum): the gain comes mainly from forbidding type-violating pairs that touch gold `other` entities, which the end-to-end pipeline never creates; forbidding question->question alone costs 2.6 points. End-to-end emulation: forbidding `header` sources +1.9 (structure mode), question->answer only +8.2 (key-value mode, gold without question->question)** |
+| 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
 
 ---
 
@@ -1110,3 +1111,45 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 **Corrected findings:** (1) Question->question links are heading -> field-label links. They are scored in XFUND (18% of the gold) and the model finds a third of them with 44% precision, which is above the break-even for F1, so predicting them helps in structure mode; they are not key -> value pairs and are irrelevant if the task is pairing a field name with its value. (2) Most of the study-23 "hard mask" gain was removing type-violating pairs that involve gold `other` entities; that part cannot transfer to the end-to-end pipeline, where it is already implicit (+3.4 for free in the emulation). (3) Transferable rules in the emulation: forbid links from `header` entities (+1.9 in structure mode, positive in every seed, XFUND-specific because its gold has almost no header links), and in key-value mode allow question->answer only (+8.2, because every other predicted link is then a false positive). (4) The earlier statement that question->question predictions were net harmful was a misreading of the `qq_free` variant and is withdrawn.
 
 **Limits of the addendum:** post hoc; gold entity types (predicted types are noisier, so the type rules will pay less end to end); legacy checkpoints; header rule is a property of XFUND's annotation, not a general law; key-value mode changes the task being scored (the +8.2 compares systems on a metric that excludes question->question gold); no interval; a confirmation on the study-19 checkpoints or with predicted entities is still needed.
+
+---
+
+## 25. Schema-guided, grounded VLM extraction on VRDU unseen templates — GPU (Kaggle T4 × 2), registered 2026-11-05
+
+(Study 24, the multilingual text-encoder study for XFUND linking, is designed but not registered; this study is numbered 25 to avoid reusing it.)
+
+**Question.** Does an LMDX-style recipe ([arXiv 2309.10952](https://arxiv.org/pdf/2309.10952): schema in the prompt, OCR lines with coordinate identifiers, answers tied to cited OCR lines and verified against them, per-field voting) beat our open-schema pipeline (studies 6-12) for the same checkpoint on unseen VRDU templates, and how much do the page pixels add? It targets the two largest VRDU losses measured so far: key->field naming (study 6) and span boundaries (study 9).
+
+**Model and data.** Qwen2.5-VL-3B-Instruct (the checkpoint of studies 6-12), greedy decoding, up to 4 pages per document. VRDU `registration-form`, three templates (Amendment, Dissemination_Report, Short-Form). Document sets: the 300 documents of studies 7-9 (**dev**, 100 per template) and the 300 fresh documents of study 12 (**confirm**). BROS (Track-1, seeds 13 and 42) is the reference on the same documents, from the existing error dumps. A fresh **pilot** set of 30 documents (10 per template, excluding dev and confirm) is the only place the prompt or output format may be changed; every change is logged, then the recipe is frozen before dev and confirm are run once each.
+
+**Recipe (frozen after the pilot).**
+1. *Segments:* the VRDU OCR lines. Each gets an identifier from its centre coordinates in 100 buckets, `XX|YY`, with the page index; a suffix disambiguates collisions, and the number of collisions is reported.
+2. *Prompt (per page):* `<Document>` the lines, each followed by its identifier; `<Task>` the instruction plus the schema as JSON keys, each with its one-line description from `results/zero_shot_kv_v2/schema_desc.json` (written by the model from field names only, so no template knowledge); `<Extraction>` for the model to complete.
+3. *Output:* a JSON object, `null` for absent fields; each value is the extracted text followed by the identifier of the line it came from (several segments allowed).
+4. *Grounding decode:* the cited line must exist and contain the text exactly (after the same normalisation as `matched_eval.py`); otherwise the value is dropped as ungrounded. A verified value becomes a word span inside that line.
+5. *One answer per field:* majority over pages (and samples), ties to the earliest page.
+
+**Arms (run in this order; an arm that does not finish within the quota is reported as not run):**
+- **A0** (reference, reused): the open-schema pipeline of studies 8 and 12, image only, naming step, post-hoc fuzzy grounding (the best existing VLM spans for these documents).
+- **A2** (**primary**): page image + OCR lines with identifiers + schema with descriptions + grounded decoding.
+- **A1** (pixel ablation): A2 without the image.
+- **A3** (descriptive): the better of A1 and A2 on dev, with 8 samples (temperature 0.5, top-k 40) and a vote.
+
+**Format gate (automatic, on the pilot).** If fewer than 90% of page outputs parse as JSON, or fewer than 90% of returned values ground, the recipe switches to the documented fallback (one field per call, prefilled tag, as in study 7) and the switch is recorded in the results.
+
+**Metric.** Exact entity-span micro F1 on word spans (identical to `scripts/matched_eval.py`), pooled and per template, per field; paired bootstrap over documents (1,000 draws) for differences.
+
+**Registered criteria (primary cell: pooled exact-span micro F1 on the 300 confirm documents, A2 minus A0):**
+- *Strong success:* delta >= **+5.0** F1, bootstrap lower bound > 0, and no template's upper bound < 0.
+- *Weaker success* (looked at in addition, as requested): delta >= **+3.0** F1 with bootstrap lower bound > 0 and no template's upper bound < 0.
+- *Competitive with BROS:* pooled A2 within 3.0 F1 of BROS, or the paired interval for A2 - BROS contains 0.
+- *Not an improvement:* delta < +3.0, or the lower bound <= 0.
+- Descriptive: A2 - A1 (value of the pixels); A3 versus its base arm; per-field F1 (notably `foreign_principle_name` and the Short-Form `registrant_name` decoy); grounding rate, hallucination (ungrounded) rate, identifier collision count; the dev-set results; and the **static hybrid router rerun with the new spans** (same rule as studies 11 and 12) to see whether a stronger VLM enlarges the +3.8 hybrid gain.
+
+**Checks before any GPU spend.** Unit tests: identifier quantisation and collision handling; the JSON parser (valid, invalid, nulls, multi-segment values); the grounding verifier (a hallucinated value must be rejected, a correct one accepted); the vote logic; and an **oracle grounding check** that feeds the gold values with their true line identifiers through the whole decode path and must score near 100% on real documents, which validates the line-to-word-span mapping before the model is involved.
+
+**Limits stated up front.** The 3B model may not follow the JSON-with-identifiers format (what the pilot gate catches); LMDX's strength came from first tuning the model on diverse synthetic form templates, which is not done here, so this tests the prompting and grounding recipe only; A2 - A0 bundles three changes (schema, OCR text, grounding) and cannot attribute the effect; the prompt is tuned on a 30-document pilot only; the dev documents were used in earlier VLM studies; VRDU registration forms only (no ad-buy, no FATURA); GPU time unmeasured; 1 model, 1 recipe.
+
+**Results:** *pending*
+
+**Evidence:** `results/schema_guided_kv/` (after the run).
