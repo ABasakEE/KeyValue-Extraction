@@ -33,7 +33,7 @@ Conventions:
 | 13 | Dataset audit for the held-out-template protocol (FATURA etc.) | CPU | 2026-10-30 | FATURA is compatible (50 labelled templates, 9 core fields, official unseen-template split) but needs block-level scoring and tokens rebuilt from the original annotations; the other candidates fail |
 | 14 | BROS + VLM hybrid on FATURA held-out template folds | GPU | 2026-10-31 | **Not passed, uninformative:** BROS already scores 99.9% on unseen templates (oracle ceiling +0.0), so the router correctly sent every field to BROS (0.0 gain, no harm); the VLM alone scores 59.6% and naive fill-in hurts (-2.2) |
 | 15 | Router with data-starved BROS on FATURA (K = 1, 2, 5, 10 seen templates) | GPU | 2026-10-31 | Registered rule passes only at K=1, where the router merely matches the VLM alone; at K=2 it is significantly worse than BROS (-2.6); K>=5 neutral. Oracle headroom exists but a static per-field router captures none |
-| 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | *pending (Kaggle run)* |
+| 16 | Per-document routing signal (BROS confidence / endorsement) on FATURA and VRDU, plus seed replication | GPU | registered 2026-10-31 | **Registered criteria met, but not by the gate:** VRDU hybrid H (static router, then gate) +3.8 [+2.0, +5.6] over BROS (passes); the confidence gate alone is -0.2 [-0.6, +0.04] on VRDU and gains only at FATURA K = 2 (+1.5 [+0.1, +3.2]); the study-15 K = 2 loss of the static router did not replicate with 5 seeds (+2.3 [-2.1, +7.3]) |
 | 17 | Link F1 of saved XFUND joint-LiLT checkpoints on held-out forms: truncation and windowing | CPU | 2026-10-31 | Reported 65.5 link F1 scores only the 61% of links visible in 512 tokens and gives the linker gold entities; counting cut-off links as misses gives 49.9; link-aware windows (510/128) at inference give 59.8. XFUND val is ~94% sibling-free, so siblings cost <1 point |
 | 18 | Are BROS's and the VLM's errors correlated? (error-correlation check on the study-16 dumps) | CPU | 2026-10-31 | Yes, positively: the VLM is right on 32% of VRDU spans BROS misses vs 70% where BROS is right (lift 0.46 [0.43, 0.50]); FATURA lift 0.81 / 0.67 / 0.51 at K = 2 / 5 / 10. The VLM still rescues 25-42% of BROS misses, so a selector has something to find, but a confidence gate sees it only weakly |
 | 19 | Windowed joint training and end-to-end (predicted-entity) XFUND link F1 | GPU | 2026-10-31 | **Windows help (registered criterion met):** end-to-end link F1 43.5 -> 47.7 (+4.2, all 3 seeds positive, windowed inference); entity F1 73.0 -> 75.9. Predicted entities cost ~22 points vs gold entities for the same checkpoint (seed 13: 60.9 -> 38.6); windowed inference over-predicts entities by ~21% |
@@ -792,9 +792,34 @@ confidences and the parameter fits are new); BROS confidences under template shi
 show it); 5 seeds is still small and VRDU has 2; VRDU's intervals cover documents of 3 templates, not new templates in
 general; the VRDU dev documents were used when choosing among variants in earlier studies.
 
-**Results:** *pending*
+**Results (`results/routing_v3/{vrdu,fatura}.json`; Δ = system − BROS, two-level bootstrap 95% interval):**
 
-**Evidence:** `results/routing_v3/` (after the run).
+| VRDU (600 docs, 2 seeds), BROS 70.5 | F1 | Δ vs BROS |
+|---|---|---|
+| static router | 74.5 | +4.0 [+2.2, +5.9] |
+| gate G | 70.3 | **−0.2** [−0.6, +0.04] |
+| endorse E | 70.9 | +0.4 [−0.4, +1.3] |
+| **hybrid H (static, then gate)** | 74.3 | **+3.8** [+2.0, +5.6] |
+| fill-in | 72.1 | +1.6 [+0.4, +2.9] |
+| oracle | 81.1 | +10.6 [+8.8, +12.4] |
+| VLM alone | 57.7 | −12.8 |
+
+The static router and H capture about 38% and 36% of the oracle headroom; G captures none (−2%). BROS's confidence separates correct from wrong spans well (AUROC 0.86) but that does not translate into gains (see study 18).
+
+| FATURA | K = 2 (5 seeds), BROS 66.6 | K = 5 (5 seeds), BROS 89.8 | K = 10 (2 seeds), BROS 95.9 |
+|---|---|---|---|
+| static router Δ | +2.3 [−2.1, +7.3] | −0.3 [−1.3, +0.2] | 0.0 |
+| gate G Δ | **+1.5 [+0.1, +3.2]** | −0.1 [−0.7, +0.3] | −0.1 [−0.4, 0.0] |
+| endorse E Δ | +3.0 [+1.3, +4.8] | 0.0 | −0.1 |
+| fill-in Δ | +2.8 [+1.0, +4.6] | −1.1 [−1.8, −0.3] | −1.8 [−2.9, −0.8] |
+| oracle Δ | +18.2 | +5.9 | +2.3 |
+| AUROC of BROS confidence | 0.84 | 0.76 | 0.70 |
+
+**Verdict (registered criteria):** VRDU rule H passes (pooled gain significant, no template significantly worse). FATURA rule G passes (lower bound > 0 at K = 2; never significantly worse at any K). Seed replication: the static router's K = 2 loss from study 15 is **not** replicated (`static_router_K2_loss_replicated = false`; with 5 seeds the point estimate is positive), so that loss was seed noise about which two templates BROS saw.
+
+**Reading:** the VRDU gain is the static two-field routing (`foreign_principle_name`, `registrant_name`) that studies 10-12 already established; the per-document gate adds nothing there. The gate and endorsement rules help only in the one FATURA setting where BROS is mid-strength and diffusely wrong (K = 2) and are neutral or slightly harmful where BROS is strong. FATURA is synthetic and the 'passes' for G rests on a lower bound of +0.1.
+
+**Evidence:** `results/routing_v3/` (`vrdu.json`, `fatura.json`, per-run probability dumps).
 
 ---
 

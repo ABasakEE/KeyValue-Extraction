@@ -41,9 +41,9 @@ Track A targets entity F1 ≈ 0.88. **Read this number as a code-path validation
 
 | Benchmark | Backbone | Split / Regimes | Train Docs | Entity F1 | Linking F1 | Key Insights |
 |---|---|---|:---:|:---:|:---:|---|
-| **FUNSD** | LiLT-RoBERTa | Official Standard Split | 119 | 78.31% ± 0.42% | 28.52% | Pipeline validation; diagnosed severe data starvation |
+| **FUNSD** | LiLT-RoBERTa | Official Standard Split | 149 | tagger 79.29% ± 1.36%; joint 79.10% ± 0.79% | 32.05% ± 2.74% | Pipeline validation (from `results/funsd_lilt`, `results/funsd_joint_lilt`); first joint model predicted ~3x too many links |
 | **VRDU Registration** | LiLT-RoBERTa | MTL vs UTL (Matched $n=200$) | 200 | MTL 87.74% / UTL 66.66% | — | Generalization Gap: $\Delta = 21.08$ pts ($-24.0\%$ drop) |
-| **XFUND (5 Latin Langs)** | LiLT-RoBERTa | Official Multilingual Split | 745 | **79.09% ± 0.21%** | **65.51% ± 1.26%** | Scaled architecture, canonical focal loss ($N_{\text{pos}}$), 1-to-1 argmax decoding |
+| **XFUND (5 Latin Langs)** | LiLT-RoBERTa | Official Multilingual Split | 745 | **79.09% ± 0.21%** | **65.51% ± 1.26%** | Focal loss, 1-to-1 decoding. **Optimistic:** gold entities and only links inside the first 512 tokens; counting all links gives ~49.9, link-aware windows ~59.8, end-to-end 47.7 (STUDIES.md 17-19) |
 
 ### Joint Architecture Overview
 1. **Multimodal Backbone**: LiLT (`npthe/lilt-roberta-en-base`) fusing text tokens and 0–1000 normalized 2D layout coordinates via Bidirectional Attention Complementary Module (BiACM).

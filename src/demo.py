@@ -87,8 +87,20 @@ try:
 except ImportError:
     from src.models.joint_extractor import JointFormExtractor
 
-CKPT_PATH = Path("results/funsd_joint_lilt/best_model.pt")
-CONFIG_PATH = Path("results/funsd_joint_lilt/config.json")
+# Which trained joint model the demo loads, and how entities / links are produced. Environment variables so the
+# evaluation script and the live demo can switch without editing code:
+#   DEMO_CKPT_DIR   results/xfund_joint_16d/seed_21 if present (16-D, link F1 67.2 on gold entities), else results/xfund_joint_lilt
+#   DEMO_PIPELINE   words (default: model run as trained, word tokens + windows) | blocks (OCR lines as tokens, colon rules)
+#   DEMO_LINK_MODE  rules | neural | hybrid  (hybrid = colon pairs + trained biaffine head; default)
+#   DEMO_CLEAN      1 (default) = tidy heuristic labels after tagging (prose -> other, trailing colon -> question)
+_DEFAULT_CKPT = "results/xfund_joint_16d/seed_21" if Path("results/xfund_joint_16d/seed_21/best_model.pt").exists() else "results/xfund_joint_lilt"
+CKPT_DIR = Path(os.environ.get("DEMO_CKPT_DIR", _DEFAULT_CKPT))
+CKPT_PATH = CKPT_DIR / "best_model.pt"
+CONFIG_PATH = CKPT_DIR / "config.json"
+LINK_MODE = os.environ.get("DEMO_LINK_MODE", "hybrid")
+CLEAN_LABELS = os.environ.get("DEMO_CLEAN", "1") == "1"
+PIPELINE = os.environ.get("DEMO_PIPELINE", "words")   # words = run the model as trained (word tokens, windows); blocks = OCR lines as tokens
+SPLIT_COLON = os.environ.get("DEMO_SPLIT_COLON", "1") == "1"  # split "Key: value" OCR lines into two entities
 ID2LABEL = {
     0: "O",
     1: "B-HEADER",
@@ -115,9 +127,16 @@ def get_loaded_model() -> JointFormExtractor | None:
         return model
     if CKPT_PATH.exists():
         try:
-            m = JointFormExtractor("lilt", len(ID2LABEL), ID2LABEL)
+            spatial = 10
+            for meta, key in ((CONFIG_PATH, None), (CKPT_DIR / "metrics.json", "config"), (CKPT_DIR.parent / "metrics.json", "config")):
+                if meta.exists():
+                    d = json.loads(meta.read_text(encoding="utf-8"))
+                    d = d.get(key, {}) if key else d
+                    spatial = int(d.get("spatial_in_features", spatial))
+                    break
+            m = JointFormExtractor("lilt", len(ID2LABEL), ID2LABEL, spatial_in_features=spatial)
             st = torch.load(CKPT_PATH, map_location="cpu", weights_only=False)
-            m.load_state_dict(st)
+            m.load_state_dict(st["model_state_dict"] if isinstance(st, dict) and "model_state_dict" in st else st)
             m.eval()
             print(f"[+] Loaded trained JointFormExtractor weights from {CKPT_PATH}")
             _MODEL_CACHE = (m, True)
@@ -268,6 +287,8 @@ def render_annotated_document(
                 # Draw arrow
                 draw_arrow(draw_overlay, pt_from, pt_to, color=LINK_COLOR, width=3, arrow_size=14)
 
+                if conf is None:
+                    continue  # the model decoded a link without exposing a probability: draw the arrow only
                 # Draw confidence badge at midpoint
                 mid_x = (pt_from[0] + pt_to[0]) / 2.0
                 mid_y = (pt_from[1] + pt_to[1]) / 2.0
@@ -319,10 +340,16 @@ def split_colon_ocr_boxes(raw_ocr_items: list[Any]) -> tuple[list[dict[str, Any]
 
         # Detect inline colon separator (e.g. "Order No: 94821" or "Total: $500.00")
         colon_pos = -1
-        for sep in [":", "："]:
-            if sep in text:
-                colon_pos = text.find(sep)
-                break
+        for m in re.finditer(r"[:：]", text):
+            pos = m.start()
+            before = text[pos - 1] if pos > 0 else ""
+            after = text[pos + 1] if pos + 1 < len(text) else ""
+            if before.isdigit() and after.isdigit():
+                continue  # clock time such as 11:44, not a key-value separator
+            if text[:pos].lower().endswith(("http", "https", "ftp")):
+                continue  # URL scheme
+            colon_pos = pos if SPLIT_COLON else -1
+            break
 
         if colon_pos > 0 and colon_pos < len(text) - 1:
             key_part = text[: colon_pos + 1].strip()
@@ -487,10 +514,103 @@ def check_corridor_line_of_sight(
     return True
 
 
+def clean_entity_labels(entities: list[dict[str, Any]]) -> None:
+    """Tidy labels after tagging. Running text is neither a key nor a value, and a text ending in a colon is a key."""
+    for e in entities:
+        if e.get("is_inline_fixed"):
+            continue
+        text = e["text"].strip()
+        n_words = len(text.split())
+        if text.endswith((":", "：")) and n_words <= 8:
+            e["label"] = "question"
+        elif n_words > 8 or len(text) > 70:
+            e["label"] = "other"
+
+
+def neural_link_probs(model, entities: list[dict[str, Any]], encoding, hidden: torch.Tensor):
+    """Link probabilities from the trained biaffine head over the OCR entities (one entity = one OCR box).
+
+    Returns (entity indices, probability matrix) or None.
+    """
+    try:
+        from models.linking_head import build_soft_type_priors_from_labels, pool_entity_representations
+    except ImportError:
+        from src.models.linking_head import build_soft_type_priors_from_labels, pool_entity_representations
+    first: dict[int, int] = {}
+    for pos, wid in enumerate(encoding.word_ids(0)):
+        if wid is not None and wid not in first:
+            first[wid] = pos
+    idx = [i for i in range(len(entities)) if i in first]
+    if len(idx) < 2:
+        return None
+    reps, boxes = pool_entity_representations(hidden[0], encoding["bbox"][0], [[first[i]] for i in idx])
+    priors = build_soft_type_priors_from_labels([entities[i]["label"] for i in idx])
+    with torch.inference_mode():
+        logits = model.relation_head(reps, boxes, soft_priors=priors)
+    return idx, torch.sigmoid(logits)
+
+
+def words_pipeline(model, ocr_items: list[Any], width: int, height: int):
+    """Run the joint model the way it was trained and evaluated: one token per word, entities from the model's own BIO tags,
+    windows over long forms, key->value links from the biaffine head (src/e2e_link.py).
+
+    RapidOCR only gives line boxes, so each line is cut into words and the line box is split in proportion to word length.
+    """
+    try:
+        from data.funsd_loader import FormExample
+        from data.xfund_windows import word_windows
+        from e2e_link import predict_document
+    except ImportError:
+        from src.data.funsd_loader import FormExample
+        from src.data.xfund_windows import word_windows
+        from src.e2e_link import predict_document
+    words: list[str] = []
+    px: list[list[float]] = []
+    for pts, text, _score in ocr_items:
+        toks = str(text).split()
+        if not toks:
+            continue
+        xs = [p[0] for p in pts]
+        ys = [p[1] for p in pts]
+        x0, y0, x1, y1 = min(xs), min(ys), max(xs), max(ys)
+        total = sum(len(t) for t in toks) + len(toks) - 1
+        cx = x0
+        for t in toks:
+            words.append(t)
+            px.append([cx, y0, cx + (x1 - x0) * len(t) / total, y1])
+            cx += (x1 - x0) * (len(t) + 1) / total
+    if not words:
+        return [], [], []
+    scaled = [[max(0, min(1000, int(1000 * b[0] / max(1, width)))), max(0, min(1000, int(1000 * b[1] / max(1, height)))),
+               max(0, min(1000, int(1000 * b[2] / max(1, width)))), max(0, min(1000, int(1000 * b[3] / max(1, height))))]
+              for b in px]
+    n = len(words)
+    ex = FormExample(guid="demo", words=words, boxes=scaled, ner_tags=[0] * n, image_path="", image_size=(width, height),
+                     entity_ids=[-1] * n, links=[], entities={})
+    ents, links = predict_document(model, ex, word_windows(model.tokenizer, words, 510, 128), "edge_drop")
+    order = sorted(ents, key=lambda e: (e[1], e[2], e[0]))
+    ent_dicts, by_span = [], {}
+    for k, (typ, a, b) in enumerate(order):
+        bx = px[a:b]
+        by_span[(a, b)] = k
+        ent_dicts.append({"id": k, "text": " ".join(words[a:b]), "label": typ,
+                          "box": [int(min(q[0] for q in bx)), int(min(q[1] for q in bx)), int(max(q[2] for q in bx)), int(max(q[3] for q in bx))],
+                          "confidence": 1.0, "is_inline_fixed": False})
+    link_list, records = [], []
+    for src, dst in sorted(links):
+        if src in by_span and dst in by_span:
+            q, a_ = ent_dicts[by_span[src]], ent_dicts[by_span[dst]]
+            link_list.append((q["id"], a_["id"], None))
+            records.append({"Key (Question)": q["text"], "Value (Answer)": a_["text"], "Confidence": "model-decoded", "Topology": "Model"})
+    return ent_dicts, link_list, records
+
+
 def resolve_key_value_links(
     entities: list[dict[str, Any]],
     inline_pairs: list[tuple[int, int]],
     threshold: float = 0.40,
+    neural: tuple[list[int], torch.Tensor] | None = None,
+    mode: str = "rules",
 ) -> tuple[list[tuple[int, int, float]], list[dict[str, Any]]]:
     """Resolves Key-Value links using Line-of-Sight corridor raycasting and 1-to-1 competitive matching."""
     links: list[tuple[int, int, float]] = []
@@ -517,6 +637,36 @@ def resolve_key_value_links(
             })
             matched_questions.add(qid)
             matched_answers.add(aid)
+
+    # 1b. Trained biaffine head: each value keeps its single best key if the probability reaches the threshold
+    if neural is not None and mode in ("neural", "hybrid"):
+        idx, probs = neural
+        pos = {ent_i: k for k, ent_i in enumerate(idx)}
+        for j in idx:
+            a = entities[j]
+            if a["label"] != "answer" or a["id"] in matched_answers:
+                continue
+            best_p, best_i = 0.0, None
+            for i in idx:
+                q = entities[i]
+                if i == j or q["label"] not in ("question", "header"):
+                    continue
+                p = float(probs[pos[i], pos[j]])
+                if p > best_p:
+                    best_p, best_i = p, i
+            if best_i is not None and best_p >= threshold:
+                q = entities[best_i]
+                links.append((q["id"], a["id"], best_p))
+                kv_records.append({
+                    "Key (Question)": q["text"],
+                    "Value (Answer)": a["text"],
+                    "Confidence": f"{best_p:.3f}",
+                    "Topology": "Neural",
+                })
+                matched_questions.add(q["id"])
+                matched_answers.add(a["id"])
+        if mode == "neural":
+            return links, kv_records
 
     # 2. Gather candidate pairs for unlinked entities
     questions = [e for e in entities if e["label"] == "question" and e["id"] not in matched_questions]
@@ -636,12 +786,14 @@ def process_uploaded_document(
     inline_pairs: list[tuple[int, int]] = []
 
     ocr = get_ocr()
+    ocr_items = None
     if ocr is not None:
         np_img = np.array(img)
         ocr_result, _ = ocr(np_img)
         if not ocr_result and raw_pdf_words:
             ocr_result = raw_pdf_words
         if ocr_result:
+            ocr_items = ocr_result
             entities, inline_pairs = split_colon_ocr_boxes(ocr_result)
     elif raw_pdf_words:
         entities, inline_pairs = split_colon_ocr_boxes(raw_pdf_words)
@@ -657,7 +809,16 @@ def process_uploaded_document(
 
     # 3. Apply LiLT Neural Backbone predictions if checkpoint is loaded
     model = get_loaded_model()
-    if model is not None and entities:
+    neural = None
+    links = kv_records = None
+    if PIPELINE == "words" and model is not None and ocr_items:
+        try:
+            entities, links, kv_records = words_pipeline(model, ocr_items, width, height)
+        except Exception as ex:
+            print(f"[-] Word-level pipeline fallback: {ex}")
+            links = kv_records = None
+            entities, inline_pairs = split_colon_ocr_boxes(ocr_items)
+    if links is None and model is not None and entities:
         try:
             words = [e["text"] for e in entities]
             scaled_boxes = [
@@ -679,7 +840,8 @@ def process_uploaded_document(
                 return_tensors="pt",
             )
             with torch.inference_mode():
-                logits = model.encoder(**encoding).logits
+                enc_out = model.encoder(**encoding, output_hidden_states=True)
+                logits = enc_out.logits
                 preds = logits[0].argmax(dim=-1).tolist()
 
             word_ids = encoding.word_ids(0)
@@ -698,11 +860,18 @@ def process_uploaded_document(
                             entities[wid]["label"] = "header"
                         else:
                             entities[wid]["label"] = "other"
+            if CLEAN_LABELS:
+                clean_entity_labels(entities)
+            if LINK_MODE in ("neural", "hybrid"):
+                neural = neural_link_probs(model, entities, encoding, enc_out.hidden_states[-1])
         except Exception as ex:
             print(f"[-] Neural tagging fallback: {ex}")
 
     # 4. Spatial Inference-Level Blocking & Line-of-Sight Relation Resolution
-    links, kv_records = resolve_key_value_links(entities, inline_pairs, threshold=link_threshold)
+    if links is None:
+        links, kv_records = resolve_key_value_links(
+            entities, inline_pairs, threshold=link_threshold, neural=neural, mode=LINK_MODE if neural is not None else "rules"
+        )
 
     # 5. Render Annotations
     annotated_img = render_annotated_document(
@@ -755,16 +924,15 @@ def generate_synthetic_demo_form(
                 if len(pair) == 2:
                     src_id, dst_id = pair
                     if dst_id in id2ent:
-                        conf = round(random.uniform(0.92, 0.99), 3)
-                        if conf >= link_threshold:
-                            raw_links.append((src_id, dst_id, conf))
-                            dst_ent = id2ent[dst_id]
-                            kv_records.append({
-                                "Key (Question)": ent.get("text", ""),
-                                "Value (Answer)": dst_ent.get("text", ""),
-                                "Confidence": f"{conf:.3f}",
-                                "Topology": "Template Ground-Truth",
-                            })
+                        # This tab draws the generator's own labels, not a model prediction, so there is no confidence.
+                        raw_links.append((src_id, dst_id, None))
+                        dst_ent = id2ent[dst_id]
+                        kv_records.append({
+                            "Key (Question)": ent.get("text", ""),
+                            "Value (Answer)": dst_ent.get("text", ""),
+                            "Confidence": "n/a (ground truth)",
+                            "Topology": "Template Ground-Truth",
+                        })
 
     annotated = render_annotated_document(
         img, entities, raw_links, show_boxes=show_boxes, show_links=show_links, show_labels=show_labels
@@ -793,7 +961,7 @@ def create_demo():
     )
 
     with gr.Blocks(title="Cross-Template Key-Value Field Extractor", theme=theme) as demo:
-        model_badge = "🟢 **Trained Neural Model Active**: Loaded fine-tuned checkpoint (`results/funsd_joint_lilt/best_model.pt` — LiLT + Biaffine Head, 130M params)" if CKPT_PATH.exists() else "🟡 **Spatial Layout Engine Active** (Heuristic mode)"
+        model_badge = f"🟢 **Trained Neural Model Active**: LiLT tagger + trained biaffine link head (`{CKPT_PATH.as_posix()}`); key-value links = colon pairs + trained head" if CKPT_PATH.exists() else "🟡 **Spatial Layout Engine Active** (Heuristic mode)"
         gr.Markdown(
             f"""
             # 📄 Cross-Template Key-Value Field Extractor

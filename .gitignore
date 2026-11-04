@@ -51,3 +51,11 @@ slides/*.snm
 slides/*.toc
 slides/*.synctex.gz
 slides/main.pdf
+
+# local handoff / design documentation
+NOVELTY.md
+
+#ignore work for presentations etc
+intensive_assessment/*
+presentation_scripts/*
+

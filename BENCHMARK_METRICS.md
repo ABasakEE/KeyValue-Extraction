@@ -13,7 +13,7 @@ To resolve the central research question—*Can geometric graph neural networks 
 
 | # | Architecture / Pipeline | Architectural Inductive Bias | Seen (MTL F1) | Unseen (UTL F1) | Generalization Gap ($\Delta$) | Relative Drop (%) | Generalization Diagnosis |
 |---|:---|:---|:---:|:---:|:---:|:---:|:---|
-| **1** | **Standard LiLT Baseline (Track 1)** | Absolute 2D BBoxes + XLM-RoBERTa backbone | **91.56%** $\pm$ 1.13% | **64.24%** $\pm$ 12.71% | **27.31 points** | **29.8% drop** | Severe Coordinate Memorization; language model prior cushions collapse. |
+| **1** | **Standard LiLT Baseline (Track 1)** | Windowed + jittered 2D BBoxes + RoBERTa-base text stream (`lilt-roberta-en-base`) | **91.56%** $\pm$ 1.13% | **64.24%** $\pm$ 12.71% | **27.31 points** | **29.8% drop** | Severe Coordinate Memorization; language model prior cushions collapse. |
 | **2** | **Standalone RSA-GNN (Track 2)** | Planar Delaunay Triangulation + 16-D Asymmetric Spatial Edges | **85.97%** | **42.05%** | **43.92 points** | **51.1% drop** | **The Spatial Overfitting Dilemma:** Geometric message passing scrambles across layout shifts. |
 | **3** | **NER-Fused Joint GNN (Track 3 Link F1)** | 16-D Edges + Discrete 8-D Entity One-Hot Concatenation | **81.40%** | **30.48%** | **50.92 points** | **62.6% drop** | **The Coupling Trap:** Discrete entity tags rigidly coupled with spatial link priors backfire on unseen layouts. |
 
@@ -46,7 +46,7 @@ Relative Drop: 29.8%                Relative Drop: 51.1%                    Rela
 ### The Three Root Mechanisms of the Collapse:
 
 1. **The Language Backbone Safety Net in LiLT:**
-   - LiLT processes text sequences through pretrained XLM-RoBERTa self-attention.
+   - LiLT processes text sequences through pretrained RoBERTa-base (English) self-attention.
    - When a template changes from `Amendment` to `Short-Form`, the text tokens (e.g., `"Date:"`, `"Registrant Name:"`, `"Address:"`) retain their linguistic and lexical salience. Even when coordinates shift unpredictably, semantic similarity allows the model to correctly identify target fields with **64.24% F1**.
 
 2. **Delaunay Graph Instability Under Layout Perturbations (Track 2):**
@@ -128,7 +128,7 @@ Relative Drop: 29.8%                Relative Drop: 51.1%                    Rela
 ## 8. Proposed Architectural Solutions (Next Steps)
 
 1. **Template-Adversarial Representation Learning (DANN-LiLT):**
-   - Integrate a Gradient Reversal Layer (GRL) and template discriminator head to penalize the LiLT backbone for encoding template-identifying spatial features, mathematically guaranteeing template-invariant representations.
+   - Integrate a Gradient Reversal Layer (GRL) and template discriminator head to penalize the LiLT backbone for encoding template-identifying spatial features, which encourages (but does not guarantee) template-invariant representations.
 2. **BROS-Style 2D Relative Spatial Positional Embeddings (2D RoPE):**
    - Replace absolute coordinate bounding boxes $[x_0, y_0, x_1, y_1]$ with pairwise relative spatial displacements $(\Delta x_{ij}, \Delta y_{ij})$ injected directly into the self-attention matrix.
 3. **Semantic-Gated Dynamic Graph Adjacency:**

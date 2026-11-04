@@ -16,7 +16,7 @@ This repository contains the complete codebase, trained model checkpoints, and e
 
 ### The Headline Finding: The "Spatial Inductive Bias Dilemma"
 Under a strict, template-disjoint 3-fold cross-validation protocol ($N=200$ matched training sample size, with zero validation/test leakage mathematically verified via `assert_no_template_leakage`):
-1. **Standard LiLT Baseline (Track 1):** Drops from **91.56% (Seen)** to **64.24% (Unseen)** — a **27.31-point / 29.8% relative collapse**. The pretrained language model backbone (XLM-RoBERTa) cushions the drop because lexical tokens remain semantically meaningful.
+1. **Standard LiLT Baseline (Track 1):** Drops from **91.56% (Seen)** to **64.24% (Unseen)** — a **27.31-point / 29.8% relative collapse**. The pretrained language model backbone (RoBERTa-base) cushions the drop because lexical tokens remain semantically meaningful.
 2. **Standalone RSA-GNN (Track 2):** Drops from **85.97% (Seen)** to **42.05% (Unseen)** — a **43.92-point / 51.1% relative collapse**. Rigid planar Delaunay triangulation hardcodes local spatial edges based on Euclidean distance. When layout shifts from horizontal rows to vertical table grids, message passing scrambles across incorrect neighbors.
 3. **NER-Fused Joint GNN (Track 3):** Drops from **81.40% (Seen)** to **30.48% (Unseen)** — a **50.92-point / 62.6% relative collapse**. Discrete entity one-hot tags coupled with spatial link priors overfit to template-specific coordinate co-occurrences.
 
@@ -128,7 +128,7 @@ A 10-slide high-impact structure designed for an academic / technical panel:
 * **Talking Points:**
   - *Data Representation:* How OCR words, bounding boxes $[x_0, y_0, x_1, y_1] \in [0, 1000]^4$, and BIO entity labels are ingested.
   - *Sliding Window Chunking:* How multi-page documents (which previously caused an 83.3% truncation drop) are processed via overlapping windows (`window_size=384`, `window_overlap=128`) with soft probability aggregation across chunks.
-  - *Backbone & Classification Head:* How LiLT pairs an XLM-RoBERTa text encoder with separate 2D spatial coordinate embeddings for sequence labeling.
+  - *Backbone & Classification Head:* How LiLT pairs a RoBERTa-base text encoder with separate 2D spatial coordinate embeddings for sequence labeling.
 
 ### Part 2: The Geometric Graph Pipeline (GNN Backbone) [2:00 - 4:00]
 * **Files to Show:** [`src/models/delaunay_graph.py`](file:///D:/KeyValue-Extraction/src/models/delaunay_graph.py) and [`src/models/edge_gat.py`](file:///D:/KeyValue-Extraction/src/models/edge_gat.py).

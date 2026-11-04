@@ -1,0 +1,38 @@
+# Same recipe as vrdu_track1_bros.yaml (BROS + Track 1) but KEEPS the best weights, so demo_bros.py can load them.
+# One seed, one fold, MTL and UTL: about 500 MB per saved model. Run on Kaggle (GPU):
+#   python src/train.py --config configs/vrdu_track1_bros_demo.yaml --protocol matched --regimes MTL,UTL --max-folds 1 --seed 13
+# Then download results/vrdu_track1_bros_demo/MTL_fold0_seed13/best_model.pt (and UTL_fold0_seed13 if you want the unseen-template one).
+# Track 1 + BROS: Relative Positional Architecture + Multi-Page Sliding Window
+#
+# Combines:
+# 1. BROS 2D Relative Positional Attention (pair-wise relative displacements)
+# 2. Multi-page sliding window (384 tokens, 128 overlap) with soft voting
+# 3. Coordinate jittering (±80 px translation, 0.85-1.15 scale)
+# 4. Aspect-preserving content bounding box normalization
+#
+# Run with:
+#   python src/train.py --config configs/vrdu_track1_bros.yaml --protocol matched
+
+backbone: bros
+dataset: vrdu
+data_root: data/vrdu          # clone of google-research-datasets/vrdu
+subcorpus: registration-form
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+# Track 1 Enhancements
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13, 21, 42]
+n_train: 200                  # match FormNet's published 200-doc condition
+save_weights: true
+output_dir: results/vrdu_track1_bros_demo
