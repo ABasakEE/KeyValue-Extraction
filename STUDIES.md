@@ -41,6 +41,7 @@ Conventions:
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 | 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
 | 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), mostly a precision gain (60.3 -> 67.7); it forbids every question->question link (recall 34 -> 0) and does not recover the downward links (recall 50 -> 46). **Correction (same day, see addendum): the gain comes mainly from forbidding type-violating pairs that touch gold `other` entities, which the end-to-end pipeline never creates; forbidding question->question alone costs 2.6 points. End-to-end emulation: forbidding `header` sources +1.9 (structure mode), question->answer only +8.2 (key-value mode, gold without question->question)** |
+| 24 | Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end | GPU | registered 2026-11-06 | *pending (Kaggle run)* |
 | 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
 
 ---
@@ -1111,6 +1112,33 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 **Corrected findings:** (1) Question->question links are heading -> field-label links. They are scored in XFUND (18% of the gold) and the model finds a third of them with 44% precision, which is above the break-even for F1, so predicting them helps in structure mode; they are not key -> value pairs and are irrelevant if the task is pairing a field name with its value. (2) Most of the study-23 "hard mask" gain was removing type-violating pairs that involve gold `other` entities; that part cannot transfer to the end-to-end pipeline, where it is already implicit (+3.4 for free in the emulation). (3) Transferable rules in the emulation: forbid links from `header` entities (+1.9 in structure mode, positive in every seed, XFUND-specific because its gold has almost no header links), and in key-value mode allow question->answer only (+8.2, because every other predicted link is then a false positive). (4) The earlier statement that question->question predictions were net harmful was a misreading of the `qq_free` variant and is withdrawn.
 
 **Limits of the addendum:** post hoc; gold entity types (predicted types are noisier, so the type rules will pay less end to end); legacy checkpoints; header rule is a property of XFUND's annotation, not a general law; key-value mode changes the task being scored (the +8.2 compares systems on a metric that excludes question->question gold); no interval; a confirmation on the study-19 checkpoints or with predicted entities is still needed.
+
+---
+
+## 24. Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end — GPU (Kaggle T4 × 2), registered 2026-11-06
+
+**Question.** Study 19 left entity precision (67-71%) as the largest cost of end-to-end linking, and the text stream of the joint model is English-only on Spanish, French, German, Italian and Portuguese forms. Does swapping in LiLT's multilingual text stream (`SCUT-DLVCLab/lilt-infoxlm-base`, same layout stream, same recipe) raise end-to-end entity and link F1?
+
+**Arms (3 seeds 13 / 21 / 42, all with the windowed recipe `form_window: 510, stride 255`, 3-stage curriculum, batch 4, lr 5e-5, 22 epochs; nothing is tuned for the new backbone):**
+- **A0** (reference, reused, not retrained): the study-19 `windows` arm, `results/xfund_e2e/windows_e2e.json` (LiLT-en text stream, LayoutLMv3 tokenizer).
+- **A1**: identical config with `backbone: lilt_xlm` (LiLT-InfoXLM, XLM-R sentencepiece tokenizer through the LayoutXLM tokenizer, which accepts `boxes=` like the current path).
+
+**Evaluation.** `scripts/xfund_e2e_eval.py` unchanged in meaning: 250 XFUND val forms, entities from the model's own tags, `single` and `windowed` readings (510-token windows, stride 128, edge-cut entities dropped), full gold = all annotated links, typed entity F1, sibling-free subset. Added for this study, as agreed: **question->answer-only link F1** (`link_qa`: gold = links from a question entity to an answer entity; predictions = predicted links whose endpoints are predicted question and answer; this filters predictions after decoding, it is not a decode-time mask). Published XFUND relation extraction scores question->answer links only, with gold entity labels; ours still predicts its own entities.
+
+**What differs besides the encoder (measured before the run, on XFUND val).** The XLM-R tokenization is shorter: median 484 vs 651 tokens per form, 137 vs 84 of 250 forms fit in 512 tokens, 93.2% vs 89.7% of the 9,062 links are reachable by 510/128 windows, 2.26 vs 3.45 windows per form. Part of any gain is therefore tokenizer coverage, and A1 trains on fewer windows per epoch (fewer steps; study 21 found that extra steps alone were worth about +1.2 link F1, so fewer steps cannot explain a gain). The embedding table is 250k x 768 (about 278M parameters in total against about 130M).
+
+**Registered criteria (primary cell: link F1, windowed inference, all 250 forms, all links, seed-matched A1 minus A0):**
+- *text side matters:* mean delta >= +2.0 points and > 0 in every seed.
+- *no better:* |mean delta| < 1.0 point, or the sign differs across seeds. A negative mean with consistent sign is reported as *worse*.
+- Secondary, descriptive: entity F1 (typed); `link_qa` F1 (A0's `link_qa` is not in the study-19 files and is filled in only if the study-19 windows checkpoints are scored with the same evaluator); single-window readings; the sibling-free subset; the reachability ceiling of each arm; and, only if the study-19 checkpoints are available, gold-entity link F1 on the links reachable under both tokenizers (separates representation from coverage).
+
+**Checks before any GPU spend.** The InfoXLM checkpoint loads in the joint model and the tokenizer gives word ids; the windowing, end-to-end evaluation and unit tests of `tests/test_e2e_link.py` pass with the new backbone; a model-free test of the question->answer filter and gold; the summary self-test; the notebook cell 3 runs the 3-phase mini-training smoke test on the GPU with the new backbone and raises on failure.
+
+**Limits stated up front.** 3 seeds (seed-matched deltas only, no interval); one new backbone with the same hyper-parameters (the larger embedding table may want a different learning rate, untested); A0 comes from a separate Kaggle run of study 19; the coverage and step differences above are not separated by a control; `link_qa` for A0 may be missing; LiLT-InfoXLM is much less used than the English checkpoint; GPU time and memory unmeasured (about 2x the parameters).
+
+**Results:** *pending*
+
+**Evidence:** `results/xfund_e2e_xlm/` (after the run).
 
 ---
 
