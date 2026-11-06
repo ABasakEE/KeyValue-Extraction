@@ -1136,6 +1136,8 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 
 **Limits stated up front.** 3 seeds (seed-matched deltas only, no interval); one new backbone with the same hyper-parameters (the larger embedding table may want a different learning rate, untested); A0 comes from a separate Kaggle run of study 19; the coverage and step differences above are not separated by a control; `link_qa` for A0 may be missing; LiLT-InfoXLM is much less used than the English checkpoint; GPU time and memory unmeasured (about 2x the parameters).
 
+**Checks done before any GPU spend (2026-11-06):** the InfoXLM checkpoint loads in the joint model (`lilt_xlm` in `BACKBONES`); `tests/test_e2e_link.py lilt_xlm` passes (every window within 512 tokens under the XLM-R tokenizer, `link_entities` equal to `forward`, windowed end-to-end prediction, the question->answer filter and gold); the default backbone still passes; the summary self-test passes and the summary skips cells missing from the study-19 file; and `scripts/smoke_xfund_e2e.py lilt_xlm` ran the 3-phase mini-training (16 forms -> **36 training windows**, against 52 for the English stream, which matches the shorter tokenization) and the end-to-end evaluation on CPU, writing every cell including `link_qa`. The smoke scores are meaningless at that size (one epoch per phase; phase-1 validation entity F1 was 0.0 with the new backbone against 0.13 for LiLT-en on the same smoke, consistent with slower early learning from the larger embedding table at the same learning rate, so the per-epoch history of the real run should be inspected).
+
 **Results:** *pending*
 
 **Evidence:** `results/xfund_e2e_xlm/` (after the run).
