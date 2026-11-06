@@ -37,6 +37,8 @@ BACKBONES: dict[str, tuple[str, str, bool]] = {
     "lilt": ("SCUT-DLVCLab/lilt-roberta-en-base", "microsoft/layoutlmv3-base", False),
     "layoutlmv3": ("microsoft/layoutlmv3-base", "microsoft/layoutlmv3-base", True),
     "bros": ("jinho8345/bros-base-uncased", "jinho8345/bros-base-uncased", False),
+    # LiLT with the multilingual InfoXLM text stream; its tokenizer is a LayoutXLMTokenizer, so `boxes=` works as for lilt
+    "lilt_xlm": ("SCUT-DLVCLab/lilt-infoxlm-base", "SCUT-DLVCLab/lilt-infoxlm-base", False),
 }
 
 

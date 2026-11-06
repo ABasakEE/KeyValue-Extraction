@@ -23,7 +23,7 @@ for p in (str(ROOT / "src"), str(Path(__file__).resolve().parent)):
 
 from data.xfund_loader import ID2LABEL, LABEL_LIST, load_xfund_split  # noqa: E402
 from data.xfund_windows import word_windows  # noqa: E402
-from e2e_link import add_counts, gold_structure, predict_document, prf  # noqa: E402
+from e2e_link import add_counts, gold_qa_links, gold_structure, predict_document, prf, qa_pred_links  # noqa: E402
 from train import build_model  # noqa: E402
 from xfund_link_eval import LANGS, sibling_free  # noqa: E402
 
@@ -33,6 +33,7 @@ def evaluate_seed(model, docs, keep: set[str], stride: int) -> dict:
     untagged = total = 0
     for ex in docs:
         g_ents, g_links = gold_structure(ex)
+        g_qa = gold_qa_links(ex)
         ranges = {(a, b) for _, a, b in g_ents}
         total += len(g_links)
         untagged += sum(1 for s, d in g_links if s not in ranges or d not in ranges)
@@ -44,6 +45,7 @@ def evaluate_seed(model, docs, keep: set[str], stride: int) -> dict:
                     continue
                 add_counts(counts.setdefault(f"{sub}|{mode}|entity", [0, 0, 0]), ents, g_ents)
                 add_counts(counts.setdefault(f"{sub}|{mode}|link", [0, 0, 0]), links, g_links)
+                add_counts(counts.setdefault(f"{sub}|{mode}|link_qa", [0, 0, 0]), qa_pred_links(ents, links), g_qa)
     out = {k: prf(*v) for k, v in counts.items()}
     out["gold_links_total"], out["gold_links_with_untagged_endpoint"] = total, untagged
     return out

@@ -15,7 +15,7 @@ for p in (str(ROOT / "src"), str(ROOT)):
 
 from data.xfund_loader import ID2LABEL, LABEL_LIST, load_xfund_split  # noqa: E402
 from data.xfund_windows import sub_example, window_examples, word_windows  # noqa: E402
-from e2e_link import gold_structure, link_entities, merge_windows, predict_document, predict_window  # noqa: E402
+from e2e_link import gold_qa_links, gold_structure, link_entities, merge_windows, predict_document, predict_window, qa_pred_links  # noqa: E402
 from models.joint_extractor import prepare_entity_batch  # noqa: E402
 from train import TrainConfig, build_model  # noqa: E402
 
@@ -35,9 +35,23 @@ def test_merge() -> None:
     assert merge_windows(one, 100, "edge_drop") == merge_windows(one, 100, "center") == ({("answer", 0, 5), ("question", 95, 100)}, {((0, 5), (95, 100))})
 
 
+def test_qa() -> None:
+    from types import SimpleNamespace
+    ex = SimpleNamespace(entities={1: {"label": "question", "token_indices": [0, 1]}, 2: {"label": "answer", "token_indices": [2]},
+                                   3: {"label": "question", "token_indices": [3]}, 4: {"label": "header", "token_indices": [4]}},
+                         links=[(1, 2), (3, 1), (4, 3), (2, 1), (1, 1)])
+    assert gold_qa_links(ex) == {((0, 2), (2, 3))}                       # only question -> answer; the reverse, q->q and header links drop out
+    ents = {("question", 0, 2), ("answer", 2, 3), ("question", 3, 4), ("header", 4, 5)}
+    links = {((0, 2), (2, 3)), ((3, 4), (0, 2)), ((4, 5), (3, 4)), ((2, 3), (0, 2))}
+    assert qa_pred_links(ents, links) == {((0, 2), (2, 3))}
+
+
 def main() -> None:
     test_merge()
+    test_qa()
     cfg = TrainConfig.from_yaml(ROOT / "configs" / "xfund_joint_lilt.yaml")
+    if len(sys.argv) > 1:
+        cfg.backbone = sys.argv[1]                                       # e.g. lilt_xlm
     torch.manual_seed(0)
     model = build_model(cfg, len(LABEL_LIST), ID2LABEL).eval()
     docs = [d for d in load_xfund_split(ROOT / "data" / "xfund", "val", ["fr"]) if len(d.words) > 250][:3]

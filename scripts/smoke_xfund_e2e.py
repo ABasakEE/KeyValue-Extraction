@@ -22,9 +22,13 @@ from xfund_e2e_eval import evaluate_seed  # noqa: E402
 
 
 def main() -> None:
+    backbone = sys.argv[1] if len(sys.argv) > 1 else None
+    sys.argv = sys.argv[:1] + ([backbone] if backbone else [])             # test_e2e_link reads the same override
     test_e2e_link.main()
 
     cfg = TrainConfig.from_yaml(ROOT / "configs" / "xfund_joint_lilt_windows.yaml")
+    if backbone:
+        cfg.backbone = backbone
     assert cfg.form_window == 510 and cfg.task == "joint"
     cfg.phase1_epochs = cfg.phase2_epochs = cfg.phase3_epochs = 1
     cfg.max_phase1_epochs = cfg.max_phase2_epochs = cfg.max_phase3_epochs = 1

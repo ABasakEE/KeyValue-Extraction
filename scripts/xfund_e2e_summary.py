@@ -19,7 +19,7 @@ PRIMARY = "all|windowed|link"
 def summarise(base: dict, windows: dict) -> dict:
     seeds = sorted(set(base["seeds"]) & set(windows["seeds"]), key=int)
     out = {"seeds": seeds, "cells": {}}
-    keys = [k for k, v in base["seeds"][seeds[0]].items() if isinstance(v, dict)]
+    keys = [k for k, v in base["seeds"][seeds[0]].items() if isinstance(v, dict) and k in windows["seeds"][seeds[0]]]
     for k in keys:
         b = [base["seeds"][s][k]["f1"] for s in seeds]
         w = [windows["seeds"][s][k]["f1"] for s in seeds]

@@ -139,6 +139,19 @@ def gold_structure(ex) -> tuple[set[Entity], set[Link]]:
     return ents, links
 
 
+def gold_qa_links(ex) -> set[Link]:
+    """Gold links from a question entity to an answer entity (the published XFUND relation-extraction setting), as word ranges."""
+    rng = {i: (min(e["token_indices"]), max(e["token_indices"]) + 1) for i, e in ex.entities.items() if e.get("token_indices")}
+    lab = lambda i: ex.entities[i]["label"].lower()
+    return {(rng[s], rng[d]) for s, d in ex.links if s in rng and d in rng and s != d and lab(s) == "question" and lab(d) == "answer"}
+
+
+def qa_pred_links(ents: set[Entity], links: set[Link]) -> set[Link]:
+    """Predicted links whose endpoints are predicted question and answer entities (a filter on the decoded links, not a mask)."""
+    typ = {(a, b): t for t, a, b in ents}
+    return {l for l in links if typ.get(l[0]) == "question" and typ.get(l[1]) == "answer"}
+
+
 def prf(tp: int, fp: int, fn: int) -> dict:
     p = tp / (tp + fp) if tp + fp else 0.0
     r = tp / (tp + fn) if tp + fn else 0.0
