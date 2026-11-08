@@ -15,6 +15,9 @@ import json
 from pathlib import Path
 
 PRIMARY = "all|windowed|link"
+A0_REFERENCE = 47.7   # Study 19 windows recipe, link F1 in points
+A0_TOLERANCE = 1.5    # registered A0 sanity gate (STUDIES.md study 26)
+MIN_SEEDS = 3
 
 
 def verdict(deltas_pts: list[float]) -> str:
@@ -47,10 +50,23 @@ def summarise(arms: dict[str, dict]) -> dict:
             d = [round((x - y) * 100, 2) for x, y in zip(a, b)]
             cells[k] = {"metric": m, "mean": round(sum(a) / len(a) * 100, 2), "delta_pts_per_seed": d,
                         "delta_pts_mean": round(sum(d) / len(d), 2)}
-        arm = {"seeds": seeds, "cells": cells}
+        arm = {"seeds": seeds, "n_seeds": len(seeds), "cells": cells}
+        if len(seeds) < MIN_SEEDS:
+            arm["warning"] = f"only {len(seeds)} seed-matched seed(s); the registered rule assumes {MIN_SEEDS}"
+            print(f"WARNING: arm {name}: {arm['warning']}")
         if name != "A0":
             arm["verdict"] = verdict(cells[PRIMARY]["delta_pts_per_seed"])
         out["arms"][name] = arm
+    a0_primary = None
+    if PRIMARY in out["arms"]["A0"]["cells"]:
+        a0_primary = out["arms"]["A0"]["cells"][PRIMARY]["mean"]
+    gate_pass = a0_primary is not None and abs(a0_primary - A0_REFERENCE) <= A0_TOLERANCE
+    out["a0_gate"] = {"a0_primary": a0_primary, "reference": A0_REFERENCE, "tolerance": A0_TOLERANCE, "pass": bool(gate_pass)}
+    if not gate_pass:
+        print(f"WARNING: A0 gate failed (A0 {a0_primary} vs {A0_REFERENCE} +- {A0_TOLERANCE}); no verdicts drawn")
+        for name, arm in out["arms"].items():
+            if "verdict" in arm:
+                arm["verdict"] = "no_verdict_a0_gate"
     return out
 
 
@@ -64,10 +80,16 @@ def _selftest() -> None:
     def run(f1s, rec):
         return {"seeds": {str(s): {PRIMARY: {"f1": f}, "all|windowed|group|below": {"recall": r, "f1": 0.0}}
                           for s, f, r in zip((13, 21, 42), f1s, rec)}}
-    r = summarise({"A0": run([.40, .41, .39], [.5, .5, .5]), "A1": run([.43, .44, .42], [.6, .6, .6])})
+    r = summarise({"A0": run([.477, .478, .476], [.5, .5, .5]), "A1": run([.507, .508, .506], [.6, .6, .6])})
+    assert r["a0_gate"]["pass"] and r["arms"]["A1"]["n_seeds"] == 3
     assert r["arms"]["A1"]["verdict"] == "helps" and "verdict" not in r["arms"]["A0"]
     assert r["arms"]["A1"]["cells"][PRIMARY]["delta_pts_per_seed"] == [3.0, 3.0, 3.0]
     assert r["arms"]["A1"]["cells"]["all|windowed|group|below"]["delta_pts_mean"] == 10.0
+    bad = summarise({"A0": run([.40, .41, .39], [.5, .5, .5]), "A1": run([.43, .44, .42], [.6, .6, .6])})
+    assert not bad["a0_gate"]["pass"] and bad["arms"]["A1"]["verdict"] == "no_verdict_a0_gate"
+    assert bad["arms"]["A1"]["cells"][PRIMARY]["delta_pts_mean"] == 3.0
+    two = {"seeds": {k: v for k, v in run([.477] * 3, [.5] * 3)["seeds"].items() if k != "42"}}
+    assert summarise({"A0": run([.477] * 3, [.5] * 3), "A1": two})["arms"]["A1"]["n_seeds"] == 2
     print("selftest passed")
 
 

@@ -112,6 +112,9 @@ def main() -> None:
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     for seed in seeds:
+        if not (ckpt / f"seed_{seed}" / "best_model.pt").exists():
+            print(f"WARNING: seed {seed}: no best_model.pt in {ckpt}, skipped", flush=True)
+            continue
         model = build_model(cfg, len(LABEL_LIST), ID2LABEL)
         sd = torch.load(ckpt / f"seed_{seed}" / "best_model.pt", map_location="cpu", weights_only=False)
         model.load_state_dict(sd["model_state_dict"] if "model_state_dict" in sd else sd)
