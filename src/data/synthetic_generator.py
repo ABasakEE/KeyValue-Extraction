@@ -133,6 +133,14 @@ class FormTable:
 
 
 @dataclass
+class FormSection:
+    """A titled group of fields. The title is rendered as a 'question' entity
+    linked to each child field's key (heading -> label, as in XFUND)."""
+    title: str
+    fields: list[FormField]
+
+
+@dataclass
 class FormDocument:
     template_name: str
     header_title: str
@@ -141,13 +149,15 @@ class FormDocument:
     table_headers: list[str] = field(default_factory=list)
     table_rows: list[list[str]] = field(default_factory=list)
     footer_text: str = ""
+    sections: list[FormSection] = field(default_factory=list)
 
 
 class SyntheticFormRenderer:
     """Renders structured synthetic form documents to images and FUNSD annotations."""
 
-    def __init__(self, fake: Faker, use_augraphy: bool = True):
+    def __init__(self, fake: Faker, use_augraphy: bool = True, stacked_ratio: float = 0.0):
         self.fake = fake
+        self.stacked_ratio = stacked_ratio
         self.use_augraphy = use_augraphy and HAVE_AUGRAPHY
         self.pipeline = build_augraphy_pipeline() if self.use_augraphy else None
 
@@ -388,6 +398,97 @@ class SyntheticFormRenderer:
         cur_y += 45
         return cur_y, entity_id_counter
 
+    def _render_fields(
+        self,
+        draw: ImageDraw.ImageDraw,
+        fields: list[FormField],
+        cur_y: int,
+        form_entities: list[dict],
+        entity_id_counter: int,
+    ) -> tuple[int, int, list[int]]:
+        """Render key-value fields; return (next_y, next_entity_id, key entity ids)."""
+        key_ids: list[int] = []
+        use_two_columns = len(fields) >= 8
+        col_width = (PAGE_WIDTH - 260) // 2 if use_two_columns else (PAGE_WIDTH - 200)
+
+        left_margin = 110
+        right_col_x = left_margin + col_width + 40
+        col_y = [cur_y, cur_y]
+
+        for i, field_item in enumerate(fields):
+            col_idx = (i % 2) if use_two_columns else 0
+            start_x = right_col_x if col_idx == 1 else left_margin
+            y_pos = col_y[col_idx]
+
+            key_text = field_item.key.strip()
+            if not key_text.endswith(":"):
+                key_text += ":"
+            val_text = field_item.value.strip()
+
+            key_id = entity_id_counter
+            val_id = entity_id_counter + 1
+            entity_id_counter += 2
+
+            layout = field_item.layout
+            if layout == "horizontal" and self.stacked_ratio > 0 and random.random() < self.stacked_ratio:
+                layout = "stacked"
+
+            if layout == "stacked":
+                k_words, k_box, _, next_k_y = self._render_text_with_boxes(
+                    draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
+                )
+                v_words, v_box, _, next_v_y = self._render_text_with_boxes(
+                    draw, val_text, start_x + 10, next_k_y + 8, self.font_val, fill="#000000"
+                )
+                col_y[col_idx] = next_v_y + 35
+            elif layout == "boxed":
+                k_words, k_box, next_k_x, next_k_y = self._render_text_with_boxes(
+                    draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
+                )
+                box_x0 = next_k_x + 15
+                box_y0 = y_pos - 4
+                box_w = max(220, col_width - (box_x0 - start_x))
+                box_h = 38
+                draw.rectangle(
+                    [box_x0, box_y0, box_x0 + box_w, box_y0 + box_h],
+                    outline="#555555",
+                    width=2,
+                )
+                v_words, v_box, _, next_v_y = self._render_text_with_boxes(
+                    draw, val_text, box_x0 + 10, box_y0 + 5, self.font_val, fill="#000000"
+                )
+                col_y[col_idx] = max(next_k_y, box_y0 + box_h) + 30
+            else:
+                k_words, k_box, next_k_x, next_k_y = self._render_text_with_boxes(
+                    draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
+                )
+                val_start_x = max(next_k_x + 15, start_x + int(col_width * 0.42))
+                v_words, v_box, _, next_v_y = self._render_text_with_boxes(
+                    draw, val_text, val_start_x, y_pos, self.font_val, fill="#000000"
+                )
+                col_y[col_idx] = max(next_k_y, next_v_y) + 32
+
+            key_ids.append(key_id)
+            form_entities.append({
+                "id": key_id,
+                "text": key_text,
+                "box": k_box,
+                "label": "question",
+                "words": k_words,
+                "linking": [[key_id, val_id]],
+            })
+            form_entities.append({
+                "id": val_id,
+                "text": val_text,
+                "box": v_box,
+                "label": "answer",
+                "words": v_words,
+                "linking": [[key_id, val_id]],
+            })
+
+        cur_y = max(col_y[0], col_y[1]) + 40
+        return cur_y, entity_id_counter, key_ids
+
     def render(self, doc: FormDocument) -> tuple[Image.Image, dict]:
         """Render a FormDocument into a PIL Image and a FUNSD-compatible annotation dict."""
         canvas = Image.new("RGB", (PAGE_WIDTH, PAGE_HEIGHT), color="#FFFFFF")
@@ -423,80 +524,35 @@ class SyntheticFormRenderer:
 
         # 2. Key-Value Fields Rendering
         if doc.fields:
-            use_two_columns = len(doc.fields) >= 8
-            col_width = (PAGE_WIDTH - 260) // 2 if use_two_columns else (PAGE_WIDTH - 200)
+            cur_y, entity_id_counter, _ = self._render_fields(
+                draw, doc.fields, cur_y, form_entities, entity_id_counter
+            )
 
-            left_margin = 110
-            right_col_x = left_margin + col_width + 40
-            col_y = [cur_y, cur_y]
-
-            for i, field_item in enumerate(doc.fields):
-                col_idx = (i % 2) if use_two_columns else 0
-                start_x = right_col_x if col_idx == 1 else left_margin
-                y_pos = col_y[col_idx]
-
-                key_text = field_item.key.strip()
-                if not key_text.endswith(":"):
-                    key_text += ":"
-                val_text = field_item.value.strip()
-
-                key_id = entity_id_counter
-                val_id = entity_id_counter + 1
-                entity_id_counter += 2
-
-                if field_item.layout == "stacked":
-                    k_words, k_box, _, next_k_y = self._render_text_with_boxes(
-                        draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
-                    )
-                    v_words, v_box, _, next_v_y = self._render_text_with_boxes(
-                        draw, val_text, start_x + 10, next_k_y + 8, self.font_val, fill="#000000"
-                    )
-                    col_y[col_idx] = next_v_y + 35
-                elif field_item.layout == "boxed":
-                    k_words, k_box, next_k_x, next_k_y = self._render_text_with_boxes(
-                        draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
-                    )
-                    box_x0 = next_k_x + 15
-                    box_y0 = y_pos - 4
-                    box_w = max(220, col_width - (box_x0 - start_x))
-                    box_h = 38
-                    draw.rectangle(
-                        [box_x0, box_y0, box_x0 + box_w, box_y0 + box_h],
-                        outline="#555555",
-                        width=2,
-                    )
-                    v_words, v_box, _, next_v_y = self._render_text_with_boxes(
-                        draw, val_text, box_x0 + 10, box_y0 + 5, self.font_val, fill="#000000"
-                    )
-                    col_y[col_idx] = max(next_k_y, box_y0 + box_h) + 30
-                else:
-                    k_words, k_box, next_k_x, next_k_y = self._render_text_with_boxes(
-                        draw, key_text, start_x, y_pos, self.font_key, fill="#222222"
-                    )
-                    val_start_x = max(next_k_x + 15, start_x + int(col_width * 0.42))
-                    v_words, v_box, _, next_v_y = self._render_text_with_boxes(
-                        draw, val_text, val_start_x, y_pos, self.font_val, fill="#000000"
-                    )
-                    col_y[col_idx] = max(next_k_y, next_v_y) + 32
-
-                form_entities.append({
-                    "id": key_id,
-                    "text": key_text,
-                    "box": k_box,
-                    "label": "question",
-                    "words": k_words,
-                    "linking": [[key_id, val_id]],
-                })
-                form_entities.append({
-                    "id": val_id,
-                    "text": val_text,
-                    "box": v_box,
-                    "label": "answer",
-                    "words": v_words,
-                    "linking": [[key_id, val_id]],
-                })
-
-            cur_y = max(col_y[0], col_y[1]) + 40
+        # 2b. Titled sections: heading ("question") linked to each child key
+        for section in doc.sections:
+            if cur_y > PAGE_HEIGHT - 500:
+                break
+            h_words, h_box, _, h_next = self._render_text_with_boxes(
+                draw, section.title, 110, cur_y, self.font_header, fill="#111111"
+            )
+            head = {
+                "id": entity_id_counter,
+                "text": section.title,
+                "box": h_box,
+                "label": "question",
+                "words": h_words,
+                "linking": [],
+            }
+            entity_id_counter += 1
+            form_entities.append(head)
+            cur_y = h_next + 24
+            cur_y, entity_id_counter, key_ids = self._render_fields(
+                draw, section.fields, cur_y, form_entities, entity_id_counter
+            )
+            by_id = {e["id"]: e for e in form_entities}
+            for kid in key_ids:
+                head["linking"].append([head["id"], kid])
+                by_id[kid]["linking"].append([head["id"], kid])
 
         # 3. Tabular Section (Advanced FormTable or legacy table_headers/rows)
         if doc.table is not None:
@@ -549,11 +605,32 @@ class SyntheticFormRenderer:
         return final_image, annotation
 
 
+def _pad_data_rows(rows: list[TableRow], n_rows: int | None, make_row: Any) -> list[TableRow]:
+    """Insert generated data rows before the trailing summary rows until the
+    table has ``n_rows`` plain data rows. No-op when ``n_rows`` is None."""
+    if n_rows is None:
+        return rows
+
+    count = sum(1 for r in rows if not r.is_subheader and not r.is_summary)
+    tail = len(rows)
+    while tail > 0 and rows[tail - 1].is_summary:
+        tail -= 1
+    extra = []
+    while count < n_rows:
+        count += 1
+        extra.append(make_row(count))
+    return rows[:tail] + extra + rows[tail:]
+
+
+def _short(text: str, n: int = 34) -> str:
+    return text if len(text) <= n else text[:n].rstrip()
+
+
 # ---------------------------------------------------------------------------
 # Template Generators
 # ---------------------------------------------------------------------------
 
-def generate_invoice_document(fake: Faker, template_idx: int) -> FormDocument:
+def generate_invoice_document(fake: Faker, template_idx: int, n_rows: int | None = None) -> FormDocument:
     """Generate an Invoice with irregular table rows and summary spans."""
     layouts = ["horizontal", "stacked", "boxed"]
     layout = layouts[template_idx % len(layouts)]
@@ -615,12 +692,20 @@ def generate_invoice_document(fake: Faker, template_idx: int) -> FormDocument:
         ], is_summary=True, bg_color="#EDEDED"),
     ]
 
+    rows = _pad_data_rows(rows, n_rows, lambda k: TableRow([
+        TableCell(str(k)),
+        TableCell(_short(fake.catch_phrase())),
+        TableCell(str(random.randint(1, 60))),
+        TableCell(f"${random.randint(10, 900)}.00"),
+        TableCell(f"${random.randint(100, 9000):,}.00"),
+    ]))
+
     table = FormTable(headers=headers, col_widths_pct=col_widths, rows=rows, border_style="grid")
     footer = f"Thank you for your business. Remit payment to {fake.company()} - Routing: {fake.numerify(text='#########')}"
     return FormDocument(f"invoice_{template_idx}", title, fields, table=table, footer_text=footer)
 
 
-def generate_itemized_financial_statement(fake: Faker, template_idx: int) -> FormDocument:
+def generate_itemized_financial_statement(fake: Faker, template_idx: int, n_rows: int | None = None) -> FormDocument:
     """Generate a multi-tier financial operations statement with irregular subheaders and totals."""
     title = f"{fake.company().upper()} - CONSOLIDATED STATEMENT OF OPERATIONS"
 
@@ -693,12 +778,19 @@ def generate_itemized_financial_statement(fake: Faker, template_idx: int) -> For
         ], is_summary=True, bg_color="#E0E0E0"),
     ]
 
+    rows = _pad_data_rows(rows, n_rows, lambda k: TableRow([
+        TableCell(_short(fake.catch_phrase(), 40)),
+        TableCell(f"{random.choice(['REV', 'EXP'])}-{100 + k * 7}"),
+        TableCell(f"${random.randint(10, 400) * 1000:,}.00"),
+        TableCell(f"${random.randint(10, 400) * 1000:,}.00"),
+    ]))
+
     table = FormTable(headers=headers, col_widths_pct=col_widths, rows=rows, border_style="grid")
     footer = "CERTIFIED FINANCIAL DISCLOSURE: Prepared in accordance with Generally Accepted Accounting Principles (US GAAP)."
     return FormDocument(f"fin_statement_{template_idx}", title, fields, table=table, footer_text=footer)
 
 
-def generate_procurement_order_with_wrapped_table(fake: Faker, template_idx: int) -> FormDocument:
+def generate_procurement_order_with_wrapped_table(fake: Faker, template_idx: int, n_rows: int | None = None) -> FormDocument:
     """Generate a Purchase Order with multi-line wrapped descriptions and sparse cells."""
     title = f"{fake.company().upper()} - PURCHASE ORDER REQUISITION"
 
@@ -756,12 +848,20 @@ def generate_procurement_order_with_wrapped_table(fake: Faker, template_idx: int
         ], is_summary=True, bg_color="#E8E8E8"),
     ]
 
+    rows = _pad_data_rows(rows, n_rows, lambda k: TableRow([
+        TableCell(str(k)),
+        TableCell(_short(fake.catch_phrase())),
+        TableCell(str(random.randint(1, 20))),
+        TableCell(f"${random.randint(20, 3000):,}.00"),
+        TableCell(f"${random.randint(100, 9000):,}.00"),
+    ]))
+
     table = FormTable(headers=headers, col_widths_pct=col_widths, rows=rows, border_style="grid")
     footer = "OFFICIAL PROCUREMENT RECORD: All deliveries must reference the PO Number on outer packaging."
     return FormDocument(f"procure_{template_idx}", title, fields, table=table, footer_text=footer)
 
 
-def generate_shipping_manifest(fake: Faker, template_idx: int) -> FormDocument:
+def generate_shipping_manifest(fake: Faker, template_idx: int, n_rows: int | None = None) -> FormDocument:
     """Generate an international shipping manifest with borderless whitespace-separated columns."""
     carrier = f"{fake.company().upper()} GLOBAL LOGISTICS"
     title = f"{carrier} - CARGO CONSIGNMENT & WAYBILL MANIFEST"
@@ -820,6 +920,14 @@ def generate_shipping_manifest(fake: Faker, template_idx: int) -> FormDocument:
         ], is_summary=True),
     ]
 
+    rows = _pad_data_rows(rows, n_rows, lambda k: TableRow([
+        TableCell(f"CON-{9000 + k}"),
+        TableCell(_short(fake.catch_phrase())),
+        TableCell(f"{random.randint(5, 200)} Cartons"),
+        TableCell(f"{random.randint(20, 900)} KG"),
+        TableCell(f"${random.randint(500, 60000):,}.00"),
+    ]))
+
     # Borderless layout with horizontal separator lines
     table = FormTable(headers=headers, col_widths_pct=col_widths, rows=rows, border_style="horizontal_only")
     footer = "INTERNATIONAL CARGO DECLARATION: Certified compliant with International Maritime Organization (IMO) conventions."
@@ -842,14 +950,21 @@ def generate_medical_intake_document(fake: Faker, template_idx: int) -> FormDocu
         FormField("Contact Phone", fake.phone_number()[:14], layout),
         FormField("Emergency Contact", fake.name(), layout),
         FormField("Emergency Relation", random.choice(["Spouse", "Parent", "Sibling", "Guardian"]), layout),
-        FormField("Insurance Carrier", f"{fake.company()} Health Plan", layout),
-        FormField("Policy Member ID", f"MEM-{fake.numerify(text='########')}", layout),
-        FormField("Group Number", f"GRP-{fake.numerify(text='#####')}", layout),
-        FormField("Primary Physician", f"Dr. {fake.last_name()}, MD", layout),
+    ]
+    sections = [
+        FormSection("Insurance Information", [
+            FormField("Insurance Carrier", f"{fake.company()} Health Plan", layout),
+            FormField("Policy Member ID", f"MEM-{fake.numerify(text='########')}", layout),
+            FormField("Group Number", f"GRP-{fake.numerify(text='#####')}", layout),
+        ]),
+        FormSection("Physician Details", [
+            FormField("Primary Physician", f"Dr. {fake.last_name()}, MD", layout),
+            FormField("Clinic Phone", fake.phone_number()[:14], layout),
+        ]),
     ]
 
     footer = "CONFIDENTIAL MEDICAL RECORD: Protected under Health Insurance Portability and Accountability Act (HIPAA)."
-    return FormDocument(f"intake_{template_idx}", title, fields, footer_text=footer)
+    return FormDocument(f"intake_{template_idx}", title, fields, footer_text=footer, sections=sections)
 
 
 def generate_adbuy_contract_document(fake: Faker, template_idx: int) -> FormDocument:
@@ -869,10 +984,17 @@ def generate_adbuy_contract_document(fake: Faker, template_idx: int) -> FormDocu
         FormField("Flight Start Date", fake.date_this_month().strftime("%m/%d/%Y"), layout),
         FormField("Flight End Date", fake.date_this_year().strftime("%m/%d/%Y"), layout),
         FormField("Broadcast Station", station, layout),
-        FormField("DMA Market Code", fake.city(), layout),
-        FormField("Gross Contract Total", f"${fake.numerify(text='#####.00')}", layout),
-        FormField("Agency Commission", "15.00%", layout),
-        FormField("Net Payable Amount", f"${fake.numerify(text='#####.00')}", layout),
+    ]
+    sections = [
+        FormSection("Market Details", [
+            FormField("DMA Market Code", fake.city(), layout),
+            FormField("Station Call Sign", station, layout),
+        ]),
+        FormSection("Billing Summary", [
+            FormField("Gross Contract Total", f"${fake.numerify(text='#####.00')}", layout),
+            FormField("Agency Commission", "15.00%", layout),
+            FormField("Net Payable Amount", f"${fake.numerify(text='#####.00')}", layout),
+        ]),
     ]
 
     table_headers = ["Program", "Daypart", "Spots", "Rate", "Subtotal"]
@@ -883,7 +1005,7 @@ def generate_adbuy_contract_document(fake: Faker, template_idx: int) -> FormDocu
     ]
 
     footer = "FCC PUBLIC INSPECTION FILE: Certified compliance under Communications Act Section 315/312."
-    return FormDocument(f"adbuy_{template_idx}", title, fields, table_headers=table_headers, table_rows=table_rows, footer_text=footer)
+    return FormDocument(f"adbuy_{template_idx}", title, fields, table_headers=table_headers, table_rows=table_rows, footer_text=footer, sections=sections)
 
 
 def generate_fara_registration_document(fake: Faker, template_idx: int) -> FormDocument:
@@ -901,15 +1023,22 @@ def generate_fara_registration_document(fake: Faker, template_idx: int) -> FormD
         FormField("Official Title", random.choice(["Managing Partner", "Senior Counsel", "Executive Director"]), layout),
         FormField("Foreign Principal Name", f"Government of {fake.country()}", layout),
         FormField("Foreign Principal Address", fake.city(), layout),
-        FormField("Nature of Services", random.choice(["Public Relations Representation", "Government Affairs Counseling", "Economic Trade Promotion"]), layout),
-        FormField("Contract Execution Date", fake.date_this_year().strftime("%B %d, %Y"), layout),
-        FormField("Term Duration", "12 Calendar Months", layout),
-        FormField("Retainer Compensation", f"${fake.numerify(text='######.00')} USD", layout),
-        FormField("Filing Year", "2024", layout),
+        FormField("Registrant Phone", fake.phone_number()[:14], layout),
+    ]
+    sections = [
+        FormSection("Services Rendered", [
+            FormField("Nature of Services", random.choice(["Public Relations Representation", "Government Affairs Counseling", "Economic Trade Promotion"]), layout),
+            FormField("Contract Execution Date", fake.date_this_year().strftime("%B %d, %Y"), layout),
+            FormField("Term Duration", "12 Calendar Months", layout),
+        ]),
+        FormSection("Compensation", [
+            FormField("Retainer Compensation", f"${fake.numerify(text='######.00')} USD", layout),
+            FormField("Filing Year", "2024", layout),
+        ]),
     ]
 
     footer = "Pursuant to Foreign Agents Registration Act of 1938, as amended (22 U.S.C. § 611 et seq.)."
-    return FormDocument(f"fara_{template_idx}", title, fields, footer_text=footer)
+    return FormDocument(f"fara_{template_idx}", title, fields, footer_text=footer, sections=sections)
 
 
 GENERATOR_REGISTRY = [
@@ -922,6 +1051,34 @@ GENERATOR_REGISTRY = [
     generate_fara_registration_document,
 ]
 
+FAMILIES: dict[str, Any] = {
+    "invoice": generate_invoice_document,
+    "financial_statement": generate_itemized_financial_statement,
+    "procurement_order": generate_procurement_order_with_wrapped_table,
+    "shipping_manifest": generate_shipping_manifest,
+    "medical_intake": generate_medical_intake_document,
+    "adbuy_contract": generate_adbuy_contract_document,
+    "fara_registration": generate_fara_registration_document,
+}
+
+# Families whose generator accepts n_rows (for --tall_tables).
+TABLE_FAMILIES = {"invoice", "financial_statement", "procurement_order", "shipping_manifest"}
+
+
+def _csv(value: str | None) -> list[str] | None:
+    if not value:
+        return None
+    return [v.strip() for v in value.split(",") if v.strip()]
+
+
+def _resolve_families(names: list[str] | None) -> list[tuple[str, Any]]:
+    if names is None:
+        return list(FAMILIES.items())
+    unknown = [n for n in names if n not in FAMILIES]
+    if unknown:
+        raise ValueError(f"Unknown families {unknown}; choose from {sorted(FAMILIES)}")
+    return [(n, FAMILIES[n]) for n in names]
+
 
 def generate_synthetic_dataset(
     output_dir: str | Path,
@@ -929,42 +1086,80 @@ def generate_synthetic_dataset(
     n_test: int = 30,
     seed: int = 42,
     use_augraphy: bool = True,
+    train_families: list[str] | None = None,
+    test_families: list[str] | None = None,
+    stacked_ratio: float = 0.0,
+    tall_tables: bool = False,
+    locales: list[str] | None = None,
+    save_images: bool = True,
 ) -> dict:
-    """Generate complete synthetic dataset split into training_data and testing_data."""
+    """Generate complete synthetic dataset split into training_data and testing_data.
+
+    With all new arguments left at their defaults the behaviour is unchanged:
+    all seven families, round-robin, in both splits. Passing ``train_families``
+    and ``test_families`` keeps the two splits family-disjoint.
+    """
     output_path = Path(output_dir)
     random.seed(seed)
     np.random.seed(seed)
     fake = Faker()
     fake.seed_instance(seed)
+    locale_fakes: dict[str, Faker] = {}
 
-    renderer = SyntheticFormRenderer(fake=fake, use_augraphy=use_augraphy)
+    renderer = SyntheticFormRenderer(fake=fake, use_augraphy=use_augraphy, stacked_ratio=stacked_ratio)
+    named_families = train_families is not None or test_families is not None
 
-    summary: dict[str, Any] = {"train_count": 0, "test_count": 0, "templates": {}}
+    summary: dict[str, Any] = {"train_count": 0, "test_count": 0, "templates": {}, "families": {}}
 
-    for split_name, count in [("training_data", n_train), ("testing_data", n_test)]:
+    split_specs = [
+        ("training_data", n_train, _resolve_families(train_families)),
+        ("testing_data", n_test, _resolve_families(test_families)),
+    ]
+    for split_name, count, families in split_specs:
         img_dir = output_path / split_name / "images"
         ann_dir = output_path / split_name / "annotations"
-        img_dir.mkdir(parents=True, exist_ok=True)
+        if save_images:
+            img_dir.mkdir(parents=True, exist_ok=True)
         ann_dir.mkdir(parents=True, exist_ok=True)
+        split_fam_counts: dict[str, int] = {}
 
         for doc_id in range(count):
-            gen_func = GENERATOR_REGISTRY[doc_id % len(GENERATOR_REGISTRY)]
-            template_variant = doc_id // len(GENERATOR_REGISTRY)
-            doc = gen_func(fake, template_variant)
+            fam_key, gen_func = families[doc_id % len(families)]
+            template_variant = doc_id // len(families)
+
+            doc_fake = fake
+            if locales:
+                loc = locales[doc_id % len(locales)]
+                if loc not in locale_fakes:
+                    locale_fakes[loc] = Faker(loc)
+                doc_fake = locale_fakes[loc]
+                doc_fake.seed_instance(seed + doc_id + (100000 if split_name == "testing_data" else 0))
+
+            if tall_tables and fam_key in TABLE_FAMILIES:
+                doc = gen_func(doc_fake, template_variant, n_rows=random.randint(8, 25))
+            else:
+                doc = gen_func(doc_fake, template_variant)
 
             template_key = doc.template_name
             summary["templates"][template_key] = summary["templates"].get(template_key, 0) + 1
+            split_fam_counts[fam_key] = split_fam_counts.get(fam_key, 0) + 1
 
             img, ann = renderer.render(doc)
 
-            file_stem = f"syn_{doc.template_name}_{doc_id:04d}"
-            img_file = img_dir / f"{file_stem}.png"
+            if named_families and fam_key not in doc.template_name:
+                file_stem = f"syn_{fam_key}_{doc.template_name}_{doc_id:04d}"
+            else:
+                file_stem = f"syn_{doc.template_name}_{doc_id:04d}"
             ann_file = ann_dir / f"{file_stem}.json"
 
-            img.save(img_file, format="PNG")
+            if save_images:
+                img.save(img_dir / f"{file_stem}.png", format="PNG")
+            else:
+                ann["image_size"] = [PAGE_WIDTH, PAGE_HEIGHT]
             ann_file.write_text(json.dumps(ann, indent=2), encoding="utf-8")
 
         summary[f"{split_name}_generated"] = count
+        summary["families"][split_name] = split_fam_counts
 
     return summary
 
@@ -976,6 +1171,12 @@ def main():
     parser.add_argument("--n_test", type=int, default=30, help="Number of testing documents")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility")
     parser.add_argument("--no_augraphy", action="store_true", help="Disable Augraphy physical degradation")
+    parser.add_argument("--train_families", default=None, help="Comma-separated family keys for the train split")
+    parser.add_argument("--test_families", default=None, help="Comma-separated family keys for the test split")
+    parser.add_argument("--stacked_ratio", type=float, default=0.0, help="Fraction of horizontal fields rendered value-below-key")
+    parser.add_argument("--tall_tables", action="store_true", help="Give table families 8-25 data rows")
+    parser.add_argument("--locales", default=None, help="Comma-separated Faker locales for values")
+    parser.add_argument("--no_images", action="store_true", help="Write annotations only (no PNGs)")
     args = parser.parse_args()
 
     print(f"Generating synthetic form dataset into {args.output_dir}...")
@@ -985,6 +1186,12 @@ def main():
         n_test=args.n_test,
         seed=args.seed,
         use_augraphy=not args.no_augraphy,
+        train_families=_csv(args.train_families),
+        test_families=_csv(args.test_families),
+        stacked_ratio=args.stacked_ratio,
+        tall_tables=args.tall_tables,
+        locales=_csv(args.locales),
+        save_images=not args.no_images,
     )
     print(f"Dataset generated successfully:\n{json.dumps(summary, indent=2)}")
 

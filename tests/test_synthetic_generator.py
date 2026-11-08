@@ -10,7 +10,12 @@ sys.path.insert(0, str(ROOT / "src"))
 from faker import Faker
 from PIL import Image
 
+from src.data.funsd_loader import load_funsd_split
 from src.data.synthetic_generator import (
+    FAMILIES,
+    FormDocument,
+    FormField,
+    FormSection,
     SyntheticFormRenderer,
     generate_invoice_document,
     generate_medical_intake_document,
@@ -102,6 +107,112 @@ def test_generate_synthetic_dataset_end_to_end():
         assert len(list(train_ann_dir.glob("*.json"))) == 2
 
 
+def _centre(box):
+    return ((box[0] + box[2]) / 2.0, (box[1] + box[3]) / 2.0)
+
+
+def test_sections_emit_question_to_question_links():
+    fake = Faker(seed=1)
+    renderer = SyntheticFormRenderer(fake=fake, use_augraphy=False)
+    fields = [FormField(f"Field {i}", f"value {i}") for i in range(3)]
+    doc = FormDocument("sec_0", "TEST FORM", [], sections=[FormSection("Applicant Details", fields)])
+    _, ann = renderer.render(doc)
+    ents = {e["id"]: e for e in ann["form"]}
+    heads = [e for e in ents.values() if e["text"] == "Applicant Details"]
+    assert len(heads) == 1 and heads[0]["label"] == "question"
+    dsts = [d for s, d in heads[0]["linking"] if s == heads[0]["id"]]
+    assert len(dsts) == 3
+    for d in dsts:
+        assert ents[d]["label"] == "question"
+        assert ents[d]["text"].startswith("Field")
+
+
+def test_stacked_ratio_one_puts_values_below_keys():
+    fake = Faker(seed=2)
+    renderer = SyntheticFormRenderer(fake=fake, use_augraphy=False, stacked_ratio=1.0)
+    doc = FormDocument("h_0", "T", [FormField(f"K{i}", f"v{i}", "horizontal") for i in range(6)])
+    _, ann = renderer.render(doc)
+    ents = {e["id"]: e for e in ann["form"]}
+    n = 0
+    for e in ann["form"]:
+        for s, d in e["linking"]:
+            if ents[s]["label"] == "question" and ents[d]["label"] == "answer":
+                assert ents[d]["box"][1] > ents[s]["box"][3]
+                n += 1
+    assert n >= 6
+
+
+def test_family_split_is_disjoint():
+    with tempfile.TemporaryDirectory() as tmp:
+        generate_synthetic_dataset(
+            tmp, n_train=10, n_test=4, use_augraphy=False,
+            train_families=["invoice", "fara_registration"],
+            test_families=["medical_intake"], save_images=False,
+        )
+        train = list((Path(tmp) / "training_data" / "annotations").glob("*.json"))
+        test = list((Path(tmp) / "testing_data" / "annotations").glob("*.json"))
+        assert len(train) == 10 and len(test) == 4
+        assert all("invoice" in p.name or "fara" in p.name for p in train)
+        assert all("medical" in p.name for p in test)
+        assert not list((Path(tmp) / "training_data").glob("images/*.png"))
+
+
+def test_tall_tables_have_many_rows():
+    import random as _r
+    from src.data.synthetic_generator import generate_invoice_document as gen
+    fake = Faker(seed=3)
+    _r.seed(3)
+    doc = gen(fake, 0, n_rows=12)
+    data_rows = [r for r in doc.table.rows if not r.is_subheader and not r.is_summary]
+    assert len(data_rows) >= 8
+    renderer = SyntheticFormRenderer(fake=fake, use_augraphy=False)
+    _, ann = renderer.render(doc)
+    ents = {e["id"]: e for e in ann["form"]}
+    far = 0
+    for e in ann["form"]:
+        if e["label"] != "header":
+            continue
+        cx, cy = _centre(e["box"])
+        order = sorted(
+            (o["id"] for o in ann["form"] if o["id"] != e["id"]),
+            key=lambda i: (_centre(ents[i]["box"])[0] - cx) ** 2 + (_centre(ents[i]["box"])[1] - cy) ** 2,
+        )
+        for s, d in e["linking"]:
+            if s == e["id"] and order.index(d) >= 5:
+                far += 1
+    assert far >= 1
+
+
+def test_locales_change_values_not_keys():
+    with tempfile.TemporaryDirectory() as tmp:
+        generate_synthetic_dataset(
+            tmp, n_train=7, n_test=0, use_augraphy=False, locales=["es_ES"],
+            save_images=False, tall_tables=True, stacked_ratio=0.4,
+        )
+        texts = set()
+        for p in (Path(tmp) / "training_data" / "annotations").glob("*.json"):
+            for e in json.loads(p.read_text(encoding="utf-8"))["form"]:
+                if e["label"] == "question":
+                    texts.add(e["text"])
+        assert "Invoice Number:" in texts and "Patient Legal Name:" in texts
+
+
+def test_loader_works_without_images():
+    with tempfile.TemporaryDirectory() as tmp:
+        generate_synthetic_dataset(tmp, n_train=7, n_test=7, use_augraphy=False, save_images=False)
+        for split in ("train", "test"):
+            exs = load_funsd_split(tmp, split)
+            assert len(exs) == 7
+            assert all(e.links and e.image_size == (1654, 2338) for e in exs)
+
+
+def test_families_registry_keys():
+    assert set(FAMILIES) == {
+        "invoice", "financial_statement", "procurement_order", "shipping_manifest",
+        "medical_intake", "adbuy_contract", "fara_registration",
+    }
+
+
 if __name__ == "__main__":
     test_template_generators()
     print("test_template_generators passed")
@@ -109,4 +220,18 @@ if __name__ == "__main__":
     print("test_synthetic_renderer_and_funsd_schema passed")
     test_generate_synthetic_dataset_end_to_end()
     print("test_generate_synthetic_dataset_end_to_end passed")
+    test_sections_emit_question_to_question_links()
+    print("test_sections_emit_question_to_question_links passed")
+    test_stacked_ratio_one_puts_values_below_keys()
+    print("test_stacked_ratio_one_puts_values_below_keys passed")
+    test_family_split_is_disjoint()
+    print("test_family_split_is_disjoint passed")
+    test_tall_tables_have_many_rows()
+    print("test_tall_tables_have_many_rows passed")
+    test_locales_change_values_not_keys()
+    print("test_locales_change_values_not_keys passed")
+    test_loader_works_without_images()
+    print("test_loader_works_without_images passed")
+    test_families_registry_keys()
+    print("test_families_registry_keys passed")
     print("ALL SYNTHETIC GENERATOR TESTS PASSED")

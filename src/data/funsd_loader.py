@@ -84,8 +84,14 @@ def _parse_form(annotation_path: Path, image_path: Path) -> FormExample:
     with annotation_path.open(encoding="utf-8") as fh:
         data = json.load(fh)
 
-    with Image.open(image_path) as img:
-        width, height = img.size
+    if image_path.exists():
+        with Image.open(image_path) as img:
+            width, height = img.size
+    elif "image_size" in data:
+        # Image-free synthetic data (generator --no_images) records the page size.
+        width, height = data["image_size"]
+    else:
+        raise FileNotFoundError(f"Annotation {annotation_path.name} has no matching image at {image_path}")
 
     words: list[str] = []
     boxes: list[list[int]] = []
@@ -164,8 +170,6 @@ def load_funsd_split(root: str | Path, split: str) -> list[FormExample]:
     examples = []
     for ann_path in sorted(ann_dir.glob("*.json")):
         img_path = img_dir / f"{ann_path.stem}.png"
-        if not img_path.exists():
-            raise FileNotFoundError(f"Annotation {ann_path.name} has no matching image at {img_path}")
         examples.append(_parse_form(ann_path, img_path))
 
     return examples
