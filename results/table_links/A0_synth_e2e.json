@@ -1,0 +1,505 @@
+{
+  "stride": 128,
+  "n_val": 300,
+  "n_sibling_free": 0,
+  "seeds": {
+    "13": {
+      "all|single|entity": {
+        "precision": 0.7697,
+        "recall": 0.7223,
+        "f1": 0.7453,
+        "gold": 20000,
+        "pred": 18768
+      },
+      "all|single|link": {
+        "precision": 0.6424,
+        "recall": 0.3829,
+        "f1": 0.4798,
+        "gold": 15950,
+        "pred": 9506
+      },
+      "all|single|link_qa": {
+        "precision": 0.2906,
+        "recall": 0.8403,
+        "f1": 0.4318,
+        "gold": 3150,
+        "pred": 9109
+      },
+      "all|single|group|below": {
+        "precision": 1.0,
+        "recall": 0.3259,
+        "f1": 0.4916,
+        "gold": 14067,
+        "pred": 4584
+      },
+      "all|single|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8088,
+        "f1": 0.8943,
+        "gold": 1883,
+        "pred": 1523
+      },
+      "all|single|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|single|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.7043,
+        "f1": 0.8265,
+        "gold": 2371,
+        "pred": 1670
+      },
+      "all|single|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.5688,
+        "f1": 0.7251,
+        "gold": 1134,
+        "pred": 645
+      },
+      "all|single|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.3787,
+        "f1": 0.5493,
+        "gold": 2625,
+        "pred": 994
+      },
+      "all|single|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2849,
+        "f1": 0.4435,
+        "gold": 9820,
+        "pred": 2798
+      },
+      "all|single|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.3653,
+        "f1": 0.5352,
+        "gold": 750,
+        "pred": 274
+      },
+      "all|windowed|entity": {
+        "precision": 0.7087,
+        "recall": 0.8489,
+        "f1": 0.7725,
+        "gold": 20000,
+        "pred": 23955
+      },
+      "all|windowed|link": {
+        "precision": 0.487,
+        "recall": 0.3838,
+        "f1": 0.4292,
+        "gold": 15950,
+        "pred": 12570
+      },
+      "all|windowed|link_qa": {
+        "precision": 0.232,
+        "recall": 0.8663,
+        "f1": 0.366,
+        "gold": 3150,
+        "pred": 11761
+      },
+      "all|windowed|group|below": {
+        "precision": 1.0,
+        "recall": 0.321,
+        "f1": 0.486,
+        "gold": 14067,
+        "pred": 4515
+      },
+      "all|windowed|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8529,
+        "f1": 0.9206,
+        "gold": 1883,
+        "pred": 1606
+      },
+      "all|windowed|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|windowed|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.7027,
+        "f1": 0.8254,
+        "gold": 2371,
+        "pred": 1666
+      },
+      "all|windowed|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.5723,
+        "f1": 0.728,
+        "gold": 1134,
+        "pred": 649
+      },
+      "all|windowed|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.373,
+        "f1": 0.5433,
+        "gold": 2625,
+        "pred": 979
+      },
+      "all|windowed|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2879,
+        "f1": 0.4471,
+        "gold": 9820,
+        "pred": 2827
+      },
+      "all|windowed|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.3653,
+        "f1": 0.5352,
+        "gold": 750,
+        "pred": 274
+      },
+      "gold_links_total": 15950,
+      "gold_links_with_untagged_endpoint": 0
+    },
+    "21": {
+      "all|single|entity": {
+        "precision": 0.8039,
+        "recall": 0.6957,
+        "f1": 0.7459,
+        "gold": 20000,
+        "pred": 17309
+      },
+      "all|single|link": {
+        "precision": 0.7181,
+        "recall": 0.4537,
+        "f1": 0.556,
+        "gold": 15950,
+        "pred": 10077
+      },
+      "all|single|link_qa": {
+        "precision": 0.2988,
+        "recall": 0.8606,
+        "f1": 0.4436,
+        "gold": 3150,
+        "pred": 9072
+      },
+      "all|single|group|below": {
+        "precision": 1.0,
+        "recall": 0.4032,
+        "f1": 0.5747,
+        "gold": 14067,
+        "pred": 5672
+      },
+      "all|single|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8306,
+        "f1": 0.9075,
+        "gold": 1883,
+        "pred": 1564
+      },
+      "all|single|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|single|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.8106,
+        "f1": 0.8954,
+        "gold": 2371,
+        "pred": 1922
+      },
+      "all|single|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.7937,
+        "f1": 0.885,
+        "gold": 1134,
+        "pred": 900
+      },
+      "all|single|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.6206,
+        "f1": 0.7659,
+        "gold": 2625,
+        "pred": 1629
+      },
+      "all|single|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2836,
+        "f1": 0.4419,
+        "gold": 9820,
+        "pred": 2785
+      },
+      "all|single|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.7027,
+        "f1": 0.8254,
+        "gold": 750,
+        "pred": 527
+      },
+      "all|windowed|entity": {
+        "precision": 0.774,
+        "recall": 0.8191,
+        "f1": 0.7959,
+        "gold": 20000,
+        "pred": 21165
+      },
+      "all|windowed|link": {
+        "precision": 0.663,
+        "recall": 0.4592,
+        "f1": 0.5426,
+        "gold": 15950,
+        "pred": 11048
+      },
+      "all|windowed|link_qa": {
+        "precision": 0.2835,
+        "recall": 0.8994,
+        "f1": 0.4311,
+        "gold": 3150,
+        "pred": 9993
+      },
+      "all|windowed|group|below": {
+        "precision": 1.0,
+        "recall": 0.4009,
+        "f1": 0.5723,
+        "gold": 14067,
+        "pred": 5639
+      },
+      "all|windowed|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8954,
+        "f1": 0.9448,
+        "gold": 1883,
+        "pred": 1686
+      },
+      "all|windowed|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|windowed|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.8111,
+        "f1": 0.8957,
+        "gold": 2371,
+        "pred": 1923
+      },
+      "all|windowed|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.7901,
+        "f1": 0.8828,
+        "gold": 1134,
+        "pred": 896
+      },
+      "all|windowed|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.6221,
+        "f1": 0.767,
+        "gold": 2625,
+        "pred": 1633
+      },
+      "all|windowed|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2926,
+        "f1": 0.4527,
+        "gold": 9820,
+        "pred": 2873
+      },
+      "all|windowed|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.7027,
+        "f1": 0.8254,
+        "gold": 750,
+        "pred": 527
+      },
+      "gold_links_total": 15950,
+      "gold_links_with_untagged_endpoint": 0
+    },
+    "42": {
+      "all|single|entity": {
+        "precision": 0.8465,
+        "recall": 0.7637,
+        "f1": 0.803,
+        "gold": 20000,
+        "pred": 18042
+      },
+      "all|single|link": {
+        "precision": 0.691,
+        "recall": 0.4206,
+        "f1": 0.5229,
+        "gold": 15950,
+        "pred": 9707
+      },
+      "all|single|link_qa": {
+        "precision": 0.2922,
+        "recall": 0.8352,
+        "f1": 0.4329,
+        "gold": 3150,
+        "pred": 9005
+      },
+      "all|single|group|below": {
+        "precision": 1.0,
+        "recall": 0.3696,
+        "f1": 0.5397,
+        "gold": 14067,
+        "pred": 5199
+      },
+      "all|single|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8014,
+        "f1": 0.8897,
+        "gold": 1883,
+        "pred": 1509
+      },
+      "all|single|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|single|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.733,
+        "f1": 0.8459,
+        "gold": 2371,
+        "pred": 1738
+      },
+      "all|single|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.6808,
+        "f1": 0.8101,
+        "gold": 1134,
+        "pred": 772
+      },
+      "all|single|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.5128,
+        "f1": 0.6779,
+        "gold": 2625,
+        "pred": 1346
+      },
+      "all|single|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2904,
+        "f1": 0.4501,
+        "gold": 9820,
+        "pred": 2852
+      },
+      "all|single|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.5867,
+        "f1": 0.7395,
+        "gold": 750,
+        "pred": 440
+      },
+      "all|windowed|entity": {
+        "precision": 0.7953,
+        "recall": 0.8938,
+        "f1": 0.8417,
+        "gold": 20000,
+        "pred": 22476
+      },
+      "all|windowed|link": {
+        "precision": 0.6126,
+        "recall": 0.4247,
+        "f1": 0.5016,
+        "gold": 15950,
+        "pred": 11058
+      },
+      "all|windowed|link_qa": {
+        "precision": 0.2693,
+        "recall": 0.8778,
+        "f1": 0.4122,
+        "gold": 3150,
+        "pred": 10266
+      },
+      "all|windowed|group|below": {
+        "precision": 1.0,
+        "recall": 0.3648,
+        "f1": 0.5345,
+        "gold": 14067,
+        "pred": 5131
+      },
+      "all|windowed|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.8725,
+        "f1": 0.9319,
+        "gold": 1883,
+        "pred": 1643
+      },
+      "all|windowed|group|above": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "gold": 0,
+        "pred": 0
+      },
+      "all|windowed|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.7343,
+        "f1": 0.8468,
+        "gold": 2371,
+        "pred": 1741
+      },
+      "all|windowed|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.6808,
+        "f1": 0.8101,
+        "gold": 1134,
+        "pred": 772
+      },
+      "all|windowed|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.5082,
+        "f1": 0.6739,
+        "gold": 2625,
+        "pred": 1334
+      },
+      "all|windowed|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2981,
+        "f1": 0.4592,
+        "gold": 9820,
+        "pred": 2927
+      },
+      "all|windowed|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.5867,
+        "f1": 0.7395,
+        "gold": 750,
+        "pred": 440
+      },
+      "gold_links_total": 15950,
+      "gold_links_with_untagged_endpoint": 0
+    }
+  },
+  "mean_f1": {
+    "all|single|entity": 0.7647,
+    "all|single|link": 0.5196,
+    "all|single|link_qa": 0.4361,
+    "all|single|group|below": 0.5353,
+    "all|single|group|same_line": 0.8972,
+    "all|single|group|above": 0.0,
+    "all|single|group|rank_0": 0.8559,
+    "all|single|group|rank_1": 0.8067,
+    "all|single|group|rank_2_4": 0.6644,
+    "all|single|group|rank_5plus": 0.4452,
+    "all|single|group|q_to_q": 0.7,
+    "all|windowed|entity": 0.8034,
+    "all|windowed|link": 0.4911,
+    "all|windowed|link_qa": 0.4031,
+    "all|windowed|group|below": 0.5309,
+    "all|windowed|group|same_line": 0.9324,
+    "all|windowed|group|above": 0.0,
+    "all|windowed|group|rank_0": 0.856,
+    "all|windowed|group|rank_1": 0.807,
+    "all|windowed|group|rank_2_4": 0.6614,
+    "all|windowed|group|rank_5plus": 0.453,
+    "all|windowed|group|q_to_q": 0.7
+  }
+}
