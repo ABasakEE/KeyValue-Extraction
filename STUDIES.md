@@ -1237,6 +1237,8 @@ Run order: A0, A2, A1, A3. Runs are resumable per seed. An arm that does not fin
 
 **Limits stated up front.** 3 seeds and no intervals; synthetic forms have English keys while XFUND forms do not; the papers do not support a relation-extraction gain for this kind of model; the crop and synthetic-data parameters are our own choices; A1 and A3 also get more training steps than A0, and no step-matched control is run (Study 21 found extra steps alone were worth about +1.2 link F1).
 
+**Checks done before any GPU spend.** The unit tests pass: test_table_crops (8), test_table_train_hooks (4), test_synthetic_generator (11), test_table_eval (3) and test_e2e_link. A CPU smoke run of all four arms on seed 13 also passed (3281 s). It trained a tiny synthetic pretrain, loaded its checkpoint through the real `init_checkpoint` path for A1 and A3, filled every group cell on 3 val forms per arm, and ran the synthetic-test evaluation. Each arm config was diffed against `configs/xfund_joint_lilt_windows.yaml` and differs only in `output_dir`, `crop_aug` and `init_checkpoint`. None of this says anything about the arms' scores, only that the pipeline runs end to end.
+
 **Results:** *pending*
 
 **Evidence:** `results/table_links/` (after the run).
