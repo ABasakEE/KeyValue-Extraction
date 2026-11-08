@@ -146,6 +146,11 @@ class TrainConfig:
     regimes: tuple = ("MTL", "UTL")
     dump_probs: bool = False                 # also write test_probs.jsonl (per-word field probabilities) for routing studies
     dump_probs_guids: str | None = None      # JSON list of document ids to keep (default: all test documents)
+    crop_aug: bool = False                   # add link-preserving table crops of the training forms (study 26)
+    crop_max_per_form: int = 4
+    crop_merge_dist: float = 50.0
+    crop_seed: int = 13
+    init_checkpoint: str = ""                # warm start; may contain {seed}
 
     @classmethod
     def from_yaml(cls, path: str | Path) -> "TrainConfig":
@@ -162,6 +167,20 @@ class TrainConfig:
         if unknown:
             raise ValueError(f"Unknown config keys: {sorted(unknown)}. Known keys: {sorted(known)}")
         return cls(**raw)
+
+
+def apply_init_checkpoint(model: torch.nn.Module, config: "TrainConfig", seed: int) -> str | None:
+    """Load config.init_checkpoint ({seed} is substituted) into model; None when unset."""
+    template = getattr(config, "init_checkpoint", "")
+    if not template:
+        return None
+    path = Path(template.format(seed=seed))
+    if not path.is_file():
+        raise FileNotFoundError(f"init_checkpoint for seed {seed} not found: {path}")
+    state = torch.load(path, map_location="cpu")
+    model.load_state_dict(state, strict=True)
+    print(f"[init] loaded {path}", flush=True)
+    return str(path)
 
 
 def jitter_boxes(
@@ -556,6 +575,15 @@ def train_one(
         train_examples = chunk_vrdu_examples(train_examples, window_size=w_size, overlap=w_overlap)
         val_examples = chunk_vrdu_examples(val_examples, window_size=w_size, overlap=w_overlap)
         test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap)
+    if getattr(config, "crop_aug", False):
+        try:
+            from data.xfund_windows import crop_examples
+        except ImportError:
+            from src.data.xfund_windows import crop_examples
+        crop_rng = random.Random(f"{config.crop_seed}-{torch.initial_seed()}")
+        crops = crop_examples(train_examples, crop_rng, config.crop_max_per_form, config.crop_merge_dist)
+        train_examples = train_examples + crops
+        print(f"  {pfx}[crops] +{len(crops)} train examples", flush=True)
     if getattr(config, "form_window", 0):
         # test stays whole-document: the windowed end-to-end score comes from scripts/xfund_e2e_eval.py
         try:
@@ -1165,6 +1193,7 @@ def train_single_seed(
     print(f"\n{log_prefix} === Seed {seed} ===", flush=True)
     set_seed(seed)
     model = build_model(config, len(label_list), id2label)
+    apply_init_checkpoint(model, config, seed)
     result = train_one(model, train_ex, val_ex, test_ex, config, device, checkpoint_dir=run_dir, log_prefix=log_prefix)
     result["seed"] = seed
     if config.task == "joint":
