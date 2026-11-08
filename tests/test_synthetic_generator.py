@@ -197,6 +197,21 @@ def test_locales_change_values_not_keys():
         assert "Invoice Number:" in texts and "Patient Legal Name:" in texts
 
 
+def test_locale_is_independent_of_family():
+    locs = ["es_ES", "fr_FR", "de_DE", "it_IT", "pt_PT"]
+    fams = ["invoice", "financial_statement", "procurement_order", "adbuy_contract", "fara_registration"]
+    with tempfile.TemporaryDirectory() as tmp:
+        generate_synthetic_dataset(
+            tmp, n_train=50, n_test=0, use_augraphy=False, train_families=fams,
+            locales=locs, save_images=False,
+        )
+        seen = {}
+        for p in (Path(tmp) / "training_data" / "annotations").glob("*.json"):
+            fam = next(f for f in fams if f in p.name)
+            seen.setdefault(fam, set()).add(json.loads(p.read_text(encoding="utf-8"))["locale"])
+        assert any(len(v) >= 2 for v in seen.values()), seen
+
+
 def test_loader_works_without_images():
     with tempfile.TemporaryDirectory() as tmp:
         generate_synthetic_dataset(tmp, n_train=7, n_test=7, use_augraphy=False, save_images=False)
@@ -230,6 +245,8 @@ if __name__ == "__main__":
     print("test_tall_tables_have_many_rows passed")
     test_locales_change_values_not_keys()
     print("test_locales_change_values_not_keys passed")
+    test_locale_is_independent_of_family()
+    print("test_locale_is_independent_of_family passed")
     test_loader_works_without_images()
     print("test_loader_works_without_images passed")
     test_families_registry_keys()

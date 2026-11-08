@@ -1128,12 +1128,16 @@ def generate_synthetic_dataset(
             template_variant = doc_id // len(families)
 
             doc_fake = fake
+            loc = None
             if locales:
-                loc = locales[doc_id % len(locales)]
+                split_offset = 100000 if split_name == "testing_data" else 0
+                # Locale is drawn independently of the family index so value
+                # locale cannot act as a shortcut for the family.
+                loc = random.Random(seed * 7919 + doc_id + split_offset).choice(locales)
                 if loc not in locale_fakes:
                     locale_fakes[loc] = Faker(loc)
                 doc_fake = locale_fakes[loc]
-                doc_fake.seed_instance(seed + doc_id + (100000 if split_name == "testing_data" else 0))
+                doc_fake.seed_instance(seed + doc_id + split_offset)
 
             if tall_tables and fam_key in TABLE_FAMILIES:
                 doc = gen_func(doc_fake, template_variant, n_rows=random.randint(8, 25))
@@ -1152,6 +1156,8 @@ def generate_synthetic_dataset(
                 file_stem = f"syn_{doc.template_name}_{doc_id:04d}"
             ann_file = ann_dir / f"{file_stem}.json"
 
+            if loc is not None:
+                ann["locale"] = loc
             if save_images:
                 img.save(img_dir / f"{file_stem}.png", format="PNG")
             else:
