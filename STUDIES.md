@@ -43,6 +43,7 @@ Conventions:
 | 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), mostly a precision gain (60.3 -> 67.7); it forbids every question->question link (recall 34 -> 0) and does not recover the downward links (recall 50 -> 46). **Correction (same day, see addendum): the gain comes mainly from forbidding type-violating pairs that touch gold `other` entities, which the end-to-end pipeline never creates; forbidding question->question alone costs 2.6 points. End-to-end emulation: forbidding `header` sources +1.9 (structure mode), question->answer only +8.2 (key-value mode, gold without question->question)** |
 | 24 | Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end | GPU | registered 2026-11-06 | *pending (Kaggle run)* |
 | 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
+| 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | registered 2026-11-08 | *pending (Kaggle run)* |
 
 ---
 
@@ -1192,3 +1193,48 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 **Results:** *pending*
 
 **Evidence:** `results/schema_guided_kv/` (after the run).
+
+---
+
+## 26. Table-type links: link-preserving crops and relation-rich synthetic pretraining — GPU (Kaggle T4 × 2), registered 2026-11-08
+
+**Question.** Study 22 showed where the joint LiLT linker loses links on XFUND: partners below the source (recall 49, against 79 for same-line partners), partners five or more entities away (recall 49) and question->question links, the heading->label links that tables are built from (recall 34). Study 19's best end-to-end link F1 is 47.7. Do two training-data changes raise end-to-end link F1, and the recall on downward, far-partner and question->question links, with the model and decoding left as they are?
+
+**Sources.** Two recent papers give the ideas:
+- *Identify, Locate, Link* (ICDAR 2026, arXiv 2608.20868): crop the page around groups of linked key-value pairs, merge groups that sit close together, add random padding. It also reports that synthetic filling raised XFUND relation extraction from 0.171 to 0.206.
+- *RIDGE* (CVPR 2025, arXiv 2504.10659): synthetic documents whose links come from nested headings; pretraining on them helped LayoutLMv3 few-shot entity tagging.
+
+Neither paper shows a relation-extraction gain for a LiLT-style linker, and neither has a no-crop baseline or a template-disjoint split. This study is a first test of the ideas for our model, and a null or negative result is reported as it comes out.
+
+**Naming.** The crops are called link-preserving crop augmentation. They change the training data and leave the model unchanged, which keeps them apart from the earlier graph models (RSA-GNN, NER-fused GNN, Graph-BROS).
+
+**Arms (XFUND es / fr / de / it / pt, seeds 13 / 21 / 42, the Study 19 `windows` recipe from `configs/xfund_joint_lilt_windows.yaml`, FP32):**
+- **A0**: the Study 19 recipe, retrained in the same run. Study 19's weights are not available locally and the group recalls need predictions. A0 should land near Study 19's 47.7 link F1.
+- **A1**: synthetic pretraining stage, then the A0 recipe.
+- **A2**: the A0 recipe with link-preserving crops added to the training set.
+- **A3**: A1 and A2 together.
+
+Run order: A0, A2, A1, A3. Runs are resumable per seed. An arm that does not finish within the Kaggle quota is reported as not run.
+
+**Evaluation.** `scripts/xfund_e2e_eval.py`: 250 XFUND val forms, entities from the model's own tags, windowed inference (510 tokens, stride 128), all gold links. Seed-matched delta against A0.
+
+**Registered criteria (primary cell: end-to-end link F1, windowed inference, all 250 val forms, all gold links, seed-matched delta vs A0, in F1 points):**
+- *helps:* mean delta >= +2.0 and positive in every seed.
+- *no_better:* |mean delta| < 1.0, or the signs differ across seeds.
+- *worse:* negative mean with the same sign in every seed.
+- *inconclusive:* anything that is not helps, no_better or worse.
+
+**Secondary cells (reported for every arm):**
+- End-to-end recall of gold links by group: `below`, `same_line`, `above`; `rank_0`, `rank_1`, `rank_2_4`, `rank_5plus`; `q_to_q`.
+- Entity F1 (typed), `link_qa` F1, and the sibling-free subset.
+- Link F1 on a synthetic test set made of the two held-out families.
+
+**Crop parameters.** Up to 4 crops per training form. Links form a graph over the form's entities; connected components are merged when their bounding boxes are within 50 of 1000 units; each region gets random padding of 10-60 units, clamped to the page. A crop keeps the words whose centre lies inside the region, keeps an entity only if all its words are kept, and keeps a link only if both ends are kept. Boxes are re-normalised to the crop frame (0-1000). Crops are added to the full-form windows, never replacing them, are built from the training set only, and are fixed once per seed.
+
+**Synthetic data.** About 3,000 training documents from five families (invoice, itemized_financial_statement, procurement_order, adbuy_contract, fara_registration) and about 300 test documents from two held-out families (shipping_manifest, medical_intake) that never appear in training. New relation structure: nested sections whose label links to child field labels (question->question), a key-above-value layout for downward links, and taller tables so a header links to far-away cells. Generated with `--no_augraphy` (LiLT reads no pixels). Values use Faker locales es_ES / fr_FR / de_DE / it_IT / pt_PT; keys stay in English. Pretraining uses the three-stage curriculum shortened to 2 / 2 / 3 epochs, validated on the held-out families, then the A0 recipe starts from the pretrained weights.
+
+**Limits stated up front.** 3 seeds and no intervals; synthetic forms have English keys while XFUND forms do not; the papers do not support a relation-extraction gain for this kind of model; the crop and synthetic-data parameters are our own choices; A1 and A3 also get more training steps than A0, and no step-matched control is run (Study 21 found extra steps alone were worth about +1.2 link F1).
+
+**Results:** *pending*
+
+**Evidence:** `results/table_links/` (after the run).
