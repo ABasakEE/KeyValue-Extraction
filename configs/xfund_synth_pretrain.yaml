@@ -1,0 +1,45 @@
+# Study 26 — synthetic table-form pretraining for the joint LiLT linker.
+# Same joint/link/spatial/loss/decoding settings as xfund_joint_lilt_windows.yaml; trains on generated relation-rich
+# forms (nested sections, stacked values, tall tables) in FUNSD format. The funsd loader carves validation out of train
+# (training families); test is the held-out families (shipping_manifest, medical_intake).
+# `languages` is omitted: the funsd path ignores it.
+
+backbone: lilt
+dataset: funsd
+data_root: data/synthetic_table
+
+task: joint
+linking_loss_weight: 1.0
+use_spatial_relations: true
+spatial_in_features: 16
+use_geometry: true
+use_containment: true
+use_line_of_sight: true
+use_typography: true
+loss_type: focal
+focal_gamma: 2.0
+focal_alpha: 0.75
+masking_mode: soft
+decode_one_to_one: true
+link_threshold: 0.5
+k_neighbors: 0
+fallback_top_k: 0
+
+curriculum: true
+patience_tolerance: 3
+min_delta: 0.001
+max_phase1_epochs: 2
+max_phase2_epochs: 2
+max_phase3_epochs: 3
+epochs: 7
+
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+form_window: 510
+form_window_stride: 255
+output_dir: results/table_links/pretrain
