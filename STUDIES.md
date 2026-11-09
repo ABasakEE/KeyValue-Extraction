@@ -1241,6 +1241,50 @@ Run order: A0, A2, A1, A3. Runs are resumable per seed. An arm that does not fin
 
 **Pre-run amendment (2026-11-08, before any GPU run).** A final review of the branch found three things the registration above should have said. First, A2 and A3 train on about 2.13 times as many windows per epoch as A0 (3,276 against 1,537, measured with the real tokenizer), because the crops are added to the forms and the epoch count stays at 22. They therefore take about twice the gradient steps. Study 21 found that extra steps alone are worth roughly +1.2 link F1, so this is a confound for A2 and A3, on top of the extra pretraining steps that A1 and A3 get. A gain for A2 or A3 cannot be read as the effect of crops alone. Second, a crop is rescaled to the 0-1000 frame separately in x and y, so word boxes inside crops come out much taller than on full pages (median height about 60 against about 12). LiLT's absolute layout embeddings and the geometry features are not scale-free, so a weak A2 could reflect that mismatch and not a failure of crop augmentation. Third, the A0 sanity gate is now computed automatically: summary.json holds an a0_gate entry (A0 primary F1, the 47.7 reference, the 1.5 tolerance, pass or fail), and when it fails every arm's verdict is written as no_verdict_a0_gate while the deltas are still reported. The summary also records n_seeds per arm and warns when fewer than 3 seeds are matched.
 
-**Results:** *pending*
+**Results (run 2026-11-08 to 2026-11-09, three Kaggle sessions).**
 
-**Evidence:** `results/table_links/` (after the run).
+A0 gate: A0 scored 47.42 against Study 19's 47.7, inside the 1.5 point tolerance, so verdicts are drawn.
+
+| Arm | Link F1 (primary) | Delta vs A0 per seed (13 / 21 / 42) | Mean delta | Verdict |
+|---|---|---|---|---|
+| A0 | 47.42 | | | reference |
+| A1 (synthetic pretraining) | 47.50 | -1.17 / -0.34 / +1.73 | +0.07 | no_better |
+| A2 (crops) | 49.70 | +1.36 / +2.27 / +3.19 | +2.27 | helps |
+| A3 (both) | 49.89 | +0.89 / +2.76 / +3.76 | +2.47 | helps |
+
+Group recall (end to end, windowed, all forms; mean delta vs A0 in points):
+
+| Group | A0 recall | A1 | A2 | A3 |
+|---|---|---|---|---|
+| below | 39.77 | +0.33 | +1.78 | +2.68 |
+| same_line | 63.47 | -0.87 | +0.66 | +1.19 |
+| above | 34.77 | +0.00 | +4.04 | +4.55 |
+| rank_0 | 57.05 | -0.95 | +1.01 | +1.44 |
+| rank_1 | 55.92 | -1.13 | +1.60 | +2.86 |
+| rank_2_4 | 54.22 | -0.00 | +1.02 | +1.93 |
+| rank_5plus | 35.83 | +0.72 | +2.03 | +2.71 |
+| q_to_q | 31.20 | +0.50 | +0.84 | +2.43 |
+
+Other secondary cells (means over 3 seeds):
+
+| Cell | A0 | A1 | A2 | A3 |
+|---|---|---|---|---|
+| Entity F1 | 75.84 | 75.32 | 76.95 | 76.57 |
+| link_qa F1 | 53.15 | 53.03 | 54.89 | 55.13 |
+| Sibling-free link F1 | 46.34 | 46.46 | 48.37 | 48.62 |
+| Synthetic held-out link F1 | 49.11 | 45.76 | 38.49 | 46.16 |
+| Synthetic held-out entity F1 | 80.34 | 73.28 | 75.40 | 73.45 |
+
+What this says:
+- The crops carry the gain. A2 clears the registered bar (mean +2.27, positive in every seed), though not by much. The groups that improve most are the ones Study 22 flagged: partners above (+4.0), far partners (+2.0) and partners below (+1.8). Same-line pairs barely move.
+- Synthetic pretraining alone does nothing measurable on XFUND (A1: +0.07, seeds disagree).
+- A3 against A2 is a post hoc comparison: per seed -0.47 / +0.49 / +0.57, mean +0.20, which would read no_better under the registered rule. A3's group recalls are a little higher than A2's across the board, but with 3 seeds that is not evidence of an added effect from pretraining.
+- On the synthetic held-out families every trained arm is below A0, and A2 is far below (-10.6). The per-seed spread is large (A2: -1.5 / -16.9 / -13.5; A3: +4.0 / -1.7 / -11.2), so this cell is noisy, but the direction is consistent. Crops help on real XFUND forms and hurt on unseen synthetic layouts. One untested explanation is the crop rescaling, which makes word boxes about five times taller than on full pages. A1's drop is also odd, since it was pretrained on synthetic forms; fine-tuning on XFUND afterwards may simply overwrite what it learned, and the held-out families differ from the training families.
+- The step confound from the pre-run amendment applies to A2 and A3: they took about twice the gradient steps of A0, and this study cannot separate crops from extra steps. Study 21 found extra steps alone worth about +1.2 for the windows recipe, so a step-matched control is the obvious follow-up.
+
+Run notes:
+- Sessions: A0 and A2 in session 1 (about 3.4 h and 5.8 h), pretrain and A1 in session 2, A3 in session 3. Pretrain weights are never pushed, so session 3 re-ran pretraining; A3 therefore starts from a different pretraining run than A1 (same seeds and config, GPU non-determinism aside).
+- Sessions 2 and 3 could not push: a conflicted `git pull --rebase` left `.git/rebase-merge` behind and every later push failed. The four evaluation JSONs for A1 and A3 were downloaded from the sessions' output by hand. They passed through a file-format converter on the way, so they were checked before use: the same key structure as A0's files, 9,062 gold links per seed, 250 / 300 forms, and the per-seed values agree with the means. The A1 and A3 training folders (`metrics.json`, per-seed `history.json`) and those sessions' `run_status.json` were not recovered. The push step was fixed afterwards (commit 0f35b99).
+- `summary.json` was rebuilt locally from the four `*_e2e.json` files.
+
+**Evidence:** `results/table_links/` (A0 to A3 `*_e2e.json` and `*_synth_e2e.json`, `summary.json`; training folders for A0 and A2 only).
