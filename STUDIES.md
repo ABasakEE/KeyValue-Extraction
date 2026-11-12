@@ -43,7 +43,8 @@ Conventions:
 | 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), mostly a precision gain (60.3 -> 67.7); it forbids every question->question link (recall 34 -> 0) and does not recover the downward links (recall 50 -> 46). **Correction (same day, see addendum): the gain comes mainly from forbidding type-violating pairs that touch gold `other` entities, which the end-to-end pipeline never creates; forbidding question->question alone costs 2.6 points. End-to-end emulation: forbidding `header` sources +1.9 (structure mode), question->answer only +8.2 (key-value mode, gold without question->question)** |
 | 24 | Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end | GPU | registered 2026-11-06 | *pending (Kaggle run)* |
 | 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
-| 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | registered 2026-11-08 | *pending (Kaggle run)* |
+| 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | 2026-11-09 | **Crops help (registered criterion met):** link F1 47.4 -> 49.7 (+1.4 / +2.3 / +3.2); gains sit on partner-above (+4.0), partner-below and far-partner links; synthetic pretraining alone is no better (+0.1); both together 49.9. Crops get ~2x the steps (confound) and lower link F1 on synthetic held-out families |
+| 27 | Zero-shot VLM (Qwen2.5-VL) key-value linking on XFUND, scored with the LiLT end-to-end scorer | GPU | registered 2026-11-13 | *pending (Kaggle run)* |
 
 ---
 
@@ -1288,3 +1289,27 @@ Run notes:
 - `summary.json` was rebuilt locally from the four `*_e2e.json` files.
 
 **Evidence:** `results/table_links/` (A0 to A3 `*_e2e.json` and `*_synth_e2e.json`, `summary.json`; training folders for A0 and A2 only).
+
+## 27. Zero-shot VLM key-value linking on XFUND, scored with the LiLT end-to-end scorer — GPU (Kaggle T4 × 2), registered 2026-11-13
+
+**Question.** Studies 6-18 and 25 used a VLM (Qwen2.5-VL-3B) for field extraction on VRDU and FATURA, but never on the task the LiLT work is measured on: finding the header / question / answer entities of an XFUND form and linking each key to its value. How well does a zero-shot open VLM do on that task, scored by exactly the same end-to-end rules as LiLT (Studies 19 and 26)? The goal is a fair attempt at the VLM route, not a win; no "helps" verdict is drawn.
+
+**Levers from `NOVELTY_ASSESSMENT.md` §7.4.** A larger VLM (7B instead of 3B) and grounded output (the VLM cites OCR word indices instead of retyping text), neither tried before.
+
+**Arms (XFUND val es / fr / de / it / pt, zero-shot, no training, greedy decoding):**
+- **V2 (main): image + numbered OCR words, end to end.** The prompt shows the page image and the form's words in `ex.words` order (the order LiLT reads), grouped into visual lines written as `[a-b] (x,y) word word ...`. The VLM lists entities as `E<n> <H|Q|A> <a>-<b>` (inclusive word indices) and links as `E<n>>E<m>`.
+- **V3: image + numbered correct entities, links only.** The prompt shows the image and every annotated entity (including `other`, as the linker got in Study 17) as `e<n> <label> (x,y) text`. The VLM lists links as `e<n>>e<m>`. Entity F1 is not reported (it is given).
+- **V1: image only, end to end.** The VLM reads the page itself and lists entities as `E<n> <H|Q|A> | <text>` plus links. Each text is mapped onto the first unused exact match of its words in `ex.words` (case, accent-insensitive punctuation-stripped comparison); an entity that matches nowhere is dropped and counted.
+
+Each prompt has one short worked example made up by us, not taken from XFUND. A link written value->key (A>Q, or Q>H) is flipped to key->value before scoring, using the VLM's own labels (V3: the given labels); this is part of the decode rule, the same for every arm.
+
+**Model and budget.** Qwen2.5-VL-7B-Instruct in float16, split over both T4s (`device_map="auto"`), `max_pixels` 1280·28·28. If the smoke cell's timing projects V2 on 250 forms above 6 h, Qwen2.5-VL-3B-Instruct is used instead and the write-up says so. Forms run in one fixed order (seed 0 shuffle, cycling through the five languages) so a run cut short stays balanced. Order and caps: V2 on all 250 forms (cap about 6 h), V3 on all 250, V1 on the first 100 in the order. Whatever finishes is reported with its form count; comparisons between arms use the forms they share.
+
+**Registered cells.**
+- **Primary:** V2 end-to-end link F1 with `src/e2e_link.py` unchanged: entities need the exact word range and label, links the exact source and destination ranges; gold is every annotated link. 95% interval by bootstrap over forms (1,000 resamples, seed 0). Reported next to LiLT A0 47.4 and A2 49.7 (Study 26, 250 forms, mean of 3 seeds); if V2 covers fewer than 250 forms, that is stated next to the comparison.
+- **Secondary, every arm:** entity F1 (V1, V2), `link_qa` F1, the sibling-free subset, recall by group (below / same_line / above, rank_0 / rank_1 / rank_2_4 / rank_5plus, q_to_q), the parse-failure rate (outputs with no parseable entity or link line) and the share of out-of-range or unmatched items. Failed outputs count as empty predictions; no form is dropped.
+- V3 link F1 is read against LiLT with gold entities (Study 17, about 59.8 with windowed inference).
+
+**Limits stated up front.** One model, one prompt per arm, greedy decoding; the prompts and the output format are ours and were not tuned on XFUND val; V2 gets the words in annotation order, the same hint LiLT gets; a VLM can be strong on content and weak on exact spans (Study 9), and this scorer counts every boundary miss as wrong.
+
+**Evidence:** `results/xfund_vlm/` (after the run): `{V1,V2,V3}_raw.jsonl` (raw generations), `{V1,V2,V3}_e2e.json`, `run_status.json`.
