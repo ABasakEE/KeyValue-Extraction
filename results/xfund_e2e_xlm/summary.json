@@ -1,0 +1,94 @@
+{
+  "seeds": [
+    "13",
+    "21",
+    "42"
+  ],
+  "cells": {
+    "all|single|entity": {
+      "base": 0.6413,
+      "windows": 0.6716,
+      "delta_per_seed": [
+        0.0385,
+        0.0337,
+        0.0188
+      ],
+      "delta_mean": 0.0303
+    },
+    "all|single|link": {
+      "base": 0.4169,
+      "windows": 0.4188,
+      "delta_per_seed": [
+        -0.0018,
+        0.0101,
+        -0.0027
+      ],
+      "delta_mean": 0.0019
+    },
+    "sibling_free|single|entity": {
+      "base": 0.6334,
+      "windows": 0.6664,
+      "delta_per_seed": [
+        0.0409,
+        0.0369,
+        0.0211
+      ],
+      "delta_mean": 0.033
+    },
+    "sibling_free|single|link": {
+      "base": 0.4049,
+      "windows": 0.4134,
+      "delta_per_seed": [
+        0.006,
+        0.017,
+        0.0024
+      ],
+      "delta_mean": 0.0085
+    },
+    "all|windowed|entity": {
+      "base": 0.7594,
+      "windows": 0.7323,
+      "delta_per_seed": [
+        -0.0194,
+        -0.0223,
+        -0.0397
+      ],
+      "delta_mean": -0.0271
+    },
+    "all|windowed|link": {
+      "base": 0.4771,
+      "windows": 0.4422,
+      "delta_per_seed": [
+        -0.0406,
+        -0.0294,
+        -0.0349
+      ],
+      "delta_mean": -0.035
+    },
+    "sibling_free|windowed|entity": {
+      "base": 0.753,
+      "windows": 0.7269,
+      "delta_per_seed": [
+        -0.0189,
+        -0.0209,
+        -0.0383
+      ],
+      "delta_mean": -0.026
+    },
+    "sibling_free|windowed|link": {
+      "base": 0.4658,
+      "windows": 0.4352,
+      "delta_per_seed": [
+        -0.0361,
+        -0.0246,
+        -0.0311
+      ],
+      "delta_mean": -0.0306
+    }
+  },
+  "verdict": {
+    "helps": false,
+    "no_better": false,
+    "primary_cell": "all|windowed|link"
+  }
+}
