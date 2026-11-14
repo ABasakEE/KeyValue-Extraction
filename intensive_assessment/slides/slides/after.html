@@ -1,0 +1,35 @@
+<section id="after" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">What we did after the prep review</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:28px">
+<div style="display:flex;flex-direction:column;gap:10px;background:#FCFCFB;padding:32px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:30px;font-weight:600;color:#C2501F">Fix the baseline</h3>
+<ul style="font-size:26px;line-height:1.45;color:#2D3748">
+<li>Sliding windows (384 words, 128 overlap) with soft voting for long multi-page forms</li>
+<li>Content-box anchoring and coordinate jitter</li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#FCFCFB;padding:32px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:30px;font-weight:600;color:#C2501F">Add key-value linking</h3>
+<ul style="font-size:26px;line-height:1.45;color:#2D3748">
+<li>Biaffine relation head on LiLT, 16-D spatial pair features</li>
+<li>Focal loss, one-to-one decoding, 3-phase curriculum</li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#FCFCFB;padding:32px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:30px;font-weight:600;color:#C2501F">Widen the evidence</h3>
+<ul style="font-size:26px;line-height:1.45;color:#2D3748">
+<li>VRDU Ad-Buy with official unseen-template splits</li>
+<li>XFUND in five languages; 7-family synthetic forms</li>
+</ul>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;background:#FCFCFB;padding:32px;border:1px solid #DEDCD3;border-radius:16px">
+<h3 style="font-size:30px;font-weight:600;color:#C2501F">Test a graph hypothesis</h3>
+<ul style="font-size:26px;line-height:1.45;color:#2D3748">
+<li>Delaunay word graph + Edge-GAT; NER-fused joint GNN</li>
+<li>Dual-T4 runs, feature cache, two Gradio demos</li>
+</ul>
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 6 / 18</p>
+<aside>After the review we worked on four things. The registration forms were being cut off at 512 tokens, so we added sliding windows. The task asks for key-value pairs, and so far we only had tags, so we built a linking head. We wanted a second corpus to check the gap wasn't specific to one dataset, so we added Ad-Buy, and XFUND for linking. And we tested whether a graph over word positions would generalise better than absolute coordinates.</aside>
+</section>

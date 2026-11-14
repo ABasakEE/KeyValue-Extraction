@@ -1,0 +1,13 @@
+<section id="res-gnn" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:32px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Graph models on seen and unseen layouts</h2>
+<div style="display:flex;gap:32px;align-items:start">
+<img src="/_blob/999529ada50c8d9ae9be81c7422e87d3" alt="Bar chart of Edge-GAT ablations on a random split: standard GAT 89.01, 16-D edges 89.91, 1 layer 90.12, 3 layers 90.50" style="width:640px;height:440px;object-fit:contain;background:#FCFCFB;border-radius:12px">
+<img src="/_blob/3a8b4b20442c436030a26cbac1ef7cb5" alt="Bar chart, matched N=200: LiLT 91.6 seen vs 64.2 unseen; RSA-GNN 86.0 vs 42.0; NER-fused GNN link F1 81.4 vs 30.5" style="width:992px;height:440px;object-fit:contain;background:#FCFCFB;border-radius:12px">
+</div>
+<div style="display:flex;gap:32px">
+<p style="width:640px;font-size:26px;line-height:1.4;color:#2D3748">Random split: edge features add 0.9 F1 over a plain GAT, a third layer adds 0.6 more.</p>
+<p style="flex:1;font-size:26px;line-height:1.4;color:#2D3748">Template-disjoint: the gap grows from <b>27.3</b> (LiLT) to <b>43.9</b> (RSA-GNN) and <b>50.9</b> link-F1 points (NER-fused GNN).</p>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 15 / 18</p>
+<aside>This went against our hypothesis. On a random document split the graph model does well, and each part adds a little. Under the matched template-disjoint protocol it falls further than LiLT. Our explanation is that Delaunay neighbours depend on the layout. If a template puts values under their keys instead of beside them, the graph connects different words, and message passing pulls in the wrong context. LiLT leans more on its language model, so it holds up better. The NER-fused number is edge link F1, a different metric, which is why it has its own panel.</aside>
+</section>

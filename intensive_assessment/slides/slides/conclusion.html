@@ -1,0 +1,24 @@
+<section id="conclusion" data-transition="fade" style="background:#16202E;color:#F6F5F0;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1;color:#F6F5F0">Conclusions</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:32px">
+<div style="display:flex;flex-direction:column;gap:10px;border-top:3px solid #F0A27E;padding:24px 0px 0px 0px">
+<h3 style="font-size:32px;font-weight:600;color:#F6F5F0">The gap is real and depends on layout variety</h3>
+<p style="font-size:26px;line-height:1.45;color:#BFC8D6">21.1 points on registration forms, 1.85 on uniform Ad-Buy forms, at matched N = 200.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;border-top:3px solid #F0A27E;padding:24px 0px 0px 0px">
+<h3 style="font-size:32px;font-weight:600;color:#F6F5F0">Almost all errors are field-type errors</h3>
+<p style="font-size:26px;line-height:1.45;color:#BFC8D6">Fields that move between templates drop to near 0 F1, and validation on seen templates doesn’t show it.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;border-top:3px solid #F0A27E;padding:24px 0px 0px 0px">
+<h3 style="font-size:32px;font-weight:600;color:#F6F5F0">Fixed spatial graphs overfit layout</h3>
+<p style="font-size:26px;line-height:1.45;color:#BFC8D6">Delaunay + Edge-GAT wins on seen layouts but its unseen gap is 43.9 points vs 27.3 for LiLT.</p>
+</div>
+<div style="display:flex;flex-direction:column;gap:10px;border-top:3px solid #F0A27E;padding:24px 0px 0px 0px">
+<h3 style="font-size:32px;font-weight:600;color:#F6F5F0">Linking works once decoding is constrained</h3>
+<p style="font-size:26px;line-height:1.45;color:#BFC8D6">XFUND link F1 rose from 32 (FUNSD, first model) to 67.2 with curriculum, focal loss and one-to-one decoding.</p>
+</div>
+</div>
+<p style="font-size:26px;line-height:1.4;color:#BFC8D6">All problem-statement deliverables are in the repository: template-disjoint splits, models, pipeline, gap measurement, failure analysis and a Gradio interface.</p>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#8D97A8">IE 643 · Unemployed and Unsupervised · 17 / 18</p>
+<aside>Under a strict, matched protocol every model we built loses a lot on unseen templates, and the geometric graph made the drop bigger. That shaped our plan for the novelty stage.</aside>
+</section>

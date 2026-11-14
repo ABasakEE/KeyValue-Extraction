@@ -1,0 +1,22 @@
+<section id="before" data-transition="fade" style="background:#F6F5F0;color:#16202E;font-family:'IBM Plex Sans', Arial, sans-serif;padding:128px 128px 160px;display:flex;flex-direction:column;gap:40px">
+<h2 style="font-family:'Source Serif 4', Georgia, serif;font-size:64px;font-weight:600;line-height:1.1">Before the prep review</h2>
+<p style="font-size:28px;line-height:1.45;color:#2D3748">We read up on four model families and the benchmarks that test template shift, wrote loaders for FUNSD and VRDU that recover each form’s template, and set up the split protocol: leave-one-template-out folds, N = 200 on both sides, and an assertion that fails on any template leakage. Entity F1 is strict seqeval, checked against our own second implementation.</p>
+<div style="display:flex;gap:28px;flex:1">
+<div style="flex:1.2;display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:16px">
+<p style="font-size:24px;color:#6A7280">FUNSD pipeline check, LiLT, 3 seeds</p>
+<p style="font-size:44px;font-weight:700">79.29 <span style="color:#6A7280">± 1.36 F1</span></p>
+<img src="/_blob/b448639055e16195cc0ecd6b45404c1f" alt="FUNSD LiLT training loss falling to near zero and validation F1 levelling off around 0.75 for seeds 13, 21 and 42" style="width:560px;height:220px;object-fit:contain">
+</div>
+<div style="flex:0.8;display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:16px">
+<p style="font-size:24px;color:#6A7280">VRDU Registration, seen to unseen</p>
+<p style="font-size:44px;font-weight:700">87.74 → <span style="color:#C2501F">66.66</span></p>
+<p style="font-size:24px;line-height:1.4;color:#4A5568">A gap of 21.08 points (24.0% relative) over 9 runs per setting</p>
+</div>
+<div style="flex:1;display:flex;flex-direction:column;gap:8px;background:#FCFCFB;padding:24px;border:1px solid #DEDCD3;border-radius:16px">
+<p style="font-size:24px;color:#6A7280">Pilot error taxonomy, unseen templates</p>
+<img src="/_blob/f5f3f924584411cd3d7bd156b22bae0e" alt="Donut chart of 7,804 unseen-template errors: field type 97.2%, repeated structure 1.5%, layout association 1.1%, OCR 0.2%" style="width:440px;height:288px;object-fit:contain">
+</div>
+</div>
+<p style="position:absolute;left:128px;bottom:64px;width:1664px;font-size:24px;color:#6A7280">IE 643 · Unemployed and Unsupervised · 5 / 18</p>
+<aside>Before the 21 September review we spent most of our time on the evaluation, because a leaky split would make every later number meaningless. By the review we had a working pipeline on FUNSD and a first seen-versus-unseen gap of 21 points on VRDU. Our FUNSD score was below the published LiLT number, which we said openly at the review. The pilot error taxonomy showed OCR was almost never the problem. From the literature we noticed that entity extraction had been tested under template shift, but key-value linking hadn’t.</aside>
+</section>

@@ -11,6 +11,8 @@ presentation_scripts/
 *.tif
 !slides/figures/*.png
 !slides/figures/*.pdf
+!intensive_assessment/figures/*.png
+!intensive_assessment/report/figures/*.png
 
 # model artifacts and archives
 *.ckpt
