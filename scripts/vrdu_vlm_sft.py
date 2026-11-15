@@ -153,7 +153,7 @@ def cmd_train(args) -> None:
     warm = max(1, int(0.03 * steps))
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: (s + 1) / warm if s < warm else 0.5 * (1 + math.cos(math.pi * (s - warm) / max(1, steps - warm))))
     scaler = torch.amp.GradScaler("cuda")
-    log, skipped, t0, n, step = [], 0, time.time(), 0, 0
+    log, skipped, t0, n, step, gns = [], 0, time.time(), 0, 0, []
     model.train()
     for ep in range(args.epochs):
         random.Random(seed + ep).shuffle(samples)
@@ -181,7 +181,11 @@ def cmd_train(args) -> None:
                 continue
             if n % args.accum == 0:
                 scaler.unscale_(opt)
-                torch.nn.utils.clip_grad_norm_(params, 1.0)
+                gn = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
+                gns.append(gn)
+                if step == 2 and not any(math.isfinite(g) and g > 0 for g in gns):
+                    # PEFT issue 2880: with gradient checkpointing a VLM can train with zero gradients; the scaler's early inf steps are normal
+                    raise RuntimeError(f"no gradient reached the LoRA weights in the first 3 optimizer steps: {gns}")
                 scaler.step(opt)
                 scaler.update()
                 opt.zero_grad(set_to_none=True)
@@ -189,7 +193,7 @@ def cmd_train(args) -> None:
                 step += 1
                 if step % 10 == 0 or args.smoke:
                     print(f"ep {ep} step {step}/{steps} loss {sum(run[-args.accum:]) / len(run[-args.accum:]):.4f} {time.time() - t0:.0f}s "
-                          f"peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
+                          f"gradnorm {gns[-1]:.3g} peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
         if not run or not all(math.isfinite(x) for x in run):
             raise RuntimeError("non-finite or empty training loss; per the registration, change the recipe only by a dated amendment")
         log.append({"epoch": ep, "mean_loss": sum(run) / len(run), "samples": len(run), "seconds": round(time.time() - t0)})
