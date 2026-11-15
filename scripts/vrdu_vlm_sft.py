@@ -220,6 +220,10 @@ def cmd_train(args) -> None:
     print(sp.describe(), flush=True)
     samples = build_samples(sp.train, id2label, fields, desc, not args.no_image)
     out = Path(args.out)
+    if args.smoke:  # results/ is untracked, so a rerun would otherwise skip the training and reuse the old adapter
+        import shutil
+
+        shutil.rmtree(out, ignore_errors=True)
     out.mkdir(parents=True, exist_ok=True)
     if (out / "train_done.json").exists() and (out / "adapter").exists():  # train_done.json is pushed, the adapter is not
         print("already trained, skipping", out)
