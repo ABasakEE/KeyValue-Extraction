@@ -49,10 +49,10 @@ def read_ref(parts=("dev", "confirm")) -> list[dict]:
     return [json.loads(l) for p in parts for l in REFS[p].read_text(encoding="utf-8").splitlines() if l.strip()]
 
 
-def split_for(examples, regime: str, fold: int | None):
+def split_for(examples, regime: str, fold: int | None, seed: int = 0):
     from data.vrdu_loader import load_splits
 
-    splits = load_splits(examples, VRDU / SUBCORPUS / "few_shot-splits", regime=regime.upper(), n_train=200, seed=0, protocol="strict")
+    splits = load_splits(examples, VRDU / SUBCORPUS / "few_shot-splits", regime=regime.upper(), n_train=200, seed=seed, protocol="strict")
     if regime == "utl":
         splits = [s for s in splits if s.held_out_template == FOLDS[fold]]
     assert len(splits) == 1, [s.name for s in splits]
@@ -131,7 +131,7 @@ def cmd_train(args) -> None:
 
     by, examples, id2label = load_all()
     fields, desc = fields_and_desc()
-    sp = split_for(examples, args.regime, args.fold)
+    sp = split_for(examples, args.regime, args.fold, args.split_seed)
     print(sp.describe(), flush=True)
     samples = build_samples(sp.train, id2label, fields, desc, not args.no_image)
     out = Path(args.out)
@@ -139,10 +139,11 @@ def cmd_train(args) -> None:
     if (out / "train_done.json").exists() and (out / "adapter").exists():  # train_done.json is pushed, the adapter is not
         print("already trained, skipping", out)
         return
-    random.Random(SEED).shuffle(samples)
+    seed = SEED + args.split_seed  # replication seed: split seed 1 and training seed 14
+    random.Random(seed).shuffle(samples)
     if args.smoke:
         samples = samples[:6]
-    torch.manual_seed(SEED)
+    torch.manual_seed(seed)
     torch.cuda.set_device(args.device)  # memory stats, the scaler and empty_cache refer to the current device
     model, proc = load_model(None, args.max_pixels, args.device, trainable=True)
     model.config.use_cache = False
@@ -155,7 +156,7 @@ def cmd_train(args) -> None:
     log, skipped, t0, n, step = [], 0, time.time(), 0, 0
     model.train()
     for ep in range(args.epochs):
-        random.Random(SEED + ep).shuffle(samples)
+        random.Random(seed + ep).shuffle(samples)
         run = []
         for i, s in enumerate(samples):
             try:
@@ -363,7 +364,7 @@ def main() -> None:
     p.add_argument("--out", required=True); p.add_argument("--device", default="cuda:0"); p.add_argument("--no-image", action="store_true")
     p.add_argument("--epochs", type=int, default=3); p.add_argument("--accum", type=int, default=8); p.add_argument("--lr", type=float, default=2e-4)
     p.add_argument("--max-pixels", type=int, default=640 * 28 * 28); p.add_argument("--max-len", type=int, default=6144)
-    p.add_argument("--smoke", action="store_true")
+    p.add_argument("--smoke", action="store_true"); p.add_argument("--split-seed", type=int, default=0)
     p = sub.add_parser("gen")
     p.add_argument("--eval", choices=["utl", "confirm", "mtl"], required=True); p.add_argument("--fold", type=int, default=None)
     p.add_argument("--adapter", required=True); p.add_argument("--out", required=True); p.add_argument("--device", default="cuda:0")

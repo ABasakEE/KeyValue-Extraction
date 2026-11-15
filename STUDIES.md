@@ -1386,6 +1386,8 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 
 **Limits stated up front.** One model size, one recipe, one training seed per cell (split seed 0), so no seed variance; BROS used its own seeds on possibly different training documents; the MTL arm is compared with a 9-run BROS mean on a different test set; N = 200 documents (about 500 page samples) may overfit; Qwen may have seen public XFUND/FUNSD pages (VRDU much less likely), which is why Track E is primary; word indices rely on the loader's OCR order; the image helps only if E1 beats E3; GPU hours are an estimate (about 1.5-2 h per training and 1 h per fold of scoring, unmeasured).
 
+**Pre-run amendment (2026-11-15, before any GPU run): two simultaneous sessions and a replication seed.** (1) Track E runs as two Kaggle sessions at the same time with the same notebook (`SESSION` = A or B): A trains E1 (split seed 0) and then runs E0 and E3; B trains E1r and E2. (2) E1r is a replication of E1 with split seed 1 (the official `SD_1` split files) and training seed 14, everything else identical. The registered primary cell, verdicts and the *gap closes* rule are unchanged and drawn on E1 (seed 0). New rule: a verdict of *beats BROS* is reported as **replicated** only if E1r has the same sign of delta against BROS and its bootstrap lower bound is above 0; otherwise it is reported as not replicated. Seeds per cell: 2 for E1, 1 for E2, E0 and E3 (BROS has 9 runs per regime, so this is still thinner than the reference). Reason: the earlier registration gave one training seed per cell, which cannot show whether a difference is seed noise.
+
 **Results:** *pending*
 
 **Evidence:** `results/vlm_sft/` (after the run).
