@@ -212,6 +212,16 @@ def ground(segs: list[tuple[str, str | None]], lines_by_id: dict[str, Line], doc
 
 def decode_doc(doc: Doc, rows: list[dict], fmt: str, fields: list[str]) -> tuple[list[list], Counter]:
     """Spans [field, start, end, text] for one document from its page rows, plus parse/grounding counters."""
+    if fmt == "span":  # study 29: word-range answers (src/vlm_sft.py); rows hold {"page", "samples": [text]}
+        from types import SimpleNamespace
+
+        from vlm_sft import decode_pages
+
+        units = []
+        for p in sorted({r["page"] for r in rows}):
+            base = doc.page_ids.index(p)
+            units.append(SimpleNamespace(page=p, base=base, words=doc.words[base:base + doc.page_ids.count(p)]))
+        return decode_pages(units, {r["page"]: r["samples"][0] for r in rows}, fields, doc.words)
     stats: Counter = Counter()
     votes: dict[str, Counter] = defaultdict(Counter)
     first_page: dict[tuple[str, tuple[int, int]], int] = {}
@@ -396,7 +406,7 @@ def cmd_score(args) -> None:
     for r in ref:
         d = manifest.get(r["guid"])
         rows = by_doc.get(d["doc_id"], []) if d else []
-        need = min(d["n_pages"], MAX_PAGES) * (1 if args.format == "json" else len(fields)) if d else 0
+        need = min(d["n_pages"], MAX_PAGES) * (1 if args.format in ("json", "span") else len(fields)) if d else 0
         if not d or len(rows) < need:
             stats["docs_incomplete"] += 1
             continue
