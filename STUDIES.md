@@ -41,7 +41,7 @@ Conventions:
 | 21 | Step-matched control for windowed joint training (is the study-19 gain just more gradient steps?) | GPU | 2026-11-01 | **Coverage matters (registered criterion met), but a quarter to a third of the gain was steps:** windows beat the control by +3.1 end-to-end link F1 (+4.0 / +3.4 / +1.8); extra steps alone gave the control +1.2 over base. Caveat: early stopping ended the control at 35-43 of 53 epochs, so it got 66-81% of the windows arm's steps |
 | 22 | Where do gold-entity link errors come from? (step 0 for the encoder question) | CPU | 2026-11-01 | 72% of missed links point downward (recall 49 vs 79 for same-line partners); 30% of misses are question->question links (recall 34); 25% are unreachable by any window. Wrong partners are rarely the nearest candidate (10% at rank 0-1; 79% are far away or of the wrong type), so close-neighbour confusion is not the main error and a layout-attention encoder is not clearly indicated |
 | 23 | Decode-time levers for gold-entity linking: threshold, one-to-one, type prior, nearness limit | CPU | 2026-11-01 | **Decode levers matter, modestly (registered criterion met):** the variant chosen on the selection split (threshold 0.4, hard type mask, one-to-one) gains +2.4 link F1 on the 250 forms (+1.9 / +2.2 / +3.2), mostly a precision gain (60.3 -> 67.7); it forbids every question->question link (recall 34 -> 0) and does not recover the downward links (recall 50 -> 46). **Correction (same day, see addendum): the gain comes mainly from forbidding type-violating pairs that touch gold `other` entities, which the end-to-end pipeline never creates; forbidding question->question alone costs 2.6 points. End-to-end emulation: forbidding `header` sources +1.9 (structure mode), question->answer only +8.2 (key-value mode, gold without question->question)** |
-| 24 | Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end | GPU | registered 2026-11-06 | *pending (Kaggle run)* |
+| 24 | Multilingual text stream for joint XFUND linking: LiLT-InfoXLM vs LiLT-en, end to end | GPU | 2026-11-14 | **Worse (registered rule):** end-to-end link F1 47.7 -> 44.2 (-3.5, negative in all 3 seeds), entity F1 75.9 -> 73.2; single-window link F1 is unchanged (41.7 vs 41.9), so the loss is in windowed inference. The multilingual stream did not help |
 | 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
 | 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | 2026-11-09 | **Crops help (registered criterion met):** link F1 47.4 -> 49.7 (+1.4 / +2.3 / +3.2); gains sit on partner-above (+4.0), partner-below and far-partner links; synthetic pretraining alone is no better (+0.1); both together 49.9. Crops get ~2x the steps (confound) and lower link F1 on synthetic held-out families |
 | 27 | Zero-shot VLM (Qwen2.5-VL) key-value linking on XFUND, scored with the LiLT end-to-end scorer | GPU | registered 2026-11-13 | *pending (Kaggle run)* |
@@ -1140,9 +1140,30 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 
 **Checks done before any GPU spend (2026-11-06):** the InfoXLM checkpoint loads in the joint model (`lilt_xlm` in `BACKBONES`); `tests/test_e2e_link.py lilt_xlm` passes (every window within 512 tokens under the XLM-R tokenizer, `link_entities` equal to `forward`, windowed end-to-end prediction, the question->answer filter and gold); the default backbone still passes; the summary self-test passes and the summary skips cells missing from the study-19 file; and `scripts/smoke_xfund_e2e.py lilt_xlm` ran the 3-phase mini-training (16 forms -> **36 training windows**, against 52 for the English stream, which matches the shorter tokenization) and the end-to-end evaluation on CPU, writing every cell including `link_qa`. The smoke scores are meaningless at that size (one epoch per phase; phase-1 validation entity F1 was 0.0 with the new backbone against 0.13 for LiLT-en on the same smoke, consistent with slower early learning from the larger embedding table at the same learning rate, so the per-epoch history of the real run should be inspected).
 
-**Results:** *pending*
+**Results (run 2026-11-14, Kaggle T4 x2, 3 seeds; A0 = study-19 `windows` arm, seed-matched):**
 
-**Evidence:** `results/xfund_e2e_xlm/` (after the run).
+| Cell (all 250 forms) | A0 (en) | A1 (xlm) | Delta per seed (13 / 21 / 42) |
+|---|---|---|---|
+| **Link F1, windowed (primary)** | 47.71 | **44.22** | -4.06 / -2.94 / -3.49 (mean -3.49) |
+| Entity F1, windowed | 75.94 | 73.23 | -1.94 / -2.23 / -3.97 |
+| Entity precision / recall, windowed | 70.2 / 82.7 | 68.6 / 78.6 | |
+| Link precision / recall, windowed | 47.3 / 48.2 | 44.4 / 44.1 | |
+| Link F1, single window | 41.69 | 41.88 | +0.2 (precision 57.0 -> 51.9, recall 32.9 -> 35.1) |
+| Link F1, windowed, sibling-free | 46.58 | 43.52 | -3.1 |
+| Question->answer-only link F1, windowed | not in the study-19 file | 50.36 (51.11 / 50.63 / 49.34) | A1 only |
+
+**Verdict (registered rule): worse.** The mean delta is -3.5 points with the same sign in every seed, so neither *text side matters* nor *no better* applies; the multilingual stream is consistently worse in the windowed end-to-end reading, which is the registered primary cell.
+
+**Other observations (descriptive):**
+- In the single-window reading the two arms tie (41.7 vs 41.9). Windowed inference adds +6.0 link F1 for A0 but only +2.3 for A1, so the loss appears where windows are used.
+- The entity side explains part of it: A1 finds fewer entities (recall 78.6 vs 82.7) and precision is also lower (68.6 vs 70.2). Links are scored on the entities found, so entity errors carry over.
+- A1's recall per link type (windowed): same line 63.7, rank 0 (nearest partner) 54.2, key above value 29.4, key below value 33.0, rank 5+ 30.7, question->question 25.5. A0's per-type recalls are not in the study-19 file, so there is no A0 comparison for these.
+- Training memory: peak 11.8-12.4 GB per GPU (seed-parallel on two T4). Training steps and wall-clock were not recorded in the pushed files.
+- Metric cross-check passed for all three seeds (seqeval F1 equals the independent F1).
+
+**Read with the limits above:** one new backbone with the English recipe unchanged (lr 5e-5, 22 epochs, same curriculum), so this says "no gain with this recipe", not "multilingual encoders cannot help". The study cannot separate the tokenizer-coverage effect from the representation effect. Fewer training windows (about 36 vs 52 on the smoke subset) means fewer gradient steps, which may contribute to the drop.
+
+**Evidence:** `results/xfund_e2e_xlm/` (`xlm_e2e.json`, `summary.json`, `run_status.json`, `xlm/seed_*/`). Pulled from the Kaggle push (commit bfd097d).
 
 ---
 
