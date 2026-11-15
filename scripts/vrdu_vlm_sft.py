@@ -78,7 +78,19 @@ def pdf_image(guid: str, page: int):
 
 
 # ---------------------------------------------------------------- model
-def load_model(adapter: str | None, max_pixels: int, device: str, trainable: bool = False):
+LLM_RE = r"(?!.*visual).*\.(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)"   # the vision MLP reuses these names
+VISION_RE = r"visual\.blocks\.\d+\.(attn\.qkv|attn\.proj|mlp\.(gate|up|down)_proj)"
+
+
+def merger_module(model):
+    """The vision-to-language projector (`visual.merger`), found through any PEFT wrapper."""
+    for n, m in model.named_modules():
+        if n.endswith("visual.merger"):
+            return m
+    raise RuntimeError("no visual.merger module found")
+
+
+def load_model(adapter: str | None, max_pixels: int, device: str, trainable: bool = False, vision_lora: bool = False):
     import torch
     from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
@@ -87,13 +99,21 @@ def load_model(adapter: str | None, max_pixels: int, device: str, trainable: boo
     if trainable:
         from peft import LoraConfig, get_peft_model
 
-        # language-model projections only: the regex skips the vision tower, whose MLP has the same layer names
-        cfg = LoraConfig(r=16, lora_alpha=32, lora_dropout=0.05, task_type="CAUSAL_LM",
-                         target_modules=r"^(?!.*visual).*\.(q_proj|k_proj|v_proj|o_proj|gate_proj|up_proj|down_proj)$")
+        # rank 64 / alpha 64 (scale 1) on the language model; the projector is trained in full; vision adapters only for arm E4
+        pattern = f"^({LLM_RE})$" + (f"|^({VISION_RE})$" if vision_lora else "")
+        cfg = LoraConfig(r=64, lora_alpha=64, lora_dropout=0.05, task_type="CAUSAL_LM", target_modules=pattern)
         model = get_peft_model(model, cfg)
+        names = [n for n, _ in model.named_modules() if n.endswith("lora_A.default")]
+        n_llm, n_vis = sum("visual" not in n for n in names), sum("visual.blocks" in n for n in names)
+        print(f"LoRA modules: language model {n_llm}, vision blocks {n_vis}", flush=True)
+        if n_llm == 0 or (vision_lora and n_vis == 0) or (not vision_lora and n_vis):
+            raise RuntimeError(f"target pattern matched the wrong modules (llm {n_llm}, vision {n_vis}); check the layer names")
+        for n, p in model.named_parameters():
+            if "visual.merger." in n:
+                p.requires_grad_(True)
         for p in model.parameters():
             if p.requires_grad:
-                p.data = p.data.float()  # fp32 adapter weights; the fp16 base stays frozen
+                p.data = p.data.float()  # fp32 trainable weights; the fp16 base stays frozen
         model.gradient_checkpointing_enable(gradient_checkpointing_kwargs={"use_reentrant": False})
         model.enable_input_require_grads()
         model.print_trainable_parameters()
@@ -101,7 +121,50 @@ def load_model(adapter: str | None, max_pixels: int, device: str, trainable: boo
         from peft import PeftModel
 
         model = PeftModel.from_pretrained(model, adapter)
+        mp = Path(adapter) / "merger.pt"
+        if mp.exists():
+            merger_module(model).load_state_dict(torch.load(mp, map_location=device))
+        else:
+            print(f"WARNING: no {mp}; the projector stays untuned", flush=True)
     return model.eval() if not trainable else model, proc
+
+
+def grad_norm(params) -> float:
+    import math
+
+    sq = [float((p.grad.float() ** 2).sum()) for p in params if p.grad is not None]
+    return math.sqrt(sum(sq)) if sq else 0.0
+
+
+def quick_check(model, proc, docs, fields, desc, id2label, args) -> dict:
+    """Collapse check: greedy-decode a few validation documents with the model in memory and score them.
+
+    Validation documents come from the strict split (no held-out-template document); a tuned model that scores near 0 here
+    has collapsed (v1 of Graph-BROS did, silently).
+    """
+    import torch
+    from matched_eval import f1_of, span_counts
+
+    model.eval()
+    model.config.use_cache = True
+    tot, sample = [0, 0, 0], ""
+    for ex in docs:
+        answers = {}
+        for u in page_units(ex):
+            image = None if args.no_image else pdf_image(ex.guid, u.page)
+            enc, _ = encode(proc, build_prompt(u, fields, desc), image, None)
+            enc = enc.to(args.device)
+            with torch.no_grad(), torch.autocast("cuda", dtype=torch.float16):
+                gen = model.generate(**enc, max_new_tokens=160, do_sample=False)
+            answers[u.page] = proc.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)[0]
+            sample = sample or answers[u.page]
+        pred, _ = decode_pages(page_units(ex), answers, fields, ex.words)
+        c = span_counts(pred, gold_spans(ex, id2label))["_micro"]
+        tot = [tot[i] + c[i] for i in range(3)]
+    return {"docs": len(docs), "f1": round(f1_of(tot), 4), "tp_pred_gold": tot, "first_answer": sample}
+
+
+CHECK_MIN_F1 = 0.10
 
 
 def encode(proc, prompt: str, image, target: str | None):
@@ -145,15 +208,17 @@ def cmd_train(args) -> None:
         samples = samples[:6]
     torch.manual_seed(seed)
     torch.cuda.set_device(args.device)  # memory stats, the scaler and empty_cache refer to the current device
-    model, proc = load_model(None, args.max_pixels, args.device, trainable=True)
+    model, proc = load_model(None, args.max_pixels, args.device, trainable=True, vision_lora=args.vision_lora)
     model.config.use_cache = False
     params = [p for p in model.parameters() if p.requires_grad]
+    mparams = [p for n, p in model.named_parameters() if p.requires_grad and "visual.merger." in n]
+    vparams = [p for n, p in model.named_parameters() if p.requires_grad and "visual.blocks" in n]
     opt = torch.optim.AdamW(params, lr=args.lr, weight_decay=0.0)
     steps = max(1, math.ceil(len(samples) * args.epochs / args.accum))
     warm = max(1, int(0.03 * steps))
     sched = torch.optim.lr_scheduler.LambdaLR(opt, lambda s: (s + 1) / warm if s < warm else 0.5 * (1 + math.cos(math.pi * (s - warm) / max(1, steps - warm))))
     scaler = torch.amp.GradScaler("cuda")
-    log, skipped, t0, n, step, gns = [], 0, time.time(), 0, 0, []
+    log, skipped, t0, n, step, gns, mgns, vgns = [], 0, time.time(), 0, 0, [], [], []
     model.train()
     for ep in range(args.epochs):
         random.Random(seed + ep).shuffle(samples)
@@ -183,9 +248,12 @@ def cmd_train(args) -> None:
                 scaler.unscale_(opt)
                 gn = float(torch.nn.utils.clip_grad_norm_(params, 1.0))
                 gns.append(gn)
-                if step == 2 and not any(math.isfinite(g) and g > 0 for g in gns):
-                    # PEFT issue 2880: with gradient checkpointing a VLM can train with zero gradients; the scaler's early inf steps are normal
-                    raise RuntimeError(f"no gradient reached the LoRA weights in the first 3 optimizer steps: {gns}")
+                mgns.append(grad_norm(mparams))
+                vgns.append(grad_norm(vparams))
+                # PEFT issue 2880: with gradient checkpointing a VLM can train with zero gradients; the scaler's early inf steps are normal
+                for what, vals, present in (("LoRA", gns, True), ("projector", mgns, bool(mparams)), ("vision adapter", vgns, bool(vparams))):
+                    if step == 2 and present and not any(math.isfinite(g) and g > 0 for g in vals):
+                        raise RuntimeError(f"no gradient reached the {what} weights in the first 3 optimizer steps: {vals}")
                 scaler.step(opt)
                 scaler.update()
                 opt.zero_grad(set_to_none=True)
@@ -193,14 +261,26 @@ def cmd_train(args) -> None:
                 step += 1
                 if step % 10 == 0 or args.smoke:
                     print(f"ep {ep} step {step}/{steps} loss {sum(run[-args.accum:]) / len(run[-args.accum:]):.4f} {time.time() - t0:.0f}s "
-                          f"gradnorm {gns[-1]:.3g} peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
+                          f"gradnorm {gns[-1]:.3g} (projector {mgns[-1]:.3g}, vision {vgns[-1]:.3g}) peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
         if not run or not all(math.isfinite(x) for x in run):
             raise RuntimeError("non-finite or empty training loss; per the registration, change the recipe only by a dated amendment")
         log.append({"epoch": ep, "mean_loss": sum(run) / len(run), "samples": len(run), "seconds": round(time.time() - t0)})
         print(log[-1], flush=True)
         model.save_pretrained(out / "adapter")
+        torch.save(merger_module(model).state_dict(), out / "adapter" / "merger.pt")
+    # collapse check on validation documents (strict split); the done marker is written only if it passes
+    chk_docs = sp.val[:]
+    random.Random(seed).shuffle(chk_docs)
+    chk = quick_check(model, proc, chk_docs[:2 if args.smoke else args.check_docs], fields, desc, id2label, args)
+    chk["min_f1"] = CHECK_MIN_F1
+    chk["passed"] = chk["f1"] >= CHECK_MIN_F1
+    (out / "collapse_check.json").write_text(json.dumps(chk, indent=2), encoding="utf-8")
+    print("collapse check:", chk, flush=True)
+    if not chk["passed"] and not args.smoke:
+        raise RuntimeError(f"collapse check failed: validation F1 {chk['f1']} < {CHECK_MIN_F1}; the adapter is kept for inspection")
     (out / "train_done.json").write_text(json.dumps({"log": log, "skipped": skipped, "optimizer_steps": step, "train_samples": len(samples),
-                                                      "peak_gb": torch.cuda.max_memory_allocated() / 2**30, "split": sp.name}, indent=2), encoding="utf-8")
+                                                      "peak_gb": torch.cuda.max_memory_allocated() / 2**30, "split": sp.name,
+                                                      "vision_lora": args.vision_lora, "collapse_check_f1": chk["f1"]}, indent=2), encoding="utf-8")
 
 
 # ---------------------------------------------------------------- generate
@@ -366,14 +446,15 @@ def main() -> None:
     p = sub.add_parser("train")
     p.add_argument("--regime", choices=["utl", "mtl"], required=True); p.add_argument("--fold", type=int, default=None)
     p.add_argument("--out", required=True); p.add_argument("--device", default="cuda:0"); p.add_argument("--no-image", action="store_true")
-    p.add_argument("--epochs", type=int, default=3); p.add_argument("--accum", type=int, default=8); p.add_argument("--lr", type=float, default=2e-4)
+    p.add_argument("--epochs", type=int, default=3); p.add_argument("--accum", type=int, default=8); p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--max-pixels", type=int, default=640 * 28 * 28); p.add_argument("--max-len", type=int, default=6144)
     p.add_argument("--smoke", action="store_true"); p.add_argument("--split-seed", type=int, default=0)
+    p.add_argument("--vision-lora", action="store_true"); p.add_argument("--check-docs", type=int, default=20)
     p = sub.add_parser("gen")
     p.add_argument("--eval", choices=["utl", "confirm", "mtl"], required=True); p.add_argument("--fold", type=int, default=None)
     p.add_argument("--adapter", required=True); p.add_argument("--out", required=True); p.add_argument("--device", default="cuda:0")
     p.add_argument("--no-image", action="store_true"); p.add_argument("--max-pixels", type=int, default=640 * 28 * 28)
-    p.add_argument("--max-new-tokens", type=int, default=160); p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)
+    p.add_argument("--max-new-tokens", type=int, default=160); p.add_argument("--split-seed", type=int, default=0); p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)
     p = sub.add_parser("gate"); p.add_argument("--rows", nargs="+", required=True); p.add_argument("--out", default=None)
     p = sub.add_parser("score")
     p.add_argument("--eval", choices=["utl", "mtl"], required=True); p.add_argument("--rows", nargs="+", required=True)
