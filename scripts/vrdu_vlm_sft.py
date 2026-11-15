@@ -455,7 +455,9 @@ def cmd_selftest(_args) -> None:
         # a page prompt and a training pair, shown once
         ex = docs[0]
         u = page_units(ex)[0]
-        print(build_prompt(u, fields, desc)[:900], "...\n--- target ---\n" + page_target(gold_spans(ex, id2label), u, fields))
+        pr = build_prompt(u, fields, desc)
+        print(pr[:700], f"\n[... {len(pr) - 900} more characters, display only; the real prompt is complete ...]\n", pr[-200:],
+              "\n--- target ---\n" + page_target(gold_spans(ex, id2label), u, fields))
         # prompt sizes (words) per page: the tokens are measured on the GPU in the smoke cell
         sizes = sorted(len(u.words) for e in examples[:300] for u in page_units(e))
         print("page words: median", sizes[len(sizes) // 2], "p95", sizes[int(0.95 * len(sizes))], "max", sizes[-1])
