@@ -129,6 +129,28 @@ def load_model(adapter: str | None, max_pixels: int, device: str, trainable: boo
     return model.eval() if not trainable else model, proc
 
 
+def wrap_head(model):
+    """Make the LM head compute logits only for the last `keep` positions (None = all).
+
+    transformers 4.51.3 builds full-sequence float32 logits (and a shifted copy) for the loss: over 4,000 tokens x 152k vocabulary
+    that is several GB and caused out-of-memory errors on long pages in the smoke test.  Training needs only the answer positions.
+    """
+    import torch
+
+    class KeepLast(torch.nn.Module):
+        def __init__(self, head):
+            super().__init__()
+            self.head, self.keep = head, None
+
+        def forward(self, h):
+            return self.head(h if self.keep is None else h[:, -self.keep:])
+
+    inner = model.base_model.model  # PeftModel -> Qwen2_5_VLForConditionalGeneration
+    if not isinstance(inner.lm_head, KeepLast):
+        inner.lm_head = KeepLast(inner.lm_head)
+    return inner.lm_head
+
+
 def grad_norm(params) -> float:
     import math
 
@@ -210,6 +232,7 @@ def cmd_train(args) -> None:
     torch.cuda.set_device(args.device)  # memory stats, the scaler and empty_cache refer to the current device
     model, proc = load_model(None, args.max_pixels, args.device, trainable=True, vision_lora=args.vision_lora)
     model.config.use_cache = False
+    head = wrap_head(model)
     params = [p for p in model.parameters() if p.requires_grad]
     mparams = [p for n, p in model.named_parameters() if p.requires_grad and "visual.merger." in n]
     vparams = [p for n, p in model.named_parameters() if p.requires_grad and "visual.blocks" in n]
@@ -231,10 +254,10 @@ def cmd_train(args) -> None:
                     skipped += 1
                     continue
                 enc = enc.to(args.device)
-                labels = enc["input_ids"].clone()
-                labels[:, :-n_tail] = -100
+                head.keep = n_tail + 1  # the position before the first answer token predicts it
                 with torch.autocast("cuda", dtype=torch.float16):
-                    loss = model(**enc, labels=labels).loss / args.accum
+                    logits = model(**enc).logits
+                loss = torch.nn.functional.cross_entropy(logits[0, :-1].float(), enc["input_ids"][0, -n_tail:]) / args.accum
                 scaler.scale(loss).backward()
                 run.append(loss.item() * args.accum)
                 n += 1
@@ -264,10 +287,11 @@ def cmd_train(args) -> None:
                           f"gradnorm {gns[-1]:.3g} (projector {mgns[-1]:.3g}, vision {vgns[-1]:.3g}) peak {torch.cuda.max_memory_allocated() / 2**30:.1f} GB", flush=True)
         if not run or not all(math.isfinite(x) for x in run):
             raise RuntimeError("non-finite or empty training loss; per the registration, change the recipe only by a dated amendment")
-        log.append({"epoch": ep, "mean_loss": sum(run) / len(run), "samples": len(run), "seconds": round(time.time() - t0)})
+        log.append({"epoch": ep, "mean_loss": sum(run) / len(run), "samples": len(run), "skipped_so_far": skipped, "seconds": round(time.time() - t0)})
         print(log[-1], flush=True)
         model.save_pretrained(out / "adapter")
         torch.save(merger_module(model).state_dict(), out / "adapter" / "merger.pt")
+    head.keep = None
     # collapse check on validation documents (strict split); the done marker is written only if it passes
     chk_docs = sp.val[:]
     random.Random(seed).shuffle(chk_docs)
@@ -278,7 +302,7 @@ def cmd_train(args) -> None:
     print("collapse check:", chk, flush=True)
     if not chk["passed"] and not args.smoke:
         raise RuntimeError(f"collapse check failed: validation F1 {chk['f1']} < {CHECK_MIN_F1}; the adapter is kept for inspection")
-    (out / "train_done.json").write_text(json.dumps({"log": log, "skipped": skipped, "optimizer_steps": step, "train_samples": len(samples),
+    (out / "train_done.json").write_text(json.dumps({"log": log, "skipped": skipped, "skipped_fraction": round(skipped / max(1, len(samples) * args.epochs), 4), "optimizer_steps": step, "train_samples": len(samples),
                                                       "peak_gb": torch.cuda.max_memory_allocated() / 2**30, "split": sp.name,
                                                       "vision_lora": args.vision_lora, "collapse_check_f1": chk["f1"]}, indent=2), encoding="utf-8")
 
