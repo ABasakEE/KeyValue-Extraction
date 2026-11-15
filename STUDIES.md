@@ -1161,6 +1161,8 @@ Recall by group, seed 13, V0 -> selected: question->answer 66.4 -> 71.6; questio
 - Training memory: peak 11.8-12.4 GB per GPU (seed-parallel on two T4). Training steps and wall-clock were not recorded in the pushed files.
 - Metric cross-check passed for all three seeds (seqeval F1 equals the independent F1).
 
+**Post hoc (2026-11-15): question->answer link F1 against a retrained A0.** The study-19 checkpoints exist only on Kaggle, so A0's `link_qa` was not scored. Study 26's A0 is the same recipe retrained with the same seeds (link F1 47.42 vs 47.71 for study 19, inside its tolerance) and its file contains `link_qa`, so it is used as a stand-in (a different training run, not the study-19 weights). Windowed, all forms, link_qa F1: A0 **53.15** (53.41 / 53.06 / 52.97) against A1 **50.36** (51.11 / 50.63 / 49.34), delta **-2.79** (-2.30 / -2.43 / -3.63); sibling-free 52.03 vs 49.43 (-2.60). Single-window: 46.20 vs 47.53 (+1.33). The multilingual stream is worse on the question->answer links too. Same-seed deltas against this A0 on all-links F1 are -3.21 (-3.81 / -2.37 / -3.44), close to the registered -3.49.
+
 **Read with the limits above:** one new backbone with the English recipe unchanged (lr 5e-5, 22 epochs, same curriculum), so this says "no gain with this recipe", not "multilingual encoders cannot help". The study cannot separate the tokenizer-coverage effect from the representation effect. Fewer training windows (about 36 vs 52 on the smoke subset) means fewer gradient steps, which may contribute to the drop.
 
 **Evidence:** `results/xfund_e2e_xlm/` (`xlm_e2e.json`, `summary.json`, `run_status.json`, `xlm/seed_*/`). Pulled from the Kaggle push (commit bfd097d).
