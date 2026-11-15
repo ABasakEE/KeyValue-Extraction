@@ -45,6 +45,7 @@ Conventions:
 | 25 | Schema-guided, grounded VLM extraction (LMDX-style) on VRDU unseen templates, with a pixel ablation | GPU | registered 2026-11-05 | *pending (Kaggle run)* |
 | 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | 2026-11-09 | **Crops help (registered criterion met):** link F1 47.4 -> 49.7 (+1.4 / +2.3 / +3.2); gains sit on partner-above (+4.0), partner-below and far-partner links; synthetic pretraining alone is no better (+0.1); both together 49.9. Crops get ~2x the steps (confound) and lower link F1 on synthetic held-out families |
 | 27 | Zero-shot VLM (Qwen2.5-VL) key-value linking on XFUND, scored with the LiLT end-to-end scorer | GPU | registered 2026-11-13 | *pending (Kaggle run)* |
+| 29 | LoRA-tuned VLM with grounded word-span output: VRDU unseen- vs mixed-template learning (Track E, primary) and XFUND end-to-end linking (Track L) | GPU | registered 2026-11-15 | *pending (Kaggle run)* |
 
 ---
 
@@ -1343,3 +1344,48 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 - **Model choice rule, made exact.** The smoke cell runs 3 V2 forms with the 7B model; projected V2 hours = 250 × (smoke seconds per generated token) × 670 tokens / 3600. Above 6 h, the run uses Qwen2.5-VL-3B-Instruct. `results/xfund_vlm/model_choice.json` records the projection and the model.
 - **Ceilings for reference.** A perfect V2 answer scores 99.8 link F1, not 100, because links touching untagged `other` entities cannot be written (the same holds for LiLT end to end); V3 can reach 100. Forms run in chunks of 50, each pushed before the next starts.
 - **Checks done.** `tests/test_vlm_link.py` passes (form order, line grouping, perfect answers score perfectly, bad or cut-off answers never crash). A CPU run of notebook cells 4-6 with a stub that writes perfect answers produced every output file. The official `{lang}.val.zip` image archives download and every val form's image is found by name (checked for es).
+
+---
+
+## 29. LoRA-tuned VLM with grounded word-span output: VRDU unseen- vs mixed-template learning (Track E, primary) and XFUND end-to-end linking (Track L) — GPU (Kaggle T4 × 2), registered 2026-11-15
+
+(Study 28 is reserved for the step-matched control of study 26; it is not registered yet.)
+
+**Question.** Studies 6-12 and 27 used a VLM zero-shot. The nearest published system, *Identify, Locate, Link* (arXiv 2608.20868), reports that fine-tuning a small VLM beats zero-shot Qwen2.5-VL-7B on XFUND links under a layout-aware metric (0.206 vs 0.123; their metric, not ours). Nobody on this project has fine-tuned one. Does a Qwen2.5-VL-3B tuned with LoRA on N = 200 documents, reading the page image plus the numbered OCR words and answering with word spans, (a) beat or match BROS on **unseen templates** (UTL), and (b) **shrink the MTL-UTL gap** (BROS: 92.4 vs 71.3, gap 21.1)?
+
+**Track E (primary): VRDU `registration-form`, Matched-Size protocol.** Same documents, gold and metric as studies 9 and 12; BROS Track-1 (seeds 13 and 42) is the reference on the same documents.
+- *Training sets:* the official split files `FARA-lv3-unk_<T>-train_200-...-SD_0.json` for the three held-out templates T (Amendment, Dissemination_Report, Short-Form), and `FARA-lv2-mixed_template-train_200-...-SD_0.json` for MTL. The strict protocol is applied (no held-out-template document in the validation part). Checked on the local files: for every T and every split seed, the 100 dev documents and the 100 confirm documents of T share no document with the training part.
+- *UTL test set:* the 100 dev documents (`results/matched_eval/spans.jsonl`) and the 100 confirm documents (`results/confirm_v2/matched/spans.jsonl`) of the held-out template, 600 documents over the three folds. They hold BROS's predictions and the gold spans.
+- *MTL test set:* the 300 documents of the lv2 split's test part (gold from the loader tags; BROS MTL is the study-9-era figure 92.4, mean of 9 runs, which is not paired with this set).
+- *Up to 4 pages per document* (as study 25); gold words on later pages are unreachable and still count as misses.
+
+**Prompt (frozen before any run; the same text is used zero-shot and for tuning).** One call per page. Words of the page are numbered from 0 on that page and grouped into visual lines (the grouping of `src/vlm_link.py`), `[first-last] (x,y) words`, x and y on the 0-1000 scale. The schema is the six field names with the one-line descriptions of `results/zero_shot_kv_v2/schema_desc.json` (written from field names only). The answer is one line per field, `field | a-b, c-d` (word ranges, several allowed) or `field | NONE`. Gold targets come from the loader's BIO tags. The image is the PDF page at 150 dpi, at most 640 x 28 x 28 pixels.
+
+**Tuning recipe (fixed, nothing tuned on test data).** Qwen2.5-VL-3B-Instruct, LoRA r = 16, alpha = 32, dropout 0.05 on the attention and MLP projections of the language model, vision tower frozen; fp16 autocast with fp32 adapter weights and a gradient scaler; AdamW, lr 2e-4, cosine, 3 warm-up percent, 3 epochs, batch 1 with 8 accumulation steps, loss on answer tokens only, seed 13; the last epoch is the checkpoint. Greedy decoding. If the loss goes non-finite or the output is garbage in fp16, the recipe may be changed only by a dated amendment made before any test document is scored.
+
+**Arms:**
+- **E0** zero-shot control: the same prompt, untuned model, confirm documents only (300).
+- **E1 (primary)** LoRA, UTL: three trainings (one per held-out template, split seed 0), scored on the 600 documents.
+- **E2** LoRA, MTL: one training, scored on the lv2 test part.
+- **E3** (ablation, runs last, descriptive): E1 without the image (words only), same recipe.
+
+**Decode.** Page answers are mapped to document word indices; one span per field per document by majority over pages, ties to the earliest page (the rule of study 25); overlapping spans are dropped; an unparseable page counts as empty. Scored with `schema_guided_kv.py score`, i.e. exact-span micro F1 (`matched_eval.py`) with a paired bootstrap over documents (1,000 draws).
+
+**Gate (before any F1 is read).** Page-level parse rate >= 90% and fewer than 5% of pages with an error; otherwise the failure is reported as the finding.
+
+**Registered criteria (primary cell: pooled UTL exact-span micro F1, 600 documents, E1 minus the mean of BROS seeds 13 and 42, paired):**
+- *Beats BROS:* delta >= +3.0 points, bootstrap lower bound > 0, and no template's upper bound < 0.
+- *Competitive:* |delta| <= 3.0 or the interval contains 0.
+- *Worse:* otherwise.
+- *Gap closes:* (E2 MTL F1) - (E1 UTL F1) <= 10.5 points, half of BROS's 21.1. Reported with the caveat that the two test sets differ.
+- Descriptive: E1 vs E0 (value of tuning), E1 vs E3 (value of pixels), per-field F1 (notably `foreign_principle_name` and the Short-Form `registrant_name` decoy), per-template F1, parse and grounding rates, training loss, GPU time and memory.
+
+**Track L (secondary, a separate Kaggle session): XFUND end-to-end links.** The V2 prompt and parser of study 27 (`src/vlm_link.py`), unchanged, with LoRA tuning on the XFUND train split (745 forms; the same recipe, 2 epochs), scored on the 250 val forms with the study-26 scorer, compared with LiLT A0 (47.4) and A2 (49.7), plus the zero-shot V2 numbers of study 27 if they exist. Registered rule: *helps* = link F1 >= LiLT A0 + 3.0 with the bootstrap lower bound above A0; *competitive* = within 3.0; otherwise *worse*. Extra generalization arms, descriptive: train on four languages and test on the fifth (the held-out language); train on XFUND and score FUNSD test. Its scripts are built after Track E has run.
+
+**Checks before any GPU spend.** Unit tests (no model): the page builder and word numbering, line grouping, the gold-target round trip (BIO tags -> target text -> parsed spans reproduce the dev-set gold of `results/matched_eval/spans.jsonl` exactly), the parser on valid, invalid and cut-off answers, and the page-to-document decode; the notebook's smoke cell trains 3 steps and generates 2 pages on the GPU and raises on failure.
+
+**Limits stated up front.** One model size, one recipe, one training seed per cell (split seed 0), so no seed variance; BROS used its own seeds on possibly different training documents; the MTL arm is compared with a 9-run BROS mean on a different test set; N = 200 documents (about 500 page samples) may overfit; Qwen may have seen public XFUND/FUNSD pages (VRDU much less likely), which is why Track E is primary; word indices rely on the loader's OCR order; the image helps only if E1 beats E3; GPU hours are an estimate (about 1.5-2 h per training and 1 h per fold of scoring, unmeasured).
+
+**Results:** *pending*
+
+**Evidence:** `results/vlm_sft/` (after the run).
