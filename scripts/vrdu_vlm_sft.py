@@ -278,7 +278,9 @@ def cmd_train(args) -> None:
                 mgns.append(grad_norm(mparams))
                 vgns.append(grad_norm(vparams))
                 # PEFT issue 2880: with gradient checkpointing a VLM can train with zero gradients; the scaler's early inf steps are normal
-                for what, vals, present in (("LoRA", gns, True), ("projector", mgns, bool(mparams)), ("vision adapter", vgns, bool(vparams))):
+                # without an image (E3) nothing passes through the vision tower or the projector, so zero gradient there is correct
+                for what, vals, present in (("LoRA", gns, True), ("projector", mgns, bool(mparams) and not args.no_image),
+                                            ("vision adapter", vgns, bool(vparams) and not args.no_image)):
                     if step == 2 and present and not any(math.isfinite(g) and g > 0 for g in vals):
                         raise RuntimeError(f"no gradient reached the {what} weights in the first 3 optimizer steps: {vals}")
                 scaler.step(opt)
