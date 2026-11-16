@@ -46,6 +46,7 @@ Conventions:
 | 26 | Table-type links: link-preserving crops and relation-rich synthetic pretraining on XFUND, end to end | GPU | 2026-11-09 | **Crops help (registered criterion met):** link F1 47.4 -> 49.7 (+1.4 / +2.3 / +3.2); gains sit on partner-above (+4.0), partner-below and far-partner links; synthetic pretraining alone is no better (+0.1); both together 49.9. Crops get ~2x the steps (confound) and lower link F1 on synthetic held-out families |
 | 27 | Zero-shot VLM (Qwen2.5-VL) key-value linking on XFUND, scored with the LiLT end-to-end scorer | GPU | registered 2026-11-13 | *pending (Kaggle run)* |
 | 29 | LoRA-tuned VLM with grounded word-span output: VRDU unseen- vs mixed-template learning (Track E, primary) and XFUND end-to-end linking (Track L) | GPU | run finished (sessions A and B; registered 2026-11-15) | **Worse (registered rule):** tuned VLM on unseen templates scores 46.2 exact-span F1 (replication 44.7) against BROS 70.1, i.e. -23.9 [-25.9, -21.6], negative on all three templates and in both seeds; it is also 11 points below the zero-shot pipeline of studies 8-12 (57.4). Mixed-template F1 is 76.1, so the seen/unseen gap is 29.9 (rule: <= 10.5, BROS 21.1). About 25% of gold fields are found with the wrong boundaries and 22-30% are not predicted at all. E3 (no image) not run; Track L not built |
+| 30 | Output format of the tuned VLM on VRDU unseen templates: word numbers (study 29) vs OCR-segment numbers vs copied text with line identifiers | GPU | registered 2026-11-16 | *pending (Kaggle run)* |
 
 ---
 
@@ -1420,3 +1421,38 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 **Run notes.** `run_status.json` in the repo is session B's (7.72 h); session A's was overwritten by the final rebase (`-X theirs`), but its metrics, gates and rows are all present. Intermediate pushes failed during the run (git identity was set only in cell 7, fixed in `ff9c4fa`), and the E3 arm failed at startup because the projector-gradient guard was wrong for runs without an image (also fixed); neither affects the E1, E1r, E2, E0 or E4 numbers. Training used 180 documents per UTL fold (strict protocol), BROS 200.
 
 **Evidence:** `results/vlm_sft/` (`metrics_*.json`, `gate_*.json`, `spans_*.jsonl`, `rows_*.jsonl`, per-training `train_done.json` and `collapse_check.json`).
+
+---
+
+## 30. Output format of the tuned VLM on VRDU unseen templates: word numbers vs OCR-segment numbers vs copied text with line identifiers — GPU (Kaggle T4 × 2), registered 2026-11-16
+
+**Question.** Study 29's tuned VLM, which answers with word numbers, scored 46.2 exact-span F1 on unseen templates against BROS's 70.1. Post hoc diagnostics on the same outputs showed that it finds the right region about as often as BROS (any-overlap F1 73.2 against 72.1 and 75.1) and that most of the loss is exact word boundaries: with a 3-word tolerance it scores 71.2 (BROS 71.8 and 74.5). If that reading is right, an output format that takes the boundaries from the OCR instead of from the model's word counting should close most of the gap. Does it? Nothing else changes: same model, recipe, training documents, test documents and scorer.
+
+**Arms (UTL only; three folds; split seed 0 is the primary, split seed 1 the replication; run as two simultaneous Kaggle sessions, A = seed 0 and B = seed 1, each training S and T on the three folds):**
+- **P** (reference, reused, not retrained): the study-29 arms E1 (seed 0) and E1r (seed 1): word numbers.
+- **S** (segment numbers): the words of each page are split into visual lines (`lines_of` of `src/vlm_sft.py`) and every line is cut where the horizontal gap between two consecutive words exceeds **1.0 x the page's median word height** (rule below). Segments are numbered from 0 on each page in reading order and listed as `S<i> (x,y) text`. The answer is, per field, `field | S<a>-S<b>` (a run of consecutive segments, several runs separated by commas) or `field | NONE`. A run maps to the word span from the first word of S<a> to the last word of S<b>. Training target for a gold span: the run of segments it overlaps if it coincides with segment boundaries, otherwise the smallest run of segments that covers it (so a model that learns this format cannot reproduce the boundaries of the gold spans that do not coincide with segment boundaries; this ceiling is reported).
+- **T** (copied text with line identifiers, the format of study 25 unchanged): the OCR lines of the page with identifiers `XX|YY` and the JSON schema prompt of `scripts/schema_guided_kv.py`; the answer is a JSON object whose values are the text copied from the line followed by that line's identifier (one `text identifier` per line for a value spanning lines). Training targets come from the gold spans through `gold_occurrences`; decoding is study 25's grounding (the cited line must exist and contain the text after the normalisation of `matched_eval.py`, otherwise the value is dropped), one answer per field by majority over pages (ties to the earliest page).
+
+**Gap rule for S, chosen on training documents only.** The multiple of the median word height was chosen as the one that maximises the share of gold spans that are exact runs of consecutive segments on the 180 training documents of each fold (candidates 1.0, 1.5, 2.0, 2.5, 3.0, 4.0 and no split): 1.0 gives 79.0 / 79.2 / 86.1% on folds 0 / 1 / 2 against 76.8 / 77.3 / 84.1% for 2.0, at about 20% more segments per page. History to disclose: before this check, a coverage table on the 600 test documents (post hoc, gold used) had suggested 2.0; that value is not used.
+
+**Recipe (identical to study 29 after amendment 2):** Qwen2.5-VL-3B-Instruct, LoRA rank 64 / alpha 64 on the language model, projector trained in full, vision tower otherwise frozen, lr 1e-4, 3 epochs, batch 1 with 8 accumulation steps, fp16 autocast, training seed 13 + split seed, answer-position loss, images at 150 dpi up to 640 x 28 x 28 pixels, 180 training documents per fold, collapse check on the 20 validation documents (F1 >= 0.10 or the run raises), gradient guards. Greedy decoding, up to 4 pages per document. Only the prompt, the answer format and the decoder differ between arms.
+
+**Metric and test set.** The 600 UTL documents of study 29 (100 dev + 100 confirm of the held-out template, three folds), exact-span micro F1 as in `matched_eval.py`, paired bootstrap over documents (1,000 draws), BROS (seeds 13 and 42) as the reference.
+
+**Gate (before any F1 is read).** Page parse rate >= 90%; for T, at least 90% of the returned values must ground; error rate below 5%. A failing gate is reported as the finding.
+
+**Registered criteria (primary cell: pooled UTL exact-span micro F1 on the 600 documents, split seed 0, for each of S and T):**
+- *Format matters:* the arm's F1 minus P's (E1) >= +5.0 points with bootstrap lower bound > 0, and **replicated**: the same arm in split seed 1 minus E1r has a positive mean difference with lower bound > 0.
+- *Beats BROS:* the arm minus the mean of BROS seeds 13 and 42 >= +3.0 with lower bound > 0, and replicated in the same sense.
+- *Competitive with BROS:* |difference| <= 3.0 or the interval contains 0.
+- *No better than word numbers:* the arm minus P is below +5.0 or its lower bound is <= 0.
+- Verdicts are given per arm; if both pass, the larger difference is named.
+- Descriptive: per-field F1 (notably `foreign_principle_name` and the Short-Form `registrant_name` decoy), the boundary-tolerance table of `scripts/vlm_sft_diagnostics.py` (k = 0, 1, 2, 3, any overlap), the share of test gold spans that are exact runs of segments (the ceiling of S), the share of values that ground (T), per-template F1, seed spread, and the cross-template router and oracle with BROS and the zero-shot VLM pipeline (as diagnostics 3 of study 29).
+
+**Checks before any GPU spend.** Unit tests without a model: the segment builder and the span <-> run mapping (gold spans that coincide with segment boundaries survive the round trip), the S parser (valid, invalid, cut-off answers), the S ceiling on the training and test documents reproduced from the oracle (gold answers through the S decode path score exactly the coverage figure), and the T oracle (`schema_guided_kv.py oracle`, at least 98 F1 on real documents, which validates the line-to-word mapping). Notebook smoke cell as in study 29: 3-step training, in-memory collapse check, generation.
+
+**Limits stated up front.** One recipe and one training seed per fold per split seed; the tuning set is 180 documents of two templates (the same as study 29); S cannot reach about 20% of the gold spans exactly by construction and handles annotation conventions (parentheses, trailing punctuation) only where they fall on segment boundaries; T inherits study 9's finding that the annotated copy of repeated text is not reliably the first or the last, so grounding can pick the wrong copy; the three arms differ in prompt length as well as in format (S lists segments, T lists lines); P was trained under the same recipe but in an earlier session; no MTL arm (run only for a format that passes); the tolerance and overlap diagnostics that motivate the study were computed after seeing the study-29 results.
+
+**Results:** *pending*
+
+**Evidence:** `results/vlm_sft30/` (after the run).
