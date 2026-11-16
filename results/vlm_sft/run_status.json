@@ -1,0 +1,13 @@
+{
+  "train_E1_utl_fold1": 0,
+  "train_E1_utl_fold0": 0,
+  "gen_E1_f1": 0,
+  "train_E3_utl_fold1": 1,
+  "train_E3_utl_fold2": 1,
+  "gen_E1_f0": 0,
+  "train_E1_utl_fold2": 0,
+  "gen_E1_f2": 0,
+  "gen_E0_confirm": 0,
+  "train_E3_utl_fold0": 1,
+  "hours": 5.49
+}

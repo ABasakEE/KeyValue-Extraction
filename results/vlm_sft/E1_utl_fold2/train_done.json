@@ -1,0 +1,33 @@
+{
+  "log": [
+    {
+      "epoch": 0,
+      "mean_loss": 0.10696105005362452,
+      "samples": 352,
+      "skipped_so_far": 0,
+      "seconds": 1459
+    },
+    {
+      "epoch": 1,
+      "mean_loss": 0.033412886531736644,
+      "samples": 352,
+      "skipped_so_far": 0,
+      "seconds": 2915
+    },
+    {
+      "epoch": 2,
+      "mean_loss": 0.01775342455926999,
+      "samples": 352,
+      "skipped_so_far": 0,
+      "seconds": 4364
+    }
+  ],
+  "skipped": 0,
+  "skipped_fraction": 0.0,
+  "optimizer_steps": 132,
+  "train_samples": 352,
+  "peak_gb": 10.879129409790039,
+  "split": "FARA-lv3-unk_Short-Form-train_200-test_300-valid_100-SD_0",
+  "vision_lora": false,
+  "collapse_check_f1": 0.8364
+}
