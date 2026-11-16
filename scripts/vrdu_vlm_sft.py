@@ -28,7 +28,8 @@ ROOT = HERE.parent
 sys.path.insert(0, str(HERE))
 sys.path.insert(0, str(ROOT / "src"))
 
-from vlm_sft import MAX_PAGES, SUBCORPUS, build_prompt, decode_pages, fields_and_desc, gold_spans, page_target, page_units, parse_page  # noqa: E402
+from vlm_sft import (GAP, MAX_PAGES, SUBCORPUS, build_prompt, build_prompt_s, decode_pages, fields_and_desc, gold_spans, page_target,  # noqa: E402
+                     page_units, parse_page, s_to_words, seg_target)
 
 FOLDS = {0: "Amendment", 1: "Dissemination_Report", 2: "Short-Form"}
 VRDU = ROOT / "data" / "vrdu"
@@ -75,6 +76,66 @@ def pdf_image(guid: str, page: int):
     with pymupdf.open(VRDU / SUBCORPUS / "main" / "pdfs" / guid) as doc:
         pix = doc[page].get_pixmap(dpi=150)
         return Image.frombytes("RGB", (pix.width, pix.height), pix.samples)
+
+
+# ---------------------------------------------------------------- answer formats (study 30)
+class Fmt:
+    """Prompts, gold targets and decoding of one answer format: word = word numbers (study 29), seg = OCR-segment numbers,
+    text = copied text with a line identifier (study 25: its prompt, gold_occurrences and grounding, unchanged)."""
+
+    def __init__(self, name: str, fields, desc, id2label, guids=()):
+        self.name, self.fields, self.desc, self.id2label = name, fields, desc, id2label
+        self.units, self.docs, self.records = {}, {}, {}
+        if name == "text":
+            import schema_guided_kv as sg
+
+            self.sg = sg
+            self.records = sg.load_records(VRDU, set(guids))
+            self.docs = {g: sg.Doc(r) for g, r in self.records.items()}
+
+    @property
+    def score_format(self) -> str:
+        return "json" if self.name == "text" else "span"
+
+    def pages(self, ex) -> list[tuple[int, str]]:
+        """(page, prompt) for every page of the document (must be called before decode and stored)."""
+        if self.name == "text":
+            doc = self.docs[ex.guid]
+            return [(p, self.sg.build_prompt(doc.lines.get(p, []), self.fields, self.desc)) for p in range(min(doc.n_pages, MAX_PAGES))]
+        self.units[ex.guid] = us = page_units(ex, gap=GAP if self.name == "seg" else None)
+        build = build_prompt_s if self.name == "seg" else build_prompt
+        return [(u.page, build(u, self.fields, self.desc)) for u in us]
+
+    def targets(self, ex) -> dict[int, str]:
+        """The gold answer of every page."""
+        if self.name == "text":
+            doc, occ, out = self.docs[ex.guid], self.sg.gold_occurrences(self.records[ex.guid], self.docs[ex.guid]), {}
+            for p in range(min(doc.n_pages, MAX_PAGES)):
+                vals = {}
+                for f, segs in occ:  # the first annotated occurrence of the field that has text on this page
+                    here = [f"{t} {lid}" for t, lid, pg in segs if pg == p]
+                    if f in self.fields and f not in vals and here:
+                        vals[f] = "\n".join(here)
+                out[p] = json.dumps({f: vals.get(f) for f in self.fields}, ensure_ascii=False, indent=2)
+            return out
+        gold, _ = gold_spans(ex, self.id2label), self.pages(ex)
+        fn = seg_target if self.name == "seg" else page_target
+        return {u.page: fn(gold, u, self.fields) for u in self.units[ex.guid]}
+
+    def decode(self, ex, answers: dict[int, str]):
+        """([field, start, end, text] spans, counters) from the raw page answers."""
+        if self.name == "text":
+            return self.sg.decode_doc(self.docs[ex.guid], [{"page": p, "samples": [a]} for p, a in answers.items()], "json", self.fields)
+        units = self.units[ex.guid]
+        if self.name == "seg":
+            answers = {u.page: s_to_words(answers[u.page], u, self.fields)[0] for u in units if u.page in answers}
+        return decode_pages(units, answers, self.fields, ex.words)
+
+    def stored(self, ex, page: int, raw: str) -> str:
+        """What rows['samples'] holds so that schema_guided_kv.cmd_score reads it: word runs for word and seg, the raw JSON for text."""
+        if self.name == "seg":
+            return s_to_words(raw, next(u for u in self.units[ex.guid] if u.page == page), self.fields)[0]
+        return raw
 
 
 # ---------------------------------------------------------------- model
@@ -158,7 +219,7 @@ def grad_norm(params) -> float:
     return math.sqrt(sum(sq)) if sq else 0.0
 
 
-def quick_check(model, proc, docs, fields, desc, id2label, args) -> dict:
+def quick_check(model, proc, docs, fmt, args) -> dict:
     """Collapse check: greedy-decode a few validation documents with the model in memory and score them.
 
     Validation documents come from the strict split (no held-out-template document); a tuned model that scores near 0 here
@@ -172,16 +233,16 @@ def quick_check(model, proc, docs, fields, desc, id2label, args) -> dict:
     tot, sample = [0, 0, 0], ""
     for ex in docs:
         answers = {}
-        for u in page_units(ex):
-            image = None if args.no_image else pdf_image(ex.guid, u.page)
-            enc, _ = encode(proc, build_prompt(u, fields, desc), image, None)
+        for p, prompt in fmt.pages(ex):
+            image = None if args.no_image else pdf_image(ex.guid, p)
+            enc, _ = encode(proc, prompt, image, None)
             enc = enc.to(args.device)
             with torch.no_grad(), torch.autocast("cuda", dtype=torch.float16):
-                gen = model.generate(**enc, max_new_tokens=160, do_sample=False)
-            answers[u.page] = proc.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)[0]
-            sample = sample or answers[u.page]
-        pred, _ = decode_pages(page_units(ex), answers, fields, ex.words)
-        c = span_counts(pred, gold_spans(ex, id2label))["_micro"]
+                gen = model.generate(**enc, max_new_tokens=new_tokens(args), do_sample=False)
+            answers[p] = proc.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)[0]
+            sample = sample or answers[p]
+        pred, _ = fmt.decode(ex, answers)
+        c = span_counts(pred, gold_spans(ex, fmt.id2label))["_micro"]
         tot = [tot[i] + c[i] for i in range(3)]
     return {"docs": len(docs), "f1": round(f1_of(tot), 4), "tp_pred_gold": tot, "first_answer": sample}
 
@@ -200,12 +261,16 @@ def encode(proc, prompt: str, image, target: str | None):
 
 
 # ---------------------------------------------------------------- train
-def build_samples(train_docs, id2label, fields, desc, use_image: bool) -> list[dict]:
+def new_tokens(args) -> int:
+    """Answer length cap: the word-run and segment-run answers are short, the JSON answer of the text format is longer (study 25 used 384)."""
+    return getattr(args, "max_new_tokens", 0) or (384 if args.format == "text" else 160)
+
+
+def build_samples(train_docs, fmt) -> list[dict]:
     out = []
     for ex in train_docs:
-        gold = gold_spans(ex, id2label)
-        for u in page_units(ex):
-            out.append({"guid": ex.guid, "page": u.page, "prompt": build_prompt(u, fields, desc), "target": page_target(gold, u, fields)})
+        tg = fmt.targets(ex)
+        out += [{"guid": ex.guid, "page": p, "prompt": prompt, "target": tg[p]} for p, prompt in fmt.pages(ex)]
     return out
 
 
@@ -218,7 +283,8 @@ def cmd_train(args) -> None:
     fields, desc = fields_and_desc()
     sp = split_for(examples, args.regime, args.fold, args.split_seed)
     print(sp.describe(), flush=True)
-    samples = build_samples(sp.train, id2label, fields, desc, not args.no_image)
+    fmt = Fmt(args.format, fields, desc, id2label, [e.guid for e in sp.train + sp.val])
+    samples = build_samples(sp.train, fmt)
     out = Path(args.out)
     if args.smoke:  # results/ is untracked, so a rerun would otherwise skip the training and reuse the old adapter
         import shutil
@@ -301,7 +367,7 @@ def cmd_train(args) -> None:
     # collapse check on validation documents (strict split); the done marker is written only if it passes
     chk_docs = sp.val[:]
     random.Random(seed).shuffle(chk_docs)
-    chk = quick_check(model, proc, chk_docs[:2 if args.smoke else args.check_docs], fields, desc, id2label, args)
+    chk = quick_check(model, proc, chk_docs[:2 if args.smoke else args.check_docs], fmt, args)
     chk["min_f1"] = CHECK_MIN_F1
     chk["passed"] = chk["f1"] >= CHECK_MIN_F1
     (out / "collapse_check.json").write_text(json.dumps(chk, indent=2), encoding="utf-8")
@@ -317,13 +383,14 @@ def cmd_train(args) -> None:
 def cmd_gen(args) -> None:
     import torch
 
-    by, examples, _ = load_all()
+    by, examples, id2label = load_all()
     fields, desc = fields_and_desc()
     docs = eval_docs(by, examples, args.eval, args.fold)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     done = {(r["guid"], r["page"]) for r in map(json.loads, out.read_text(encoding="utf-8").splitlines())} if out.exists() and out.stat().st_size else set()
-    units = [(ex, u) for ex in docs for u in page_units(ex) if (ex.guid, u.page) not in done]
+    fmt = Fmt(args.format, fields, desc, id2label, [ex.guid for ex in docs])
+    units = [(ex, p, prompt) for ex in docs for p, prompt in fmt.pages(ex) if (ex.guid, p) not in done]
     if args.limit:
         units = units[:args.limit]
     print(f"{len(units)} pages to do ({len(done)} done)", flush=True)
@@ -333,18 +400,20 @@ def cmd_gen(args) -> None:
     model, proc = load_model(None if args.adapter == "none" else args.adapter, args.max_pixels, args.device)
     deadline = time.time() + args.deadline_hours * 3600 if args.deadline_hours else None
     with open(out, "a", encoding="utf-8") as fh:
-        for k, (ex, u) in enumerate(units, 1):
+        for k, (ex, p, prompt) in enumerate(units, 1):
             if deadline and time.time() > deadline:
                 print("deadline reached; stopping cleanly (re-run to resume)", flush=True)
                 break
-            row, t0 = {"guid": ex.guid, "doc_id": f"{SUBCORPUS}/{ex.guid}", "page": u.page, "samples": [], "error": None}, time.time()
+            row, t0 = {"guid": ex.guid, "doc_id": f"{SUBCORPUS}/{ex.guid}", "page": p, "samples": [], "error": None}, time.time()
             try:
-                image = None if args.no_image else pdf_image(ex.guid, u.page)
-                enc, _ = encode(proc, build_prompt(u, fields, desc), image, None)
+                image = None if args.no_image else pdf_image(ex.guid, p)
+                enc, _ = encode(proc, prompt, image, None)
                 enc = enc.to(args.device)
                 with torch.no_grad():
-                    gen = model.generate(**enc, max_new_tokens=args.max_new_tokens, do_sample=False)
-                row["samples"] = proc.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)
+                    gen = model.generate(**enc, max_new_tokens=new_tokens(args), do_sample=False)
+                raw = proc.batch_decode(gen[:, enc["input_ids"].shape[1]:], skip_special_tokens=True)
+                row["samples"] = [fmt.stored(ex, p, raw[0])]
+                row["raw"] = raw  # the scorer reads samples (word runs for the segment format); raw is the model's own answer
             except Exception as e:  # one bad page must not kill a multi-hour run
                 row["error"] = f"{type(e).__name__}: {e}"
                 torch.cuda.empty_cache()
@@ -369,6 +438,11 @@ def read_rows(paths) -> dict[str, dict[int, str]]:
 
 
 def cmd_gate(args) -> None:
+    if args.format == "text":  # study 25's gate: JSON parse rate and the share of values that ground
+        import schema_guided_kv as sg
+
+        sg.cmd_gate(argparse.Namespace(manifest=args.manifest, format="json", rows=args.rows, out=args.out))
+        return
     by, examples, _ = load_all()
     fields, _ = fields_and_desc()
     rows = read_rows(args.rows)
@@ -410,6 +484,7 @@ def cmd_score(args) -> None:
     rows = read_rows(args.rows)
     name = f"vlm_{args.arm}"
     if args.eval == "mtl":
+        assert args.format == "word", "the MTL arm exists for the word format only"
         docs = [ex for ex in eval_docs(by, examples, "mtl", None) if len({u.page for u in page_units(ex)} & set(rows.get(ex.guid, {}))) == len(page_units(ex))]
         per = [span_counts(decode_pages(page_units(ex), rows[ex.guid], fields, ex.words)[0], gold_spans(ex, id2label)) for ex in docs]
         tot = [sum(x["_micro"][i] for x in per) for i in range(3)]
@@ -421,7 +496,7 @@ def cmd_score(args) -> None:
         return
     import schema_guided_kv as sg
 
-    ns = argparse.Namespace(manifest=args.manifest, ref=args.ref, rows=args.rows, arm=args.arm, format="span", reference="vlm_both", out=args.out)
+    ns = argparse.Namespace(manifest=args.manifest, ref=args.ref, rows=args.rows, arm=args.arm, format="json" if args.format == "text" else "span", reference="vlm_both", out=args.out)
     sg.cmd_score(ns)
 
 
@@ -454,7 +529,7 @@ def cmd_selftest(_args) -> None:
         print("oracle F1 on 12 documents:", round(100 * f1_of(tot), 2), tot)
         assert f1_of(tot) > 0.9
         sg_out = td / "metrics.json"
-        cmd_score(argparse.Namespace(eval="utl", rows=[str(td / "rows.jsonl")], arm="oracle", out=str(sg_out),
+        cmd_score(argparse.Namespace(eval="utl", format="word", rows=[str(td / "rows.jsonl")], arm="oracle", out=str(sg_out),
                                      manifest=str(td / "manifest_utl.json"), ref=str(td / "ref_utl.jsonl")))
         m = json.loads(sg_out.read_text(encoding="utf-8"))
         assert m["n_docs"] == 12 and m["pooled"]["f1"]["vlm_oracle"] > 0.9, m["pooled"]["f1"]
@@ -481,16 +556,19 @@ def main() -> None:
     p.add_argument("--epochs", type=int, default=3); p.add_argument("--accum", type=int, default=8); p.add_argument("--lr", type=float, default=1e-4)
     p.add_argument("--max-pixels", type=int, default=640 * 28 * 28); p.add_argument("--max-len", type=int, default=6144)
     p.add_argument("--smoke", action="store_true"); p.add_argument("--split-seed", type=int, default=0)
+    p.add_argument("--format", choices=["word", "seg", "text"], default="word")
     p.add_argument("--vision-lora", action="store_true"); p.add_argument("--check-docs", type=int, default=20)
     p = sub.add_parser("gen")
     p.add_argument("--eval", choices=["utl", "confirm", "mtl"], required=True); p.add_argument("--fold", type=int, default=None)
     p.add_argument("--adapter", required=True); p.add_argument("--out", required=True); p.add_argument("--device", default="cuda:0")
     p.add_argument("--no-image", action="store_true"); p.add_argument("--max-pixels", type=int, default=640 * 28 * 28)
-    p.add_argument("--max-new-tokens", type=int, default=160); p.add_argument("--split-seed", type=int, default=0); p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)
+    p.add_argument("--max-new-tokens", type=int, default=0); p.add_argument("--split-seed", type=int, default=0)
+    p.add_argument("--format", choices=["word", "seg", "text"], default="word"); p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)
     p = sub.add_parser("gate"); p.add_argument("--rows", nargs="+", required=True); p.add_argument("--out", default=None)
+    p.add_argument("--format", choices=["word", "seg", "text"], default="word"); p.add_argument("--manifest", default="results/vlm_sft/manifest_utl.json")
     p = sub.add_parser("score")
     p.add_argument("--eval", choices=["utl", "mtl"], required=True); p.add_argument("--rows", nargs="+", required=True)
-    p.add_argument("--arm", required=True); p.add_argument("--out", required=True)
+    p.add_argument("--arm", required=True); p.add_argument("--out", required=True); p.add_argument("--format", choices=["word", "seg", "text"], default="word")
     p.add_argument("--manifest", default="results/vlm_sft/manifest_utl.json"); p.add_argument("--ref", default="results/vlm_sft/ref_utl.jsonl")
     a = ap.parse_args()
     {"selftest": cmd_selftest, "prepare": cmd_prepare, "train": cmd_train, "gen": cmd_gen, "gate": cmd_gate, "score": cmd_score}[a.cmd](a)
