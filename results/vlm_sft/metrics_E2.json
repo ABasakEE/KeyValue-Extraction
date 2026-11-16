@@ -1,0 +1,18 @@
+{
+  "arm": "E2",
+  "eval": "mtl",
+  "n_docs": 300,
+  "f1": 0.7612,
+  "f1_ci95": [
+    0.7358,
+    0.787
+  ],
+  "per_field_f1": {
+    "file_date": 0.7483,
+    "foreign_principle_name": 0.8366,
+    "registrant_name": 0.8013,
+    "registration_num": 0.9404,
+    "signer_name": 0.5058,
+    "signer_title": 0.5098
+  }
+}

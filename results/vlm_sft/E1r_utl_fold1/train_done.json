@@ -1,0 +1,33 @@
+{
+  "log": [
+    {
+      "epoch": 0,
+      "mean_loss": 0.10880056070707587,
+      "samples": 372,
+      "skipped_so_far": 0,
+      "seconds": 1665
+    },
+    {
+      "epoch": 1,
+      "mean_loss": 0.03093718820695045,
+      "samples": 372,
+      "skipped_so_far": 0,
+      "seconds": 3343
+    },
+    {
+      "epoch": 2,
+      "mean_loss": 0.014917156318446242,
+      "samples": 372,
+      "skipped_so_far": 0,
+      "seconds": 5018
+    }
+  ],
+  "skipped": 0,
+  "skipped_fraction": 0.0,
+  "optimizer_steps": 139,
+  "train_samples": 372,
+  "peak_gb": 11.208394527435303,
+  "split": "FARA-lv3-unk_Dissemination_Report-train_200-test_300-valid_100-SD_1",
+  "vision_lora": false,
+  "collapse_check_f1": 0.8193
+}

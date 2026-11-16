@@ -1,0 +1,12 @@
+{
+  "docs": 20,
+  "f1": 0.8193,
+  "tp_pred_gold": [
+    68,
+    82,
+    84
+  ],
+  "first_answer": "file_date | NONE\nforeign_principle_name | NONE\nregistrant_name | 42-44\nregistration_num | 45-45\nsigner_name | NONE\nsigner_title | NONE",
+  "min_f1": 0.1,
+  "passed": true
+}
