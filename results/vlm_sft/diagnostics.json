@@ -1,0 +1,486 @@
+{
+ "n_dev": 300,
+ "n_confirm": 300,
+ "D1": {
+  "vlm_E1": {
+   "anatomy": {
+    "n_near_miss": 704,
+    "kinds": {
+     "pred_contains_gold (too long)": 380,
+     "pred_inside_gold (too short)": 188,
+     "shifted": 136
+    },
+    "total_abs_offset_le1": 0.357,
+    "le2": 0.554,
+    "le3": 0.697,
+    "le5": 0.849,
+    "mean_start_offset": -0.35,
+    "mean_end_offset": 0.76,
+    "examples": {
+     "foreign_principle_name": [
+      [
+       "Rudolf F. Mattesich",
+       "Name of foreign principal Rudolf F. Mattesich"
+      ],
+      [
+       "Algemene Nederlandse Vereniging Voor Vreemdelingenverkeer",
+       "Name of foreign principal Algemene Nederlandse Vereniging Voor Vreemde"
+      ],
+      [
+       "Qu\u00e9bec Government",
+       "transmitted . Qu\u00e9bec Government"
+      ],
+      [
+       "Far East Trade Service , Inc. Taipei , Taiwan , R.O.C.",
+       "Far East Trade Service , Inc."
+      ]
+     ],
+     "registrant_name": [
+      [
+       "Austrian State Tourist Department Austrian Federal Railways",
+       "Tourist Department"
+      ],
+      [
+       "NETHERLANDS NATIONAL TOURIST OFFICE ANVV",
+       "OFFICE ANVV"
+      ],
+      [
+       "Caroline Cushing",
+       "Caroline Cushing 2327"
+      ],
+      [
+       "BARBADOS IND . DEV . CORPORATION BARBADOS TOURIST BOARD",
+       "BARBADOS IND . DEV . CORPORATION"
+      ]
+     ],
+     "file_date": [
+      [
+       "18th day of apristory",
+       "this 18th day of apristory"
+      ],
+      [
+       "28 day of March , 19 23",
+       "this 28 day of"
+      ],
+      [
+       "23rd day of December 19 77",
+       "this 23rd day of December 19 77"
+      ],
+      [
+       "11 day of July 1978",
+       "this 11 day of July"
+      ]
+     ],
+     "registration_num": [
+      [
+       "2277",
+       "MASAAKI KITAGAWA 2277"
+      ],
+      [
+       "2327",
+       "Office 2327"
+      ],
+      [
+       "3712",
+       "Woolley 3712"
+      ],
+      [
+       "5758",
+       "Wiltz 5758"
+      ]
+     ],
+     "signer_title": [
+      [
+       "DIRECTOR",
+       ", DIRECTOR"
+      ],
+      [
+       "General Manager",
+       "General Manager , North America"
+      ],
+      [
+       "President , Edelman Washington",
+       ", Edelman Washington"
+      ],
+      [
+       "Representative Director",
+       "Director"
+      ]
+     ],
+     "signer_name": [
+      [
+       "( Ronald N. Bassett )",
+       "Bassett )"
+      ],
+      [
+       "Patrick FJ Macrory",
+       "FJ Macrory"
+      ],
+      [
+       "Jared Genser",
+       "Jared Genser , Associate"
+      ],
+      [
+       "Carolyn Blackett",
+       "Blackett Carolyn Blackett"
+      ]
+     ]
+    }
+   },
+   "f1_with_boundary_tolerance": {
+    "within_0_words": 46.24,
+    "within_1_words": 58.06,
+    "within_2_words": 63.76,
+    "within_3_words": 71.18,
+    "within_5_words": 75.23,
+    "any_overlap": 73.17
+   }
+  },
+  "vlm_E1r": {
+   "anatomy": {
+    "n_near_miss": 620,
+    "kinds": {
+     "pred_contains_gold (too long)": 228,
+     "pred_inside_gold (too short)": 161,
+     "shifted": 231
+    },
+    "total_abs_offset_le1": 0.298,
+    "le2": 0.595,
+    "le3": 0.782,
+    "le5": 0.952,
+    "mean_start_offset": -0.58,
+    "mean_end_offset": 0.12,
+    "examples": {
+     "file_date": [
+      [
+       "23rd day of March -1962",
+       "this 23rd day of March -1962"
+      ],
+      [
+       "18th day of apristory",
+       "this 18th day of apristory"
+      ],
+      [
+       "28 day of March , 19 23",
+       "of March , 19 23"
+      ],
+      [
+       "23rd day of December 19 77",
+       "December 19 77"
+      ]
+     ],
+     "foreign_principle_name": [
+      [
+       "Rudolf F. Mattesich",
+       "Name of foreign principal Rudolf F. Mattesich"
+      ],
+      [
+       "Algemene Nederlandse Vereniging Voor Vreemdelingenverkeer",
+       "Name of foreign principal Algemene Nederlandse Vereniging Voor Vreemde"
+      ],
+      [
+       "Qu\u00e9bec Government",
+       "transmitted . Qu\u00e9bec Government"
+      ],
+      [
+       "Canadian Forest Industries Council",
+       "packet Canadian Forest Industries Council"
+      ]
+     ],
+     "registrant_name": [
+      [
+       "Austrian State Tourist Department Austrian Federal Railways",
+       "Tourist Department"
+      ],
+      [
+       "NETHERLANDS NATIONAL TOURIST OFFICE ANVV",
+       "OFFICE ANVV"
+      ],
+      [
+       "Caroline Cushing",
+       "Caroline Cushing 2327"
+      ],
+      [
+       "BARBADOS IND . DEV . CORPORATION BARBADOS TOURIST BOARD",
+       "BARBADOS IND . DEV . CORPORATION"
+      ]
+     ],
+     "registration_num": [
+      [
+       "495",
+       "495 for Period ending Dec.31,1961"
+      ],
+      [
+       "2277",
+       "MASAAKI KITAGAWA 2277"
+      ],
+      [
+       "3988",
+       "L.P. 3988"
+      ],
+      [
+       "1032",
+       "No .. 1032"
+      ]
+     ],
+     "signer_title": [
+      [
+       "General Manager",
+       "General Manager , North America"
+      ],
+      [
+       "General Manager , North America",
+       ", North America"
+      ],
+      [
+       "Representative Director",
+       "Director"
+      ],
+      [
+       "Sr. Vice President , Sr. Partner & Corporate Controller",
+       "Sr. Vice President , Sr. Partner"
+      ]
+     ],
+     "signer_name": [
+      [
+       "Joseph B. kins , Jr.",
+       "Joseph B. kins"
+      ],
+      [
+       "Jared Genser",
+       "Genser , Associate"
+      ],
+      [
+       "Raymond S. Calamaro",
+       "Calamaro"
+      ],
+      [
+       "Carolyn Blackett",
+       "Carolyn"
+      ]
+     ]
+    }
+   },
+   "f1_with_boundary_tolerance": {
+    "within_0_words": 44.66,
+    "within_1_words": 57.4,
+    "within_2_words": 62.91,
+    "within_3_words": 70.14,
+    "within_5_words": 73.7,
+    "any_overlap": 69.42
+   }
+  }
+ },
+ "D2": {
+  "vlm_E1": {
+   "unsnapped": 46.24,
+   "snap_to_BROS_seed13_same_field": 60.32,
+   "snap_to_BROS_seed13_any_field": 58.06,
+   "snap_to_zero_shot_VLM_same_field": 56.95,
+   "snap_to_visual_lines": 36.11,
+   "gold_spans_that_are_whole_visual_lines_pct": 46.4
+  },
+  "vlm_E1r": {
+   "unsnapped": 44.66,
+   "snap_to_BROS_seed13_same_field": 60.2,
+   "snap_to_BROS_seed13_any_field": 59.52,
+   "snap_to_zero_shot_VLM_same_field": 55.28,
+   "snap_to_visual_lines": 32.35,
+   "gold_spans_that_are_whole_visual_lines_pct": 46.4
+  }
+ },
+ "D3": {
+  "vlm_E1|bros_seed13": {
+   "singles_on_confirm": {
+    "bros_seed13": 68.99,
+    "vlm_both": 57.71,
+    "vlm_E1": 45.52
+   },
+   "router_BROS+zeroshot": 73.39,
+   "router_BROS+zeroshot+tuned": 72.01,
+   "router3_minus_router2_boot": {
+    "mean": -1.37,
+    "ci95": [
+     -2.03,
+     -0.74
+    ]
+   },
+   "oracle_BROS+zeroshot": 80.5,
+   "oracle_BROS+zeroshot+tuned": 83.94,
+   "p_correct_given_BROS_wrong(gold field occurrences)": {
+    "vlm_both": 0.197,
+    "vlm_E1": 0.144
+   },
+   "tables3": {
+    "0": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "vlm_both",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "1": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_E1",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "2": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    }
+   }
+  },
+  "vlm_E1|bros_seed42": {
+   "singles_on_confirm": {
+    "bros_seed42": 72.01,
+    "vlm_both": 57.71,
+    "vlm_E1": 45.52
+   },
+   "router_BROS+zeroshot": 75.13,
+   "router_BROS+zeroshot+tuned": 71.35,
+   "router3_minus_router2_boot": {
+    "mean": -3.79,
+    "ci95": [
+     -4.79,
+     -2.78
+    ]
+   },
+   "oracle_BROS+zeroshot": 81.71,
+   "oracle_BROS+zeroshot+tuned": 85.52,
+   "p_correct_given_BROS_wrong(gold field occurrences)": {
+    "vlm_both": 0.181,
+    "vlm_E1": 0.137
+   },
+   "tables3": {
+    "0": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "bros_seed42"
+    },
+    "1": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_E1",
+     "registrant_name": "bros_seed42",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm_E1"
+    },
+    "2": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "bros_seed42"
+    }
+   }
+  },
+  "vlm_E1r|bros_seed13": {
+   "singles_on_confirm": {
+    "bros_seed13": 68.99,
+    "vlm_both": 57.71,
+    "vlm_E1r": 45.13
+   },
+   "router_BROS+zeroshot": 73.39,
+   "router_BROS+zeroshot+tuned": 73.39,
+   "router3_minus_router2_boot": {
+    "mean": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ]
+   },
+   "oracle_BROS+zeroshot": 80.5,
+   "oracle_BROS+zeroshot+tuned": 84.25,
+   "p_correct_given_BROS_wrong(gold field occurrences)": {
+    "vlm_both": 0.197,
+    "vlm_E1r": 0.076
+   },
+   "tables3": {
+    "0": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "vlm_both",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "1": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "2": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    }
+   }
+  },
+  "vlm_E1r|bros_seed42": {
+   "singles_on_confirm": {
+    "bros_seed42": 72.01,
+    "vlm_both": 57.71,
+    "vlm_E1r": 45.13
+   },
+   "router_BROS+zeroshot": 75.13,
+   "router_BROS+zeroshot+tuned": 75.13,
+   "router3_minus_router2_boot": {
+    "mean": 0.0,
+    "ci95": [
+     0.0,
+     0.0
+    ]
+   },
+   "oracle_BROS+zeroshot": 81.71,
+   "oracle_BROS+zeroshot+tuned": 85.5,
+   "p_correct_given_BROS_wrong(gold field occurrences)": {
+    "vlm_both": 0.181,
+    "vlm_E1r": 0.06
+   },
+   "tables3": {
+    "0": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "bros_seed42"
+    },
+    "1": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "bros_seed42",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "bros_seed42"
+    },
+    "2": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm_both",
+     "registrant_name": "vlm_both",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "bros_seed42"
+    }
+   }
+  }
+ }
+}
