@@ -330,7 +330,7 @@ def cmd_run(args) -> None:
         def sample(self, prompt, image, k, max_new_tokens, prefill=""):
             return ['{"file_date": null}' if "JSON" in prompt else "ANSWER: NONE"] * k
 
-    gen = _Stub() if args.stub else _vlm_class()(args.model, args.device, args.dtype, args.max_pixels)
+    gen = _Stub() if args.stub else _vlm_class()(args.model, args.device, args.dtype, args.max_pixels, args.quant4)
     deadline = time.time() + args.deadline_hours * 3600 if args.deadline_hours else None
     cache: dict[str, Doc] = {}
     with open(out, "a", encoding="utf-8") as fh:
@@ -579,6 +579,7 @@ def main() -> None:
     p.add_argument("--arm", choices=["image", "text"], default="image"); p.add_argument("--format", choices=["json", "field"], default="json")
     p.add_argument("--samples", type=int, default=1); p.add_argument("--model", default="Qwen/Qwen2.5-VL-3B-Instruct")
     p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
+    p.add_argument("--quant4", action="store_true", help="load the model in 4-bit nf4 (bitsandbytes)")
     p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--max-new-tokens", type=int, default=384)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1)
     p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)

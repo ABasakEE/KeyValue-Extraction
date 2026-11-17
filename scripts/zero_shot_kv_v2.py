@@ -199,14 +199,24 @@ def build_manifest(funsd_root: Path | None, vrdu_root: Path, n_per_template: int
 
 # ---------------------------------------------------------------- generation
 class VLM:
-    def __init__(self, model_id: str, device: str, dtype: str, max_pixels: int):
+    def __init__(self, model_id: str, device: str, dtype: str, max_pixels: int, quant4: bool = False):
         import torch
-        from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+        import transformers
+        from transformers import AutoProcessor
 
         self.device = device
-        self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
-            model_id, torch_dtype=getattr(torch, dtype), attn_implementation="sdpa").to(device).eval()
+        qwen3 = "Qwen3-VL" in model_id
+        cls = getattr(transformers, "Qwen3VLForConditionalGeneration" if qwen3 else "Qwen2_5_VLForConditionalGeneration")
+        kw = {"torch_dtype": getattr(torch, dtype), "attn_implementation": "sdpa"}
+        if quant4:  # shortcut: nf4 so an 8B model fits one 15 GB T4; the quality cost is not measured
+            kw["quantization_config"] = transformers.BitsAndBytesConfig(
+                load_in_4bit=True, bnb_4bit_quant_type="nf4", bnb_4bit_compute_dtype=getattr(torch, dtype))
+            kw["device_map"] = {"": device}
+        model = cls.from_pretrained(model_id, **kw)
+        self.model = (model if quant4 else model.to(device)).eval()
         self.proc = AutoProcessor.from_pretrained(model_id, min_pixels=256 * 28 * 28, max_pixels=max_pixels)
+        if qwen3:  # same pixel budget; the Qwen3-VL processor may not read min/max_pixels, so set its size dict too (checked in the smoke cell)
+            self.proc.image_processor.size = {"shortest_edge": 256 * 28 * 28, "longest_edge": max_pixels}
         self.proc.tokenizer.padding_side = "left"  # batched generation needs left padding
 
     def batch_text(self, prompts: list[str], max_new_tokens: int, prefill: str = "",
