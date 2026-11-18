@@ -1,0 +1,17 @@
+{
+  "format": "field",
+  "json_gate": {
+    "format": "json",
+    "outputs": 59,
+    "parse_rate": 1.0,
+    "values": 210,
+    "ground_rate": 0.0,
+    "counters": {
+      "outputs": 59,
+      "values": 210,
+      "ungrounded_unknown_id": 210,
+      "null": 144
+    },
+    "decision": "switch_to_field_format"
+  }
+}

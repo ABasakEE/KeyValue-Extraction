@@ -1,0 +1,21 @@
+{
+  "docs": 100,
+  "oracle_f1": 0.9969,
+  "tp_fp_fn": [
+    478,
+    478,
+    481
+  ],
+  "grounding_reasons": {
+    "exact": 469,
+    "disjoint_truncated": 9,
+    "empty": 3
+  },
+  "collisions": null,
+  "docs_with_misses": 3,
+  "example_misses": [
+    "19880301_Arnold _ Porter Kaye Scholer, LLP_Amendment_Amendment.pdf",
+    "19790101_Representative of the Turkish Republic of Northern Cyprus_Amendment_Amendment.pdf",
+    "19811201_Monaco Government Tourist Office_Amendment_Amendment.pdf"
+  ]
+}

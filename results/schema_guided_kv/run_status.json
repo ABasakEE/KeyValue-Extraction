@@ -1,0 +1,12 @@
+{
+  "pilot_json_failed": [],
+  "pilot_field_failed": [],
+  "A2_confirm_failed": [],
+  "A2_dev_failed": [],
+  "A1_confirm_failed": [],
+  "A1_dev_failed": [],
+  "A3_base": "A1",
+  "A3_confirm_failed": [],
+  "A3_dev_failed": [],
+  "hours_used": 7.85
+}

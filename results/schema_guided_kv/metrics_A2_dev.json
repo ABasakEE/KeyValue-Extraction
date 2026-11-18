@@ -1,0 +1,301 @@
+{
+  "arm": "A2",
+  "format": "field",
+  "reference": "vlm_both",
+  "n_docs": 300,
+  "docs_incomplete": 0,
+  "decode": {
+    "outputs": 3612,
+    "values": 1544,
+    "ungrounded_unknown_id": 1380,
+    "null": 2068,
+    "grounded": 108,
+    "grounded_exact": 106,
+    "ungrounded_empty": 28,
+    "ungrounded_not_in_line": 28,
+    "dropped_overlap": 3,
+    "grounded_lenient": 2
+  },
+  "folds": {
+    "fold0_Amendment": {
+      "n_docs": 100,
+      "f1": {
+        "bros_seed13": 0.8356,
+        "bros_seed42": 0.8418,
+        "vlm_both": 0.6512,
+        "vlm_A2": 0.0141
+      },
+      "f1_ci95": {
+        "bros_seed13": [
+          0.7941,
+          0.8743
+        ],
+        "bros_seed42": [
+          0.8025,
+          0.8769
+        ],
+        "vlm_both": [
+          0.6107,
+          0.6918
+        ],
+        "vlm_A2": [
+          0.0,
+          0.0293
+        ]
+      },
+      "new_minus_reference_ci95": [
+        -0.68,
+        -0.5938
+      ],
+      "new_minus_reference_mean": -0.6367,
+      "new_minus_bros_ci95": [
+        -0.8605,
+        -0.785
+      ],
+      "per_field_f1": {
+        "file_date": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.4409,
+          "bros_seed13": 0.7579
+        },
+        "foreign_principle_name": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.5,
+          "bros_seed13": 0.0
+        },
+        "registrant_name": {
+          "vlm_A2": 0.0388,
+          "vlm_both": 0.8832,
+          "bros_seed13": 0.8612
+        },
+        "registration_num": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.92,
+          "bros_seed13": 0.9612
+        },
+        "signer_name": {
+          "vlm_A2": 0.0217,
+          "vlm_both": 0.3613,
+          "bros_seed13": 0.7933
+        },
+        "signer_title": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.1429,
+          "bros_seed13": 0.7097
+        }
+      }
+    },
+    "fold1_Dissemination_Report": {
+      "n_docs": 100,
+      "f1": {
+        "bros_seed13": 0.6276,
+        "bros_seed42": 0.7,
+        "vlm_both": 0.6616,
+        "vlm_A2": 0.0358
+      },
+      "f1_ci95": {
+        "bros_seed13": [
+          0.5894,
+          0.6631
+        ],
+        "bros_seed42": [
+          0.6652,
+          0.7311
+        ],
+        "vlm_both": [
+          0.6303,
+          0.6922
+        ],
+        "vlm_A2": [
+          0.0161,
+          0.0604
+        ]
+      },
+      "new_minus_reference_ci95": [
+        -0.6665,
+        -0.5826
+      ],
+      "new_minus_reference_mean": -0.6264,
+      "new_minus_bros_ci95": [
+        -0.665,
+        -0.5862
+      ],
+      "per_field_f1": {
+        "file_date": {
+          "vlm_A2": 0.04,
+          "vlm_both": 0.7817,
+          "bros_seed13": 0.763
+        },
+        "foreign_principle_name": {
+          "vlm_A2": 0.0225,
+          "vlm_both": 0.6104,
+          "bros_seed13": 0.0
+        },
+        "registrant_name": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.96,
+          "bros_seed13": 0.7807
+        },
+        "registration_num": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.9749,
+          "bros_seed13": 0.9515
+        },
+        "signer_name": {
+          "vlm_A2": 0.0508,
+          "vlm_both": 0.3636,
+          "bros_seed13": 0.3134
+        },
+        "signer_title": {
+          "vlm_A2": 0.0952,
+          "vlm_both": 0.0629,
+          "bros_seed13": 0.4662
+        }
+      }
+    },
+    "fold2_Short-Form": {
+      "n_docs": 100,
+      "f1": {
+        "bros_seed13": 0.6017,
+        "bros_seed42": 0.6009,
+        "vlm_both": 0.4156,
+        "vlm_A2": 0.0636
+      },
+      "f1_ci95": {
+        "bros_seed13": [
+          0.5777,
+          0.6244
+        ],
+        "bros_seed42": [
+          0.5771,
+          0.6242
+        ],
+        "vlm_both": [
+          0.3812,
+          0.4512
+        ],
+        "vlm_A2": [
+          0.0365,
+          0.0921
+        ]
+      },
+      "new_minus_reference_ci95": [
+        -0.3963,
+        -0.3096
+      ],
+      "new_minus_reference_mean": -0.354,
+      "new_minus_bros_ci95": [
+        -0.5713,
+        -0.5056
+      ],
+      "per_field_f1": {
+        "file_date": {
+          "vlm_A2": 0.0192,
+          "vlm_both": 0.4742,
+          "bros_seed13": 0.9072
+        },
+        "foreign_principle_name": {
+          "vlm_A2": 0.0833,
+          "vlm_both": 0.578,
+          "bros_seed13": 0.0
+        },
+        "registrant_name": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.0603,
+          "bros_seed13": 0.0199
+        },
+        "registration_num": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.9592,
+          "bros_seed13": 0.9804
+        },
+        "signer_name": {
+          "vlm_A2": 0.2245,
+          "vlm_both": 0.1519,
+          "bros_seed13": 0.8511
+        },
+        "signer_title": {
+          "vlm_A2": 0.0,
+          "vlm_both": 0.0,
+          "bros_seed13": 0.0
+        }
+      }
+    }
+  },
+  "pooled": {
+    "n_docs": 300,
+    "f1": {
+      "bros_seed13": 0.6856,
+      "bros_seed42": 0.7094,
+      "vlm_both": 0.5716,
+      "vlm_A2": 0.0389
+    },
+    "f1_ci95": {
+      "bros_seed13": [
+        0.6607,
+        0.7077
+      ],
+      "bros_seed42": [
+        0.6859,
+        0.7288
+      ],
+      "vlm_both": [
+        0.5479,
+        0.597
+      ],
+      "vlm_A2": [
+        0.0257,
+        0.0526
+      ]
+    },
+    "new_minus_reference_ci95": [
+      -0.563,
+      -0.5044
+    ],
+    "new_minus_reference_mean": -0.5327,
+    "new_minus_bros_ci95": [
+      -0.6837,
+      -0.6313
+    ],
+    "per_field_f1": {
+      "file_date": {
+        "vlm_A2": 0.0193,
+        "vlm_both": 0.5685,
+        "bros_seed13": 0.8115
+      },
+      "foreign_principle_name": {
+        "vlm_A2": 0.0535,
+        "vlm_both": 0.591,
+        "bros_seed13": 0.0
+      },
+      "registrant_name": {
+        "vlm_A2": 0.0129,
+        "vlm_both": 0.6342,
+        "bros_seed13": 0.5528
+      },
+      "registration_num": {
+        "vlm_A2": 0.0,
+        "vlm_both": 0.9513,
+        "bros_seed13": 0.9643
+      },
+      "signer_name": {
+        "vlm_A2": 0.0974,
+        "vlm_both": 0.2895,
+        "bros_seed13": 0.6696
+      },
+      "signer_title": {
+        "vlm_A2": 0.08,
+        "vlm_both": 0.0522,
+        "bros_seed13": 0.5122
+      }
+    }
+  },
+  "verdict": {
+    "strong_ge_5": false,
+    "weaker_ge_3": false,
+    "not_worse_than_bros_by_more_than_3": false,
+    "competitive_with_bros": false,
+    "delta_pooled_f1_points": -53.27,
+    "no_template_significantly_worse": false
+  }
+}

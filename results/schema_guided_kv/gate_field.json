@@ -1,0 +1,18 @@
+{
+  "format": "field",
+  "outputs": 354,
+  "parse_rate": 1.0,
+  "values": 152,
+  "ground_rate": 0.0987,
+  "counters": {
+    "outputs": 354,
+    "values": 152,
+    "ungrounded_unknown_id": 133,
+    "null": 202,
+    "grounded": 15,
+    "grounded_exact": 15,
+    "ungrounded_empty": 3,
+    "ungrounded_not_in_line": 1
+  },
+  "decision": "switch_to_field_format"
+}
