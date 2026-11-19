@@ -1,0 +1,484 @@
+{
+ "test_dev_fit_confirm": {
+  "n_docs": 300,
+  "vlm": {
+   "bros_f1": 0.6975,
+   "f1": 0.7516,
+   "minus_bros": 0.0541,
+   "minus_bros_ci95": [
+    0.0287,
+    0.0786
+   ]
+  },
+  "snap": {
+   "bros_f1": 0.6975,
+   "f1": 0.7429,
+   "minus_bros": 0.0455,
+   "minus_bros_ci95": [
+    0.022,
+    0.0682
+   ]
+  },
+  "fill": {
+   "bros_f1": 0.6975,
+   "f1": 0.7625,
+   "minus_bros": 0.0652,
+   "minus_bros_ci95": [
+    0.0447,
+    0.0857
+   ]
+  },
+  "router_vlm": {
+   "bros_f1": 0.6975,
+   "f1": 0.7294,
+   "minus_bros": 0.0322,
+   "minus_bros_ci95": [
+    0.0155,
+    0.049
+   ]
+  },
+  "router_snap": {
+   "bros_f1": 0.6975,
+   "f1": 0.7294,
+   "minus_bros": 0.0322,
+   "minus_bros_ci95": [
+    0.0155,
+    0.049
+   ]
+  },
+  "router_fill": {
+   "bros_f1": 0.6975,
+   "f1": 0.7284,
+   "minus_bros": 0.0312,
+   "minus_bros_ci95": [
+    0.0153,
+    0.0478
+   ]
+  },
+  "per_field_f1_seed13": {
+   "bros": {
+    "file_date": 81.1,
+    "foreign_principle_name": 0.0,
+    "registrant_name": 55.3,
+    "registration_num": 96.4,
+    "signer_name": 67.0,
+    "signer_title": 51.2
+   },
+   "vlm": {
+    "file_date": 82.6,
+    "foreign_principle_name": 57.4,
+    "registrant_name": 86.3,
+    "registration_num": 96.3,
+    "signer_name": 48.9,
+    "signer_title": 64.5
+   },
+   "snap": {
+    "file_date": 80.4,
+    "foreign_principle_name": 57.4,
+    "registrant_name": 83.4,
+    "registration_num": 97.0,
+    "signer_name": 47.2,
+    "signer_title": 63.7
+   }
+  },
+  "choices": {
+   "fold0_seed13": {
+    "router_vlm": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "vlm",
+     "signer_name": "bros_seed13",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "snap13",
+     "signer_name": "bros_seed13",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "fill13",
+     "signer_name": "bros_seed13",
+     "signer_title": "vlm"
+    }
+   },
+   "fold0_seed42": {
+    "router_vlm": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "snap42",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "fill42",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    }
+   },
+   "fold1_seed13": {
+    "router_vlm": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "vlm",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "router_snap": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "snap13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "router_fill": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill13",
+     "registration_num": "fill13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    }
+   },
+   "fold1_seed42": {
+    "router_vlm": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill42",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    }
+   },
+   "fold2_seed13": {
+    "router_vlm": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed13",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed13",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill13",
+     "registration_num": "bros_seed13",
+     "signer_name": "fill13",
+     "signer_title": "vlm"
+    }
+   },
+   "fold2_seed42": {
+    "router_vlm": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "snap42",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "fill42",
+     "registrant_name": "fill42",
+     "registration_num": "bros_seed42",
+     "signer_name": "fill42",
+     "signer_title": "vlm"
+    }
+   }
+  }
+ },
+ "test_confirm_fit_dev": {
+  "n_docs": 300,
+  "vlm": {
+   "bros_f1": 0.705,
+   "f1": 0.7647,
+   "minus_bros": 0.0591,
+   "minus_bros_ci95": [
+    0.0349,
+    0.0854
+   ]
+  },
+  "snap": {
+   "bros_f1": 0.705,
+   "f1": 0.7553,
+   "minus_bros": 0.05,
+   "minus_bros_ci95": [
+    0.0277,
+    0.0738
+   ]
+  },
+  "fill": {
+   "bros_f1": 0.705,
+   "f1": 0.7718,
+   "minus_bros": 0.0665,
+   "minus_bros_ci95": [
+    0.0472,
+    0.0877
+   ]
+  },
+  "router_vlm": {
+   "bros_f1": 0.705,
+   "f1": 0.723,
+   "minus_bros": 0.0179,
+   "minus_bros_ci95": [
+    -0.0009,
+    0.0357
+   ]
+  },
+  "router_snap": {
+   "bros_f1": 0.705,
+   "f1": 0.7222,
+   "minus_bros": 0.017,
+   "minus_bros_ci95": [
+    -0.0018,
+    0.0351
+   ]
+  },
+  "router_fill": {
+   "bros_f1": 0.705,
+   "f1": 0.7347,
+   "minus_bros": 0.0295,
+   "minus_bros_ci95": [
+    0.01,
+    0.0477
+   ]
+  },
+  "per_field_f1_seed13": {
+   "bros": {
+    "file_date": 84.0,
+    "foreign_principle_name": 2.0,
+    "registrant_name": 56.9,
+    "registration_num": 97.4,
+    "signer_name": 64.9,
+    "signer_title": 50.3
+   },
+   "vlm": {
+    "file_date": 79.5,
+    "foreign_principle_name": 52.5,
+    "registrant_name": 90.4,
+    "registration_num": 97.2,
+    "signer_name": 53.4,
+    "signer_title": 75.1
+   },
+   "snap": {
+    "file_date": 77.3,
+    "foreign_principle_name": 52.5,
+    "registrant_name": 87.5,
+    "registration_num": 97.5,
+    "signer_name": 52.9,
+    "signer_title": 72.1
+   }
+  },
+  "choices": {
+   "fold0_seed13": {
+    "router_vlm": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "snap13",
+     "signer_name": "bros_seed13",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "fill13",
+     "signer_name": "bros_seed13",
+     "signer_title": "fill13"
+    }
+   },
+   "fold0_seed42": {
+    "router_vlm": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "vlm",
+     "foreign_principle_name": "snap42",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "vlm",
+     "foreign_principle_name": "fill42",
+     "registrant_name": "vlm",
+     "registration_num": "fill42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    }
+   },
+   "fold1_seed13": {
+    "router_vlm": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "router_snap": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    },
+    "router_fill": {
+     "file_date": "bros_seed13",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill13",
+     "registration_num": "bros_seed13",
+     "signer_name": "bros_seed13",
+     "signer_title": "bros_seed13"
+    }
+   },
+   "fold1_seed42": {
+    "router_vlm": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "snap42",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "bros_seed42",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill42",
+     "registration_num": "bros_seed42",
+     "signer_name": "bros_seed42",
+     "signer_title": "vlm"
+    }
+   },
+   "fold2_seed13": {
+    "router_vlm": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "vlm",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "vlm",
+     "registration_num": "vlm",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "fill13",
+     "registration_num": "fill13",
+     "signer_name": "fill13",
+     "signer_title": "fill13"
+    }
+   },
+   "fold2_seed42": {
+    "router_vlm": {
+     "file_date": "vlm",
+     "foreign_principle_name": "vlm",
+     "registrant_name": "bros_seed42",
+     "registration_num": "vlm",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_snap": {
+     "file_date": "vlm",
+     "foreign_principle_name": "snap42",
+     "registrant_name": "bros_seed42",
+     "registration_num": "snap42",
+     "signer_name": "vlm",
+     "signer_title": "vlm"
+    },
+    "router_fill": {
+     "file_date": "vlm",
+     "foreign_principle_name": "fill42",
+     "registrant_name": "fill42",
+     "registration_num": "fill42",
+     "signer_name": "fill42",
+     "signer_title": "fill42"
+    }
+   }
+  }
+ }
+}
