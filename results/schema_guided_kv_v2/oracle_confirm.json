@@ -1,0 +1,21 @@
+{
+  "docs": 100,
+  "oracle_f1": 0.9958,
+  "tp_fp_fn": [
+    472,
+    473,
+    475
+  ],
+  "grounding_reasons": {
+    "exact": 464,
+    "disjoint_truncated": 9,
+    "empty": 3
+  },
+  "collisions": null,
+  "docs_with_misses": 3,
+  "example_misses": [
+    "19730301_Bermuda Tourism Authority_Amendment_Amendment.pdf",
+    "19931001_JETRO, Houston_Dissemination Report_Dissemination Report.pdf",
+    "19650405_Switzerland Tourism_Amendment_Amendment.pdf"
+  ]
+}

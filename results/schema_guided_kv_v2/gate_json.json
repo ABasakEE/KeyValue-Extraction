@@ -1,0 +1,17 @@
+{
+  "format": "json",
+  "outputs": 59,
+  "parse_rate": 1.0,
+  "values": 173,
+  "ground_rate": 0.8439,
+  "counters": {
+    "outputs": 59,
+    "null": 181,
+    "values": 173,
+    "grounded": 146,
+    "grounded_exact": 146,
+    "ungrounded_not_in_line": 22,
+    "ungrounded_unknown_id": 5
+  },
+  "decision": "switch_to_field_format"
+}

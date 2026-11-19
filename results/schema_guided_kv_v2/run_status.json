@@ -1,0 +1,12 @@
+{
+  "pilot_json_failed": [],
+  "pilot_field_failed": [],
+  "pilot_micro_v1_v2": [
+    60.9,
+    73.9
+  ],
+  "pilot_guard_ok": true,
+  "V2A2_confirm_failed": [],
+  "V2A1_confirm_failed": [],
+  "hours_used": 4.03
+}

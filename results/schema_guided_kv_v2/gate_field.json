@@ -1,0 +1,20 @@
+{
+  "format": "field",
+  "outputs": 354,
+  "parse_rate": 1.0,
+  "values": 191,
+  "ground_rate": 0.8325,
+  "counters": {
+    "outputs": 354,
+    "null": 163,
+    "values": 191,
+    "grounded": 159,
+    "grounded_exact": 154,
+    "ungrounded_not_in_line": 25,
+    "grounded_disjoint_truncated": 3,
+    "grounded_lenient": 2,
+    "dropped_overlap": 8,
+    "ungrounded_unknown_id": 7
+  },
+  "decision": "switch_to_field_format"
+}
