@@ -1,0 +1,1065 @@
+{
+ "split": "confirm",
+ "n_docs": 300,
+ "exact_span": {
+  "f1": {
+   "bros13": 69.0,
+   "bros42": 72.0,
+   "vlm_both": 57.7,
+   "3B-A1": 42.9,
+   "3B-A2": 56.6,
+   "8B-A1": 57.3,
+   "8B-A2": 60.5,
+   "3B-A1|snap13": 47.2,
+   "3B-A1|snap13+fill": 64.1,
+   "3B-A1|snap42": 47.3,
+   "3B-A1|snap42+fill": 65.5,
+   "3B-A2|snap13": 59.2,
+   "3B-A2|snap13+fill": 65.4,
+   "3B-A2|snap42": 59.6,
+   "3B-A2|snap42+fill": 66.3,
+   "8B-A1|snap13": 62.1,
+   "8B-A1|snap13+fill": 64.4,
+   "8B-A1|snap42": 62.8,
+   "8B-A1|snap42+fill": 65.4,
+   "8B-A2|snap13": 64.8,
+   "8B-A2|snap13+fill": 66.9,
+   "8B-A2|snap42": 65.5,
+   "8B-A2|snap42+fill": 67.9
+  },
+  "ci95": {
+   "bros13": [
+    66.8,
+    71.4
+   ],
+   "bros42": [
+    69.9,
+    74.1
+   ],
+   "vlm_both": [
+    55.4,
+    60.4
+   ],
+   "3B-A1": [
+    40.0,
+    45.7
+   ],
+   "3B-A2": [
+    54.0,
+    59.1
+   ],
+   "8B-A1": [
+    54.7,
+    59.7
+   ],
+   "8B-A2": [
+    58.1,
+    62.9
+   ],
+   "3B-A1|snap13": [
+    44.2,
+    49.9
+   ],
+   "3B-A1|snap13+fill": [
+    61.7,
+    66.4
+   ],
+   "3B-A1|snap42": [
+    44.7,
+    50.0
+   ],
+   "3B-A1|snap42+fill": [
+    63.2,
+    67.7
+   ],
+   "3B-A2|snap13": [
+    57.0,
+    61.6
+   ],
+   "3B-A2|snap13+fill": [
+    62.9,
+    67.5
+   ],
+   "3B-A2|snap42": [
+    57.2,
+    61.9
+   ],
+   "3B-A2|snap42+fill": [
+    64.0,
+    68.4
+   ],
+   "8B-A1|snap13": [
+    59.8,
+    64.5
+   ],
+   "8B-A1|snap13+fill": [
+    62.1,
+    66.6
+   ],
+   "8B-A1|snap42": [
+    60.6,
+    65.1
+   ],
+   "8B-A1|snap42+fill": [
+    63.2,
+    67.6
+   ],
+   "8B-A2|snap13": [
+    62.7,
+    67.0
+   ],
+   "8B-A2|snap13+fill": [
+    64.8,
+    69.0
+   ],
+   "8B-A2|snap42": [
+    63.3,
+    67.6
+   ],
+   "8B-A2|snap42+fill": [
+    65.7,
+    70.0
+   ]
+  },
+  "paired": {
+   "3B A2-A1": {
+    "mean": 13.7,
+    "ci95": [
+     11.2,
+     16.3
+    ]
+   },
+   "8B A2-A1": {
+    "mean": 3.3,
+    "ci95": [
+     1.8,
+     4.8
+    ]
+   },
+   "A2 8B-3B": {
+    "mean": 3.8,
+    "ci95": [
+     1.9,
+     5.8
+    ]
+   }
+  },
+  "per_field": {
+   "file_date": {
+    "bros13": 84.0,
+    "bros42": 89.7,
+    "vlm_both": 62.9,
+    "3B-A1": 2.7,
+    "3B-A2": 15.2,
+    "8B-A1": 21.2,
+    "8B-A2": 22.3,
+    "3B-A1|snap13": 3.1,
+    "3B-A1|snap13+fill": 37.9,
+    "3B-A1|snap42": 3.1,
+    "3B-A1|snap42+fill": 40.9,
+    "3B-A2|snap13": 15.6,
+    "3B-A2|snap13+fill": 42.6,
+    "3B-A2|snap42": 15.6,
+    "3B-A2|snap42+fill": 45.3,
+    "8B-A1|snap13": 21.2,
+    "8B-A1|snap13+fill": 26.6,
+    "8B-A1|snap42": 21.6,
+    "8B-A1|snap42+fill": 27.6,
+    "8B-A2|snap13": 20.8,
+    "8B-A2|snap13+fill": 29.4,
+    "8B-A2|snap42": 21.5,
+    "8B-A2|snap42+fill": 31.3
+   },
+   "foreign_principle_name": {
+    "bros13": 2.0,
+    "bros42": 8.2,
+    "vlm_both": 55.5,
+    "3B-A1": 51.5,
+    "3B-A2": 44.5,
+    "8B-A1": 65.3,
+    "8B-A2": 70.4,
+    "3B-A1|snap13": 51.5,
+    "3B-A1|snap13+fill": 50.8,
+    "3B-A1|snap42": 52.8,
+    "3B-A1|snap42+fill": 53.2,
+    "3B-A2|snap13": 44.5,
+    "3B-A2|snap13+fill": 43.9,
+    "3B-A2|snap42": 47.2,
+    "3B-A2|snap42+fill": 46.3,
+    "8B-A1|snap13": 65.3,
+    "8B-A1|snap13+fill": 65.0,
+    "8B-A1|snap42": 67.8,
+    "8B-A1|snap42+fill": 67.8,
+    "8B-A2|snap13": 70.4,
+    "8B-A2|snap13+fill": 70.1,
+    "8B-A2|snap42": 72.0,
+    "8B-A2|snap42+fill": 71.5
+   },
+   "registrant_name": {
+    "bros13": 56.9,
+    "bros42": 62.4,
+    "vlm_both": 64.0,
+    "3B-A1": 48.9,
+    "3B-A2": 54.8,
+    "8B-A1": 64.8,
+    "8B-A2": 62.3,
+    "3B-A1|snap13": 48.5,
+    "3B-A1|snap13+fill": 57.5,
+    "3B-A1|snap42": 48.5,
+    "3B-A1|snap42+fill": 59.6,
+    "3B-A2|snap13": 53.7,
+    "3B-A2|snap13+fill": 57.4,
+    "3B-A2|snap42": 54.1,
+    "3B-A2|snap42+fill": 58.8,
+    "8B-A1|snap13": 63.8,
+    "8B-A1|snap13+fill": 65.2,
+    "8B-A1|snap42": 64.5,
+    "8B-A1|snap42+fill": 66.6,
+    "8B-A2|snap13": 60.2,
+    "8B-A2|snap13+fill": 62.4,
+    "8B-A2|snap42": 60.9,
+    "8B-A2|snap42+fill": 63.2
+   },
+   "registration_num": {
+    "bros13": 97.4,
+    "bros42": 98.2,
+    "vlm_both": 94.9,
+    "3B-A1": 58.4,
+    "3B-A2": 96.8,
+    "8B-A1": 85.9,
+    "8B-A2": 97.3,
+    "3B-A1|snap13": 58.4,
+    "3B-A1|snap13+fill": 93.0,
+    "3B-A1|snap42": 58.4,
+    "3B-A1|snap42+fill": 93.0,
+    "3B-A2|snap13": 97.5,
+    "3B-A2|snap13+fill": 98.0,
+    "3B-A2|snap42": 97.5,
+    "3B-A2|snap42+fill": 98.2,
+    "8B-A1|snap13": 86.3,
+    "8B-A1|snap13+fill": 89.3,
+    "8B-A1|snap42": 86.3,
+    "8B-A1|snap42+fill": 89.3,
+    "8B-A2|snap13": 97.7,
+    "8B-A2|snap13+fill": 98.3,
+    "8B-A2|snap42": 97.7,
+    "8B-A2|snap42+fill": 98.2
+   },
+   "signer_name": {
+    "bros13": 64.9,
+    "bros42": 68.1,
+    "vlm_both": 26.8,
+    "3B-A1": 41.3,
+    "3B-A2": 48.1,
+    "8B-A1": 41.3,
+    "8B-A2": 41.1,
+    "3B-A1|snap13": 66.5,
+    "3B-A1|snap13+fill": 71.0,
+    "3B-A1|snap42": 67.0,
+    "3B-A1|snap42+fill": 72.9,
+    "3B-A2|snap13": 65.0,
+    "3B-A2|snap13+fill": 70.5,
+    "3B-A2|snap42": 65.9,
+    "3B-A2|snap42+fill": 71.4,
+    "8B-A1|snap13": 72.3,
+    "8B-A1|snap13+fill": 73.8,
+    "8B-A1|snap42": 73.6,
+    "8B-A1|snap42+fill": 75.3,
+    "8B-A2|snap13": 72.6,
+    "8B-A2|snap13+fill": 73.3,
+    "8B-A2|snap42": 74.4,
+    "8B-A2|snap42+fill": 75.7
+   },
+   "signer_title": {
+    "bros13": 50.3,
+    "bros42": 55.1,
+    "vlm_both": 5.9,
+    "3B-A1": 74.0,
+    "3B-A2": 77.6,
+    "8B-A1": 73.7,
+    "8B-A2": 73.5,
+    "3B-A1|snap13": 70.8,
+    "3B-A1|snap13+fill": 75.0,
+    "3B-A1|snap42": 69.8,
+    "3B-A1|snap42+fill": 70.7,
+    "3B-A2|snap13": 74.5,
+    "3B-A2|snap13+fill": 77.1,
+    "3B-A2|snap42": 72.4,
+    "3B-A2|snap42+fill": 70.5,
+    "8B-A1|snap13": 70.7,
+    "8B-A1|snap13+fill": 74.8,
+    "8B-A1|snap42": 68.7,
+    "8B-A1|snap42+fill": 69.7,
+    "8B-A2|snap13": 70.4,
+    "8B-A2|snap13+fill": 73.6,
+    "8B-A2|snap42": 68.4,
+    "8B-A2|snap42+fill": 69.4
+   }
+  }
+ },
+ "official_style_text": {
+  "f1": {
+   "bros13": 69.6,
+   "bros42": 72.0,
+   "vlm_both": 59.2,
+   "3B-A1": 43.4,
+   "3B-A2": 60.4,
+   "8B-A1": 57.5,
+   "8B-A2": 60.6,
+   "3B-A1|snap13": 47.6,
+   "3B-A1|snap13+fill": 64.4,
+   "3B-A1|snap42": 47.9,
+   "3B-A1|snap42+fill": 65.9,
+   "3B-A2|snap13": 62.7,
+   "3B-A2|snap13+fill": 68.5,
+   "3B-A2|snap42": 63.3,
+   "3B-A2|snap42+fill": 69.4,
+   "8B-A1|snap13": 62.1,
+   "8B-A1|snap13+fill": 64.4,
+   "8B-A1|snap42": 62.9,
+   "8B-A1|snap42+fill": 65.5,
+   "8B-A2|snap13": 64.7,
+   "8B-A2|snap13+fill": 66.8,
+   "8B-A2|snap42": 65.5,
+   "8B-A2|snap42+fill": 67.9
+  },
+  "ci95": {
+   "bros13": [
+    67.3,
+    71.9
+   ],
+   "bros42": [
+    69.9,
+    74.2
+   ],
+   "vlm_both": [
+    56.9,
+    61.8
+   ],
+   "3B-A1": [
+    40.5,
+    46.2
+   ],
+   "3B-A2": [
+    57.8,
+    62.8
+   ],
+   "8B-A1": [
+    54.9,
+    59.8
+   ],
+   "8B-A2": [
+    58.2,
+    63.1
+   ],
+   "3B-A1|snap13": [
+    44.8,
+    50.3
+   ],
+   "3B-A1|snap13+fill": [
+    61.9,
+    66.6
+   ],
+   "3B-A1|snap42": [
+    45.1,
+    50.5
+   ],
+   "3B-A1|snap42+fill": [
+    63.6,
+    68.0
+   ],
+   "3B-A2|snap13": [
+    60.3,
+    65.2
+   ],
+   "3B-A2|snap13+fill": [
+    66.0,
+    70.7
+   ],
+   "3B-A2|snap42": [
+    60.8,
+    65.5
+   ],
+   "3B-A2|snap42+fill": [
+    67.0,
+    71.4
+   ],
+   "8B-A1|snap13": [
+    59.8,
+    64.5
+   ],
+   "8B-A1|snap13+fill": [
+    62.1,
+    66.6
+   ],
+   "8B-A1|snap42": [
+    60.6,
+    65.2
+   ],
+   "8B-A1|snap42+fill": [
+    63.4,
+    67.7
+   ],
+   "8B-A2|snap13": [
+    62.5,
+    66.9
+   ],
+   "8B-A2|snap13+fill": [
+    64.7,
+    68.8
+   ],
+   "8B-A2|snap42": [
+    63.3,
+    67.7
+   ],
+   "8B-A2|snap42+fill": [
+    65.7,
+    70.1
+   ]
+  },
+  "paired": {
+   "3B A2-A1": {
+    "mean": 17.0,
+    "ci95": [
+     14.4,
+     19.6
+    ]
+   },
+   "8B A2-A1": {
+    "mean": 3.2,
+    "ci95": [
+     1.7,
+     4.7
+    ]
+   },
+   "A2 8B-3B": {
+    "mean": 0.1,
+    "ci95": [
+     -1.9,
+     2.1
+    ]
+   }
+  },
+  "per_field": {
+   "file_date": {
+    "bros13": 83.0,
+    "bros42": 88.3,
+    "vlm_both": 64.9,
+    "3B-A1": 3.1,
+    "3B-A2": 31.2,
+    "8B-A1": 20.9,
+    "8B-A2": 22.3,
+    "3B-A1|snap13": 3.6,
+    "3B-A1|snap13+fill": 36.7,
+    "3B-A1|snap42": 3.6,
+    "3B-A1|snap42+fill": 39.9,
+    "3B-A2|snap13": 31.6,
+    "3B-A2|snap13+fill": 54.4,
+    "3B-A2|snap42": 31.6,
+    "3B-A2|snap42+fill": 57.2,
+    "8B-A1|snap13": 20.9,
+    "8B-A1|snap13+fill": 25.6,
+    "8B-A1|snap42": 21.2,
+    "8B-A1|snap42+fill": 26.6,
+    "8B-A2|snap13": 20.8,
+    "8B-A2|snap13+fill": 28.4,
+    "8B-A2|snap42": 21.5,
+    "8B-A2|snap42+fill": 30.7
+   },
+   "foreign_principle_name": {
+    "bros13": 3.0,
+    "bros42": 7.5,
+    "vlm_both": 55.5,
+    "3B-A1": 51.5,
+    "3B-A2": 48.5,
+    "8B-A1": 65.3,
+    "8B-A2": 68.9,
+    "3B-A1|snap13": 51.5,
+    "3B-A1|snap13+fill": 50.8,
+    "3B-A1|snap42": 52.8,
+    "3B-A1|snap42+fill": 53.5,
+    "3B-A2|snap13": 48.5,
+    "3B-A2|snap13+fill": 47.9,
+    "3B-A2|snap42": 51.2,
+    "3B-A2|snap42+fill": 49.7,
+    "8B-A1|snap13": 65.3,
+    "8B-A1|snap13+fill": 65.0,
+    "8B-A1|snap42": 67.8,
+    "8B-A1|snap42+fill": 67.8,
+    "8B-A2|snap13": 68.9,
+    "8B-A2|snap13+fill": 68.5,
+    "8B-A2|snap42": 70.4,
+    "8B-A2|snap42+fill": 69.7
+   },
+   "registrant_name": {
+    "bros13": 58.9,
+    "bros42": 61.7,
+    "vlm_both": 64.0,
+    "3B-A1": 49.2,
+    "3B-A2": 54.4,
+    "8B-A1": 64.5,
+    "8B-A2": 61.9,
+    "3B-A1|snap13": 48.9,
+    "3B-A1|snap13+fill": 58.5,
+    "3B-A1|snap42": 48.9,
+    "3B-A1|snap42+fill": 59.5,
+    "3B-A2|snap13": 53.4,
+    "3B-A2|snap13+fill": 57.6,
+    "3B-A2|snap42": 54.1,
+    "3B-A2|snap42+fill": 58.6,
+    "8B-A1|snap13": 63.4,
+    "8B-A1|snap13+fill": 65.1,
+    "8B-A1|snap42": 64.5,
+    "8B-A1|snap42+fill": 66.6,
+    "8B-A2|snap13": 59.8,
+    "8B-A2|snap13+fill": 62.3,
+    "8B-A2|snap42": 60.9,
+    "8B-A2|snap42+fill": 63.3
+   },
+   "registration_num": {
+    "bros13": 99.2,
+    "bros42": 99.0,
+    "vlm_both": 96.1,
+    "3B-A1": 59.6,
+    "3B-A2": 99.0,
+    "8B-A1": 87.7,
+    "8B-A2": 99.2,
+    "3B-A1|snap13": 59.6,
+    "3B-A1|snap13+fill": 94.3,
+    "3B-A1|snap42": 59.6,
+    "3B-A1|snap42+fill": 94.1,
+    "3B-A2|snap13": 98.3,
+    "3B-A2|snap13+fill": 99.0,
+    "3B-A2|snap42": 98.3,
+    "3B-A2|snap42+fill": 99.0,
+    "8B-A1|snap13": 87.0,
+    "8B-A1|snap13+fill": 90.1,
+    "8B-A1|snap42": 87.0,
+    "8B-A1|snap42+fill": 90.1,
+    "8B-A2|snap13": 98.5,
+    "8B-A2|snap13+fill": 99.2,
+    "8B-A2|snap42": 98.5,
+    "8B-A2|snap42+fill": 99.0
+   },
+   "signer_name": {
+    "bros13": 64.4,
+    "bros42": 68.3,
+    "vlm_both": 32.6,
+    "3B-A1": 41.7,
+    "3B-A2": 47.9,
+    "8B-A1": 41.2,
+    "8B-A2": 41.5,
+    "3B-A1|snap13": 66.8,
+    "3B-A1|snap13+fill": 70.9,
+    "3B-A1|snap42": 67.8,
+    "3B-A1|snap42+fill": 73.9,
+    "3B-A2|snap13": 64.8,
+    "3B-A2|snap13+fill": 70.0,
+    "3B-A2|snap42": 66.2,
+    "3B-A2|snap42+fill": 71.8,
+    "8B-A1|snap13": 72.2,
+    "8B-A1|snap13+fill": 73.3,
+    "8B-A1|snap42": 73.9,
+    "8B-A1|snap42+fill": 75.1,
+    "8B-A2|snap13": 72.9,
+    "8B-A2|snap13+fill": 73.7,
+    "8B-A2|snap42": 75.1,
+    "8B-A2|snap42+fill": 76.4
+   },
+   "signer_title": {
+    "bros13": 50.6,
+    "bros42": 56.6,
+    "vlm_both": 5.9,
+    "3B-A1": 74.0,
+    "3B-A2": 77.6,
+    "8B-A1": 73.7,
+    "8B-A2": 73.5,
+    "3B-A1|snap13": 70.8,
+    "3B-A1|snap13+fill": 75.4,
+    "3B-A1|snap42": 69.8,
+    "3B-A1|snap42+fill": 72.7,
+    "3B-A2|snap13": 74.5,
+    "3B-A2|snap13+fill": 77.5,
+    "3B-A2|snap42": 72.4,
+    "3B-A2|snap42+fill": 71.9,
+    "8B-A1|snap13": 70.7,
+    "8B-A1|snap13+fill": 75.1,
+    "8B-A1|snap42": 68.7,
+    "8B-A1|snap42+fill": 71.5,
+    "8B-A2|snap13": 70.4,
+    "8B-A2|snap13+fill": 73.9,
+    "8B-A2|snap42": 68.4,
+    "8B-A2|snap42+fill": 70.8
+   }
+  }
+ },
+ "error_kinds": {
+  "file_date|text differs": 183,
+  "registrant_name|exact": 179,
+  "file_date|no gold field": 4,
+  "foreign_principle_name|exact": 137,
+  "registration_num|text-match, different span": 5,
+  "signer_name|exact": 94,
+  "signer_title|exact": 72,
+  "foreign_principle_name|text differs": 33,
+  "registration_num|exact": 289,
+  "signer_title|no gold field": 7,
+  "signer_name|no gold field": 21,
+  "foreign_principle_name|no gold field": 25,
+  "file_date|exact": 60,
+  "signer_name|text differs": 107,
+  "registrant_name|text differs": 95,
+  "registrant_name|no gold field": 2,
+  "registration_num|no gold field": 1,
+  "signer_name|text-match, different span": 1,
+  "signer_title|text differs": 1,
+  "registrant_name|text-match, different span": 1
+ },
+ "error_dump": {
+  "file_date": [
+   {
+    "guid": "19630601_Arab Information Center_Amendme",
+    "pred": "March 3 , 1962",
+    "gold": [
+     "to before me at.\nCW\nyou\nday of\n1925\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19650405_Switzerland Tourism_Amendment_A",
+    "pred": "DEC 31 1963",
+    "gold": [
+     "31st\nday of\nMarch\n1965.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19660309_German National Tourist Office_",
+    "pred": "MAR 9 1 55 PM 1966",
+    "gold": [
+     "you\nday of March\n1966\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19850306_Daniel J. Edelman, Inc._Amendme",
+    "pred": "MAR 6 2 56 PM '85",
+    "gold": [
+     "85\n4th\nday of\n19\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19880401_Holland _ Knight_Amendment_Amen",
+    "pred": "88 APR -6 A10 : 18",
+    "gold": [
+     "5th\nday of\nApril\n1988\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19901201_CMGRP, Inc._Amendment_Amendment",
+    "pred": "'90 DEC 26 A10 : 40",
+    "gold": [
+     "alecember\n19th\n90\nday of\n,19\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910201_Kobe Trade Information Office_D",
+    "pred": "FEB 12 12:09",
+    "gold": [
+     "2/06/91\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910201_Representative of German Indust",
+    "pred": "91 FEB 20 P12 : 56",
+    "gold": [
+     "2.15.91 "
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910601_Representative of the Turkish R",
+    "pred": "91 JUN 11 P3 : 06",
+    "gold": [
+     "June\n1991\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910901_Akin, Gump, Strauss, Hauer _ Fe",
+    "pred": "9/25/91",
+    "gold": [
+     "9/26/91\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920501_International Registries, Inc._",
+    "pred": "MAY 14 A7 : 48",
+    "gold": [
+     "May 11,\n1992\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920701_JETRO, Houston_Dissemination Re",
+    "pred": "E92 JUL 14 A10 : 04",
+    "gold": [
+     "July 8, 1991 "
+    ],
+    "text_ok": false
+   }
+  ],
+  "registration_num": [
+   {
+    "guid": "19640201_Tourism Australia_Amendment_Ame",
+    "pred": "1032",
+    "gold": [
+     "1032\n",
+     "1032 "
+    ],
+    "text_ok": true
+   },
+   {
+    "guid": "19720101_KOTRA_Amendment_Amendment.pdf",
+    "pred": "# 1619",
+    "gold": [
+     "1619\n"
+    ],
+    "text_ok": true
+   },
+   {
+    "guid": "20010409_International Registries, Inc._",
+    "pred": "# 4533",
+    "gold": [
+     "4533\n"
+    ],
+    "text_ok": true
+   },
+   {
+    "guid": "20100111_O_Brien Gentry _ Scott, LLC_Gen",
+    "pred": "5971",
+    "gold": [
+     "No.\n5971\n"
+    ],
+    "text_ok": true
+   },
+   {
+    "guid": "20180413_Livingston Group, LLC_Livingsto",
+    "pred": "# 6344",
+    "gold": [
+     "6344\n"
+    ],
+    "text_ok": true
+   }
+  ],
+  "foreign_principle_name": [
+   {
+    "guid": "19650405_Switzerland Tourism_Amendment_A",
+    "pred": "Section : Swiss National Tourist Office",
+    "gold": [
+     "-\nSwiss Government Department of Posts and Railroads\nSection"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910801_JETRO, Atlanta_Dissemination Re",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19911001_Kobe Trade Information Office_D",
+    "pred": "Foreign Government Kobe Municipal Government",
+    "gold": [
+     ".\nForeign Government\nKobe Municipal Government\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19911101_Far East Trade Services, Inc._D",
+    "pred": "Far East Trade Service , Inc.",
+    "gold": [
+     "Far East Trade Service, Inc.\nTaipei, Taiwan, R.O.C.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920301_JETRO, Houston_Dissemination Re",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920401_JETRO, Los Angeles_Disseminatio",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920501_JETRO, Los Angeles_Disseminatio",
+    "pred": "Japan External Trade Org .",
+    "gold": [
+     "Japan External Trade Org.\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920701_Hill and Knowlton Strategies, L",
+    "pred": "OOC Ltd ,",
+    "gold": [
+     "OOC Ltd"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920801_Scottish Enterprise_Disseminati",
+    "pred": "Scottish Enterprise",
+    "gold": [
+     "Scottish Enterprise\nGlasgow, Scotland\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920901_JETRO, Los Angeles_Disseminatio",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19921001_Oromo Liberation Front, North A",
+    "pred": "Oromo Liberation Front ( OLF )",
+    "gold": [
+     "Oromo Liberation Front (OCF)\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19921201_Far East Trade Services, Inc._D",
+    "pred": "Far East Trade Service , Inc.",
+    "gold": [
+     "Far East Trade Service, Inc.\nTaipei, Taiwan, R.O.C.\n"
+    ],
+    "text_ok": false
+   }
+  ],
+  "signer_name": [
+   {
+    "guid": "19750101_Quebec Government Office_Dissem",
+    "pred": "Guy Poliquin , Delegate General",
+    "gold": [
+     "Guy Poliquin"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19750801_Netherlands Board of Tourism an",
+    "pred": "Henry Fisher , Deputy Director",
+    "gold": [
+     "Henry Fisher"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910101_Daniel J. Edelman, Inc._Dissemi",
+    "pred": "Robin G. Matthews , Account Executive",
+    "gold": [
+     "Robin G. Matthews"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910101_World Zionist Organization - Am",
+    "pred": "Vais Blay",
+    "gold": [
+     "Sam Bloch\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910201_Representative of German Indust",
+    "pred": "John Vaughan , Attorney",
+    "gold": [
+     "John Vaughan"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910201_World Zionist Organization - Am",
+    "pred": "Sam E. Bloch Dir . of Publications",
+    "gold": [
+     "Sam E. Bloch "
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19910701_Quebec Government Office_Dissem",
+    "pred": "Leo Par\u00e9 , Delegate general",
+    "gold": [
+     "Leo Par\u00e9"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19911001_Quebec Government Office_Dissem",
+    "pred": "L\u00e9o Par\u00e9 , Delegate general",
+    "gold": [
+     "L\u00e9o Par\u00e9"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19911101_Far East Trade Services, Inc._D",
+    "pred": "Robert Y. Wang , Director",
+    "gold": [
+     "Robert Y. Wang"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920401_International Registries, Inc._",
+    "pred": "Archibald N. Stewart , President",
+    "gold": [
+     "Archibald N. Stewart"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920401_Quebec Government Office_Dissem",
+    "pred": "L\u00e9o Par\u00e9 , Delegate general",
+    "gold": [
+     "L\u00e9o Par\u00e9"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920501_International Registries, Inc._",
+    "pred": "Archibald N. Stewart , President",
+    "gold": [
+     "Archibald N. Stewart"
+    ],
+    "text_ok": false
+   }
+  ],
+  "registrant_name": [
+   {
+    "guid": "19910201_Kobe Trade Information Office_D",
+    "pred": "Toshiyuki Ishida , Director",
+    "gold": [
+     "KOBE TRADE INFORMATION OFFICE\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920301_Public Strategies Washington, I",
+    "pred": "Joseph P. O'Neill",
+    "gold": [
+     "Joseph P. O'Neill\nPublic Strategies Washington, Inc.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19920501_Hill and Knowlton Strategies, L",
+    "pred": "Sally Aman",
+    "gold": [
+     "Hill and Knowlton,\nInc.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19921201_Kobe Trade Information Office_D",
+    "pred": "Toshiaki Baba , Director",
+    "gold": [
+     "KOBE TRADE INFORMATION OFFICE\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19930501_Representative of the Turkish R",
+    "pred": "David Grabias",
+    "gold": [
+     "Office of the Representative of\nthe Turkish Republic of Nort"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19930601_Hill and Knowlton Strategies, L",
+    "pred": "Val Arthur Kratzman",
+    "gold": [
+     "HILL AND KNOWL/TON, INC.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19931001_Public Strategies Washington, I",
+    "pred": "Paul M.Snyderill",
+    "gold": [
+     "Paul M. Snyder!\nPublic Strategies Washington, Inc.\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19931201_JETRO, Houston_Dissemination Re",
+    "pred": "Hiroyuki Nemoto",
+    "gold": [
+     "JETRO,\nHouston\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19950522_Representative of the Turkish R",
+    "pred": "PETER HOLST - NY",
+    "gold": [
+     "Office of the Representative of the Turkish\nRepublic of Nort"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "19950525_JETRO, Houston_Dissemination Re",
+    "pred": "Hiroyuki Nemoto",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "20080611_Quebec Government Office_Sylves",
+    "pred": "Rene Sylvestre",
+    "gold": [
+     "Quebec Government Office\n"
+    ],
+    "text_ok": false
+   },
+   {
+    "guid": "20080822_Ketchum Inc. NY_Cohen, Paul Dou",
+    "pred": "Paul Douglas Cohen",
+    "gold": [
+     "Ketchum Inc.\n"
+    ],
+    "text_ok": false
+   }
+  ],
+  "signer_title": [
+   {
+    "guid": "20000905_Squire Patton Boggs, LLP_Amendm",
+    "pred": "Managing Partner",
+    "gold": [
+     "Managing Partner\nPatton Boggs LLP\n"
+    ],
+    "text_ok": false
+   }
+  ]
+ }
+}

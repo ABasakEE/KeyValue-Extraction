@@ -1,0 +1,395 @@
+{
+  "rules": "Study 12: confirmation of the study-11 hybrid on fresh unseen-template documents (CPU scoring).\n\nEverything was frozen before the GPU run: extraction/naming prompts, schema descriptions (copied from v2),\none-answer-per-field, the mode-free `vlm_both` mapping, grounding, and the pass rule of studies 10-11.\n\n* primary   : the per-fold router tables learned in study 11 (each from the *other two* templates' old documents),\n              applied unchanged to fresh documents of the held-out template.\n* secondary : the same routing procedure re-fitted on the fresh documents of the other two templates.\n* validity  : BROS on the fresh sample vs its full test-set F1; VLM on the fresh sample vs the old sample.\n\nPass (unchanged): pooled router - BROS (mean over seeds, paired bootstrap) has a 95% interval above 0, and no\ntemplate's interval lies entirely below 0.",
+  "router_tables": {
+    "fold0_seed13": {
+      "primary_frozen": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "vlm_both",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "vlm_both",
+        "signer_name": "vlm_both",
+        "signer_title": "vlm_both"
+      }
+    },
+    "fold0_seed42": {
+      "primary_frozen": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "bros_seed42",
+        "registration_num": "bros_seed42",
+        "signer_name": "vlm_both",
+        "signer_title": "vlm_both"
+      }
+    },
+    "fold1_seed13": {
+      "primary_frozen": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "vlm_both",
+        "signer_name": "vlm_both",
+        "signer_title": "bros_seed13"
+      }
+    },
+    "fold1_seed42": {
+      "primary_frozen": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "bros_seed42",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "bros_seed42",
+        "registration_num": "bros_seed42",
+        "signer_name": "vlm_both",
+        "signer_title": "vlm_both"
+      }
+    },
+    "fold2_seed13": {
+      "primary_frozen": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed13",
+        "signer_name": "bros_seed13",
+        "signer_title": "bros_seed13"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed13",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed13",
+        "signer_name": "vlm_both",
+        "signer_title": "vlm_both"
+      }
+    },
+    "fold2_seed42": {
+      "primary_frozen": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "vlm_both",
+        "registration_num": "bros_seed42",
+        "signer_name": "bros_seed42",
+        "signer_title": "bros_seed42"
+      },
+      "secondary_refit": {
+        "file_date": "bros_seed42",
+        "foreign_principle_name": "vlm_both",
+        "registrant_name": "bros_seed42",
+        "registration_num": "bros_seed42",
+        "signer_name": "vlm_both",
+        "signer_title": "vlm_both"
+      }
+    }
+  },
+  "validity": {
+    "Amendment": {
+      "n_docs": 100,
+      "bros": {
+        "seed13": {
+          "fresh_f1": 0.8447,
+          "fresh_ci95": [
+            0.7971,
+            0.8875
+          ],
+          "full_test_f1": 0.8275,
+          "full_test_inside_ci": true
+        },
+        "seed42": {
+          "fresh_f1": 0.8586,
+          "fresh_ci95": [
+            0.8145,
+            0.8955
+          ],
+          "full_test_f1": 0.8443,
+          "full_test_inside_ci": true
+        }
+      },
+      "vlm": {
+        "vlm_key": {
+          "fresh_f1": 0.7034,
+          "fresh_ci95": [
+            0.657,
+            0.7459
+          ],
+          "old_f1": 0.7223,
+          "old_ci95": [
+            0.6825,
+            0.7582
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_named": {
+          "fresh_f1": 0.6462,
+          "fresh_ci95": [
+            0.5966,
+            0.6926
+          ],
+          "old_f1": 0.6528,
+          "old_ci95": [
+            0.6131,
+            0.6919
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_both": {
+          "fresh_f1": 0.6726,
+          "fresh_ci95": [
+            0.6414,
+            0.7006
+          ],
+          "old_f1": 0.6512,
+          "old_ci95": [
+            0.6107,
+            0.6918
+          ],
+          "intervals_overlap": true
+        }
+      }
+    },
+    "Dissemination_Report": {
+      "n_docs": 100,
+      "bros": {
+        "seed13": {
+          "fresh_f1": 0.6568,
+          "fresh_ci95": [
+            0.6234,
+            0.6894
+          ],
+          "full_test_f1": 0.6582,
+          "full_test_inside_ci": true
+        },
+        "seed42": {
+          "fresh_f1": 0.7353,
+          "fresh_ci95": [
+            0.7045,
+            0.7667
+          ],
+          "full_test_f1": 0.7346,
+          "full_test_inside_ci": true
+        }
+      },
+      "vlm": {
+        "vlm_key": {
+          "fresh_f1": 0.7007,
+          "fresh_ci95": [
+            0.6747,
+            0.7269
+          ],
+          "old_f1": 0.6762,
+          "old_ci95": [
+            0.6488,
+            0.7052
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_named": {
+          "fresh_f1": 0.632,
+          "fresh_ci95": [
+            0.6025,
+            0.6622
+          ],
+          "old_f1": 0.6224,
+          "old_ci95": [
+            0.5919,
+            0.6545
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_both": {
+          "fresh_f1": 0.731,
+          "fresh_ci95": [
+            0.694,
+            0.767
+          ],
+          "old_f1": 0.6616,
+          "old_ci95": [
+            0.6303,
+            0.6922
+          ],
+          "intervals_overlap": false
+        }
+      }
+    },
+    "Short-Form": {
+      "n_docs": 100,
+      "bros": {
+        "seed13": {
+          "fresh_f1": 0.5711,
+          "fresh_ci95": [
+            0.5479,
+            0.5904
+          ],
+          "full_test_f1": 0.5808,
+          "full_test_inside_ci": true
+        },
+        "seed42": {
+          "fresh_f1": 0.5724,
+          "fresh_ci95": [
+            0.5519,
+            0.5936
+          ],
+          "full_test_f1": 0.5758,
+          "full_test_inside_ci": true
+        }
+      },
+      "vlm": {
+        "vlm_key": {
+          "fresh_f1": 0.3382,
+          "fresh_ci95": [
+            0.3073,
+            0.3693
+          ],
+          "old_f1": 0.3337,
+          "old_ci95": [
+            0.305,
+            0.3673
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_named": {
+          "fresh_f1": 0.5416,
+          "fresh_ci95": [
+            0.5,
+            0.5823
+          ],
+          "old_f1": 0.5659,
+          "old_ci95": [
+            0.5316,
+            0.6037
+          ],
+          "intervals_overlap": true
+        },
+        "vlm_both": {
+          "fresh_f1": 0.5197,
+          "fresh_ci95": [
+            0.4959,
+            0.5461
+          ],
+          "old_f1": 0.4156,
+          "old_ci95": [
+            0.3812,
+            0.4512
+          ],
+          "intervals_overlap": false
+        }
+      }
+    }
+  },
+  "primary": {
+    "Amendment": {
+      "bros_f1": 0.8516,
+      "f1": 0.8274,
+      "minus_bros": -0.0243,
+      "minus_bros_ci95": [
+        -0.0453,
+        -0.0023
+      ]
+    },
+    "Dissemination_Report": {
+      "bros_f1": 0.6961,
+      "f1": 0.7508,
+      "minus_bros": 0.0547,
+      "minus_bros_ci95": [
+        0.0383,
+        0.0713
+      ]
+    },
+    "Short-Form": {
+      "bros_f1": 0.5718,
+      "f1": 0.7057,
+      "minus_bros": 0.134,
+      "minus_bros_ci95": [
+        0.1132,
+        0.1547
+      ]
+    },
+    "_pooled": {
+      "bros_f1": 0.705,
+      "f1": 0.7587,
+      "minus_bros": 0.0535,
+      "minus_bros_ci95": [
+        0.0415,
+        0.0663
+      ]
+    }
+  },
+  "secondary": {
+    "Amendment": {
+      "bros_f1": 0.8516,
+      "f1": 0.8494,
+      "minus_bros": -0.0028,
+      "minus_bros_ci95": [
+        -0.0225,
+        0.0166
+      ]
+    },
+    "Dissemination_Report": {
+      "bros_f1": 0.6961,
+      "f1": 0.7716,
+      "minus_bros": 0.0756,
+      "minus_bros_ci95": [
+        0.0466,
+        0.1043
+      ]
+    },
+    "Short-Form": {
+      "bros_f1": 0.5718,
+      "f1": 0.7095,
+      "minus_bros": 0.138,
+      "minus_bros_ci95": [
+        0.1198,
+        0.1561
+      ]
+    },
+    "_pooled": {
+      "bros_f1": 0.705,
+      "f1": 0.7744,
+      "minus_bros": 0.0691,
+      "minus_bros_ci95": [
+        0.0535,
+        0.0834
+      ]
+    }
+  },
+  "verdict": {
+    "primary": {
+      "pooled_gain_significant": true,
+      "no_template_significantly_worse": false,
+      "passes": false
+    },
+    "secondary": {
+      "pooled_gain_significant": true,
+      "no_template_significantly_worse": true,
+      "passes": true
+    }
+  }
+}

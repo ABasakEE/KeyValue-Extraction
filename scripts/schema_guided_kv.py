@@ -182,25 +182,36 @@ def _line_span_lenient(text: str, ln: Line, doc: Doc) -> tuple[int, int] | None:
     return None if pos is None else (toks[pos][1], toks[pos + len(vt) - 1][1] + 1)
 
 
-def ground(segs: list[tuple[str, str | None]], lines_by_id: dict[str, Line], doc: Doc) -> tuple[tuple[int, int] | None, str]:
+def ground(segs: list[tuple[str, str | None]], lines_by_id: dict[str, Line], doc: Doc,
+           fallback: bool = False) -> tuple[tuple[int, int] | None, str]:
     """Verify every segment against its cited line; return (word span, how) or (None, reason).
 
     A segment is grounded when its text occurs in the cited line (exactly, else after normalisation).  Segments are merged
-    while they are contiguous; a later disjoint segment is ignored, because the gold alignment keeps the first contiguous run."""
+    while they are contiguous; a later disjoint segment is ignored, because the gold alignment keeps the first contiguous run.
+
+    ``fallback`` (post hoc, study 25 stage 0): when the cited id is missing or unknown, look for the text in any line of the page
+    (a trailing 1-2 digit remainder of a truncated id is dropped first).  Not the registered decode."""
     lo = hi = None
     how = "exact"
     for text, lid in segs:
         ln = lines_by_id.get(lid) if lid else None
         if ln is None:
-            return None, "unknown_id"
-        if not norm(text).split():
-            return None, "empty"
-        span = _line_span(text, ln, doc)
-        if span is None:
-            span = _line_span_lenient(text, ln, doc)
+            if not fallback or not norm(text).split():
+                return None, "unknown_id"
+            t = re.sub(r"\s+\d{1,2}$", "", text) if lid is None else text
+            span = next((sp for cand in lines_by_id.values() if (sp := _line_span(t, cand, doc) or _line_span_lenient(t, cand, doc))), None)
             if span is None:
-                return None, "not_in_line"
-            how = "lenient"
+                return None, "unknown_id"
+            how = "fallback" if how == "exact" else how
+        else:
+            if not norm(text).split():
+                return None, "empty"
+            span = _line_span(text, ln, doc)
+            if span is None:
+                span = _line_span_lenient(text, ln, doc)
+                if span is None:
+                    return None, "not_in_line"
+                how = "lenient"
         if lo is None:
             lo, hi = span
         elif span[0] <= hi and span[1] >= lo:
@@ -210,7 +221,7 @@ def ground(segs: list[tuple[str, str | None]], lines_by_id: dict[str, Line], doc
     return ((lo, hi), how) if lo is not None else (None, "empty")
 
 
-def decode_doc(doc: Doc, rows: list[dict], fmt: str, fields: list[str]) -> tuple[list[list], Counter]:
+def decode_doc(doc: Doc, rows: list[dict], fmt: str, fields: list[str], fallback: bool = False) -> tuple[list[list], Counter]:
     """Spans [field, start, end, text] for one document from its page rows, plus parse/grounding counters."""
     if fmt == "span":  # study 29: word-range answers (src/vlm_sft.py); rows hold {"page", "samples": [text]}
         from types import SimpleNamespace
@@ -243,7 +254,7 @@ def decode_doc(doc: Doc, rows: list[dict], fmt: str, fields: list[str]) -> tuple
                     stats["null"] += 1
                     continue
                 stats["values"] += 1
-                span, why = ground(segs, by_id, doc)
+                span, why = ground(segs, by_id, doc, fallback)
                 if span is None:
                     stats[f"ungrounded_{why}"] += 1
                     continue
@@ -410,7 +421,7 @@ def cmd_score(args) -> None:
         if not d or len(rows) < need:
             stats["docs_incomplete"] += 1
             continue
-        spans, st = decode_doc(Doc(records[r["guid"]]), rows, args.format, fields)
+        spans, st = decode_doc(Doc(records[r["guid"]]), rows, args.format, fields, args.fallback)
         keep.append({**r, name: spans})
         stats.update(st)
     systems = ["bros_seed13", "bros_seed42", args.reference, name]
@@ -560,6 +571,8 @@ def cmd_selftest(_args) -> None:
     rows = [{"page": 0, "samples": ['{"file_date": "June 5, 2020 %s", "signer_name": "June 5, 2020 %s"}' % (date_id, date_id)]}]
     spans, st = decode_doc(doc, rows, "json", f)
     assert len(spans) == 1 and st["dropped_overlap"] == 1
+    assert ground([("June 5, 2020", "99|99")], by0, doc, True) == ((2, 5), "fallback")                  # post hoc fallback: unknown id, text found
+    assert ground([("June 5, 2020 4", None)], by0, doc, True)[0] == (2, 5) and ground([("nowhere", "99|99")], by0, doc, True) == (None, "unknown_id")
     assert "June 5, 2020" in build_prompt(doc.lines[0], f, {"file_date": "the filing date"}) and date_id in build_prompt(doc.lines[0], f, {})
     print("selftest passed")
 
@@ -591,6 +604,7 @@ def main() -> None:
     p.add_argument("--manifest", required=True); p.add_argument("--ref", required=True); p.add_argument("--rows", nargs="+", required=True)
     p.add_argument("--arm", required=True); p.add_argument("--format", choices=["json", "field"], default="json")
     p.add_argument("--reference", default="vlm_both"); p.add_argument("--out", required=True)
+    p.add_argument("--fallback", action="store_true", help="post hoc: ground values with a missing or unknown id by their text")
     a = ap.parse_args()
     {"selftest": cmd_selftest, "oracle": cmd_oracle, "pilot-manifest": cmd_pilot_manifest, "run": cmd_run, "gate": cmd_gate,
      "score": cmd_score}[a.cmd](a)
