@@ -1,0 +1,10 @@
+{
+ "registration-form": {
+  "file_date": "The date on which the form was signed or dated by its signer, as written beside the signature (for example 'the 5th day of March, 2012'). It is not a received or filed stamp.",
+  "foreign_principle_name": "The foreign principle name refers to the name of the individual or entity that holds foreign ownership or control over the registrant.",
+  "registrant_name": "The name of the organisation (firm, company or office) that files the registration, not the name of the person who signs it.",
+  "registration_num": "Registration number associated with the document.",
+  "signer_name": "The full name of the person who signs the document, written without their title or position.",
+  "signer_title": "The signer_title field holds the title or position of the person who signed the document."
+ }
+}

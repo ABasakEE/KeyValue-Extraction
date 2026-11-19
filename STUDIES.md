@@ -47,6 +47,7 @@ Conventions:
 | 27 | Zero-shot VLM (Qwen2.5-VL) key-value linking on XFUND, scored with the LiLT end-to-end scorer | GPU | registered 2026-11-13 | *pending (Kaggle run)* |
 | 29 | LoRA-tuned VLM with grounded word-span output: VRDU unseen- vs mixed-template learning (Track E, primary) and XFUND end-to-end linking (Track L) | GPU | run finished (sessions A and B; registered 2026-11-15) | **Worse (registered rule):** tuned VLM on unseen templates scores 46.2 exact-span F1 (replication 44.7) against BROS 70.1, i.e. -23.9 [-25.9, -21.6], negative on all three templates and in both seeds; it is also 11 points below the zero-shot pipeline of studies 8-12 (57.4). Mixed-template F1 is 76.1, so the seen/unseen gap is 29.9 (rule: <= 10.5, BROS 21.1). About 25% of gold fields are found with the wrong boundaries and 22-30% are not predicted at all. E3 (no image) not run; Track L not built |
 | 30 | Output format of the tuned VLM on VRDU unseen templates: word numbers (study 29) vs OCR-segment numbers vs copied text with line identifiers | GPU | registered 2026-11-16 | *pending (Kaggle run)* |
+| 31 | Prompt v2 (copy only the value, id example, three rewritten field descriptions) for the schema-guided grounded extractor, Qwen3-VL-8B 4-bit, VRDU unseen templates, confirm set | GPU | registered 2026-11-19 | *pending (Kaggle run)* |
 
 ---
 
@@ -1468,3 +1469,31 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 **Results:** *pending*
 
 **Evidence:** `results/vlm_sft30/` (after the run).
+
+---
+
+## 31. Prompt v2 for the schema-guided grounded extractor: Qwen3-VL-8B (4-bit) on VRDU unseen templates — GPU (Kaggle T4 × 2), registered 2026-11-19
+
+**Question.** Study 25's 8B arm (A2: image + OCR lines with ids + schema, grounded decoding) scored 60.5 exact-span F1 with the post hoc fallback decode, against BROS 70.5; its router with BROS gave 76.2 (+5.7). The error review (study 25, stage 0) found prompt-level causes: whole-line copies (`signer_name` too long in 107 of 222 predictions, snapping to BROS lifts it from 41 to 73), the received stamp chosen for `file_date` (22.3 against BROS 84), the signer returned for `registrant_name`, and no line ids in the one-call-per-page JSON format (5.5% of values). Does a prompt that (i) says to copy only the value, (ii) shows one worked example of the id format, (iii) rewrites three field descriptions, raise the 8B's F1 and the router gain? Nothing else changes.
+
+**Prompt v2 (frozen before any run; `build_prompt` / `field_prompt` with `v2=True` in `scripts/schema_guided_kv.py`, descriptions in `results/schema_guided_kv_v2/schema_desc_v2.json`).** Rules in the prompt: copy the value exactly from ONE line followed by that line's id (example `"Jane Q. Public 42|17"`, an invented value); copy only the value, not the label in front of it nor other words on the line (for a person's name leave out the title); several lines as one `text identifier` per line; null if absent; one worked answer for a different, invented document (`EXAMPLE_V2`); the answer skeleton no longer uses empty strings (`"<text> <identifier>" or null`). Descriptions changed (the rest as in study 25): `file_date` = the date on which the form was signed or dated by its signer, as written beside the signature (e.g. 'the 5th day of March, 2012'), not a received or filed stamp; `registrant_name` = the name of the organisation (firm, company or office) that files the registration, not the person who signs it; `signer_name` = the full name of the person who signs, without title or position. **Disclosure:** the `file_date` wording was chosen after seeing study 25's errors on the confirm documents (it names the signing date, which is generic domain knowledge, not a template); the user approved putting it in the main arm. The same applies to the other two descriptions and the copy-only-the-value rule. The confirm set was used to see these errors, so it is no longer a clean untouched test of this prompt; it is the same set on which study 25 was scored, which is what makes the comparison paired.
+
+**Model, data, decode.** Qwen3-VL-8B-Instruct in 4-bit nf4, fp16 compute, as study 25 session B; OCR lines with ids, grounding, vote, up to 4 pages, one sample (K = 1, which the sampling code decodes greedily), the post hoc fallback decode (`--fallback`) for every scored arm, exact-span micro F1 as in `matched_eval.py`, paired bootstrap over documents (1,000 draws), the 300 confirm documents only (no dev set, no multi-sample vote).
+
+**Arms (`notebooks/kaggle_prompt_v2.ipynb`, one session):** **V2A2** (primary): image + OCR lines + schema, prompt v2. **V2A1**: the same without the image (descriptive: V2A2 - V2A1). Reference arm (not re-run): the study-25 8B A2 spans decoded with the fallback (`results/study25_stage0/8B_A2_confirm/spans_A2.jsonl`).
+
+**Pilot and format gate.** The 30-document pilot of study 25 (same manifest, checked identical in the notebook). The JSON-per-page format is kept if at least 90% of outputs parse and at least 90% of values ground with a valid id (strict decode, no fallback), otherwise the one-call-per-field format is used, as in study 25. **Pilot guard:** the pilot is decoded with the fallback and scored per field with the official-style text match (`scripts/pilot_fieldwise.py`); study 25's prompt on the same 30 documents gives micro 60.9 (`results/schema_guided_kv_v2/pilot_v1_baseline.json`: file_date 25.5, foreign_principle_name 73.7, registrant_name 56.6, registration_num 100, signer_name 41.9, signer_title 58.8). If v2's pilot micro is more than 5.0 points below 60.9 the main arms are not run (a guard against a broken prompt, not a significance test: 30 documents).
+
+**Registered criteria (primary cell: pooled exact-span micro F1, 300 confirm documents, V2A2 minus the study-25 8B A2 arm, both with the fallback decode, paired):**
+- *Helps:* delta >= +3.0 points, bootstrap lower bound > 0, and no template's upper bound < 0.
+- *Clears the bar:* V2A2 alone >= 66.0 exact-span F1, or the static cross-template router (as studies 11-12, `confirm_eval.py`) with the V2A2 spans gains >= +7.0 over BROS (study 25: 60.5 and +5.7).
+- *No better:* otherwise.
+- Descriptive: per-field F1 (notably `signer_name`, `registrant_name`, `file_date`), V2A2 - V2A1, JSON gate and decode counters (ids, grounded, dropped overlaps), comparison with A0 and BROS, GPU time per arm.
+
+**Checks before any GPU spend.** The self-test of `schema_guided_kv.py` passes with new assertions (the v2 prompt contains the id example, the invented example, the descriptions and the line ids; the v1 prompt is unchanged); the run loop with the new flags was exercised with the stub model; the pilot baseline was computed on the saved study-25 rows; the notebook cells compile. The model path is the study-25 session-B path (Qwen3-VL-8B 4-bit), which ran to completion there.
+
+**Limits stated up front.** One model, one prompt variant, one sample: a change in F1 cannot be attributed to the individual rules, the example or the descriptions; the prompt and descriptions were written after seeing study-25 errors on the same confirm documents (see above); the 4-bit and fp16 loading effect is not measured; the `file_date` description names the signing date, which may not hold for every VRDU template and was not tested on other datasets; the decode fallback is post hoc (introduced in study 25's stage 0); no dev set, so no selection between prompts was made.
+
+**Results:** *pending*
+
+**Evidence:** `results/schema_guided_kv_v2/` (after the run).

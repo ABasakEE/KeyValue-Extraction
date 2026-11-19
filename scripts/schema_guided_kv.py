@@ -107,8 +107,24 @@ def load_records(root: Path, filenames: set[str]) -> dict[str, dict]:
 
 
 # ---------------------------------------------------------------- prompts
-def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str]) -> str:
+EXAMPLE_V2 = '{"file_date": "March 5, 2012 31|12", "registration_num": "6123 08|40", "signer_name": null}'   # invented values and ids
+
+
+def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str], v2: bool = False) -> str:
     doc = "\n".join(f"{ln.text} {ln.id}" for ln in lines)
+    if v2:  # study 31: copy only the value, one worked example of the id format
+        descs = "\n".join(f"- {f}: {desc[f]}" for f in fields if desc.get(f))
+        schema = "{\n" + ",\n".join(f'  "{f}": "<text> <identifier>" or null' for f in fields) + "\n}"
+        return (f"<Document>\n{doc}\n</Document>\n<Task>\nFrom the document, extract the values of the fields below. Every document line ends "
+                f"with its identifier (two numbers separated by |).\nRules:\n"
+                f"1. Write each value as the text copied exactly from ONE line, followed by that line's identifier, for example "
+                f"\"Jane Q. Public 42|17\".\n"
+                f"2. Copy only the value itself: not the label in front of it and not other words on the same line (for a person's name, "
+                f"leave out their title or position).\n"
+                f"3. A value that spans several lines is written as one 'text identifier' per line, separated by a newline.\n"
+                f"4. Use null for a field that does not occur on this page.\n"
+                f"Field descriptions:\n{descs}\nExample of the answer format (a different document): {EXAMPLE_V2}\n"
+                f"Answer with this JSON object:\n{schema}\n</Task>\n<Extraction>\n")
     descs = "\n".join(f"- {f}: {desc[f]}" for f in fields if desc.get(f))
     schema = "{\n" + ",\n".join(f'  "{f}": ""' for f in fields) + "\n}"
     return (f"<Document>\n{doc}\n</Document>\n<Task>\nFrom the document, extract the text values of the following fields. "
@@ -118,8 +134,15 @@ def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str]) -> 
             f"Field descriptions:\n{descs}\nAnswer with this JSON object:\n{schema}\n</Task>\n<Extraction>\n")
 
 
-def field_prompt(lines: list[Line], field: str, desc: dict[str, str]) -> str:
+def field_prompt(lines: list[Line], field: str, desc: dict[str, str], v2: bool = False) -> str:
     doc = "\n".join(f"{ln.text} {ln.id}" for ln in lines)
+    if v2:
+        return (f"<Document>\n{doc}\n</Document>\n<Task>\nFrom the document, extract the value of the field \"{field}\"" +
+                (f" ({desc[field]})" if desc.get(field) else "") +
+                ". Every document line ends with its identifier. Copy the value exactly from ONE line and write it followed by that "
+                "line's identifier, for example \"Jane Q. Public 42|17\". Copy only the value itself: not the label in front of it and "
+                "not other words on the same line (for a person's name, leave out their title or position). If the value spans several "
+                "lines, write one 'text identifier' per line. If the field does not occur on this page, answer NONE.\n</Task>\nANSWER: ")
     return (f"<Document>\n{doc}\n</Document>\n<Task>\nFrom the document, extract the value of the field \"{field}\"" +
             (f" ({desc[field]})" if desc.get(field) else "") +
             ". Every document line ends with its identifier. Answer with the exact text copied from the line, followed by that "
@@ -323,7 +346,7 @@ def cmd_run(args) -> None:
 
     docs = vrdu_manifest_docs(args.manifest)
     fields = schema_fields(SUBCORPUS)
-    desc = json.loads((ROOT / "results" / "zero_shot_kv_v2" / "schema_desc.json").read_text(encoding="utf-8"))[SUBCORPUS]
+    desc = json.loads(Path(args.desc).read_text(encoding="utf-8"))[SUBCORPUS]
     records = load_records(ROOT / "data" / "vrdu", {d["doc_id"].split("/", 1)[1] for d in docs})
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
@@ -356,7 +379,8 @@ def cmd_run(args) -> None:
             try:
                 lines = doc.lines.get(p, [])
                 image = load_image({"image": d["source"], "pdf_page": p}) if args.arm == "image" else None
-                prompt = build_prompt(lines, fields, desc) if f is None else field_prompt(lines, f, desc)
+                v2 = args.prompt == "v2"
+                prompt = build_prompt(lines, fields, desc, v2) if f is None else field_prompt(lines, f, desc, v2)
                 row["samples"] = gen.sample(prompt, image, args.samples, args.max_new_tokens if f is None else 64,
                                             prefill="" if f is None else "")
             except Exception as e:  # one bad page must not kill a multi-hour run
@@ -573,6 +597,9 @@ def cmd_selftest(_args) -> None:
     assert len(spans) == 1 and st["dropped_overlap"] == 1
     assert ground([("June 5, 2020", "99|99")], by0, doc, True) == ((2, 5), "fallback")                  # post hoc fallback: unknown id, text found
     assert ground([("June 5, 2020 4", None)], by0, doc, True)[0] == (2, 5) and ground([("nowhere", "99|99")], by0, doc, True) == (None, "unknown_id")
+    p2 = build_prompt(doc.lines[0], f, {"file_date": "the signing date"}, True)
+    assert "Jane Q. Public 42|17" in p2 and EXAMPLE_V2 in p2 and "the signing date" in p2 and date_id in p2
+    assert "42|17" in field_prompt(doc.lines[0], "file_date", {}, True) and "42|17" not in build_prompt(doc.lines[0], f, {})
     assert "June 5, 2020" in build_prompt(doc.lines[0], f, {"file_date": "the filing date"}) and date_id in build_prompt(doc.lines[0], f, {})
     print("selftest passed")
 
@@ -593,6 +620,8 @@ def main() -> None:
     p.add_argument("--samples", type=int, default=1); p.add_argument("--model", default="Qwen/Qwen2.5-VL-3B-Instruct")
     p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
     p.add_argument("--quant4", action="store_true", help="load the model in 4-bit nf4 (bitsandbytes)")
+    p.add_argument("--prompt", choices=["v1", "v2"], default="v1", help="v2 = study 31 prompt (copy only the value, id example)")
+    p.add_argument("--desc", default=str(ROOT / "results" / "zero_shot_kv_v2" / "schema_desc.json"), help="field descriptions json")
     p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--max-new-tokens", type=int, default=384)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1)
     p.add_argument("--limit", type=int, default=0); p.add_argument("--deadline-hours", type=float, default=0.0)
