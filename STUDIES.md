@@ -49,6 +49,7 @@ Conventions:
 | 30 | Output format of the tuned VLM on VRDU unseen templates: word numbers (study 29) vs OCR-segment numbers vs copied text with line identifiers | GPU | registered 2026-11-16 | *pending (Kaggle run)* |
 | 31 | Prompt v2 (copy only the value, id example, three rewritten field descriptions) for the schema-guided grounded extractor, Qwen3-VL-8B 4-bit, VRDU unseen templates, confirm set | GPU | confirm and dev runs finished (registered 2026-11-19) | **Helps, clears the bar, and replicates (registered rules):** V2A2 76.5 (confirm) and 75.2 (dev) exact-span F1 vs 60.5 / 58.1 for study 25's prompt (+16.0 and +17.0, positive on all templates); router with BROS 79.2 vs 70.5 (+8.7 [+6.9, +10.6]); image adds +3.2 / +3.4; text-only already 73.3 / 71.7 (BROS 70.5 / 69.8). Still below BROS on Amendment; `foreign_principle_name` regressed (70 -> 52-57) and `signer_name` is below BROS |
 | 32 | Prompt v2 and two post hoc rules (latest-page tie-break, abstaining vote with BROS) on a fresh third document set, Qwen3-VL-8B 4-bit | GPU | registered 2026-11-20 | *pending (Kaggle run)* |
+| 33 | Schema-guided grounded recipe (prompt v2, Qwen3-VL-8B 4-bit) on FATURA unseen templates against BROS trained on K = 1, 2, 5, 10, 40 seen templates | GPU | registered 2026-11-20 | *pending (Kaggle run)* |
 
 ---
 
@@ -1558,3 +1559,31 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 **Results:** *pending*
 
 **Evidence:** `results/fresh_set3/` (after the run).
+
+
+---
+
+## 33. The schema-guided grounded recipe on FATURA unseen templates, against BROS trained on K seen templates — GPU (Kaggle T4 × 2), registered 2026-11-20
+
+**Question.** Study 15 measured BROS's unseen-template F1 on FATURA as a function of the number K of seen templates (32.5 / 69.2 / 90.8 / 95.9 / 99.9 for K = 1 / 2 / 5 / 10 / 40, 500 confirm invoices) and compared it with a zero-shot 3B VLM in a key-value formulation (59.6, flat in K). That formulation could not express unlabeled blocks (`title` 0.0, `seller_name` 14.2) and the model was small. The VRDU studies (25, 31) showed that the schema-guided grounded recipe (OCR lines with ids, schema with descriptions, answers that cite a line) with Qwen3-VL-8B reaches 75-77 exact-span F1 on unseen templates, above BROS trained on two templates (about 70). **At which number of seen templates does BROS stop being worse than this training-free recipe on FATURA?** This is the measurement the VRDU data cannot give (VRDU has three templates, so only K = 2 exists).
+
+**Data.** The 500 confirm invoices of study 14 (10 per template, 50 templates, `results/fatura_sg/confirm.json`, from `results/fatura_v1/manifest.json`). Gold = the annotated blocks of the nine core fields (block text includes its label). The OCR lines of a page are its annotated text blocks (`fatura_loader.parse_doc`); the same block tokens are what BROS read, so both systems start from the same 'perfect OCR' (a limit: no OCR noise). A cited block id becomes the whole block (gold is block level). 30 dev invoices of study 14 (`results/fatura_sg/pilot.json`, seed 5) are used only for the answer-format gate.
+
+**Recipe (frozen; nothing tuned on FATURA).** Qwen3-VL-8B-Instruct, 4-bit nf4 (fp16 compute), prompt v2 of study 31 with the nine field descriptions of study 14 (`results/fatura_v1/schema_desc.json`, written by a model from the field names alone) and a worked example in FATURA's field names (invented values and ids); one sample per page, greedy; fallback by text when an id is missing or unknown; one block per field, a block cited by two fields goes to the first field in alphabetical order. **Format gate on the pilot:** JSON per page if at least 90% of outputs parse and at least 90% of values cite an existing block id (strict), else one call per field. **Arms (order):** **A2** (page image + blocks + schema; primary) then **A1** (no image). Notebook: `notebooks/kaggle_fatura_sg.ipynb`, deadline 5.0 h.
+
+**BROS reference.** The saved dumps of studies 14 and 15 (`results/fatura_v1/bros` for K = 40; `results/fatura_v2_sweep/K{1,2,5,10}`), two seeds each, same 500 invoices; the scorer reproduces their F1 (32.5, 69.2, 90.8, 95.9, 99.9) on stub rows.
+
+**Metric.** Exact block-span micro F1 (a predicted span counts only if it equals a gold block). Intervals: bootstrap over the 50 templates (clusters of 10 invoices), 1,000 draws, as in studies 14-16; differences to BROS are against the mean of the two seeds.
+
+**Registered rules (primary arm A2; A1 reported alongside):**
+- *Recipe helps on FATURA:* A2 minus the study-14 zero-shot VLM (59.6) >= +10.0, template-bootstrap interval above 0.
+- *Crossover:* for each K, **LLM wins** if A2 minus BROS(K) has its interval above 0, **tie** if the interval contains 0, **BROS wins** if the interval is below 0. Report the largest K where the LLM wins and the smallest K where BROS wins.
+- Descriptive: per-field and per-template F1; two combinations per K (BROS with the LLM filling fields BROS left empty; the LLM with BROS filling its empty fields); A2 against A1 (value of the image).
+
+**Checks before any GPU spend.** The oracle (gold block cited by id, through the decode path, both answer formats) scores 100.00 on 100 invoices; the scorer ran on stub rows and reproduced BROS's study-15 numbers; the run loop was exercised with the stub model; the notebook cells compile. Not tested here: the 8B model on FATURA pages (the notebook's smoke cell runs 3 invoices per arm before anything else and checks the visual-token budget).
+
+**Limits stated up front.** FATURA is synthetic (generated values, clean rendering) and the OCR is the annotation, so both systems are favoured; the model may have seen the public dataset (not checkable); BROS has two seeds per K and the K seen templates vary by seed, so the BROS curve has seed noise that the template bootstrap does not cover; one prompt, one model, one sample; block-level exact scoring is strict for a model that must pick whole blocks including labels; the field descriptions come from a model, not from FATURA's wording; no ablation separates prompt, ids and model from the study-14 baseline (the comparison with 59.6 bundles them).
+
+**Results:** *pending*
+
+**Evidence:** `results/fatura_sg/` (after the run).

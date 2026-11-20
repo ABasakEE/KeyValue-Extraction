@@ -110,7 +110,7 @@ def load_records(root: Path, filenames: set[str]) -> dict[str, dict]:
 EXAMPLE_V2 = '{"file_date": "March 5, 2012 31|12", "registration_num": "6123 08|40", "signer_name": null}'   # invented values and ids
 
 
-def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str], v2: bool = False) -> str:
+def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str], v2: bool = False, example: str = EXAMPLE_V2) -> str:
     doc = "\n".join(f"{ln.text} {ln.id}" for ln in lines)
     if v2:  # study 31: copy only the value, one worked example of the id format
         descs = "\n".join(f"- {f}: {desc[f]}" for f in fields if desc.get(f))
@@ -123,7 +123,7 @@ def build_prompt(lines: list[Line], fields: list[str], desc: dict[str, str], v2:
                 f"leave out their title or position).\n"
                 f"3. A value that spans several lines is written as one 'text identifier' per line, separated by a newline.\n"
                 f"4. Use null for a field that does not occur on this page.\n"
-                f"Field descriptions:\n{descs}\nExample of the answer format (a different document): {EXAMPLE_V2}\n"
+                f"Field descriptions:\n{descs}\nExample of the answer format (a different document): {example}\n"
                 f"Answer with this JSON object:\n{schema}\n</Task>\n<Extraction>\n")
     descs = "\n".join(f"- {f}: {desc[f]}" for f in fields if desc.get(f))
     schema = "{\n" + ",\n".join(f'  "{f}": ""' for f in fields) + "\n}"
