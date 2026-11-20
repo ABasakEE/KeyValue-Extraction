@@ -54,9 +54,10 @@ def load_split(split: str) -> list[dict]:
 _GOLD_T: dict = {}
 
 
-def evaluate(rows: list[dict], systems: dict, base: str, text: bool = False) -> dict:
+def evaluate(rows: list[dict], systems: dict, base, text: bool = False) -> dict:
     """systems: name -> function(row) -> spans.  Per-system F1 and the paired difference to `base`.
 
+    `base` is one system name (returns {system: result}) or a list of names (returns {base: {system: result}}, one bootstrap for all).
     text=False: exact spans (as registered).  text=True: official-style text match (any annotated occurrence of the field, VRDU rules),
     which does not penalise picking another occurrence of the right text."""
     if text:
@@ -68,12 +69,16 @@ def evaluate(rows: list[dict], systems: dict, base: str, text: bool = False) -> 
         count = lambda r, fn: span_counts(fn(r), r["gold"])
     per = {n: [count(r, fn) for r in rows] for n, fn in systems.items()}
     boot = paired_bootstrap(per, "_micro")
-    res = {}
-    for n in systems:
-        f1 = f1_of([sum(x["_micro"][i] for x in per[n]) for i in range(3)])
-        d = boot[n] - boot[base]
-        res[n] = {"f1": round(f1 * 100, 1), "minus_base": round(float(d.mean()) * 100, 1), "ci": [round(v * 100, 1) for v in ci(d)]}
-    return res
+    f1s = {n: f1_of([sum(x["_micro"][i] for x in per[n]) for i in range(3)]) for n in systems}
+
+    def table(b: str) -> dict:
+        out = {}
+        for n in systems:
+            d = boot[n] - boot[b]
+            out[n] = {"f1": round(f1s[n] * 100, 1), "minus_base": round(float(d.mean()) * 100, 1), "ci": [round(v * 100, 1) for v in ci(d)]}
+        return out
+
+    return {b: table(b) for b in base} if isinstance(base, (list, tuple)) else table(base)
 
 
 # ------------------------------------------------------------------ vote
