@@ -1,0 +1,1262 @@
+{
+ "by_field": {
+  "file_date": {
+   "missing": 60,
+   "other text": 59,
+   "gold continues after it (too short)": 7,
+   "exact": 453,
+   "inside the gold text": 6,
+   "predicted, field not annotated": 7
+  },
+  "foreign_principle_name": {
+   "exact": 235,
+   "predicted, field not annotated": 139,
+   "missing": 31,
+   "text of another field": 8,
+   "inside the gold text": 13,
+   "gold continues after it (too short)": 54,
+   "other text": 30,
+   "contains the gold text (too long)": 3
+  },
+  "registrant_name": {
+   "exact": 493,
+   "missing": 78,
+   "other text": 13,
+   "right text, other occurrence": 4,
+   "inside the gold text": 2,
+   "gold continues after it (too short)": 1,
+   "predicted, field not annotated": 2,
+   "contains the gold text (too long)": 1,
+   "text of another field": 4
+  },
+  "registration_num": {
+   "right text, other occurrence": 13,
+   "exact": 575,
+   "other text": 5,
+   "missing": 5,
+   "predicted, field not annotated": 1
+  },
+  "signer_name": {
+   "exact": 245,
+   "missing": 104,
+   "predicted, field not annotated": 96,
+   "inside the gold text": 4,
+   "other text": 49,
+   "right text, other occurrence": 72,
+   "gold continues after it (too short)": 7,
+   "text of another field": 2
+  },
+  "signer_title": {
+   "gold continues after it (too short)": 3,
+   "exact": 189,
+   "predicted, field not annotated": 109,
+   "missing": 31,
+   "contains the gold text (too long)": 1,
+   "text of another field": 4,
+   "other text": 3,
+   "inside the gold text": 1
+  }
+ },
+ "by_field_template": {
+  "file_date|Amendment": {
+   "missing": 29,
+   "other text": 25,
+   "gold continues after it (too short)": 4,
+   "exact": 128,
+   "inside the gold text": 5,
+   "predicted, field not annotated": 6
+  },
+  "foreign_principle_name|Amendment": {
+   "exact": 5,
+   "predicted, field not annotated": 119,
+   "missing": 2,
+   "text of another field": 1
+  },
+  "registrant_name|Amendment": {
+   "exact": 147,
+   "missing": 44,
+   "other text": 3,
+   "right text, other occurrence": 1,
+   "inside the gold text": 2,
+   "gold continues after it (too short)": 1,
+   "predicted, field not annotated": 1,
+   "contains the gold text (too long)": 1
+  },
+  "registration_num|Amendment": {
+   "right text, other occurrence": 8,
+   "exact": 190,
+   "other text": 1,
+   "missing": 1
+  },
+  "signer_name|Amendment": {
+   "exact": 103,
+   "missing": 67,
+   "predicted, field not annotated": 10,
+   "inside the gold text": 3,
+   "other text": 2,
+   "right text, other occurrence": 1
+  },
+  "signer_title|Amendment": {
+   "gold continues after it (too short)": 3,
+   "exact": 22,
+   "predicted, field not annotated": 8,
+   "missing": 6,
+   "contains the gold text (too long)": 1,
+   "text of another field": 1
+  },
+  "file_date|Dissemination_Report": {
+   "exact": 172,
+   "missing": 18,
+   "other text": 6,
+   "predicted, field not annotated": 1
+  },
+  "foreign_principle_name|Dissemination_Report": {
+   "exact": 116,
+   "missing": 17,
+   "predicted, field not annotated": 10,
+   "inside the gold text": 2,
+   "gold continues after it (too short)": 22,
+   "text of another field": 3,
+   "other text": 19,
+   "contains the gold text (too long)": 1
+  },
+  "registrant_name|Dissemination_Report": {
+   "missing": 15,
+   "exact": 175,
+   "other text": 4,
+   "text of another field": 4
+  },
+  "registration_num|Dissemination_Report": {
+   "other text": 2,
+   "exact": 191,
+   "missing": 4,
+   "right text, other occurrence": 1,
+   "predicted, field not annotated": 1
+  },
+  "signer_name|Dissemination_Report": {
+   "exact": 142,
+   "other text": 10,
+   "missing": 33,
+   "gold continues after it (too short)": 6,
+   "right text, other occurrence": 5,
+   "predicted, field not annotated": 1
+  },
+  "signer_title|Dissemination_Report": {
+   "exact": 166,
+   "missing": 25,
+   "text of another field": 3,
+   "other text": 3,
+   "inside the gold text": 1
+  },
+  "file_date|Short-Form": {
+   "other text": 28,
+   "missing": 13,
+   "exact": 153,
+   "inside the gold text": 1,
+   "gold continues after it (too short)": 3
+  },
+  "foreign_principle_name|Short-Form": {
+   "exact": 114,
+   "missing": 12,
+   "text of another field": 4,
+   "gold continues after it (too short)": 32,
+   "predicted, field not annotated": 10,
+   "other text": 11,
+   "inside the gold text": 11,
+   "contains the gold text (too long)": 2
+  },
+  "registrant_name|Short-Form": {
+   "exact": 171,
+   "missing": 19,
+   "other text": 6,
+   "predicted, field not annotated": 1,
+   "right text, other occurrence": 3
+  },
+  "registration_num|Short-Form": {
+   "exact": 194,
+   "other text": 2,
+   "right text, other occurrence": 4
+  },
+  "signer_name|Short-Form": {
+   "predicted, field not annotated": 85,
+   "other text": 37,
+   "right text, other occurrence": 66,
+   "missing": 4,
+   "text of another field": 2,
+   "gold continues after it (too short)": 1,
+   "inside the gold text": 1
+  },
+  "signer_title|Short-Form": {
+   "predicted, field not annotated": 101,
+   "exact": 1
+  }
+ },
+ "examples": {
+  "file_date|missing": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "23rd\nday of\nMarch\n-1962"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "18th day of apristory"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "30\nday of\nMarch\n1973"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "11 day of July\n1978"
+    ]
+   }
+  ],
+  "registration_num|right text, other occurrence": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "495",
+    "gold": [
+     "495",
+     "495"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "619",
+    "gold": [
+     "619",
+     "619"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "4789009",
+    "gold": [
+     "Registration No.\n4789009"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "# 5483",
+    "gold": [
+     "5483"
+    ]
+   }
+  ],
+  "file_date|other text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "JUN 30 1965",
+    "gold": [
+     "23\nday of\nJames\n1966\n."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "22 - day of Dec",
+    "gold": [
+     "22-day of Dec\n1981\n'"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "October 3 , 1984",
+    "gold": [
+     "4th day of\nJanney\n-, 1985"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "12/30/92",
+    "gold": [
+     "12/21/92"
+    ]
+   }
+  ],
+  "signer_title|gold continues after it (too short)": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Manager",
+    "gold": [
+     "Manager N.Y. Office"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "President",
+    "gold": [
+     "President\nThe Americas"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Representative",
+    "gold": [
+     "Representative\nDirector"
+    ]
+   }
+  ],
+  "foreign_principle_name|predicted, field not annotated": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Caroline Cushing",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "BARBADOS IND . DEV . CORPORATION BARBADOS TOURIST BOARD",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Austrian National Tourist Office Austrian Federal Railways",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "MASAAKI KITAGAWA",
+    "gold": []
+   }
+  ],
+  "registrant_name|missing": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Caroline Cushing"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "BARBADOS IND. DEV. CORPORATION\nBARBADOS TOURIST BOARD"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Austrian National Tourist Office\nAustrian Federal Railways"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "The Office of Tibet"
+    ]
+   }
+  ],
+  "signer_name|missing": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Caroline\nCushing"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Wr\nRoger"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Patrick FJ Macrory"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Norihiro Kono"
+    ]
+   }
+  ],
+  "file_date|gold continues after it (too short)": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "28 day of March",
+    "gold": [
+     "28 day of March\n, 19 23"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "9th",
+    "gold": [
+     "9th\nday of\nFebruary 1989"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "18th",
+    "gold": [
+     "18th\nday of\nJuly\n1991"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "4/1/2014",
+    "gold": [
+     "4/1/2014\n(Date of"
+    ]
+   }
+  ],
+  "signer_name|predicted, field not annotated": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "MARGARET MICHAELS",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Dengan Seton",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "JOHN L. GAROFALO",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Naoki Motoshima",
+    "gold": [
+     "Naoki Motoshima"
+    ]
+   }
+  ],
+  "signer_title|predicted, field not annotated": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Notary Public , New York",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Richard a . Sephard",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Executive Director",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Harold G. Bailey , Jr.",
+    "gold": []
+   }
+  ],
+  "registrant_name|other text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Jalan Trade Center",
+    "gold": [
+     "MASAAKI KITAGAWA"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Charles Gunnerson",
+    "gold": [
+     "Office of the Representative of the\nTurkish Republic of Nort"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "ETHIOPIAN PEOPLES ' REVOLUTIONARY PARTY",
+    "gold": [
+     "1. Name of registrant\nETHIOPIAN PEOPLES' REVOLUTIONARY PARTY"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Foley , Hoag & Eliot LLP",
+    "gold": [
+     "Foley, Hoag & Eliot LLP\n1747 Pennsylvania Ave., N.W.\nSuite 1"
+    ]
+   }
+  ],
+  "file_date|inside the gold text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "19 79",
+    "gold": [
+     "19 d.\nday of\nJanuary\n19 79\n."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "18th",
+    "gold": [
+     "March\n18th\nday of\n1988\n'"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "1/31/10",
+    "gold": [
+     "her knowledge and 1/31/10\n(Date of signature"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Amendment",
+    "pred": "4th",
+    "gold": [
+     "85\n4th\nday of\n19"
+    ]
+   }
+  ],
+  "registrant_name|right text, other occurrence": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Monaco Government Tourist Office",
+    "gold": [
+     "Monaco Government Tourist\nOffice"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "Ketchum Inc.",
+    "gold": [
+     "Ketchum Inc."
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "Singapore Economic Development Board",
+    "gold": [
+     "Singapore Economic Development Board"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "Heesun Kim",
+    "gold": [
+     "Heesun Kim"
+    ]
+   }
+  ],
+  "signer_title|missing": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "",
+    "gold": [
+     "Consul"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "Representative"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "Representative"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "Delegate general"
+    ]
+   }
+  ],
+  "signer_title|contains the gold text (too long)": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "General Manager , North America",
+    "gold": [
+     "General Manager"
+    ]
+   }
+  ],
+  "signer_name|inside the gold text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Ronald N. Bassett",
+    "gold": [
+     "(Ronald N. Bassett )"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Stephan E. Becker",
+    "gold": [
+     "/Stephan E. Becker"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Amendment",
+    "pred": "R. M. Younger",
+    "gold": [
+     "(R. M. Younger)"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "Imtiaz Ali",
+    "gold": [
+     ".\nImtiaz Ali\n(Signature)"
+    ]
+   }
+  ],
+  "signer_name|other text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Doral S. Cooper",
+    "gold": [
+     "Crowell & Moring International L.P."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Ken Car",
+    "gold": [
+     "and title\nPAR\u00c9\nLED"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Robin S. Matthews",
+    "gold": [
+     "Robin Matthews"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Haus Bus",
+    "gold": [
+     "Sam E. Bloch"
+    ]
+   }
+  ],
+  "registration_num|other text": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "None",
+    "gold": [
+     "No.\n4364"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "3899",
+    "gold": [
+     "3988"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "2010 SEP 1 AM 11:33",
+    "gold": [
+     "3634"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "NA",
+    "gold": [
+     "6227"
+    ]
+   }
+  ],
+  "foreign_principle_name|missing": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "Scottish Development Agency\nGlasgow, Scotland"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "W.2.0.-Jerusalem"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "W.2.0. Jerusalem"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "Scottish Enterprise\nGlasgow, Scotland"
+    ]
+   }
+  ],
+  "registrant_name|text of another field": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Osman Ertug",
+    "gold": [
+     "Office of the Representative of the\nTurkish Republic of Nort"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Osman Ertug",
+    "gold": [
+     "Office of the Representative of the\nTurkish Republic of Nort"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Osman Ertug",
+    "gold": [
+     "Office of the Representative of the\nTurkish Republic of Nort"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "Osman Ertug",
+    "gold": [
+     "Office of the Representative of the\nTurkish Republic of Nort"
+    ]
+   }
+  ],
+  "foreign_principle_name|inside the gold text": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Qu\u00e9bec Government",
+    "gold": [
+     "'Qu\u00e9bec Government"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Republic of Albania",
+    "gold": [
+     "By this filing: Republic of Albania; National Security Counc"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Embassy of Ecuador",
+    "gold": [
+     "By this filing: Embassy of Ecuador"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Union of the Republic of Myanmar",
+    "gold": [
+     "By this filing: Union of the Republic of Myanmar.\nBy previou"
+    ]
+   }
+  ],
+  "registration_num|missing": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "2985"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "4789"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "1787"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "",
+    "gold": [
+     "1833"
+    ]
+   }
+  ],
+  "signer_name|gold continues after it (too short)": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Archibald N. Stewart",
+    "gold": [
+     "Archibald N. Stewart,"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Laurence J. Hoffman",
+    "gold": [
+     "Laurence J. Hoffman, P.C."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Joel Jankowsky",
+    "gold": [
+     "Joel Jankowsky, P.C."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "JOUNG WOO PARK",
+    "gold": [
+     "Joung Woo Park"
+    ]
+   }
+  ],
+  "foreign_principle_name|gold continues after it (too short)": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "JAPAN External Trade Organization",
+    "gold": [
+     "JAPAN External Trade Organization\nTokyo, Japan"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Sacilda",
+    "gold": [
+     "Sacilda (Angola)"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Japan External Trade Organization",
+    "gold": [
+     "Japan External Trade Organization\nTokyo, Japan"
+    ]
+   }
+  ],
+  "foreign_principle_name|text of another field": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Tamam A. Youssouf",
+    "gold": [
+     "OROMO LIBERATIONS FRONT"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "MARI MASENG WILL",
+    "gold": [
+     "Japan Automobile Manufacturers Association,\nInc."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "C. ALESSANDRO",
+    "gold": [
+     "JAPAN EXTERNAL TRADE ORGANIZATO\nJETRO)"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Quebec Government House",
+    "gold": [
+     "Dept. of International Affairs, Dept. of Industry, Commerce "
+    ]
+   }
+  ],
+  "foreign_principle_name|other text": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Far East Trade Service , Inc.",
+    "gold": [
+     "Far East Trade Service, Inc.\nTaipei, Taiwan, R.O.C."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Far East Trade Service , Inc.",
+    "gold": [
+     "Far East Trade Service, Inc.\nTaipei, Taiwan, R.O.C."
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Far East Trade Service , Inc.",
+    "gold": [
+     "Far East Trade Service, Inc.\nTaipei, Taiwan, ROC"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Japan External Trade Organization ( JETRO )",
+    "gold": [
+     "Japan External Trade Organization (JETRO), Tokyo, JAPAN"
+    ]
+   }
+  ],
+  "signer_title|text of another field": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Arzu Tuncata",
+    "gold": [
+     "Vice President"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Robert Rehg",
+    "gold": [
+     "President, Edelman Washington"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "Toshiaki Baba",
+    "gold": [
+     "Director"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "Reed Scowen",
+    "gold": [
+     "Delegate General"
+    ]
+   }
+  ],
+  "signer_name|right text, other occurrence": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Katie Moore",
+    "gold": [
+     "Katie Moore"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "SEUNGHEE LEE",
+    "gold": [
+     "SEUNGHEE LEE"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Judith HoSang",
+    "gold": [
+     "Judith HoSang"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "William Arthur BURTON",
+    "gold": [
+     "William Arthur BURTON"
+    ]
+   }
+  ],
+  "signer_title|other text": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Reed Scowen",
+    "gold": [
+     "Delegate General"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "ASSISTANT DIR .",
+    "gold": [
+     "TECHNOLOGY RESEARCHES\nASSISTANT DIR."
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "Vice President",
+    "gold": [
+     "CPA"
+    ]
+   }
+  ],
+  "signer_title|inside the gold text": [
+   {
+    "split": "dev",
+    "template": "Dissemination_Report",
+    "pred": "Director",
+    "gold": [
+     "Lee\nDirector"
+    ]
+   }
+  ],
+  "registrant_name|inside the gold text": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Bozell Sawyer Miller Group",
+    "gold": [
+     "Old Name: Bozell Sawyer Miller Group\nNew Name: BSMG Worldwid"
+    ]
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "BRITISH VIRGIN ISLANDS TOURIST BOARD",
+    "gold": [
+     "of Registrant\nBRITISH VIRGIN\nISLANDS TOURIST BOARD"
+    ]
+   }
+  ],
+  "file_date|predicted, field not annotated": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "204 MAY 11 PM 3 : 10",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "204 AUG 12 PM 3:06",
+    "gold": []
+   },
+   {
+    "split": "confirm",
+    "template": "Amendment",
+    "pred": "FEB 25 2 04 PM 1964",
+    "gold": []
+   },
+   {
+    "split": "confirm",
+    "template": "Amendment",
+    "pred": "8/18/75",
+    "gold": []
+   }
+  ],
+  "registrant_name|gold continues after it (too short)": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "LeClairRyan",
+    "gold": [
+     "LeClairRyan, A Professional Corporation"
+    ]
+   }
+  ],
+  "registrant_name|predicted, field not annotated": [
+   {
+    "split": "dev",
+    "template": "Amendment",
+    "pred": "Sorini , Samet & Associates",
+    "gold": []
+   },
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "Lubanovici , Mircea",
+    "gold": []
+   }
+  ],
+  "signer_name|text of another field": [
+   {
+    "split": "dev",
+    "template": "Short-Form",
+    "pred": "James A. Blakeslee",
+    "gold": [
+     "James Andrew Blakeslee"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "walid Mahmoud Sayed Ahmed Sherif",
+    "gold": [
+     "walid\nshen"
+    ]
+   }
+  ],
+  "registrant_name|contains the gold text (too long)": [
+   {
+    "split": "confirm",
+    "template": "Amendment",
+    "pred": "World Zionist Organization- American Section , Inc.",
+    "gold": [
+     "World Zionist Organization-"
+    ]
+   }
+  ],
+  "foreign_principle_name|contains the gold text (too long)": [
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "OOC Ltd ,",
+    "gold": [
+     "OOC Ltd"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "The Russian Federation Gazprom Export",
+    "gold": [
+     "The Russian Federation"
+    ]
+   },
+   {
+    "split": "confirm",
+    "template": "Short-Form",
+    "pred": "Republic of Guatemala Democratic Party of Albania",
+    "gold": [
+     "Democratic Party of Albania"
+    ]
+   }
+  ],
+  "registration_num|predicted, field not annotated": [
+   {
+    "split": "confirm",
+    "template": "Dissemination_Report",
+    "pred": "1900-312-032 / 61637",
+    "gold": []
+   }
+  ]
+ }
+}

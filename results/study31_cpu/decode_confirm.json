@@ -1,0 +1,153 @@
+{
+ "results": {
+  "exact": {
+   "saved_v2a2": {
+    "f1": 76.5,
+    "minus_base": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ]
+   },
+   "earliest": {
+    "f1": 76.5,
+    "minus_base": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ]
+   },
+   "earliest+next_best": {
+    "f1": 76.7,
+    "minus_base": 0.2,
+    "ci": [
+     -0.1,
+     0.5
+    ]
+   },
+   "latest_signature": {
+    "f1": 81.7,
+    "minus_base": 5.2,
+    "ci": [
+     4.0,
+     6.6
+    ]
+   },
+   "latest_signature+next_best": {
+    "f1": 81.7,
+    "minus_base": 5.2,
+    "ci": [
+     4.0,
+     6.6
+    ]
+   },
+   "richest_page": {
+    "f1": 74.0,
+    "minus_base": -2.5,
+    "ci": [
+     -3.5,
+     -1.5
+    ]
+   },
+   "richest_page+next_best": {
+    "f1": 74.2,
+    "minus_base": -2.2,
+    "ci": [
+     -3.2,
+     -1.2
+    ]
+   },
+   "latest_all": {
+    "f1": 77.0,
+    "minus_base": 0.5,
+    "ci": [
+     -1.4,
+     2.5
+    ]
+   },
+   "latest_all+next_best": {
+    "f1": 76.9,
+    "minus_base": 0.4,
+    "ci": [
+     -1.4,
+     2.4
+    ]
+   }
+  },
+  "text": {
+   "saved_v2a2": {
+    "f1": 78.7,
+    "minus_base": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ]
+   },
+   "earliest": {
+    "f1": 78.7,
+    "minus_base": 0.0,
+    "ci": [
+     0.0,
+     0.0
+    ]
+   },
+   "earliest+next_best": {
+    "f1": 78.9,
+    "minus_base": 0.2,
+    "ci": [
+     -0.1,
+     0.5
+    ]
+   },
+   "latest_signature": {
+    "f1": 81.9,
+    "minus_base": 3.2,
+    "ci": [
+     2.2,
+     4.2
+    ]
+   },
+   "latest_signature+next_best": {
+    "f1": 81.9,
+    "minus_base": 3.1,
+    "ci": [
+     2.2,
+     4.2
+    ]
+   },
+   "richest_page": {
+    "f1": 76.3,
+    "minus_base": -2.5,
+    "ci": [
+     -3.4,
+     -1.5
+    ]
+   },
+   "richest_page+next_best": {
+    "f1": 76.6,
+    "minus_base": -2.2,
+    "ci": [
+     -3.1,
+     -1.2
+    ]
+   },
+   "latest_all": {
+    "f1": 77.4,
+    "minus_base": -1.4,
+    "ci": [
+     -3.0,
+     0.3
+    ]
+   },
+   "latest_all+next_best": {
+    "f1": 77.4,
+    "minus_base": -1.4,
+    "ci": [
+     -3.0,
+     0.2
+    ]
+   }
+  }
+ },
+ "reproduces_saved": 1.0
+}
