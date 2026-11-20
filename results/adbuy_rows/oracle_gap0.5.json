@@ -1,0 +1,42 @@
+{
+ "docs": 641,
+ "gold_rows": 9163,
+ "gold_cells": 38204,
+ "lir_f1": 0.978,
+ "cell_f1": 0.978,
+ "value_lir_f1": 0.9779,
+ "value_cell_f1": 0.9779,
+ "value_tp_pred_gold": [
+  37360,
+  38204,
+  38204
+ ],
+ "tp_pred_gold_lir": [
+  37362,
+  38204,
+  38204
+ ],
+ "gap": 0.5,
+ "grounding": {
+  "grounded": 38204,
+  "right_words": 37362,
+  "wrong_words": 842
+ },
+ "docs_with_misses": 75,
+ "example_misses": [
+  "0179ed96-6b64-eb8b-07c1-3214262dec0c.pdf",
+  "035f7290-f161-1e4e-daae-0e1d37df6b33.pdf",
+  "090bd765-b37c-722c-5f15-05919a2051e8.pdf",
+  "1291762d-c6ac-1154-8ea5-b4e15468ab8f.pdf",
+  "161648f7-00b2-bf14-373b-83436d07e037.pdf"
+ ],
+ "page_prompt_tokens_estimate": {
+  "pages": 1598,
+  "median": 1399,
+  "p90": 2431,
+  "p99": 4417,
+  "max": 9163,
+  "pages_over_6000": 6,
+  "pages_over_12000": 0
+ }
+}
