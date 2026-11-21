@@ -1,0 +1,40 @@
+{
+ "all labelled documents": {
+  "documents": 5680,
+  "cells": 157469,
+  "no_same_type_header": 20904,
+  "R1": {
+   "cells": 157469,
+   "linked": 132000,
+   "right": 129170,
+   "recoverable": 136565,
+   "right_among_recoverable": 129170
+  },
+  "R2": {
+   "cells": 157469,
+   "linked": 144129,
+   "right": 135150,
+   "recoverable": 136565,
+   "right_among_recoverable": 135150
+  }
+ },
+ "test documents (200)": {
+  "documents": 200,
+  "cells": 3225,
+  "no_same_type_header": 663,
+  "R1": {
+   "cells": 3225,
+   "linked": 2482,
+   "right": 2410,
+   "recoverable": 2562,
+   "right_among_recoverable": 2410
+  },
+  "R2": {
+   "cells": 3225,
+   "linked": 2796,
+   "right": 2509,
+   "recoverable": 2562,
+   "right_among_recoverable": 2509
+  }
+ }
+}
