@@ -6,6 +6,7 @@ only the entities that lie wholly inside the window, plus the links between them
 from __future__ import annotations
 
 import dataclasses
+import inspect
 import random
 
 try:
@@ -16,7 +17,12 @@ except ImportError:  # imported as src.data.xfund_windows
 
 def word_windows(tokenizer, words: list[str], size: int = 510, stride: int = 255) -> list[tuple[int, int]]:
     """[(first_word, end_word_exclusive)], each window <= ``size`` subwords, successive starts ~``stride`` subwords apart."""
-    enc = tokenizer(words, boxes=[[0, 0, 0, 0]] * len(words), truncation=False)
+    # Only the LayoutLM-family tokenizers take boxes. A plain fast tokenizer (BROS) rejects the keyword in transformers 4.x and, worse, ignores it in 5.x and then
+    # reads the word list as a batch of texts, which gives wrong windows; so ask the signature instead of catching the error.
+    if "boxes" in inspect.signature(tokenizer.__call__).parameters:
+        enc = tokenizer(words, boxes=[[0, 0, 0, 0]] * len(words), truncation=False)
+    else:
+        enc = tokenizer(words, is_split_into_words=True, truncation=False)
     first: dict[int, int] = {}
     last: dict[int, int] = {}
     for p, w in enumerate(enc.word_ids()):
