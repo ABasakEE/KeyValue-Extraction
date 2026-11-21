@@ -51,6 +51,7 @@ Conventions:
 | 32 | Prompt v2 and two post hoc rules (latest-page tie-break, abstaining vote with BROS) on a fresh third document set, Qwen3-VL-8B 4-bit | GPU | registered 2026-11-20 | *pending (Kaggle run)* |
 | 33 | Schema-guided grounded recipe (prompt v2, Qwen3-VL-8B 4-bit) on FATURA unseen templates against BROS trained on K = 1, 2, 5, 10, 40 seen templates | GPU | 2026-11-20 | **Recipe helps (rule met):** A2 91.7 vs zero-shot 3B VLM 59.6 (+32.1 [27.1, 36.9]). **Crossover:** LLM wins at K = 1 (+59.4) and 2 (+22.5), tie at K = 5 (+0.9 [-1.8, 3.7]), BROS wins at K = 10 (-4.2 [-6.5, -1.9]) and 40 (-8.2). Image adds about 3.8 F1 (A2 91.7 vs A1 87.9); neither combination beats the better system alone |
 | 34 | Table-heavy extension: line items (rows of cells) on VRDU ad-buy unseen templates, schema-guided grounded recipe vs BROS plus row grouping; DocILE LIR metric ported | CPU steps done, GPU pending | registered 2026-11-20 | *pending (steps 3-6)* |
+| 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | *pending (step 1)* |
 
 ---
 
@@ -1701,3 +1702,36 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 **Next:** rerun both notebooks (separate sessions, any order): `kaggle_adbuy_sg.ipynb` smoke cell first (it now prints prompt tokens, output tokens, tokens per second and whether the image was dropped), then `kaggle_adbuy_bros.ipynb`; then `adbuy_compare.py`.
 
 **Evidence:** `scripts/lir_metric.py` (self-check passes); dataset profile as above (no result file written yet).
+
+
+---
+
+## 35. Efficient linking on tables: row grouping and header typing with a learned pair classifier — CPU first, registered 2026-11-21
+
+**Question.** Our table pipeline needs two links once cells are found: cell to row (which cells form one line item) and cell to column header (which field a cell is). Study 34 groups rows with a hand-made anchor rule (`adbuy_bros.group_rows`) and types cells from content. With perfect cells the rule gives row F1 94.43 on the DocILE test documents (cell F1 97.83) and 90.01 on the ad-buy primary documents (cell F1 94.89). **Can a learned pair classifier over cheap candidate pairs group rows better than the rule, at a cost that does not grow with the square of the page?** The rule baseline for header linking is already measured (study 34: the nearest header above recovers the type of 99.0% of the cells that have a header of their type, but 13.3% of all cells, 20.6% of the DocILE test cells, have none).
+
+**What the literature does (focused search, 2026-11-21; read from search summaries and abstracts, not in full).**
+- *Token tagging for membership, then grouping:* the DocILE baselines tag every token as inside a line item and group by the predicted line-item tags ([DocILE benchmark](https://arxiv.org/pdf/2302.05658)); [Holeček et al. 2019](https://arxiv.org/abs/1904.12577) classify each word box of an invoice graph as line item or not and leave the table to clustering; [Spatial ModernBERT 2025](https://arxiv.org/abs/2507.08865) uses one head for semantic labels, one for column indices and one that separates item rows from header rows.
+- *Merger or pair modules on a text-box graph:* the DocILE CLEF 2023 notebook of USTC and iFLYTEK ([paper 052](https://ceur-ws.org/Vol-3497/paper-052.pdf), GraphDoc backbone, ranked first on key-information localisation in the leaderboard summary I found) classifies text boxes, then runs an instance-merge and a line-item-merge process; the exact merger design and its line-item score were not in the summaries. [PEneo 2024](https://arxiv.org/html/2401.03472v3) does line extraction, line grouping and entity linking in one pass for key-value pairs, against the usual two-step recognition then pair classification of every candidate pair.
+- *Relation prediction over cells:* table-structure recognisers link cells (GraphTSR; [TSRFormer](https://arxiv.org/abs/2208.04921) forms a grid and a relation network merges adjacent cells to recover spanning cells); these work on table images or detected tables, not on invoice pages with unbordered tables.
+- *Generative:* [LMDX](https://arxiv.org/abs/2309.10952) outputs hierarchical entities (line items with their fields) from an LLM, which is our recipe; a 2026 WACV paper benchmarks zero-shot table detection and structure recognition on DocILE-QUEST ([poster](https://wacv.thecvf.com/virtual/2026/poster/338)); I found no source testing row-structure prompting on DocILE.
+- *Rules:* patents cluster cells into header and value regions; the [DoSA](https://arxiv.org/pdf/2211.04934) annotation tool links a value to the nearest preceding key and reports noisy pairs.
+- *Gaps in what I found:* no top-team line-item score, no paper comparing groupers at different numbers of training layouts, none that scores header-to-cell links as links.
+
+**Efficiency argument (ours).** An all-pairs head over n cells costs n squared; a page of 150 cells gives 22,000 pairs. Rows are local: a cell and its row-mates sit inside a vertical band. Candidate pairs are therefore restricted to cells of the same page whose vertical distance is at most a few row heights (measured on the training documents), which is linear in n, and the classifier is a small model on pair features, so no GPU is needed.
+
+**Step 1 (CPU, the study's first run).** Group gold cells into rows; compare, by strict row F1 with `lir_metric`:
+- (a) the anchor rule (reference: 94.43 DocILE test, 90.01 ad-buy primary);
+- (b) a pair classifier on candidate pairs (same row or not) with features of the two cells: relative vertical and horizontal offsets in units of the cell heights, overlap of the vertical extents, order, field types, whether the two types occur together in a row in the training documents, horizontal overlap with the nearest header above; clusters = connected components of the pairs scored above a threshold, with a split rule for components that hold two cells of a field that never repeats in a row (ad-buy);
+- (c) (b) without the header feature (what the feature adds).
+Training only on the training documents of each split (DocILE: the pool order of `splits.json`, N = 200 and 1000, seed 0; ad-buy: the training documents of the unseen-template splits, N = 100 and 200); threshold chosen on the validation documents of the same split; evaluation on the 200 DocILE test documents and the 143 ad-buy primary documents; bootstrap over documents (layouts for DocILE).
+
+**Registered rule.** The learned grouper replaces the anchor rule in the BROS baselines if its row F1 minus the rule's is at least +1.0 on both test sets with an interval above 0; if it wins on one set only, it is reported and not adopted; if it does not win, the rule stays and the grouping ceiling is stated as it is. The rule baseline for headers is already the reference; step 1 does not retype cells.
+
+**Later steps (not registered yet).** (2) End to end: the pair head inside the BROS tagger (study 26 style) with predicted cells, link F1 and row F1 against tag-then-group, on a GPU. (3) The header text as an input to the recipe prompt as an ablation (the prompt already contains it as text).
+
+**Limits stated up front.** The classifier sees gold cells (perfect cells), so the gain is an upper bound for a tagger's output; the header feature uses the gold type of the header (as in the rule baseline); DocILE test documents have a median of 2 rows, so row differences are small per document (886 rows); one classifier family only; the literature summary rests on search snippets.
+
+**Results:** *pending*
+
+**Evidence:** `scripts/docile_headers.py`, `results/docile_rows/header_rule.json` (rule baseline, study 34); step 1 scripts to come.
