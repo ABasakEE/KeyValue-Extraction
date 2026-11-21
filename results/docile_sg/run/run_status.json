@@ -1,0 +1,15 @@
+{
+  "pilot_failed": [],
+  "gate": {
+    "outputs": 38,
+    "parse_rate": 1.0,
+    "cells": 621,
+    "id_valid_rate": 0.8828,
+    "pages_with_gold_rows": 33,
+    "answered_rate": 0.9091,
+    "repaired": 46,
+    "ungrounded": 177,
+    "decision": "stop_and_review"
+  },
+  "hours_used": 0.44
+}
