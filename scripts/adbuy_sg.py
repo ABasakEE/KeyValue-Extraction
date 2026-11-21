@@ -266,8 +266,9 @@ def cmd_run(a) -> None:
                     tok = None if a.stub else gen.proc.tokenizer
                     row["prompt_tokens"] = len(tok(prompt).input_ids) if tok else None
                     image = None
-                    # Frozen before the run: the real prompt of a numeric page is about 1.7 times the 3-characters-per-token estimate, and a 6k-token
-                    # prompt plus the image ran a T4 out of memory in the smoke run, so a page above the cap is answered from the text alone.
+                    # Cap on the text prompt above which a page is answered without the image. It was 5,500 before the attention fix (the Kaggle probe then ran
+                    # out of memory at 5,500 positions); with the fix the longest page (8,110 text tokens, about 9,100 positions) peaks near 8.6 GiB, so the
+                    # cap is effectively off and the out-of-memory retry below is the safety net.
                     if a.arm == "image" and not (row["prompt_tokens"] and row["prompt_tokens"] > a.image_cap_tokens):
                         from zero_shot_kv import load_image
                         image = load_image({"image": str(R.DATA.parent / "pdfs" / fn), "pdf_page": p})
@@ -383,7 +384,7 @@ def main() -> None:
     p.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct"); p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
     p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--quant4", action="store_true")
     p.add_argument("--max-new-tokens", type=int, default=2400)
-    p.add_argument("--image-cap-tokens", type=int, default=5500)
+    p.add_argument("--image-cap-tokens", type=int, default=8500)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1); p.add_argument("--limit", type=int, default=0)
     p.add_argument("--deadline-hours", type=float, default=0.0); p.add_argument("--stub", action="store_true")
     p = sub.add_parser("gate")
