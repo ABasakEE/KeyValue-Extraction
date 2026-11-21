@@ -64,7 +64,7 @@ def score(rows: dict[str, dict], examples: dict, keep: set[str], guids: list[str
         seconds.append(row.get("seconds", 0.0))
         stats["errors"] += bool(row.get("error"))
         stats["truncated"] += bool(row.get("truncated"))
-        ents, links, st = parse(arm, row.get("text") or "", ex)
+        ents, links, st = parse(arm, row.get("text") or "", ex, {tuple(e) for e in row.get("entities", [])} or None)
         stats.update(st)
         g_ents, g_links = gold_structure(ex)
         g_qa, groups = gold_qa_links(ex), link_groups(ex)

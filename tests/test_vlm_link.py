@@ -9,7 +9,7 @@ sys.path.insert(0, str(ROOT / "src"))
 
 from data.xfund_loader import load_xfund_split  # noqa: E402
 from e2e_link import gold_structure  # noqa: E402
-from vlm_link import form_order, ocr_lines, parse, prompt_v2, prompt_v3, render_gold  # noqa: E402
+from vlm_link import form_order, ocr_lines, parse, prompt_v2, prompt_v3, prompt_v4, render_gold  # noqa: E402
 
 DATA = ROOT / "data" / "xfund"
 _VAL = []
@@ -109,6 +109,23 @@ def test_prompts_mention_every_word_or_entity():
     p2 = prompt_v2(ex)
     assert f"[0-" in p2 and f"-{len(ex.words) - 1}]" in p2
     assert f"e{len([i for i in ex.entities if ex.entities[i].get('token_indices')])} " in prompt_v3(ex)
+
+
+def test_v4_perfect_answer_scores_perfectly_and_missing_entities_are_survived():
+    val = _val()
+    for ex in val[:40]:
+        g_ents, rep_links = representable(ex)
+        ents, links, stats = parse("V4", render_gold("V4", ex, g_ents), ex, g_ents)
+        assert ents == g_ents and links == rep_links and stats["parse_fail"] == 0, ex.guid
+        # a tagger that missed one entity: its links vanish from the answer, nothing else changes
+        lost = next(iter(sorted(g_ents)), None)
+        if lost is not None:
+            part = g_ents - {lost}
+            ents, links, _ = parse("V4", render_gold("V4", ex, part), ex, part)
+            assert ents == part and all(lost[1:] not in l for l in links) and links <= rep_links
+        assert "e1 " in prompt_v4(ex, g_ents) or not g_ents
+        for bad in ("", "no links here", "e999>e1000", "e1>e1"):
+            parse("V4", bad, ex, g_ents)   # never raises
 
 
 if __name__ == "__main__":

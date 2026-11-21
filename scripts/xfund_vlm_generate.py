@@ -19,10 +19,20 @@ ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT / "src"))
 
 from data.xfund_loader import load_xfund_split  # noqa: E402
-from vlm_link import PROMPTS, form_order, render_gold  # noqa: E402
+from vlm_link import PROMPTS, form_order, prompt_v4, render_gold  # noqa: E402
 
 LANGS = ["es", "fr", "de", "it", "pt"]
-MAX_NEW = {"V1": 2048, "V2": 1536, "V3": 768}
+MAX_NEW = {"V1": 2048, "V2": 1536, "V3": 768, "V4": 768}
+
+
+def patch_sdpa() -> None:
+    """Newer transformers (about 4.53 and later) pass enable_gqa=True to scaled_dot_product_attention; a T4 then falls back to the math kernel, whose memory grows
+    with the square of the prompt length (the ad-buy recipe ran out of memory at about 5,500 positions, study 34). Repeating the keys and values keeps the efficient
+    kernel. A no-op on the pinned 4.51.3, which has no such function."""
+    import transformers.integrations.sdpa_attention as sa
+
+    if hasattr(sa, "use_gqa_in_sdpa"):
+        sa.use_gqa_in_sdpa = lambda attention_mask, key: False
 
 
 class VLM:
@@ -32,6 +42,7 @@ class VLM:
         import torch
         from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
+        patch_sdpa()
         self.model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
             model_id, torch_dtype=getattr(torch, dtype), device_map="auto", attn_implementation="sdpa").eval()
         self.proc = AutoProcessor.from_pretrained(model_id, min_pixels=256 * 28 * 28, max_pixels=max_pixels)
@@ -57,7 +68,8 @@ def image_index(root: Path) -> dict[str, Path]:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--arm", choices=sorted(PROMPTS), required=True)
+    ap.add_argument("--arm", choices=sorted(PROMPTS) + ["V4"], required=True)
+    ap.add_argument("--entities", default="", help="V4: jsonl of predicted entities per form (scripts/xfund_dump_entities.py)")
     ap.add_argument("--model", default="Qwen/Qwen2.5-VL-7B-Instruct")
     ap.add_argument("--dtype", default="float16")
     ap.add_argument("--max-pixels", type=int, default=1280 * 28 * 28)
@@ -79,6 +91,15 @@ def main() -> None:
     done = set()
     if out.exists():
         done = {json.loads(l)["guid"] for l in out.read_text(encoding="utf-8").splitlines() if l.strip()}
+    ents = {}
+    if a.arm == "V4":
+        if not a.entities:
+            ap.error("--arm V4 needs --entities")
+        lines = [l for l in Path(a.entities).read_text(encoding="utf-8").splitlines() if l.strip()]
+        ents = {r["guid"]: [tuple(e) for e in r["entities"]] for r in map(json.loads, lines)}
+        missing = [ex.guid for ex in forms if ex.guid not in ents]
+        if missing:
+            ap.error(f"{len(missing)} forms have no predicted entities in {a.entities}, e.g. {missing[:2]}")
     todo = [ex for ex in forms if ex.guid not in done]
     print(f"[{a.arm}] {len(todo)} of {len(forms)} forms to do ({len(done)} already in {out})", flush=True)
     if not todo:
@@ -95,9 +116,11 @@ def main() -> None:
             t0 = time.time()
             row = {"guid": ex.guid, "arm": a.arm, "model": model_name, "text": "", "new_tokens": 0, "prompt_tokens": 0,
                    "truncated": False, "error": None}
+            if a.arm == "V4":
+                row["entities"] = [list(e) for e in ents[ex.guid]]   # the scorer reads the entities from the row
             try:
                 if gen is None:
-                    row["text"] = render_gold(a.arm, ex)
+                    row["text"] = render_gold(a.arm, ex, set(ents.get(ex.guid, ())))
                 else:
                     from PIL import Image
 
@@ -105,7 +128,7 @@ def main() -> None:
                     if path is None:
                         raise FileNotFoundError(f"no image {ex.image_path} under {a.images}")
                     image = Image.open(path).convert("RGB")
-                    row["text"], row["new_tokens"], row["prompt_tokens"] = gen(PROMPTS[a.arm](ex), image, max_new)
+                    row["text"], row["new_tokens"], row["prompt_tokens"] = gen(prompt_v4(ex, set(ents[ex.guid])) if a.arm == "V4" else PROMPTS[a.arm](ex), image, max_new)
                     row["truncated"] = row["new_tokens"] >= max_new
             except Exception as e:  # one bad form (e.g. out of memory) is recorded and scored as an empty answer
                 row["error"] = f"{type(e).__name__}: {e}"[:500]

@@ -1,11 +1,13 @@
 """Zero-shot VLM key-value linking on XFUND (Study 27): prompts, output parsers and gold renderings.
 
-Three arms, all scored with the end-to-end rules of ``e2e_link`` (exact word ranges, typed entities, directed links):
+Four arms, all scored with the end-to-end rules of ``e2e_link`` (exact word ranges, typed entities, directed links):
 
   V2  page image + the form's words (``ex.words`` order, grouped into visual lines with their indices);
       one item per line: a linked pair ``Q 4-6 > A 7-9`` or a lone entity ``H 0-3`` (inclusive word indices).
       Every line stands alone, so an answer cut off by the token limit keeps all its complete lines.
   V3  page image + every annotated entity numbered ``e<n>``; the VLM lists links only, as ``e<n>>e<m>``.
+  V4  like V3, but the numbered entities are the ones a trained tagger predicted (``predict_document``), not the gold ones: the tagger
+      supplies the spans, the VLM only the links; entity F1 is the tagger's, link F1 is end to end.
   V1  page image only; the VLM lists entities as ``E<n> <H|Q|A> | <text>`` and links; texts are mapped onto
       ``ex.words`` by exact (normalised) match.
 
@@ -161,6 +163,29 @@ def prompt_v3(ex) -> str:
         "The entities of this form:\n" + "\n".join(rows) + "\nAnswer:\n")
 
 
+def predicted_list(ents) -> list:
+    """Predicted entities (label, first word, end word) in reading order of their first word: the e<n> numbering of V4."""
+    return sorted(ents, key=lambda e: (e[1], e[2], e[0]))
+
+
+def prompt_v4(ex, ents) -> str:
+    rows = []
+    for n, (lab, a, b) in enumerate(predicted_list(ents), 1):
+        box = ex.boxes[a]
+        rows.append(f"e{n} {lab.lower()} ({box[0]},{box[1]}) {' '.join(ex.words[a:b])}")
+    return (
+        "This is a scanned form. A tagger found the entities listed below as 'e<number> <type> (x,y) text', with x,y the top-left "
+        "corner on a 0-1000 scale; it can make mistakes, so use the page image too. Types: header (title or section heading), question "
+        "(a key or field label), answer (the value filled in for a key).\n"
+        "List every link from a key to its value: a question to its answer, and a header to the questions under it, using only the "
+        "entities listed. Answer with one link per line as e<number>>e<number>, key first, and nothing else.\n"
+        "Example answer:\n"
+        "e1>e2\n"
+        "e2>e3\n"
+        "e4>e5\n"
+        "The entities of this form:\n" + "\n".join(rows) + "\nAnswer:\n")
+
+
 PROMPTS = {"V1": prompt_v1, "V2": prompt_v2, "V3": prompt_v3}
 
 
@@ -239,6 +264,18 @@ def parse_v3(text: str, ex) -> tuple[set[Link], dict]:
     return links, stats
 
 
+def parse_v4(text: str, ex, ents) -> tuple[set[Entity], set[Link], dict]:
+    stats = _new_stats()
+    lst = predicted_list(ents)
+    rng = {n: (a, b) for n, (_, a, b) in enumerate(lst, 1)}
+    labels = {n: lab.lower() for n, (lab, _, _) in enumerate(lst, 1)}
+    links = _links(text, "e", rng, labels, stats)
+    _finish(stats, text)
+    stats["entity_lines"] = len(lst)  # given, not generated
+    stats["parse_fail"] = int(stats["link_lines"] == 0)
+    return set(ents), links, stats
+
+
 def norm_tokens(s: str) -> list[str]:
     s = unicodedata.normalize("NFKD", s.lower())
     s = "".join(c for c in s if not unicodedata.combining(c))
@@ -309,8 +346,10 @@ def parse_v1(text: str, ex) -> tuple[set[Entity], set[Link], dict]:
     return {(labels[n], *ents[n]) for n in ents}, links, stats
 
 
-def parse(arm: str, text: str, ex) -> tuple[set[Entity], set[Link], dict]:
-    """(entities, links, stats) for any arm; V3 returns the gold entities (they were given)."""
+def parse(arm: str, text: str, ex, ents=None) -> tuple[set[Entity], set[Link], dict]:
+    """(entities, links, stats) for any arm; V3 returns the gold entities (they were given), V4 the predicted ones (``ents``)."""
+    if arm == "V4":
+        return parse_v4(text, ex, ents or set())
     if arm == "V2":
         return parse_v2(text, len(ex.words))
     if arm == "V1":
@@ -322,8 +361,11 @@ def parse(arm: str, text: str, ex) -> tuple[set[Entity], set[Link], dict]:
 
 
 # ---------------------------------------------------------------- perfect answers (tests and dry runs)
-def render_gold(arm: str, ex) -> str:
-    """The answer a perfect VLM would write for this form in the arm's format."""
+def render_gold(arm: str, ex, ents=None) -> str:
+    """The answer a perfect VLM would write for this form in the arm's format (V4: for the given predicted entities)."""
+    if arm == "V4":
+        num = {(a, b): n for n, (_, a, b) in enumerate(predicted_list(ents or set()), 1)}
+        return "\n".join(f"e{num[s]}>e{num[d]}" for s, d in sorted(gold_structure(ex)[1]) if s in num and d in num)
     if arm == "V3":
         num = {i: n for n, i in enumerate(entity_list(ex), 1)}
         return "\n".join(f"e{num[s]}>e{num[d]}" for s, d in ex.links if s in num and d in num and s != d)
