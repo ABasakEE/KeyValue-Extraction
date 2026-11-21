@@ -1,0 +1,101 @@
+{
+  "test": {
+    "precision": 0.8943,
+    "recall": 0.9323,
+    "f1": 0.9129,
+    "support": 212323,
+    "truncated_words": 0,
+    "per_type": {
+      "channel": {
+        "precision": 0.9771,
+        "recall": 0.9431,
+        "f1": 0.9598,
+        "support": 1583
+      },
+      "program_desc": {
+        "precision": 0.7667,
+        "recall": 0.8553,
+        "f1": 0.8086,
+        "support": 2052
+      },
+      "program_end_date": {
+        "precision": 0.9779,
+        "recall": 0.9904,
+        "f1": 0.9841,
+        "support": 1564
+      },
+      "program_start_date": {
+        "precision": 0.8849,
+        "recall": 0.9387,
+        "f1": 0.911,
+        "support": 1860
+      },
+      "sub_amount": {
+        "precision": 0.9293,
+        "recall": 0.9593,
+        "f1": 0.9441,
+        "support": 1425
+      }
+    }
+  },
+  "best_val_f1": 0.938,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.6588,
+      "val_f1": 0.5144
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0881,
+      "val_f1": 0.8689
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0328,
+      "val_f1": 0.9028
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0217,
+      "val_f1": 0.8761
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.014,
+      "val_f1": 0.9216
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.01,
+      "val_f1": 0.9216
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0084,
+      "val_f1": 0.938
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0075,
+      "val_f1": 0.935
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0064,
+      "val_f1": 0.9278
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0064,
+      "val_f1": 0.93
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 233,
+    "total_i_tags": 11528,
+    "rate": 0.0202
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9129 == independent F1=0.9129 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9019 (spread 0.0110)\n  malformed I- tags: 233/11528 (2.0%)",
+  "peak_gpu_mem_gb": 7.87
+}

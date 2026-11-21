@@ -1,0 +1,86 @@
+{
+  "test": {
+    "precision": 0.906,
+    "recall": 0.8873,
+    "f1": 0.8966,
+    "support": 212323,
+    "truncated_words": 0,
+    "per_type": {
+      "channel": {
+        "precision": 0.9418,
+        "recall": 0.9002,
+        "f1": 0.9205,
+        "support": 1583
+      },
+      "program_desc": {
+        "precision": 0.8469,
+        "recall": 0.79,
+        "f1": 0.8174,
+        "support": 2052
+      },
+      "program_end_date": {
+        "precision": 0.959,
+        "recall": 0.9578,
+        "f1": 0.9584,
+        "support": 1564
+      },
+      "program_start_date": {
+        "precision": 0.9008,
+        "recall": 0.8935,
+        "f1": 0.8972,
+        "support": 1860
+      },
+      "sub_amount": {
+        "precision": 0.8963,
+        "recall": 0.9277,
+        "f1": 0.9117,
+        "support": 1425
+      }
+    }
+  },
+  "best_val_f1": 0.9033,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.9877,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.2847,
+      "val_f1": 0.7831
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0738,
+      "val_f1": 0.8647
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0312,
+      "val_f1": 0.9033
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0179,
+      "val_f1": 0.8929
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.018,
+      "val_f1": 0.8862
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0121,
+      "val_f1": 0.8998
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 357,
+    "total_i_tags": 11020,
+    "rate": 0.0324
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.8966 == independent F1=0.8966 (delta 0.00e+00)\n  lenient-IOB2 F1=0.8849 (spread 0.0117)\n  malformed I- tags: 357/11020 (3.2%)",
+  "peak_gpu_mem_gb": 7.89
+}
