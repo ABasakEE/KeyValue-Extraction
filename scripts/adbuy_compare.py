@@ -48,6 +48,8 @@ def recipe_counts(rows_dir: Path, docs: dict) -> dict[str, dict[str, dict]]:
             if not d["rows"]:
                 continue
             doc = S.make_doc(recs[g])
+            if not S.complete(doc, pages.get(g, {})):
+                continue   # a document the deadline or an error left half answered is not scored
             assert len(doc.words) == len(d["words"]), f"word indexing differs for {g}"
             pred = [set(r) for p in sorted(doc.lines) for r in S.decode_page(doc, p, pages.get(g, {}).get(p, '{"rows": []}'), Counter())]
             out[arm][g] = B.run_counts(pred, d)

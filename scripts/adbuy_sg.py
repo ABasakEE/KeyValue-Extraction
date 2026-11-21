@@ -50,7 +50,8 @@ def build_prompt(lines: list[sg.Line]) -> str:
     schema = '{"rows": [{' + ", ".join(f'"{f}": "<text> <identifier>" or null' for f in R.LI_FIELDS) + "}, ...]}"
     return (f"<Document>\n{doc}\n</Document>\n<Task>\nThis page may contain a table of line items. Extract every row of that table. "
             f"Every document line ends with its identifier (two numbers separated by |).\nRules:\n"
-            f"1. One JSON object per table row, in reading order. Do not merge, skip or repeat rows.\n"
+            f"1. One JSON object per table row, in reading order. Do not merge, skip or repeat rows. Write the answer compactly: one row object per "
+            f"line, no indentation, no blank lines, no comments.\n"
             f"2. Write each cell as the text copied exactly from ONE line, followed by that line's identifier, for example \"WXYZ 31|12\".\n"
             f"3. Copy only the cell's value, not the table header and not other cells on the same line.\n"
             f"4. A cell that spans several lines is written as one 'text identifier' per line, separated by a newline.\n"
@@ -250,19 +251,36 @@ def cmd_run(a) -> None:
                 doc = cache.setdefault(fn, make_doc(recs[fn]))
                 lines = doc.lines.get(p, [])
                 if lines:
+                    prompt = build_prompt(lines)
+                    tok = None if a.stub else gen.proc.tokenizer
+                    row["prompt_tokens"] = len(tok(prompt).input_ids) if tok else None
                     image = None
-                    if a.arm == "image":
+                    # Frozen before the run: the real prompt of a numeric page is about 1.7 times the 3-characters-per-token estimate, and a 6k-token
+                    # prompt plus the image ran a T4 out of memory in the smoke run, so a page above the cap is answered from the text alone.
+                    if a.arm == "image" and not (row["prompt_tokens"] and row["prompt_tokens"] > a.image_cap_tokens):
                         from zero_shot_kv import load_image
                         image = load_image({"image": str(R.DATA.parent / "pdfs" / fn), "pdf_page": p})
-                    row["samples"] = gen.sample(build_prompt(lines), image, 1, a.max_new_tokens)
+                    row["image_dropped"] = a.arm == "image" and image is None
+                    row["samples"] = gen.sample(prompt, image, 1, a.max_new_tokens)
+                    row["new_tokens"] = len(tok(row["samples"][0]).input_ids) if tok else None
                 else:
                     row["samples"] = ['{"rows": []}']
             except Exception as e:  # one bad page must not kill a multi-hour run
                 row["error"] = f"{type(e).__name__}: {e}"
+            if not a.stub:
+                import torch
+                torch.cuda.empty_cache()   # the smoke run died on the third page with 1.6 GiB reserved but unallocated
             row["seconds"] = round(time.time() - t0, 2)
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
             fh.flush()
-            print(f"[shard {a.shard}] {k}/{len(units)} {fn[:40]} p{p} {row['seconds']}s{' ERR ' + row['error'] if row['error'] else ''}", flush=True)
+            rate = f" {row['new_tokens'] / max(row['seconds'], 1e-6):.1f} tok/s" if row.get("new_tokens") else ""
+            print(f"[shard {a.shard}] {k}/{len(units)} {fn[:40]} p{p} {row['seconds']}s prompt {row.get('prompt_tokens')} out {row.get('new_tokens')}{rate}"
+                  f"{' ERR ' + row['error'] if row['error'] else ''}", flush=True)
+
+
+def complete(doc: sg.Doc, answers: dict[int, str]) -> bool:
+    """True if every page with text has an answer (a run cut by the deadline or by errors leaves documents half done; they are not scored)."""
+    return all(p in answers for p, lines in doc.lines.items() if lines)
 
 
 def read_pages(paths: list[str]) -> dict[str, dict[int, str]]:
@@ -309,10 +327,14 @@ def cmd_score(a) -> None:
             continue
         tot = {k: [0, 0, 0] for k in ("lir", "cell", "vlir", "vcell")}
         st: Counter = Counter()
+        n_done = 0
         for fn in ids:
             doc = make_doc(recs[fn])
+            if not complete(doc, pages.get(fn, {})):
+                continue
+            n_done += 1
             gold = R.gold_rows(recs[fn], doc)
-            pred = [r for p in sorted(doc.lines) for r in decode_page(doc, p, pages.get(fn, {}).get(p, '{"rows": []}'), st)]
+            pred = [r for p in sorted(doc.lines) for r in decode_page(doc, p, pages[fn].get(p, '{"rows": []}'), st)]
             if not gold:
                 continue
             g, p = [{(f, ws) for f, ws, _, _ in row} for row in gold], [set(r) for r in pred]
@@ -321,7 +343,8 @@ def cmd_score(a) -> None:
             for k, c in (("lir", lir_counts(p, g)), ("cell", cell_counts(p, g)), ("vlir", lir_counts(vp, vg, R.value_same)), ("vcell", cell_counts(vp, vg, R.value_same))):
                 tot[k] = [x + y for x, y in zip(tot[k], c)]
         report[arm] = {"lir_f1": round(f1(tot["lir"]) * 100, 2), "cell_f1": round(f1(tot["cell"]) * 100, 2), "value_lir_f1": round(f1(tot["vlir"]) * 100, 2),
-                       "value_cell_f1": round(f1(tot["vcell"]) * 100, 2), "counts_lir": tot["lir"], "decode": dict(st)}
+                       "value_cell_f1": round(f1(tot["vcell"]) * 100, 2), "counts_lir": tot["lir"], "decode": dict(st),
+                       "documents_scored": n_done, "documents_in_manifest": len(ids)}
         print(arm, json.dumps(report[arm]))
     (Path(a.rows_dir) / "report.json").write_text(json.dumps(report, indent=1), encoding="utf-8")
 
@@ -334,8 +357,9 @@ def main() -> None:
     p = sub.add_parser("run")
     p.add_argument("--manifest", required=True); p.add_argument("--arm", choices=["image", "text"], required=True); p.add_argument("--out", required=True)
     p.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct"); p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
-    p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--quant4", action="store_true")
-    p.add_argument("--max-new-tokens", type=int, default=3000)
+    p.add_argument("--max-pixels", type=int, default=640 * 28 * 28); p.add_argument("--quant4", action="store_true")
+    p.add_argument("--max-new-tokens", type=int, default=2400)
+    p.add_argument("--image-cap-tokens", type=int, default=5500)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1); p.add_argument("--limit", type=int, default=0)
     p.add_argument("--deadline-hours", type=float, default=0.0); p.add_argument("--stub", action="store_true")
     p = sub.add_parser("gate")
