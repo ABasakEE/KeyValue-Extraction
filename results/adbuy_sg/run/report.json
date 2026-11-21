@@ -1,0 +1,24 @@
+{
+ "A2": {
+  "lir_f1": 38.16,
+  "cell_f1": 39.45,
+  "value_lir_f1": 46.76,
+  "value_cell_f1": 47.82,
+  "counts_lir": [
+   3578,
+   11437,
+   7318
+  ],
+  "decode": {
+   "outputs": 330,
+   "cells": 12605,
+   "segments": 12605,
+   "id_valid": 11358,
+   "repaired": 1920,
+   "ungrounded": 1168,
+   "empty_rows": 97
+  },
+  "documents_scored": 128,
+  "documents_in_manifest": 143
+ }
+}

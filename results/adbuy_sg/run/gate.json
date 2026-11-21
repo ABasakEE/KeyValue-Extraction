@@ -1,0 +1,11 @@
+{
+  "outputs": 74,
+  "parse_rate": 1.0,
+  "cells": 2872,
+  "id_valid_rate": 0.9025,
+  "pages_with_gold_rows": 60,
+  "answered_rate": 0.9833,
+  "repaired": 542,
+  "ungrounded": 278,
+  "decision": "keep"
+}
