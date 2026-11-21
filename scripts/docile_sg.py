@@ -24,7 +24,7 @@ HERE = Path(__file__).resolve().parent
 sys.path[:0] = [str(HERE), str(HERE.parent / "src")]
 import docile_rows as D  # noqa: E402
 import schema_guided_kv as sg  # noqa: E402
-from adbuy_sg import _pick  # noqa: E402
+from row_repair import _pick, patch_sdpa  # noqa: E402
 from lir_metric import cell_counts, f1, lir_counts  # noqa: E402
 
 OUT = D.ROOT / "results" / "docile_sg"
@@ -186,7 +186,7 @@ def cmd_run(a) -> None:
     ids = json.loads(Path(a.manifest).read_text(encoding="utf-8"))
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    done = {(r["doc_id"], r["page"]) for r in map(json.loads, out.read_text(encoding="utf-8").splitlines())} if out.exists() and out.stat().st_size else set()
+    done = {(r["doc_id"], r["page"]) for r in map(json.loads, out.read_text(encoding="utf-8").splitlines()) if not r.get("error")} if out.exists() and out.stat().st_size else set()   # a page that failed is retried on a re-run
     docs = {i: D.Doc(i, GAP) for i in ids}
     units = [(i, p) for i in ids for p in range(len(docs[i].pieces))]
     units = [u for u in units[a.shard::a.num_shards] if u not in done]
@@ -200,6 +200,8 @@ def cmd_run(a) -> None:
         def sample(self, prompt, image, k, max_new_tokens, prefill=""):
             return ['{"rows": []}'] * k
 
+    if not a.stub:
+        patch_sdpa()
     gen = _Stub() if a.stub else sg._vlm_class()(a.model, a.device, a.dtype, a.max_pixels, a.quant4)
     deadline = time.time() + a.deadline_hours * 3600 if a.deadline_hours else None
     with open(out, "a", encoding="utf-8") as fh:
@@ -211,19 +213,47 @@ def cmd_run(a) -> None:
             t0 = time.time()
             try:
                 if docs[i].pieces[p]:
+                    prompt = build_prompt(docs[i], p)
+                    tok = None if a.stub else gen.proc.tokenizer
+                    row["prompt_tokens"] = len(tok(prompt).input_ids) if tok else None
                     image = None
-                    if a.arm == "image":
+                    if a.arm == "image" and not (row["prompt_tokens"] and row["prompt_tokens"] > a.image_cap_tokens):   # as in adbuy_sg: the cap is effectively off
                         from zero_shot_kv import load_image
                         image = load_image({"image": str(D.DATA / "pdfs" / f"{i}.pdf"), "pdf_page": p})
-                    row["samples"] = gen.sample(build_prompt(docs[i], p), image, 1, a.max_new_tokens)
+                    row["image_dropped"] = a.arm == "image" and image is None
+                    if not a.stub:
+                        import torch
+                        torch.cuda.reset_peak_memory_stats(a.device)
+                    try:
+                        row["samples"] = gen.sample(prompt, image, 1, a.max_new_tokens)
+                    except Exception as e:   # out of memory with the image: answer this page from the text alone, and say so in the row
+                        if image is None or "out of memory" not in str(e).lower():
+                            raise
+                        import torch
+                        torch.cuda.empty_cache()
+                        row["image_dropped"], row["oom_retry"] = True, True
+                        row["samples"] = gen.sample(prompt, None, 1, a.max_new_tokens)
+                    if not a.stub:
+                        row["peak_gb"] = round(torch.cuda.max_memory_allocated(a.device) / 2**30, 2)
+                    row["new_tokens"] = len(tok(row["samples"][0]).input_ids) if tok else None
                 else:
                     row["samples"] = ['{"rows": []}']
             except Exception as e:  # one bad page must not kill a multi-hour run
                 row["error"] = f"{type(e).__name__}: {e}"
+            if not a.stub:
+                import torch
+                torch.cuda.empty_cache()
             row["seconds"] = round(time.time() - t0, 2)
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
             fh.flush()
-            print(f"[shard {a.shard}] {k}/{len(units)} {i} p{p} {row['seconds']}s{' ERR ' + row['error'] if row['error'] else ''}", flush=True)
+            rate = f" {row['new_tokens'] / max(row['seconds'], 1e-6):.1f} tok/s" if row.get("new_tokens") else ""
+            print(f"[shard {a.shard}] {k}/{len(units)} {i} p{p} {row['seconds']}s prompt {row.get('prompt_tokens')} out {row.get('new_tokens')}{rate} peak {row.get('peak_gb')} GB"
+                  f"{' OOM-RETRY no image' if row.get('oom_retry') else ''}{' ERR ' + row['error'] if row['error'] else ''}", flush=True)
+
+
+def complete(doc: D.Doc, answers: dict[int, str]) -> bool:
+    """True if every page with text has an answer (a run cut by the deadline or by errors leaves documents half done; they are not scored)."""
+    return all(p in answers for p, pcs in doc.pieces.items() if pcs)
 
 
 def read_pages(paths: list[str]) -> dict[str, dict[int, str]]:
@@ -266,16 +296,21 @@ def cmd_score(a) -> None:
         if not pages:
             continue
         tot, per_doc, st = {"lir": [0, 0, 0], "cell": [0, 0, 0]}, {}, Counter()
+        n_done = 0
         for i in ids:
             ann, doc = ann_of(i), D.Doc(i, GAP)
+            if not complete(doc, pages.get(i, {})):
+                continue
+            n_done += 1
             gold = [{(f, ws) for f, ws, _ in row} for row in D.gold_rows(doc, ann)]
-            pred = [set(r) for p in sorted(doc.pieces) for r in decode_page(doc, p, pages.get(i, {}).get(p, '{"rows": []}'), st)]
+            pred = [set(r) for p in sorted(doc.pieces) for r in decode_page(doc, p, pages[i].get(p, '{"rows": []}'), st)]
             if not gold:
                 continue
             c = {"lir": lir_counts(pred, gold), "cell": cell_counts(pred, gold)}
             per_doc[i] = c
             tot = {k: [x + y for x, y in zip(tot[k], c[k])] for k in tot}
-        report[arm] = {"lir_f1": round(f1(tot["lir"]) * 100, 2), "cell_f1": round(f1(tot["cell"]) * 100, 2), "counts": tot, "decode": dict(st), "per_doc": per_doc}
+        report[arm] = {"lir_f1": round(f1(tot["lir"]) * 100, 2), "cell_f1": round(f1(tot["cell"]) * 100, 2), "counts": tot, "decode": dict(st), "per_doc": per_doc,
+                       "documents_scored": n_done, "documents_in_manifest": len(ids)}
         print(arm, {k: report[arm][k] for k in ("lir_f1", "cell_f1", "decode")})
     (Path(a.rows_dir) / "report.json").write_text(json.dumps(report), encoding="utf-8")
 
@@ -289,7 +324,8 @@ def main() -> None:
     p.add_argument("--manifest", required=True); p.add_argument("--arm", choices=["image", "text"], required=True); p.add_argument("--out", required=True)
     p.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct"); p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
     p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--quant4", action="store_true")
-    p.add_argument("--max-new-tokens", type=int, default=3000)
+    p.add_argument("--max-new-tokens", type=int, default=2400)
+    p.add_argument("--image-cap-tokens", type=int, default=8500)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1); p.add_argument("--limit", type=int, default=0)
     p.add_argument("--deadline-hours", type=float, default=0.0); p.add_argument("--stub", action="store_true")
     p = sub.add_parser("gate")

@@ -27,6 +27,7 @@ sys.path[:0] = [str(HERE), str(HERE.parent / "src")]
 import adbuy_rows as R  # noqa: E402
 import schema_guided_kv as sg  # noqa: E402
 from lir_metric import cell_counts, f1, lir_counts  # noqa: E402
+from row_repair import _pick, _xy, patch_sdpa  # noqa: E402, F401
 
 OUT = sg.ROOT / "results" / "adbuy_sg"
 SPLITS = R.DATA.parent.parent / "few_shot-splits"
@@ -80,30 +81,6 @@ def _words(text: str, ln: sg.Line, doc: sg.Doc):
     return set(range(*sp)) if sp else None
 
 
-def _xy(lid: str | None):
-    m = re.match(r"(\d{2})\|(\d{2})", lid or "")
-    return (int(m[1]), int(m[2])) if m else None
-
-
-def _pick(cand: list[sg.Line], lid: str | None, row_y: float | None, repair: str) -> sg.Line | None:
-    """Choose among the pieces that hold a cell's text. unique: only if one piece holds it. nearest: closest to the cited id's coordinates.
-    row: closest to the vertical position of the row's other (correct) cells, ties broken by the cited coordinates."""
-    if not cand:
-        return None
-    if repair == "unique":
-        return cand[0] if len(cand) == 1 else None
-    xy = _xy(lid)
-    d_cited = lambda c: ((c.box[0] + c.box[2]) * 50 - xy[0]) ** 2 + ((c.box[1] + c.box[3]) * 50 - xy[1]) ** 2 if xy else 0.0
-    if repair == "row" and row_y is not None:
-        key = lambda c: (round(abs((c.box[1] + c.box[3]) / 2 - row_y), 3), d_cited(c))
-    elif repair in ("nearest", "row") and xy:
-        key = lambda c: (d_cited(c),)
-    else:
-        return cand[0] if len(cand) == 1 else None
-    ranked = sorted(cand, key=key)
-    return ranked[0] if len(ranked) == 1 or key(ranked[0]) != key(ranked[1]) else None
-
-
 def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: str | bool = "row") -> list[list[tuple[str, frozenset]]]:
     """Rows of (field, word set) from one page's answer; cells that cannot be grounded are dropped, empty rows too.
     `repair`: none | unique (study 33 rule) | nearest | row (see `_pick`) | row+ (row, and also moves cells that sit off their row's line); True and False mean unique and none."""
@@ -154,15 +131,6 @@ def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: str | boo
         else:
             st["empty_rows"] += 1
     return out
-
-
-def patch_sdpa() -> None:
-    """transformers 4.57 passes enable_gqa=True to scaled_dot_product_attention when there is no mask. A T4 has no flash kernel and (as far as is known; the
-    Kaggle probe `attn_probe_gpu.py` measures it) the memory-efficient kernel does not take that flag, so PyTorch falls back to the math kernel and builds the
-    whole L x L attention matrix: 3.56 GiB for 32 heads at the 5,463 positions of the page that ran out of memory. Repeating the keys and values keeps the
-    efficient kernel, whose memory grows linearly with the length. Same results, a little more memory for the repeated keys and values."""
-    import transformers.integrations.sdpa_attention as sa
-    sa.use_gqa_in_sdpa = lambda attention_mask, key: False
 
 
 def make_doc(rec: dict) -> sg.Doc:
@@ -233,7 +201,7 @@ def cmd_run(a) -> None:
     recs = {r["filename"]: r for r in R.load_records() if r["filename"] in set(ids)}
     out = Path(a.out)
     out.parent.mkdir(parents=True, exist_ok=True)
-    done = {(r["doc_id"], r["page"]) for r in map(json.loads, out.read_text(encoding="utf-8").splitlines())} if out.exists() and out.stat().st_size else set()
+    done = {(r["doc_id"], r["page"]) for r in map(json.loads, out.read_text(encoding="utf-8").splitlines()) if not r.get("error")} if out.exists() and out.stat().st_size else set()   # a page that failed is retried on a re-run
     units = [(fn, p) for fn in ids for p in range(len(recs[fn]["ocr"]["pages"]))]
     units = [u for u in units[a.shard::a.num_shards] if u not in done]
     if a.limit:

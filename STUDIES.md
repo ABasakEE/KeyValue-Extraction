@@ -54,6 +54,7 @@ Conventions:
 | 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part; step 1b (average link, correlation, anchors): ad-buy +2.3 to +2.6 for every variant, DocILE best -1.9 [-4.0, +0.03]; the rule stays |
 | 36 | A learned router between the recipe and BROS (which system to trust, per document or per field): headroom first | CPU | groundwork 2026-11-22 | **Headroom exists:** on the FATURA confirm invoices a perfect per-field router gains +4.2 / +5.4 / +5.8 / +4.1 / +0.1 over the better single system at K = 1 / 2 / 5 / 10 / 40; no router has been trained |
 | 37 | The joint tagger-plus-biaffine-linker with a BROS backbone against LiLT on XFUND (end to end, 250 val forms, 3 seeds) | GPU | registered 2026-11-22 | *pending (Kaggle run); CPU checks done* |
+| 38 | The schema-guided grounded recipe on DocILE line items (layout-disjoint test documents), pilot-gated | GPU | registered 2026-11-22 | *pending (Kaggle run)* |
 
 ---
 
@@ -1845,3 +1846,26 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Results:** *pending*
 
 **Evidence:** `results/bros_joint/` (after the run).
+
+
+---
+
+## 38. The schema-guided grounded recipe on DocILE line items — GPU (Kaggle T4 x 2), registered 2026-11-22
+
+**Question.** Study 34 found that on VRDU ad-buy line items (dense scanned tables, median 7 gold rows per page with rows, up to 47) the recipe scores 38.2 row F1 against 68.9 to 85.3 for a trained BROS tagger, and that cleaning its answers (repeated rows, runaway pages) only reaches 43.8. **Is that failure general to tables, or specific to the ad-buy scans?** DocILE pages are shorter (median 3 gold rows per page with rows, maximum 61), its oracle through the same decode path scores 99.98 row F1 and 99.79 cell F1 on the test documents, and its layouts are split so that no test layout is in any training set.
+
+**Data and inputs.** DocILE `annotated-trainval` (5,680 documents; terms of use not yet read by us), the layout-disjoint test documents of `results/docile_rows/splits.json` (200 documents, 236 pages, 886 gold rows) as the only scored set, and the 30 pilot documents (38 pages) that are in no test set. Pieces: OCR lines cut at 0.5 line heights (`docile_rows.Doc`). The 19 line-item fields have descriptions written from their names alone and frozen in `docile_sg.DESC`. Several cells of one field in a row are written as a list (26% of DocILE rows repeat a field).
+
+**Method (same as study 34, `scripts/docile_sg.py`).** Qwen3-VL-8B-Instruct, 4-bit, greedy, one call per page, answer `{"rows": [...]}` with every cell citing a piece id plus its text, at most 2,400 new tokens, image budget 1,280 (at most 980 visual tokens), the row-position repair, the attention fix, an out-of-memory retry without the image, a page that failed is retried on a re-run, and only documents with every page answered are scored. Arm A2 (image + pieces) first; A1 (text only) only if A2 is informative. **Gate on the pilot (image arm):** at least 90% of answers parse, at least 90% of cited ids exist, and at least one row on at least 90% of the pages that have gold rows; if it fails the test run is skipped and the pilot is reviewed (no automatic fallback).
+
+**Scoring.** Strict row F1 (DocILE's line-item rule: predicted rows matched one-to-one to gold rows for the most matching cells, a cell right only if its word set equals the gold word set) and cell F1; per-document counts are saved. There is no BROS baseline on DocILE yet (the training code is not written), so the result is read against the oracle, the ad-buy recipe and the stated rule below; it is not a win or loss against BROS.
+
+**Registered reading (fixed before the run, on the A2 row F1 of the test documents):** 80 or more: the recipe is competitive on typical invoice tables and the ad-buy failure is specific to dense scans; 50 to 80: partial, the failure is partly general; below 50: tables are hard for the recipe in general. These thresholds are judgement calls, not tested rules, and a number inside a band says nothing about BROS.
+
+**Limits stated up front.** One model, one prompt, no tuning on DocILE (the descriptions and the prompt were written before any DocILE page went through the model); the test set has a median of 2 gold rows per document, so row F1 rests on few rows per document; the oracle ceiling counts only gold cells that contain an OCR word (3.5% of DocILE line-item cells do not, so under the official every-cell rule the ceiling is lower); the answers contain document text and are not pushed to GitHub by default until the terms are read (scores and counts are); the run time on DocILE is not measured (estimate 2 to 3 h for the 236 pages on two T4s plus 0.3 h for the pilot).
+
+**Pre-run checks done on CPU (2026-11-22).** The shared repair helpers moved to `scripts/row_repair.py` and both recipes were re-tested (ad-buy oracle 100.00 on 3 documents with the repair table unchanged, 83.72 with repair after shifted ids; DocILE oracle 99.98 / 99.79 on the 200 test documents); stub run, gate and scorer work, including a partly finished run (26 of 30 documents scored) and a re-run that retries failed pages (30 of 30). **Not checked:** the image path and the 8B model on DocILE pages (the notebook's smoke cell is the first test), and the PDF download inside Kaggle.
+
+**Results:** *pending*
+
+**Evidence:** `results/docile_sg/run/` (scores, gate and counts after the run); notebook `notebooks/kaggle_docile_sg.ipynb`.
