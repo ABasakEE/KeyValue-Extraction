@@ -1,0 +1,29 @@
+{
+ "docs": 5680,
+ "gap": 0.5,
+ "gold_rows": 38657,
+ "gold_cells": 151202,
+ "gold_cells_with_no_word": 5563,
+ "rows_crossing_pages": 45,
+ "lir_f1": 0.9994,
+ "cell_f1": 0.9971,
+ "tp_pred_gold": [
+  151018,
+  151020,
+  151202
+ ],
+ "docs_with_misses": 38,
+ "rows_per_page_with_rows": {
+  "median": 3,
+  "p90": 15,
+  "max": 61
+ },
+ "page_prompt_tokens_estimate": {
+  "pages": 7394,
+  "median": 740,
+  "p90": 1647,
+  "p99": 6584,
+  "max": 8995,
+  "pages_over_6000": 82
+ }
+}

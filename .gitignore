@@ -61,3 +61,6 @@ NOVELTY.md
 intensive_assessment/*
 presentation_scripts/*
 
+
+# access tokens (DocILE etc.) - never commit
+/.secrets/
