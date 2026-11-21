@@ -51,7 +51,7 @@ Conventions:
 | 32 | Prompt v2 and two post hoc rules (latest-page tie-break, abstaining vote with BROS) on a fresh third document set, Qwen3-VL-8B 4-bit | GPU | registered 2026-11-20 | *pending (Kaggle run)* |
 | 33 | Schema-guided grounded recipe (prompt v2, Qwen3-VL-8B 4-bit) on FATURA unseen templates against BROS trained on K = 1, 2, 5, 10, 40 seen templates | GPU | 2026-11-20 | **Recipe helps (rule met):** A2 91.7 vs zero-shot 3B VLM 59.6 (+32.1 [27.1, 36.9]). **Crossover:** LLM wins at K = 1 (+59.4) and 2 (+22.5), tie at K = 5 (+0.9 [-1.8, 3.7]), BROS wins at K = 10 (-4.2 [-6.5, -1.9]) and 40 (-8.2). Image adds about 3.8 F1 (A2 91.7 vs A1 87.9); neither combination beats the better system alone |
 | 34 | Table-heavy extension: line items (rows of cells) on VRDU ad-buy unseen templates, schema-guided grounded recipe vs BROS plus row grouping; DocILE LIR metric ported | CPU steps done, GPU pending | registered 2026-11-20 | *pending (steps 3-6)* |
-| 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | *pending (step 1)* |
+| 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part |
 
 ---
 
@@ -1732,6 +1732,23 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** The classifier sees gold cells (perfect cells), so the gain is an upper bound for a tagger's output; the header feature uses the gold type of the header (as in the rule baseline); DocILE test documents have a median of 2 rows, so row differences are small per document (886 rows); one classifier family only; the literature summary rests on search snippets.
 
-**Results:** *pending*
+**Results (step 1, 2026-11-21; `scripts/table_rows_learn.py`, `results/table_linking/step1.json`; input = the spans a perfect tagger outputs; strict row F1; bootstrap over documents):**
 
-**Evidence:** `scripts/docile_headers.py`, `results/docile_rows/header_rule.json` (rule baseline, study 34); step 1 scripts to come.
+| Set | Anchor rule | Learned, training documents | Row F1 | Threshold | Learned minus rule [95% CI] |
+|---|---|---|---|---|---|
+| DocILE test (200 documents) | 94.43 | N = 200, with header feature | 86.00 | 0.9 | -8.21 [-13.55, -3.11] |
+| | | N = 200, without | 86.61 | 0.9 | -7.61 [-12.84, -2.64] |
+| | | N = 1000, with (primary) | 90.10 | 0.9 | **-4.32 [-9.28, -0.90]** |
+| | | N = 1000, without | 90.59 | 0.9 | -3.83 [-9.26, -0.32] |
+| Ad-buy primary (142 documents) | 90.01 | N = 100 | 92.64 | 0.2 | +2.61 [+0.53, +4.95] |
+| | | N = 200 (primary) | 92.39 | 0.2 | **+2.38 [+0.42, +4.71]** |
+
+- **Registered rule: not met.** The learned grouper beats the rule on ad-buy only (+2.38, interval above 0) and loses on DocILE (-4.32, interval below 0); a win on one set only is reported and not adopted, so **the anchor rule stays in the BROS baselines**. The header feature does not help on DocILE (with the feature is 0.5 points lower at both N).
+- **Post hoc checks (written after the result; `scripts/table_rows_learn_posthoc.py`, `step1_posthoc.json`):** the chosen thresholds sat at the edge of the registered grid (0.9 on DocILE, 0.2 on ad-buy), so a wider grid was tried. *Pair quality:* DocILE test AUC 0.9725, precision 0.961 and recall 0.892 at 0.5, the candidate band holds 98.9% of the same-row pairs; ad-buy AUC 0.998, precision 0.990, recall 0.984, band recall 97.3%. *DocILE, N = 1000, wider grid:* best validation threshold 0.995 (validation row F1 93.5) gives test 91.13, still **-3.31 [-5.96, -1.14]** against the rule; with the 'no repeated field in a row' constraint (right for ad-buy, wrong for DocILE where 26% of rows repeat a field) test 86.93 (-7.56). *Ad-buy, wider grid:* validation row F1 is flat from 0.02 to 0.5 (92.0 to 91.8), test 92.41, +2.40 [+0.46, +4.73] (so that win does not depend on the threshold). *Same documents, validation:* the rule scores 94.76 on the 100 DocILE validation documents against the learned grouper's 93.5 (-1.3), and 91.40 on the 100 ad-buy validation documents against 92.0 (+0.6), so the sign is the same on selection and test data.
+- **Reading:** the pair classifier is good (AUC 0.97 to 0.998); the loss on DocILE comes from turning pair scores into rows. Single-link clustering lets one false pair merge two rows, and DocILE tables are dense and repeat fields, so the constraint that fixes ad-buy cannot be used. The anchor rule uses structure the classifier does not see (one anchor field per row), which helps on DocILE and costs on ad-buy, where the learned model recovers about 2.4 points of the 4.9 that grouping loses. Untried: a different clustering over the same pair scores (average-link, correlation clustering, or assigning every span to its best anchor with learned scores), features of neighbouring rows, and the dataset difference in training size (ad-buy N = 200 documents against DocILE N = 1000 documents with few rows each).
+- **Decision for the baselines:** keep the rule on both datasets (the registered rule). The ad-buy gain (+2.4 on the perfect-span ceiling) is reported as a possible improvement of the ad-buy BROS baseline that was not registered as an adoption.
+- **Caveat on the post hoc work:** the DocILE test documents were used again for the post hoc rows; the threshold was chosen on validation only, and no variant was picked by its test score.
+
+**Next (not registered yet):** step 1b, a different clustering over the same pair scores, with its own rule fixed before it runs; the end-to-end pair head inside the tagger only if step 1b closes the DocILE gap.
+
+**Evidence:** `scripts/table_rows_learn.py`, `scripts/table_rows_learn_posthoc.py`, `results/table_linking/step1.json`, `results/table_linking/step1_posthoc.json`; `scripts/docile_headers.py`, `results/docile_rows/header_rule.json` (rule baseline for headers, study 34).

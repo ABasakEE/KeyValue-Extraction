@@ -1,0 +1,78 @@
+{
+ "docile": {
+  "rule": 94.43,
+  "runs": {
+   "N=200 header=True": {
+    "row_f1": 86.0,
+    "threshold": 0.9,
+    "diff_vs_rule": [
+     -8.21,
+     -13.55,
+     -3.11
+    ],
+    "train_pairs": 42859,
+    "positive_rate": 0.269
+   },
+   "N=200 header=False": {
+    "row_f1": 86.61,
+    "threshold": 0.9,
+    "diff_vs_rule": [
+     -7.61,
+     -12.84,
+     -2.64
+    ],
+    "train_pairs": 42859,
+    "positive_rate": 0.269
+   },
+   "N=1000 header=True": {
+    "row_f1": 90.1,
+    "threshold": 0.9,
+    "diff_vs_rule": [
+     -4.32,
+     -9.28,
+     -0.9
+    ],
+    "train_pairs": 212297,
+    "positive_rate": 0.251
+   },
+   "N=1000 header=False": {
+    "row_f1": 90.59,
+    "threshold": 0.9,
+    "diff_vs_rule": [
+     -3.83,
+     -9.26,
+     -0.32
+    ],
+    "train_pairs": 212297,
+    "positive_rate": 0.251
+   }
+  }
+ },
+ "adbuy": {
+  "rule": 90.01,
+  "runs": {
+   "N=100 header=False": {
+    "row_f1": 92.64,
+    "threshold": 0.2,
+    "diff_vs_rule": [
+     2.61,
+     0.53,
+     4.95
+    ],
+    "train_pairs": 28134,
+    "positive_rate": 0.376
+   },
+   "N=200 header=False": {
+    "row_f1": 92.39,
+    "threshold": 0.2,
+    "diff_vs_rule": [
+     2.38,
+     0.42,
+     4.71
+    ],
+    "train_pairs": 60770,
+    "positive_rate": 0.349
+   }
+  }
+ }
+}
