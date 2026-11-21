@@ -51,7 +51,7 @@ Conventions:
 | 32 | Prompt v2 and two post hoc rules (latest-page tie-break, abstaining vote with BROS) on a fresh third document set, Qwen3-VL-8B 4-bit | GPU | registered 2026-11-20 | *pending (Kaggle run)* |
 | 33 | Schema-guided grounded recipe (prompt v2, Qwen3-VL-8B 4-bit) on FATURA unseen templates against BROS trained on K = 1, 2, 5, 10, 40 seen templates | GPU | 2026-11-20 | **Recipe helps (rule met):** A2 91.7 vs zero-shot 3B VLM 59.6 (+32.1 [27.1, 36.9]). **Crossover:** LLM wins at K = 1 (+59.4) and 2 (+22.5), tie at K = 5 (+0.9 [-1.8, 3.7]), BROS wins at K = 10 (-4.2 [-6.5, -1.9]) and 40 (-8.2). Image adds about 3.8 F1 (A2 91.7 vs A1 87.9); neither combination beats the better system alone |
 | 34 | Table-heavy extension: line items (rows of cells) on VRDU ad-buy unseen templates, schema-guided grounded recipe vs BROS plus row grouping; DocILE LIR metric ported | CPU steps done, GPU pending | registered 2026-11-20 | *pending (steps 3-6)* |
-| 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part |
+| 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part; step 1b (average link, correlation, anchors): ad-buy +2.3 to +2.6 for every variant, DocILE best -1.9 [-4.0, +0.03]; the rule stays |
 
 ---
 
@@ -1756,6 +1756,22 @@ Training only on the training documents of each split (DocILE: the pool order of
 - **Registered rule:** as in step 1: the selected learned grouper replaces the anchor rule in the BROS baselines if its row F1 minus the rule's is at least +1.0 with a document-bootstrap interval above 0 on both the DocILE test documents and the ad-buy primary documents; a win on one set only is reported, not adopted.
 - **Limits:** the classifier sees gold-derived spans (an upper bound for a tagger's output); four variants and about 30 settings are searched on 100 validation documents per dataset, so the selected validation score is optimistic; the DocILE test documents were already used in step 1 and its post hoc checks, though never for selection.
 
-**Next:** the end-to-end pair head inside the tagger only if step 1b closes the DocILE gap.
+**Step 1b results (2026-11-22; `scripts/table_rows_cluster.py`, `results/table_linking/step1b.json`; same classifiers and sets as step 1; each variant at its best validation setting; test row F1 minus the anchor rule with a document-bootstrap interval):**
+
+| Variant | DocILE: validation / test, minus rule [95% CI] | Ad-buy: validation / test, minus rule [95% CI] |
+|---|---|---|
+| V0 single link | 93.54 / 91.13, -3.31 [-5.96, -1.14] | 91.99 / 92.41, +2.40 [+0.46, +4.73] |
+| V1 average link | 94.71 / 92.54, -1.89 [-4.01, +0.03] | 91.74 / 92.29, +2.28 [+0.33, +4.58] |
+| V2 correlation | **94.71** / 92.57, -1.86 [-3.97, +0.03] | 91.91 / 92.47, +2.46 [+0.51, +4.76] |
+| V3 anchors | 91.37 / 87.70, -6.75 [-10.91, -2.58] | **92.17** / 92.58, **+2.57 [+0.67, +4.89]** |
+| anchor rule (reference) | 94.76 / 94.43 | 91.40 / 90.01 |
+
+- **Selected by validation:** V2 on DocILE (tie on validation, 94.71 for V1 and V2), V3 on ad-buy.
+- **Registered rule: not met.** DocILE: V2, -1.86 [-3.97, +0.03] (the interval just reaches 0, the point estimate is below the rule); ad-buy: V3, +2.57 [+0.67, +4.89]. A gain on one set only is reported and not adopted, so **the anchor rule stays in the BROS baselines on both datasets.**
+- **Reading:** the clustering was the weak part of step 1. Average link and correlation clustering recover most of the DocILE gap (single link -3.3 to -1.9 points) and tie the rule on the DocILE validation documents (94.71 against 94.76), but on the test layouts they stay about 1.9 points below it; no clustering beats the rule on DocILE. On ad-buy all four variants gain 2.3 to 2.6 points, so that gain does not depend on the clustering. The ad-buy gain is largest for the variant that keeps the rule's anchor structure (V3), the opposite of DocILE where V3 is the worst, which fits the structure of the two tables: ad-buy rows have one anchor-field cell and no repeated fields, DocILE rows repeat fields and have a variable set of fields.
+- **Limits:** about 30 settings and four variants were searched on 100 validation documents per dataset (the selected validation scores are optimistic); validation and test disagree on DocILE (a tie on validation, -1.9 on test), consistent with layout shift between document sets; the classifier still sees gold-derived spans (a ceiling for a tagger's output); the DocILE test set has a median of 2 rows per document.
+- **Decision and consequence:** no change to the baselines; the learned grouper is a possible dataset-specific improvement for ad-buy (about +2.4 to +2.6 on perfect spans), not adopted because it does not generalise to DocILE under the registered rule. The end-to-end pair head inside the tagger is not worth building on this evidence: with perfect spans the learned grouping gains at most about 2.5 points on one dataset and loses on the other.
+
+**Next:** back to the main line: the ad-buy recipe and BROS results, then `adbuy_compare.py`.
 
 **Evidence:** `scripts/table_rows_learn.py`, `scripts/table_rows_learn_posthoc.py`, `results/table_linking/step1.json`, `results/table_linking/step1_posthoc.json`; `scripts/docile_headers.py`, `results/docile_rows/header_rule.json` (rule baseline for headers, study 34).
