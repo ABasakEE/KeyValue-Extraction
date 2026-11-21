@@ -156,6 +156,15 @@ def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: str | boo
     return out
 
 
+def patch_sdpa() -> None:
+    """transformers 4.57 passes enable_gqa=True to scaled_dot_product_attention when there is no mask. A T4 has no flash kernel and (as far as is known; the
+    Kaggle probe `attn_probe_gpu.py` measures it) the memory-efficient kernel does not take that flag, so PyTorch falls back to the math kernel and builds the
+    whole L x L attention matrix: 3.56 GiB for 32 heads at the 5,463 positions of the page that ran out of memory. Repeating the keys and values keeps the
+    efficient kernel, whose memory grows linearly with the length. Same results, a little more memory for the repeated keys and values."""
+    import transformers.integrations.sdpa_attention as sa
+    sa.use_gqa_in_sdpa = lambda attention_mask, key: False
+
+
 def make_doc(rec: dict) -> sg.Doc:
     doc = sg.Doc(rec, max_pages=R.MAX_PAGES)
     R.split_lines(rec, doc, GAP)
@@ -237,6 +246,8 @@ def cmd_run(a) -> None:
         def sample(self, prompt, image, k, max_new_tokens, prefill=""):
             return ['{"rows": []}'] * k
 
+    if not a.stub:
+        patch_sdpa()
     gen = _Stub() if a.stub else sg._vlm_class()(a.model, a.device, a.dtype, a.max_pixels, a.quant4)
     deadline = time.time() + a.deadline_hours * 3600 if a.deadline_hours else None
     cache: dict[str, sg.Doc] = {}
