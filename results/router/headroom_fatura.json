@@ -1,0 +1,47 @@
+{
+ "1": {
+  "bros": 32.53,
+  "a2": 93.96,
+  "oracle": 98.13,
+  "either_right": 96.95,
+  "only_a2": 74.14,
+  "only_bros": 0.31,
+  "headroom_over_best_single": 4.17
+ },
+ "2": {
+  "bros": 69.21,
+  "a2": 93.96,
+  "oracle": 99.36,
+  "either_right": 98.85,
+  "only_a2": 31.78,
+  "only_bros": 2.21,
+  "headroom_over_best_single": 5.4
+ },
+ "5": {
+  "bros": 90.79,
+  "a2": 93.96,
+  "oracle": 99.8,
+  "either_right": 99.65,
+  "only_a2": 7.01,
+  "only_bros": 3.01,
+  "headroom_over_best_single": 5.84
+ },
+ "10": {
+  "bros": 95.88,
+  "a2": 93.96,
+  "oracle": 99.97,
+  "either_right": 99.96,
+  "only_a2": 3.29,
+  "only_bros": 3.32,
+  "headroom_over_best_single": 4.09
+ },
+ "40": {
+  "bros": 99.86,
+  "a2": 93.96,
+  "oracle": 99.99,
+  "either_right": 99.99,
+  "only_a2": 0.22,
+  "only_bros": 3.35,
+  "headroom_over_best_single": 0.13
+ }
+}

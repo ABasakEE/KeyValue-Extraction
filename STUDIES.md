@@ -52,6 +52,7 @@ Conventions:
 | 33 | Schema-guided grounded recipe (prompt v2, Qwen3-VL-8B 4-bit) on FATURA unseen templates against BROS trained on K = 1, 2, 5, 10, 40 seen templates | GPU | 2026-11-20 | **Recipe helps (rule met):** A2 91.7 vs zero-shot 3B VLM 59.6 (+32.1 [27.1, 36.9]). **Crossover:** LLM wins at K = 1 (+59.4) and 2 (+22.5), tie at K = 5 (+0.9 [-1.8, 3.7]), BROS wins at K = 10 (-4.2 [-6.5, -1.9]) and 40 (-8.2). Image adds about 3.8 F1 (A2 91.7 vs A1 87.9); neither combination beats the better system alone |
 | 34 | Table-heavy extension: line items (rows of cells) on VRDU ad-buy unseen templates, schema-guided grounded recipe vs BROS plus row grouping; DocILE LIR metric ported | CPU steps done, GPU pending | registered 2026-11-20 | *pending (steps 3-6)* |
 | 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part; step 1b (average link, correlation, anchors): ad-buy +2.3 to +2.6 for every variant, DocILE best -1.9 [-4.0, +0.03]; the rule stays |
+| 36 | A learned router between the recipe and BROS (which system to trust, per document or per field): headroom first | CPU | groundwork 2026-11-22 | **Headroom exists:** on the FATURA confirm invoices a perfect per-field router gains +4.2 / +5.4 / +5.8 / +4.1 / +0.1 over the better single system at K = 1 / 2 / 5 / 10 / 40; no router has been trained |
 
 ---
 
@@ -1775,3 +1776,27 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Next:** back to the main line: the ad-buy recipe and BROS results, then `adbuy_compare.py`.
 
 **Evidence:** `scripts/table_rows_learn.py`, `scripts/table_rows_learn_posthoc.py`, `results/table_linking/step1.json`, `results/table_linking/step1_posthoc.json`; `scripts/docile_headers.py`, `results/docile_rows/header_rule.json` (rule baseline for headers, study 34).
+
+
+---
+
+## 36. A learned router between the schema-guided recipe and BROS — groundwork (CPU), 2026-11-22
+
+**Question.** Can a small model, given a form (or a field of it), pick the system that will be right, the recipe (Qwen3-VL-8B, schema-guided, grounded) or a trained BROS tagger? Earlier evidence on routers is mixed: a static per-field router with BROS gave VRDU +3.8 [+2.0, +5.6] over BROS (study 16, old 3B VLM), the per-document confidence gate alone -0.2 on VRDU and +1.5 at FATURA K = 2 (study 16), the errors of BROS and the old VLM were positively correlated (lift 0.46 on VRDU, 0.81 / 0.67 / 0.51 on FATURA at K = 2 / 5 / 10, study 18), and with the new recipe a router with BROS reached 79.2 against 70.5 for BROS and 76.5 for the recipe alone on VRDU (study 31). FATURA with the new recipe: filling one system's empty fields with the other never beat the better system alone (study 33).
+
+**Groundwork result (`scripts/router_headroom_fatura.py`, `results/router/headroom_fatura.json`; the 500 FATURA confirm invoices, recipe A2 with the text-first decode, BROS dumps of study 15 averaged over seeds 13 and 42; the BROS and recipe numbers reproduce the registered ones: 32.5 / 69.2 / 90.8 / 95.9 / 99.9 and 94.0).** An oracle router picks, per invoice and field, the system whose block is right, abstains when the field has no gold, and otherwise keeps the recipe's answer:
+
+| K seen templates | BROS | Recipe | Oracle router | Headroom over the better system | Gold fields right only for the recipe / only for BROS |
+|---|---|---|---|---|---|
+| 1 | 32.5 | 94.0 | 98.1 | +4.2 | 74.1% / 0.3% |
+| 2 | 69.2 | 94.0 | 99.4 | +5.4 | 31.8% / 2.2% |
+| 5 | 90.8 | 94.0 | 99.8 | +5.8 | 7.0% / 3.0% |
+| 10 | 95.9 | 94.0 | 100.0 | +4.1 | 3.3% / 3.3% |
+| 40 | 99.9 | 94.0 | 100.0 | +0.1 | 0.2% / 3.4% |
+
+- **Reading:** there is room for a router (+4 to +6 points around the crossover, K = 2 to 10), and the share of fields where only BROS is right stays near 3% even at K = 40, so the two systems fail on different fields to a useful degree with the new recipe. The oracle also knows when a field is absent, so part of its gain is abstention (the recipe predicts `buyer` for templates whose gold has none); I did not separate the two (a first attempt at a no-abstention oracle forced an answer and was discarded as unfair).
+- **Not tested:** any deployable router; features (agreement of the two systems, BROS span confidence, similarity of the layout to the training layouts, field type, K); labels for VRDU, ad-buy and DocILE (they need the recipe run on those sets and BROS predictions on held-out layouts).
+
+**Plan (not registered for a run yet).** Leave-templates-out cross-validation on the FATURA dumps for K = 2, 5, 10: logistic regression and gradient boosting on the features above, at field level, against the better single system and the oracle; the rule to be fixed before running. A neural network is not needed for a handful of features; a small model is enough and is cheaper to validate.
+
+**Evidence:** `scripts/router_headroom_fatura.py`, `results/router/headroom_fatura.json`.
