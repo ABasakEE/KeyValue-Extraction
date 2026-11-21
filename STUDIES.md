@@ -53,6 +53,7 @@ Conventions:
 | 34 | Table-heavy extension: line items (rows of cells) on VRDU ad-buy unseen templates, schema-guided grounded recipe vs BROS plus row grouping; DocILE LIR metric ported | CPU steps done, GPU pending | registered 2026-11-20 | **Ad-buy result (2026-11-22):** BROS row F1 68.9 / 83.2 / 83.8 / 85.7 at N = 10 / 50 / 100 / 200; recipe A2 38.2 (128 documents, 1.71x too many rows); **BROS wins at every N, no crossover for N >= 10**; DocILE runs not done |
 | 35 | Efficient linking on tables: grouping cells into rows (and typing them from headers) with a learned pair classifier on candidate pairs, against the anchor heuristic; DocILE and ad-buy | CPU first | registered 2026-11-21 | **Not adopted (registered rule):** learned pair classifier beats the anchor rule on ad-buy (+2.38 [+0.42, +4.71]) but loses on DocILE (-4.32 [-9.28, -0.90]); the pair scores are good (AUC 0.97 to 0.998), the clustering is the weak part; step 1b (average link, correlation, anchors): ad-buy +2.3 to +2.6 for every variant, DocILE best -1.9 [-4.0, +0.03]; the rule stays |
 | 36 | A learned router between the recipe and BROS (which system to trust, per document or per field): headroom first | CPU | groundwork 2026-11-22 | **Headroom exists:** on the FATURA confirm invoices a perfect per-field router gains +4.2 / +5.4 / +5.8 / +4.1 / +0.1 over the better single system at K = 1 / 2 / 5 / 10 / 40; no router has been trained |
+| 37 | The joint tagger-plus-biaffine-linker with a BROS backbone against LiLT on XFUND (end to end, 250 val forms, 3 seeds) | GPU | registered 2026-11-22 | *pending (Kaggle run); CPU checks done* |
 
 ---
 
@@ -1817,3 +1818,30 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Plan (not registered for a run yet).** Leave-templates-out cross-validation on the FATURA dumps for K = 2, 5, 10: logistic regression and gradient boosting on the features above, at field level, against the better single system and the oracle; the rule to be fixed before running. A neural network is not needed for a handful of features; a small model is enough and is cheaper to validate.
 
 **Evidence:** `scripts/router_headroom_fatura.py`, `results/router/headroom_fatura.json`.
+
+
+---
+
+## 37. The joint tagger-plus-biaffine-linker with a BROS backbone, against LiLT — GPU (Kaggle T4 x 2), registered 2026-11-22
+
+**Question.** Every linking result so far (studies 19 to 26) comes from the joint model with a LiLT backbone: token tags plus a biaffine link head (`src/models/joint_extractor.py`). Attaching that head to BROS was the project's original, untested hypothesis (`NOVELTY_ASSESSMENT.md` section 7.3), and BROS tags unseen layouts better than LiLT on VRDU (Track-1 BROS 71.3 against LiLT 64.2 on unseen templates). **With the study 26 A0 recipe unchanged, does a BROS backbone raise end-to-end entity and link F1 on XFUND?** The aim of the project is both tagging and linking, so one model that does both is the natural test.
+
+**Setup.** XFUND val es / fr / de / it / pt (250 forms), seeds 13, 21, 42, FP32, entity-safe 510-subword windows with stride 255 for training and the 'windowed' reading (stride 128) for scoring, entities from the model's own tags, `src/e2e_link.py` unchanged (a link counts only if both ends are exact predicted entities of the right type and the direction is right). Scored by `scripts/xfund_e2e_eval.py`.
+
+**Arms.** J1 = `configs/xfund_table_A0.yaml` with `backbone: bros` and nothing else changed (`configs/xfund_joint_bros_J1.yaml`; checked: the two files differ only in backbone and output directory). J2 = J1 plus `coordinate_jitter: true` (`configs/xfund_joint_bros_J2.yaml`), the one Track-1 geometry option that is safe here: **anchoring is excluded because `e2e_link.predict_window` feeds unanchored boxes while the training collator would anchor them, a train/test mismatch** found in the CPU check. Notebook: `notebooks/kaggle_xfund_bros_joint.ipynb` (J1 on GPU 0 and J2 on GPU 1 in parallel, each scored and pushed).
+
+**Reference (LiLT A0, `results/table_links/A0_e2e.json`; the same code and data).** Mean of 3 seeds: entity 75.84, link 47.42, link_qa 53.15. Per seed 13 / 21 / 42: entity 75.79 / 75.85 / 75.88, link 48.33 / 47.01 / 46.93, link_qa 53.41 / 53.06 / 52.97. Recall by group, mean of 3 seeds: below 39.8, same line 63.5, above 34.8, rank 0 / 1 / 2-4 / 5+ 57.1 / 55.9 / 54.2 / 35.8, question to question 31.2.
+
+**Registered rule (primary cell: link F1, each BROS arm against A0 with seeds matched).** *Better* if the mean difference is at least +1.5 points and positive in all three seed pairs; *worse* if at most -1.5 and negative in all three; otherwise *no clear difference*. Entity F1, link_qa and the group recalls are reported, not tested. No interval is computed (three seeds); the seed-to-seed spread of A0 is about 1.4 points of link F1. If any seed does not finish, that arm is reported as incomplete.
+
+**CPU checks done before any GPU run (2026-11-22; conda env with transformers 5.17 and torch 2.14; no GPU).**
+- The joint model builds with `backbone: bros` (the BROS checkpoint `jinho8345/bros-base-uncased`; the classifier layer is new, as expected) and the existing training loop runs: a 6-form CPU run went through phase 1, phase 2 and into phase 3 (token classification, linking, joint) with the real early-stopping validation; **its end, the final test pass and the result files, were still running when this was written and are covered by the notebook's smoke cell.**
+- `e2e_link.predict_document` works with a BROS model on real XFUND forms (entities and links come out; the head was untrained, so only the plumbing was tested).
+- In the training collator, coordinate jitter and content-box anchoring both change the boxes BROS receives; `predict_window` does not anchor (above).
+- BROS uses an uncased English vocabulary and XFUND is not English; LiLT-en has the same limit (LiLT with a multilingual text stream was worse, study 24), so the comparison is fair but both may be capped.
+
+**Limits stated up front.** One recipe, written for LiLT and not tuned for BROS (learning rate, epochs, window sizes); three seeds; the BROS arms' runtime is unmeasured; XFUND val is only approximately template-disjoint (about 94% of forms have no train sibling by a question-text proxy); the A0 reference was trained in an earlier session, so a session effect cannot be excluded; FP32 only.
+
+**Results:** *pending*
+
+**Evidence:** `results/bros_joint/` (after the run).

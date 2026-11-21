@@ -1,0 +1,45 @@
+# Study 37 — arm J2: the XFUND joint tagger-plus-biaffine-linker with a BROS backbone, otherwise the study 26 A0 recipe unchanged.
+# J2 adds coordinate jitter at training time only (anchoring is not used: the end-to-end predictor feeds unanchored boxes).
+# Evaluate with scripts/xfund_e2e_eval.py (windowed reading) and compare with A0 (entity 75.84, link 47.42, link_qa 53.15, mean of 3 seeds).
+backbone: bros
+dataset: xfund
+data_root: data/xfund
+languages: [es, fr, de, it, pt]
+
+task: joint
+linking_loss_weight: 1.0
+use_spatial_relations: true
+spatial_in_features: 16
+use_geometry: true
+use_containment: true
+use_line_of_sight: true
+use_typography: true
+loss_type: focal
+focal_gamma: 2.0
+focal_alpha: 0.75
+masking_mode: soft
+decode_one_to_one: true
+link_threshold: 0.5
+k_neighbors: 0
+fallback_top_k: 0
+
+# Dynamic Decoupled Curriculum Schedule with Early Stopping
+curriculum: true
+patience_tolerance: 3
+min_delta: 0.001
+max_phase1_epochs: 8
+max_phase2_epochs: 6
+max_phase3_epochs: 8
+epochs: 22
+
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+seeds: [13, 21, 42]
+form_window: 510
+form_window_stride: 255
+output_dir: results/bros_joint/J2
+coordinate_jitter: true
