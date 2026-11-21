@@ -261,7 +261,20 @@ def cmd_run(a) -> None:
                         from zero_shot_kv import load_image
                         image = load_image({"image": str(R.DATA.parent / "pdfs" / fn), "pdf_page": p})
                     row["image_dropped"] = a.arm == "image" and image is None
-                    row["samples"] = gen.sample(prompt, image, 1, a.max_new_tokens)
+                    if not a.stub:
+                        import torch
+                        torch.cuda.reset_peak_memory_stats(a.device)
+                    try:
+                        row["samples"] = gen.sample(prompt, image, 1, a.max_new_tokens)
+                    except Exception as e:   # out of memory with the image: answer this page from the text alone, and say so in the row
+                        if image is None or "out of memory" not in str(e).lower():
+                            raise
+                        import torch
+                        torch.cuda.empty_cache()
+                        row["image_dropped"], row["oom_retry"] = True, True
+                        row["samples"] = gen.sample(prompt, None, 1, a.max_new_tokens)
+                    if not a.stub:
+                        row["peak_gb"] = round(torch.cuda.max_memory_allocated(a.device) / 2**30, 2)
                     row["new_tokens"] = len(tok(row["samples"][0]).input_ids) if tok else None
                 else:
                     row["samples"] = ['{"rows": []}']
@@ -274,7 +287,7 @@ def cmd_run(a) -> None:
             fh.write(json.dumps(row, ensure_ascii=False) + "\n")
             fh.flush()
             rate = f" {row['new_tokens'] / max(row['seconds'], 1e-6):.1f} tok/s" if row.get("new_tokens") else ""
-            print(f"[shard {a.shard}] {k}/{len(units)} {fn[:40]} p{p} {row['seconds']}s prompt {row.get('prompt_tokens')} out {row.get('new_tokens')}{rate}"
+            print(f"[shard {a.shard}] {k}/{len(units)} {fn[:40]} p{p} {row['seconds']}s prompt {row.get('prompt_tokens')} out {row.get('new_tokens')}{rate} peak {row.get('peak_gb')} GB{' OOM-RETRY no image' if row.get('oom_retry') else ''}"
                   f"{' ERR ' + row['error'] if row['error'] else ''}", flush=True)
 
 
@@ -357,7 +370,7 @@ def main() -> None:
     p = sub.add_parser("run")
     p.add_argument("--manifest", required=True); p.add_argument("--arm", choices=["image", "text"], required=True); p.add_argument("--out", required=True)
     p.add_argument("--model", default="Qwen/Qwen3-VL-8B-Instruct"); p.add_argument("--device", default="cuda:0"); p.add_argument("--dtype", default="float16")
-    p.add_argument("--max-pixels", type=int, default=640 * 28 * 28); p.add_argument("--quant4", action="store_true")
+    p.add_argument("--max-pixels", type=int, default=1280 * 28 * 28); p.add_argument("--quant4", action="store_true")
     p.add_argument("--max-new-tokens", type=int, default=2400)
     p.add_argument("--image-cap-tokens", type=int, default=5500)
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1); p.add_argument("--limit", type=int, default=0)
