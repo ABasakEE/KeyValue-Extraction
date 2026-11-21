@@ -55,6 +55,7 @@ Conventions:
 | 36 | A learned router between the recipe and BROS (which system to trust, per document or per field): headroom first | CPU | groundwork 2026-11-22 | **Headroom exists:** on the FATURA confirm invoices a perfect per-field router gains +4.2 / +5.4 / +5.8 / +4.1 / +0.1 over the better single system at K = 1 / 2 / 5 / 10 / 40; no router has been trained |
 | 37 | The joint tagger-plus-biaffine-linker with a BROS backbone against LiLT on XFUND (end to end, 250 val forms, 3 seeds) | GPU | registered 2026-11-22 | *pending (Kaggle run); CPU checks done* |
 | 38 | The schema-guided grounded recipe on DocILE line items (layout-disjoint test documents), pilot-gated | GPU | registered 2026-11-22 | *pending (Kaggle run)* |
+| 39 | The BROS line-item tagger with row grouping on DocILE layout-disjoint splits (the baseline for study 38) | GPU | registered 2026-11-22 | *pending (Kaggle run); CPU checks done* |
 
 ---
 
@@ -1858,7 +1859,7 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Method (same as study 34, `scripts/docile_sg.py`).** Qwen3-VL-8B-Instruct, 4-bit, greedy, one call per page, answer `{"rows": [...]}` with every cell citing a piece id plus its text, at most 2,400 new tokens, image budget 1,280 (at most 980 visual tokens), the row-position repair, the attention fix, an out-of-memory retry without the image, a page that failed is retried on a re-run, and only documents with every page answered are scored. Arm A2 (image + pieces) first; A1 (text only) only if A2 is informative. **Gate on the pilot (image arm):** at least 90% of answers parse, at least 90% of cited ids exist, and at least one row on at least 90% of the pages that have gold rows; if it fails the test run is skipped and the pilot is reviewed (no automatic fallback).
 
-**Scoring.** Strict row F1 (DocILE's line-item rule: predicted rows matched one-to-one to gold rows for the most matching cells, a cell right only if its word set equals the gold word set) and cell F1; per-document counts are saved. There is no BROS baseline on DocILE yet (the training code is not written), so the result is read against the oracle, the ad-buy recipe and the stated rule below; it is not a win or loss against BROS.
+**Scoring.** Strict row F1 (DocILE's line-item rule: predicted rows matched one-to-one to gold rows for the most matching cells, a cell right only if its word set equals the gold word set) and cell F1; per-document counts are saved. The BROS baseline on the same test documents is study 39 (comparison with `scripts/docile_compare.py` once both have run); on its own the result is read against the oracle, the ad-buy recipe and the stated rule below.
 
 **Registered reading (fixed before the run, on the A2 row F1 of the test documents):** 80 or more: the recipe is competitive on typical invoice tables and the ad-buy failure is specific to dense scans; 50 to 80: partial, the failure is partly general; below 50: tables are hard for the recipe in general. These thresholds are judgement calls, not tested rules, and a number inside a band says nothing about BROS.
 
@@ -1869,3 +1870,22 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Results:** *pending*
 
 **Evidence:** `results/docile_sg/run/` (scores, gate and counts after the run); notebook `notebooks/kaggle_docile_sg.ipynb`.
+
+
+---
+
+## 39. The BROS line-item tagger with row grouping on DocILE, layout-disjoint splits — GPU (Kaggle T4 x 2), registered 2026-11-22
+
+**Question.** Study 38 runs the recipe on DocILE line items but has no trained baseline to be read against. How well does a trained Track-1 BROS tagger with the anchor row rule do on the same layout-disjoint test documents as a function of the number of training documents, and where does it cross the recipe? On ad-buy (study 34) BROS scored 68.9 / 83.2 / 83.8 / 85.7 row F1 at N = 10 / 50 / 100 / 200 against 38.2 for the recipe.
+
+**Setup (`scripts/docile_bros.py`, `configs/docile_rows_bros.yaml`, `notebooks/kaggle_docile_bros.ipynb`).** Track-1 BROS, the recipe unchanged from `configs/vrdu_track1_bros.yaml` (20 epochs, windows of 384 words with overlap 128, coordinate jitter, content-box anchoring, learning rate 5e-5), one training seed (13); the 19 line-item fields as BIO labels, every run of consecutive words of a cell is a span (a cell on two lines is two spans, ceiling in the oracle below). Training sets: for split seed s in {0, 1, 2} the first N documents of the registered order of `results/docile_rows/splits.json` (nested in N), N in {10, 50, 200, 1000}; early stopping on the 100 validation layouts; prediction on the 200 test layouts (layouts and vendors disjoint from every training set). **12 runs.** Rows from the predicted spans by the anchor rule (`row_group.group_rows`, tolerance 0.5, chosen on ad-buy training documents only, not on DocILE). Scoring: strict row F1 (DocILE's line-item rule) and cell F1 (`lir_metric`), per-document counts saved; the comparison with the recipe is `scripts/docile_compare.py` (bootstrap over documents, each a different layout; for each N the BROS value is the mean over its three split seeds; rule: the recipe wins if the interval of recipe minus BROS is above 0, ties if it contains 0, BROS wins if below).
+
+**Ceilings (CPU oracle, test documents).** Perfect tags decoded to spans: 97.83 cell F1 (1.0% of the cells are not consecutive words); with rows from the anchor rule: 94.43 row F1. A learned grouper did not beat the rule on DocILE (study 35).
+
+**CPU checks done before any GPU run (2026-11-22).** The ad-buy oracle gives the same numbers after the shared row-grouping code moved to `scripts/row_group.py` (95.18 / 91.63 on all 641 documents, 94.89 / 90.01 on the primary set); the DocILE oracle gives 97.83 / 94.43 on the test documents and 97.11 / 95.65 on 200 training documents; `docile_bros.py score` on span dumps made from the gold tags reproduces 94.43 row F1 and 97.83 cell F1 on the 200 test documents; a real CPU training smoke (`train --smoke`: 6 training documents, 2 validation, 3 test, one epoch, BROS from the Hub) wrote the result files and `test_entities.jsonl`, and `score` read them (scores 0.0 for the untrained model); `docile_compare.py` was tested on made-up reports. **Not checked:** the GPU run, the time per run on DocILE, and the DocILE download inside Kaggle.
+
+**Limits stated up front.** One training seed per run and three split seeds, one recipe not tuned for DocILE (learning rate, epochs, window size are those of VRDU), BROS has an English vocabulary and DocILE is English, the row rule was not tuned on DocILE, the test documents have a median of 2 gold rows each (886 rows in total), runs at N = 1000 are the least certain in time (a deadline of 11 h stops the notebook cleanly and finished runs are kept), and the predictions contain document text so they stay out of GitHub until the DocILE terms are read (scores and per-document counts are pushed).
+
+**Results:** *pending*
+
+**Evidence:** `results/docile_bros/run/` (scores after the run).

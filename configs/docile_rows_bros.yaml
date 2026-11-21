@@ -1,0 +1,23 @@
+# Track-1 BROS recipe (unchanged from configs/vrdu_track1_bros.yaml) on the 19 DocILE line-item fields (study 34).
+# Used by scripts/docile_bros.py; the split loop lives there. One training seed (the first below) per (N, split seed). No n_train: the script picks the training documents.
+backbone: bros
+dataset: vrdu
+data_root: data/vrdu
+subcorpus: ad-buy-form   # not used: the script builds the examples itself
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: true
+relative_coords: true
+
+seeds: [13]
+save_weights: false
+output_dir: results/docile_bros/run
