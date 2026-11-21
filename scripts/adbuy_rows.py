@@ -59,7 +59,9 @@ def split_lines(rec: dict, doc: sg.Doc, gap: float) -> None:
                 cs, ce = min(doc.char_ranges[w][0] for w in ws), max(doc.char_ranges[w][1] for w in ws)
                 lid = sg.coord_id([p, min(boxes[w][1] for w in ws), min(boxes[w][2] for w in ws), max(boxes[w][3] for w in ws), max(boxes[w][4] for w in ws)])
                 seen[lid] += 1
-                out.append(sg.Line(p, lid if seen[lid] == 1 else f"{lid}#{seen[lid]}", doc.ocr_text[cs:ce].strip(), ws, (cs, ce), doc.ocr_text[cs:ce]))
+                piece = sg.Line(p, lid if seen[lid] == 1 else f"{lid}#{seen[lid]}", doc.ocr_text[cs:ce].strip(), ws, (cs, ce), doc.ocr_text[cs:ce])
+                piece.box = (min(boxes[w][1] for w in ws), min(boxes[w][2] for w in ws), max(boxes[w][3] for w in ws), max(boxes[w][4] for w in ws))   # kept for repair strategies
+                out.append(piece)
         doc.lines[p] = out
 
 

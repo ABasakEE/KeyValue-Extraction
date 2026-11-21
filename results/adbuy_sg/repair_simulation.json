@@ -1,0 +1,242 @@
+{
+ "next|0.0|none": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "next|0.0|unique": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "next|0.0|nearest": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "next|0.0|row": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "next|0.0|row+": {
+  "cell": 94.54,
+  "lir": 94.54
+ },
+ "next|0.1|none": {
+  "cell": 89.28,
+  "lir": 89.28
+ },
+ "next|0.1|unique": {
+  "cell": 90.89,
+  "lir": 90.89
+ },
+ "next|0.1|nearest": {
+  "cell": 95.52,
+  "lir": 95.52
+ },
+ "next|0.1|row": {
+  "cell": 95.96,
+  "lir": 95.96
+ },
+ "next|0.1|row+": {
+  "cell": 94.76,
+  "lir": 94.76
+ },
+ "next|0.3|none": {
+  "cell": 76.4,
+  "lir": 75.88
+ },
+ "next|0.3|unique": {
+  "cell": 81.15,
+  "lir": 80.65
+ },
+ "next|0.3|nearest": {
+  "cell": 92.14,
+  "lir": 91.59
+ },
+ "next|0.3|row": {
+  "cell": 92.69,
+  "lir": 92.36
+ },
+ "next|0.3|row+": {
+  "cell": 91.92,
+  "lir": 91.92
+ },
+ "random|0.0|none": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "random|0.0|unique": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "random|0.0|nearest": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "random|0.0|row": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "random|0.0|row+": {
+  "cell": 94.54,
+  "lir": 94.54
+ },
+ "random|0.1|none": {
+  "cell": 87.69,
+  "lir": 87.57
+ },
+ "random|0.1|unique": {
+  "cell": 90.06,
+  "lir": 89.95
+ },
+ "random|0.1|nearest": {
+  "cell": 87.01,
+  "lir": 86.14
+ },
+ "random|0.1|row": {
+  "cell": 94.43,
+  "lir": 94.43
+ },
+ "random|0.1|row+": {
+  "cell": 92.79,
+  "lir": 92.79
+ },
+ "random|0.3|none": {
+  "cell": 77.65,
+  "lir": 77.65
+ },
+ "random|0.3|unique": {
+  "cell": 82.29,
+  "lir": 82.29
+ },
+ "random|0.3|nearest": {
+  "cell": 79.26,
+  "lir": 76.75
+ },
+ "random|0.3|row": {
+  "cell": 92.03,
+  "lir": 91.92
+ },
+ "random|0.3|row+": {
+  "cell": 89.63,
+  "lir": 89.52
+ },
+ "row_neighbor|0.0|none": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "row_neighbor|0.0|unique": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "row_neighbor|0.0|nearest": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "row_neighbor|0.0|row": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "row_neighbor|0.0|row+": {
+  "cell": 94.54,
+  "lir": 94.54
+ },
+ "row_neighbor|0.1|none": {
+  "cell": 86.96,
+  "lir": 85.26
+ },
+ "row_neighbor|0.1|unique": {
+  "cell": 88.65,
+  "lir": 86.99
+ },
+ "row_neighbor|0.1|nearest": {
+  "cell": 89.3,
+  "lir": 87.88
+ },
+ "row_neighbor|0.1|row": {
+  "cell": 89.3,
+  "lir": 87.88
+ },
+ "row_neighbor|0.1|row+": {
+  "cell": 91.81,
+  "lir": 91.48
+ },
+ "row_neighbor|0.3|none": {
+  "cell": 75.64,
+  "lir": 68.85
+ },
+ "row_neighbor|0.3|unique": {
+  "cell": 80.0,
+  "lir": 73.47
+ },
+ "row_neighbor|0.3|nearest": {
+  "cell": 82.1,
+  "lir": 76.31
+ },
+ "row_neighbor|0.3|row": {
+  "cell": 82.31,
+  "lir": 76.75
+ },
+ "row_neighbor|0.3|row+": {
+  "cell": 85.59,
+  "lir": 84.39
+ },
+ "same_row|0.0|none": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "same_row|0.0|unique": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "same_row|0.0|nearest": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "same_row|0.0|row": {
+  "cell": 98.25,
+  "lir": 98.25
+ },
+ "same_row|0.0|row+": {
+  "cell": 94.54,
+  "lir": 94.54
+ },
+ "same_row|0.1|none": {
+  "cell": 91.07,
+  "lir": 91.07
+ },
+ "same_row|0.1|unique": {
+  "cell": 92.57,
+  "lir": 92.57
+ },
+ "same_row|0.1|nearest": {
+  "cell": 93.01,
+  "lir": 93.01
+ },
+ "same_row|0.1|row": {
+  "cell": 96.29,
+  "lir": 96.29
+ },
+ "same_row|0.1|row+": {
+  "cell": 94.21,
+  "lir": 94.21
+ },
+ "same_row|0.3|none": {
+  "cell": 80.08,
+  "lir": 80.08
+ },
+ "same_row|0.3|unique": {
+  "cell": 84.3,
+  "lir": 84.3
+ },
+ "same_row|0.3|nearest": {
+  "cell": 87.01,
+  "lir": 86.9
+ },
+ "same_row|0.3|row": {
+  "cell": 93.12,
+  "lir": 93.12
+ },
+ "same_row|0.3|row+": {
+  "cell": 91.48,
+  "lir": 91.48
+ }
+}

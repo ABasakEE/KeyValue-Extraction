@@ -79,8 +79,34 @@ def _words(text: str, ln: sg.Line, doc: sg.Doc):
     return set(range(*sp)) if sp else None
 
 
-def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: bool = True) -> list[list[tuple[str, frozenset]]]:
-    """Rows of (field, word set) from one page's answer; cells that cannot be grounded are dropped, empty rows too."""
+def _xy(lid: str | None):
+    m = re.match(r"(\d{2})\|(\d{2})", lid or "")
+    return (int(m[1]), int(m[2])) if m else None
+
+
+def _pick(cand: list[sg.Line], lid: str | None, row_y: float | None, repair: str) -> sg.Line | None:
+    """Choose among the pieces that hold a cell's text. unique: only if one piece holds it. nearest: closest to the cited id's coordinates.
+    row: closest to the vertical position of the row's other (correct) cells, ties broken by the cited coordinates."""
+    if not cand:
+        return None
+    if repair == "unique":
+        return cand[0] if len(cand) == 1 else None
+    xy = _xy(lid)
+    d_cited = lambda c: ((c.box[0] + c.box[2]) * 50 - xy[0]) ** 2 + ((c.box[1] + c.box[3]) * 50 - xy[1]) ** 2 if xy else 0.0
+    if repair == "row" and row_y is not None:
+        key = lambda c: (round(abs((c.box[1] + c.box[3]) / 2 - row_y), 3), d_cited(c))
+    elif repair in ("nearest", "row") and xy:
+        key = lambda c: (d_cited(c),)
+    else:
+        return cand[0] if len(cand) == 1 else None
+    ranked = sorted(cand, key=key)
+    return ranked[0] if len(ranked) == 1 or key(ranked[0]) != key(ranked[1]) else None
+
+
+def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: str | bool = "row") -> list[list[tuple[str, frozenset]]]:
+    """Rows of (field, word set) from one page's answer; cells that cannot be grounded are dropped, empty rows too.
+    `repair`: none | unique (study 33 rule) | nearest | row (see `_pick`) | row+ (row, and also moves cells that sit off their row's line); True and False mean unique and none."""
+    repair = {True: "unique", False: "none"}.get(repair, repair)
     lines = doc.lines.get(page, [])
     by_id = {ln.id: ln for ln in lines}
     st["outputs"] += 1
@@ -90,23 +116,30 @@ def decode_page(doc: sg.Doc, page: int, raw: str, st: Counter, repair: bool = Tr
         return []
     out = []
     for obj in rows:
+        parsed = {f: sg._segments(obj[f]) for f in R.LI_FIELDS if obj.get(f) not in (None, "", [])}
+        parsed = {f: v for f, v in parsed.items() if v}
+        direct = {f: [(_words(t, by_id[i], doc) if i in by_id else None) for t, i in segs] for f, segs in parsed.items()}
+        ys = sorted((by_id[i].box[1] + by_id[i].box[3]) / 2 for f, segs in parsed.items() for (t, i), g in zip(segs, direct[f]) if g is not None)
+        row_y = ys[len(ys) // 2] if ys else None
         cells = []
-        for f in R.LI_FIELDS:
-            segs = sg._segments(obj[f]) if obj.get(f) not in (None, "", []) else None
-            if not segs:
-                continue
+        for f, segs in parsed.items():
             st["cells"] += 1
             ws: set[int] = set()
-            for text, lid in segs:
-                ln = by_id.get(lid) if lid else None
-                got = _words(text, ln, doc) if ln else None
+            for (text, lid), got in zip(segs, direct[f]):
                 st["segments"] += 1
-                st["id_valid"] += ln is not None
-                if got is None and repair:
-                    cand = [c for c in lines if _words(text, c, doc)]
-                    if len(cand) == 1:
-                        got = _words(text, cand[0], doc)
-                        st["repaired"] += 1
+                st["id_valid"] += lid in by_id
+                rule = "row" if repair == "row+" else repair
+                if got is not None and repair == "row+" and row_y is not None:   # a cell whose piece sits off its row's line: look for a nearer piece
+                    ln = by_id[lid]
+                    if abs((ln.box[1] + ln.box[3]) / 2 - row_y) > 1.5 * (ln.box[3] - ln.box[1]):
+                        c = _pick([c for c in lines if _words(text, c, doc)], lid, row_y, rule)
+                        if c is not None and c is not ln:
+                            got = _words(text, c, doc)
+                            st["moved"] += 1
+                if got is None and repair != "none":
+                    c = _pick([c for c in lines if _words(text, c, doc)], lid, row_y, rule)
+                    got = _words(text, c, doc) if c else None
+                    st["repaired"] += c is not None
                 if got is None:
                     ws = set()
                     break
@@ -171,7 +204,7 @@ def cmd_oracle(a) -> None:
         gold = [{(f, ws) for f, ws, _, _ in row} for row in R.gold_rows(rec, doc)]
         if not gold:
             continue
-        for name, corrupt, repair in (("clean", False, True), ("corrupt_repair", True, True), ("corrupt_plain", True, False)):
+        for name, corrupt, repair in (("clean", False, "row"), ("corrupt_repair", True, "row"), ("corrupt_plain", True, "none")):
             pred = [r for p in doc.lines for r in decode_page(doc, p, synthetic_answer(doc, rec, p, corrupt), st if name == "clean" else Counter(), repair)]
             pred = [set(r) for r in pred]
             if name == "clean":
