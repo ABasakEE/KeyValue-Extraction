@@ -1,4 +1,149 @@
 {
+ "Nfull_T13": {
+  "typed_span_f1": 74.72,
+  "untyped_span_f1": 78.76,
+  "typed_counts": [
+   2608,
+   3473,
+   3508
+  ],
+  "untyped_counts": [
+   2749,
+   3473,
+   3508
+  ],
+  "gold_span_outcome": {
+   "right": 2608,
+   "missed (no predicted span touches it)": 541,
+   "wrong field, same extent": 141,
+   "right field, wrong extent": 189,
+   "wrong field and extent": 29
+  },
+  "top_field_confusions": [
+   [
+    "line_item_amount_net",
+    "line_item_amount_gross",
+    48
+   ],
+   [
+    "line_item_unit_price_gross",
+    "line_item_unit_price_net",
+    30
+   ],
+   [
+    "line_item_amount_gross",
+    "line_item_amount_net",
+    15
+   ],
+   [
+    "line_item_unit_price_net",
+    "line_item_unit_price_gross",
+    13
+   ],
+   [
+    "line_item_unit_price_gross",
+    "line_item_amount_gross",
+    7
+   ],
+   [
+    "line_item_description",
+    "line_item_code",
+    5
+   ],
+   [
+    "line_item_code",
+    "line_item_date",
+    4
+   ],
+   [
+    "line_item_quantity",
+    "line_item_date",
+    4
+   ]
+  ],
+  "spurious_by_field": {
+   "line_item_description": 113,
+   "line_item_date": 104,
+   "line_item_quantity": 73,
+   "line_item_code": 35,
+   "line_item_unit_price_gross": 34,
+   "line_item_amount_gross": 32
+  },
+  "per_field": {
+   "line_item_description": {
+    "f1": 64.83,
+    "tp": 599,
+    "pred": 935,
+    "gold": 913
+   },
+   "line_item_amount_gross": {
+    "f1": 81.93,
+    "tp": 451,
+    "pred": 542,
+    "gold": 559
+   },
+   "line_item_date": {
+    "f1": 82.43,
+    "tp": 462,
+    "pred": 594,
+    "gold": 527
+   },
+   "line_item_quantity": {
+    "f1": 80.17,
+    "tp": 380,
+    "pred": 473,
+    "gold": 475
+   },
+   "line_item_unit_price_gross": {
+    "f1": 74.65,
+    "tp": 237,
+    "pred": 287,
+    "gold": 348
+   },
+   "line_item_code": {
+    "f1": 74.48,
+    "tp": 162,
+    "pred": 207,
+    "gold": 228
+   },
+   "line_item_amount_net": {
+    "f1": 64.49,
+    "tp": 69,
+    "pred": 88,
+    "gold": 126
+   },
+   "line_item_position": {
+    "f1": 77.51,
+    "tp": 81,
+    "pred": 104,
+    "gold": 105
+   },
+   "line_item_unit_price_net": {
+    "f1": 70.27,
+    "tp": 65,
+    "pred": 96,
+    "gold": 89
+   },
+   "line_item_currency": {
+    "f1": 77.78,
+    "tp": 42,
+    "pred": 55,
+    "gold": 53
+   }
+  },
+  "reported": {
+   "row_f1": 68.87,
+   "cell_f1": 71.75
+  },
+  "group_oracle": {
+   "row_f1": 71.75,
+   "cell_f1": 71.75
+  },
+  "typing_oracle": {
+   "row_f1": 72.47,
+   "cell_f1": 75.66
+  }
+ },
  "Nfull_T21": {
   "typed_span_f1": 68.51,
   "untyped_span_f1": 75.18,

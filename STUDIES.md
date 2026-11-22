@@ -2004,9 +2004,21 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** One recipe tuned for neither DocILE nor the pool size; two seeds on one document set; test documents have a median of 2 gold rows (886 rows in total); the study 39 reference runs may have had under-trained smaller sizes, but N = 1000 stopped on validation, not on the epoch limit.
 
-**Results:** *pending*
+**Results (2026-11-22; two sessions, one training seed each; `results/docile_bros_full/run/report_{13,21}.json`, `report_mtl_{13,21}.json`; no failed shard).** Training set 2,908 documents (562 layouts); both test sets of 200 documents; strict row F1 (cell F1 in brackets).
 
-**Evidence:** `results/docile_bros_full/run/` (after the run).
+| Training seed | Epochs run (best) | Training hours | UTL row F1 | MTL row F1 | MTL minus UTL |
+|---|---|---|---|---|---|
+| 13 | 11 (10) | 2.30 | 59.84 (61.56) | 68.87 (71.75) | +9.03 |
+| 21 | 5 (2) | 1.16 | 60.96 (62.82) | 63.02 (65.39) | +2.06 |
+| mean | | | **60.40** | **65.95** | +5.55 |
+
+- **Registered reading (UTL against the study 39 N = 1000 mean, 59.56): flattening.** The differences are +0.28 (seed 13) and +1.40 (seed 21), both below +1.5. Three times the training documents and about twice the layouts (562 against about 285) bought at most 1.4 row F1 on unseen layouts. For scale: N = 50 to 200 gave +8.2, N = 200 to 1000 gave +6.7. The reference is a mean of three different 1,000-document sets and the new seeds share one document set, so this comparison carries both kinds of variation unequally; two seeds only.
+- **The MTL number moves with the seed, the UTL number does not.** Seed 13 trained 11 epochs (validation F1 still creeping up to 0.704) and gained on seen layouts (68.87) but not on unseen ones (59.84); seed 21 stopped after 5 epochs (best epoch 2, validation 0.677) and sits at 63.02 / 60.96. A longer-trained model is better on layouts it has seen and no better on layouts it has not, which is what memorising layout conventions would look like. With two seeds and early stopping decided on 100 validation layouts, the size of the gap (+9.0 against +2.1) is not pinned down; the sign (seen at least as good as unseen) holds in both. For comparison the VRDU gap with BROS Track-1 is 21 points.
+- **Error decomposition (`scripts/docile_bros_errors.py`, with `--mtl` for seen layouts; `errors_{utl,mtl}_all.json`, both seeds).** Gold spans exactly right, unseen / seen: seed 13 60.6% / 74.3%, seed 21 66.8% / 71.1%. Never touched by a predicted span: seed 13 24.0% / 15.4%, seed 21 18.5% / 13.9%. **Right extent, wrong field: seed 13 9.1% / 4.0%, seed 21 8.8% / 6.9%.** Typed span F1 (unseen / seen): 62.6 / 74.7 and 63.6 / 68.5. The typing oracle (true field on exactly-found spans) gives row F1 69.07 / 72.47 (seed 13) and 69.29 / 69.34 (seed 21).
+- **Correction to an earlier remark.** After seed 21 alone I wrote that the net-versus-gross confusion is as large on seen layouts as on unseen ones. That holds for seed 21 (8.8% against 6.9% wrong-field) but not for seed 13 (9.1% against 4.0%): a model trained longer types the monetary fields better on layouts it has seen. The layout-independence of the label (`scripts/docile_netgross_layouts.py`: 63% of net-only documents sit in layouts that also have gross-only documents) is unchanged; what changed is that the seen-layout error rate depends on the training run.
+- **What this shows:** on DocILE line items, more training layouts (to 562 of the pool) raised unseen-layout row F1 by at most 1.4 over N = 1000, and the seen-versus-unseen gap is between 2 and 9 points depending on the seed, far below the 21 points of VRDU registration forms. The loss is dominated by detection and monetary typing, not by template shift. **What it does not show:** a value for the gap that is stable (two seeds, early stopping decided on a small validation set), or what a fully different recipe (more epochs, other learning rate, pre-training) would do.
+
+**Evidence:** `results/docile_bros_full/run/` (`report_*.json`, `run_status_*.json`, per-seed `result.json`, `history.json`, `test_entities.jsonl` for both test sets), `errors_utl_all.json`, `errors_mtl_all.json`.
 
 
 ---
