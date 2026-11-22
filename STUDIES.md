@@ -58,7 +58,7 @@ Conventions:
 | 39 | The BROS line-item tagger with row grouping on DocILE layout-disjoint splits (the baseline for study 38) | GPU | 2026-11-22 | Row F1 on unseen layouts 0.3 (N = 10, did not train) / 44.7 / 52.9 / **59.6** (N = 50 / 200 / 1000); level with the published RoBERTa baseline on unseen layouts (59.8); the loss is tagging (detection first, then monetary typing), not row grouping |
 | 40 | Two column rules (field vote, table extent) on the saved BROS predictions for DocILE | CPU | 2026-11-22 | **Neither adopted:** column vote -2.7 row F1 (harmful), table-extent rule +0.0 |
 | 41 | The BROS line-item tagger on the whole DocILE training pool (562 layouts), unseen and seen layouts, 2 seeds | GPU | 2026-11-22 | **Flattening:** unseen-layout row F1 60.4 (59.8 / 61.0) against 59.6 at N = 1000; seen-layout 66.0 (68.9 / 63.0); the seen-unseen gap is 2 to 9 points, against 21 on VRDU forms |
-| 42 | Does the page image help a fine-tuned encoder across templates? LayoutLMv3 with and without pixels on VRDU registration forms | GPU | seen templates done 2026-11-22; unseen templates **[RUNNING]** | Seen templates (MTL, 3 folds, 2 seeds): pages 92.24, blank 92.35, BROS 92.36, i.e. no pixel effect; unseen-template verdict pending |
+| 42 | Does the page image help a fine-tuned encoder across templates? LayoutLMv3 with and without pixels on VRDU registration forms | GPU | seen templates done 2026-11-22; unseen templates: fold 0 done, fold 1 **[RUNNING]** | Seen templates (MTL, 3 folds, 2 seeds): pages 92.24, blank 92.35, BROS 92.36, i.e. no pixel effect. Unseen, fold 0: pages 69.98 vs blank 66.10 (+3.89, both seeds), both far below BROS 83.38 (no anchoring); verdict needs `pages` fold 1 |
 | 43 | Detector and typer on DocILE line items: BROS finds the monetary cells, a VLM says which field each is | GPU | 2026-11-22 | **The typer hurts:** -7.45 row F1 [-10.0, -5.1]; VLM typing accuracy 46 to 52% against 77% for BROS; it is better only on net-only documents (27% against 8%) |
 | 44 | Failure taxonomy of the BROS line-item tagger on DocILE (unseen and seen layouts) | CPU | 2026-11-22 | Of the gold spans 64% right, 21% missed (13.6% partly tagged fields, 6.9% fields absent from the document), 8% wrong field, 5% wrong extent; false spans 23% of predictions; gross/net labelling is not a function of the layout |
 
@@ -2067,7 +2067,22 @@ Training only on the training documents of each split (DocILE: the pool order of
 - **LayoutLMv3 against BROS Track-1 on seen templates (three folds):** `pages` 92.24, `blank` 92.35, BROS 92.36: all three within 0.15 points. For seen templates the ceiling is about 92 whatever the input; the interest is in the unseen-template result, which is still running.
 - **MTL-minus-UTL gap:** to be computed from the unseen-template runs (folds 0 and 1 are being run; fold 2, `Short-Form`, is not, so the gap is compared fold by fold with these MTL values).
 
-**Results (unseen templates, the registered cell):** *pending*
+**Results so far (unseen templates, 2026-11-22; four notebooks, one per arm and fold, each about 1 hour; `results/vrdu_layoutlmv3[_blank]_utl_f0|f1/`): three of the four arm-fold cells are in; `pages` fold 1 is still running, so the registered verdict is not drawn yet.**
+
+| Cell | Seed 13 / 42 | Mean | BROS Track-1 (3 seeds) |
+|---|---|---|---|
+| UTL fold 0 (`Amendment` held out), `pages` | 70.49 / 69.47 | **69.98** | 83.38 |
+| UTL fold 0, `blank` | 65.96 / 66.23 | **66.10** | 83.38 |
+| UTL fold 1 (`Dissemination_Report`), `blank` | 55.21 / 54.18 | **54.70** | 72.07 |
+| UTL fold 1, `pages` | `[RUNNING]` | `[RUNNING]` | 72.07 |
+
+- **Pixels on unseen templates, fold 0:** `pages` minus `blank` = **+4.53 (seed 13), +3.24 (seed 42), mean +3.89**, positive in both seeds. On seen templates the same arms differ by -0.12 (six tasks), so the page image helps on the unseen template and not on seen ones. The registered rule (mean at least +2.0, at least 3 of the 4 pairs and both fold means positive) needs fold 1: **`[RUNNING]`**.
+- **Where the image helps (fold 0, mean of 2 seeds, `pages` / `blank` / BROS):** `signer_title` 36.6 / 9.7 / 48.7, `signer_name` 71.9 / 60.6 / 75.7, `registration_num` 94.6 / 89.6 / 96.8, `file_date` 71.0 / 73.0 / 75.7, `registrant_name` 50.0 / 53.3 / 91.1, `foreign_principle_name` 3.1 / 2.7 / 8.7. The gain is in the signature-block fields (visual cues: a signature line, a title under a name); the image does nothing for `registrant_name`.
+- **LayoutLMv3 is far below BROS Track-1 on unseen templates either way:** fold 0 `pages` -13.4, `blank` -17.3; fold 1 `blank` -17.4. `registrant_name` on `Amendment` is 50 against 91 for BROS, and on `Dissemination_Report` the `blank` arm gets `signer_name` 2.5 and `signer_title` 13.6 against 51.2 and 66.0. **Confound, not a verdict on the backbone:** these runs have no coordinate jitter and no content-box anchoring (they would move the boxes but not the pixels), the two ingredients of Track-1 that remove absolute-position memorisation; BROS's own ablation (study P and the anchoring ablation) put much of its unseen-template gain there. The `blank` arm shows what LayoutLMv3 does without anchoring and without pixels.
+- **MTL minus UTL gap, fold 0:** `pages` 91.62 - 69.98 = **21.6**, `blank` 91.12 - 66.10 = **25.0**, BROS Track-1 92.21 - 83.38 = **8.8**. Fold 1 `blank`: 92.52 - 54.70 = 37.8 (BROS 20.3). The page image shrinks the gap by about 3.4 points on fold 0; absolute-position coordinates leave it much larger than BROS's.
+- **Run health:** 0.91 to 1.17 hours per notebook, no failed runs; seeds differ by about 1 point within an arm and fold, small against the +3.9 effect, but this is one fold.
+
+**Results (unseen templates, the registered cell): `[RUNNING]` — waiting for `pages` fold 1 (UTL_fold1_seed13 and seed42).**
 
 **Evidence:** `results/vrdu_layoutlmv3*/`, `results/vrdu_layoutlmv3_summary_*.json` (after the runs); `results/LayoutLMv3/` (MTL logs); notebook `notebooks/kaggle_layoutlmv3.ipynb`.
 
