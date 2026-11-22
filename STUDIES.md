@@ -1961,6 +1961,21 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Checks done before the run.** `tests/test_docile_column_rules.py` (a made-up page: the minority field in a column is relabelled, a tie is left alone, spans far above and below the table are dropped and a span half a pitch below the last row is kept) passes.
 
-**Results:** *pending*
+**Results (2026-11-22; `results/docile_column_rules/results.json`; one run of each rule, as registered).** Row F1, mean of the three split seeds; difference to the reported predictions per seed, 95% interval over documents:
 
-**Evidence:** `results/docile_column_rules/results.json` (after the run).
+| N | Arm | Row F1 | Difference (per seed) | Interval | Test halves (even / odd) |
+|---|---|---|---|---|---|
+| 1000 | reported | 59.56 | | | |
+| 1000 | R1 column vote | 56.85 | **-2.71** (-3.15 / -3.65 / -1.33) | [-4.10, -1.31] | -2.75 / -2.66 |
+| 1000 | R2 table extent | 59.57 | **+0.01** (-0.14 / +0.01 / +0.17) | [-0.17, +0.19] | -0.04 / +0.06 |
+| 1000 | R1+R2 (not tested) | 56.85 | -2.71 | [-4.03, -1.37] | |
+| 200 | reported | 52.87 | | | |
+| 200 | R1 | 51.05 | -1.82 (-2.03 / -2.33 / -1.10) | [-3.84, -0.39] | -1.26 / -2.41 |
+| 200 | R2 | 52.98 | +0.11 (+0.07 / +0.19 / +0.07) | [-0.06, +0.27] | +0.19 / +0.03 |
+
+- **R1 is harmful** under the registered rule (mean difference at most -1.0, interval below 0, negative in every seed and at both sizes). Exactly-right spans fell from 5,996 to 5,717 at N = 1000 (summed over the three runs; 9,828 predicted spans, none added or removed): the vote changed more right labels to wrong than it fixed. The registered expectation (R1 cannot reach +1.0) holds, and it is worse than "no effect".
+- **R2 changes nothing** (+0.01 at N = 1000, +0.11 at N = 200, intervals contain 0): it dropped 152 spans (1.5%) of which **66 were exactly right**, so it removed about as many right cells as false ones. The registered guess that it might reach +1 is not met. It means the spans above or below the anchor rows are not mostly false: many are real cells of rows the anchor field does not mark (for example a row whose anchor field was not predicted).
+- **Neither rule is adopted.** The anchor rule and the plain predictions stay as they are.
+- **What this says:** the lost points are not recoverable from column structure by a rule applied to these predictions. The wrong fields are not randomly scattered inside consistent columns (a vote makes it worse), and the false spans are not mostly outside the table. The tagger itself has to be better, which points at the training side (more layouts, a different loss, different inputs) and not at post-processing. **What it does not say:** that no column-aware method can help (a learned column typer, or a header-conditioned tagger, was not tested; the header rule of study 35 needs gold header types), or anything about parameter values other than the registered ones (none were tried; 0.5 and one pitch were fixed in advance).
+
+**Evidence:** `results/docile_column_rules/results.json`; `scripts/docile_column_rules.py`; `tests/test_docile_column_rules.py`.
