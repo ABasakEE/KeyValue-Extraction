@@ -1374,6 +1374,13 @@ Each prompt has one short worked example made up by us, not taken from XFUND. A 
 - **Time.** Caps per arm V3 2.5 h, V2 6 h, V4 2.5 h plus the tagger training, V1 2.5 h inside the 11 h budget; the order puts V3, V2 and V4 first, so a cut run loses V1 first.
 - **Checks done on CPU (no model).** `tests/test_vlm_link.py` passes including a V4 test (a perfect answer for the gold entities scores perfectly, a tagger that missed an entity loses only that entity's links, malformed answers never raise); the stub pipeline `xfund_dump_entities.py --stub` then `xfund_vlm_generate.py --arm V4 --stub` then `xfund_vlm_score.py` runs and scores 1.0 (the stub entities are the gold ones, so that 1.0 only proves the plumbing); every notebook cell compiles. **Not checked:** training LiLT inside this notebook, the V4 prompt with a real model, and the dump script on a real checkpoint (no checkpoint is available here).
 
+**Results (2026-11-22; scored on CPU with `scripts/xfund_vlm_score.py` from the pushed raw answers; `results/xfund_vlm/{V3,V2}_e2e.json`; Qwen2.5-VL-7B-Instruct, chosen because the projected V2 time was 3.87 h, below the 6 h switch; zero parse failures in both arms).** **The run was partial: V3 and V2 only, and V2 on 200 of 250 forms; V4 and V1 have no output.**
+- **V3 (VLM links the given gold entities), 232 of 250 forms** (stopped by the 2.5 h arm cap; 2.52 h): entity F1 100 (gold given), **link F1 23.69, 95% interval over forms [21.86, 25.66]**, link_qa F1 41.34. Link precision 19.1% and recall 31.2%: it wrote 13,448 links for 8,243 gold ones. Group recall: below 20.0, same line 47.6, above 36.4. **Read against the registered reference (LiLT with gold entities, windowed, about 59.8; a different set of forms: 250 against 232):** the zero-shot VLM is about 36 points lower even when it is handed the entities.
+- **V2 (end to end, VLM finds entities and links), 200 forms:** entity F1 13.38, **link F1 3.30, interval [2.43, 4.31]**, link_qa F1 3.57, against LiLT A0 47.42 (mean of 3 seeds, all 250 forms). The registered primary cell has no "helps" verdict by design; the interval is far below A0's and the order of the arms is not in doubt.
+- **V4 (tagger entities, VLM links) and V1 (image only) were not run.** The tagger side exists: LiLT A0 seed 13 was trained in the notebook and its predicted entities for the 250 forms are in `results/xfund_vlm/lilt_entities.jsonl` (`lilt_A0/`). `run_status.json` records only V3; why V2 stopped at 200 forms is not recorded (the push log shows chunks of 50 up to 200 and no completion entry).
+- **Not checked:** whether part of V2's very low entity F1 (precision 14.6%, recall 12.3%) comes from the word-range output format and numbering rather than from the VLM's reading; the CPU checks used perfect stub answers only.
+- **What this shows:** with this prompt, a zero-shot 7B VLM does not link XFUND entities competitively, and mostly over-links. **What it does not show:** anything about V4, where the VLM would only link (the only arm in which the tagger supplies exact spans), about larger or tuned VLMs, or about prompts other than ours.
+
 ---
 
 ## 29. LoRA-tuned VLM with grounded word-span output: VRDU unseen- vs mixed-template learning (Track E, primary) and XFUND end-to-end linking (Track L) — GPU (Kaggle T4 × 2), registered 2026-11-15
@@ -1845,9 +1852,19 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** One recipe, written for LiLT and not tuned for BROS (learning rate, epochs, window sizes); three seeds; the BROS arms' runtime is unmeasured; XFUND val is only approximately template-disjoint (about 94% of forms have no train sibling by a question-text proxy); the A0 reference was trained in an earlier session, so a session effect cannot be excluded; FP32 only.
 
-**Results:** *pending*
+**Results (scored 2026-11-22 from `results/bros_joint/{J1,J2}_e2e.json`; windowed inference, all 250 val forms, mean of 3 seeds; 5.75 h on two T4s, all 6 trainings and both scoring passes returned 0).**
 
-**Evidence:** `results/bros_joint/` (after the run).
+| Arm | Entity F1 | Link F1 | Link_qa F1 | Link F1 per seed 13 / 21 / 42 | Link F1 minus A0, same seeds |
+|---|---|---|---|---|---|
+| LiLT A0 (reference) | 75.84 | 47.42 | 53.15 | 48.33 / 47.01 / 46.93 | |
+| BROS J1 | 80.20 | 53.35 | 59.59 | 53.10 / 52.93 / 54.01 | +4.77 / +5.92 / +7.08 (mean +5.93) |
+| BROS J2 (+ jitter) | 79.63 | 53.00 | 59.66 | 53.10 / 52.72 / 53.19 | +4.77 / +5.71 / +6.26 (mean +5.58) |
+
+**Registered rule: both BROS arms are *better* than A0** (mean difference at least +1.5 and positive in all three seed pairs; the smallest pair difference is +4.77). Not tested, reported: entity F1 +4.4 (J1) and +3.8 (J2), link_qa +6.4 and +6.5; sibling-free forms link F1 52.52 (J1), 52.24 (J2) against 46.34; single-window link F1 47.47 / 47.13 against 41.54. Recall by group (mean of 3 seeds), A0 / J1 / J2: below 39.8 / 46.5 / 47.3, same line 63.5 / 67.4 / 67.1, above 34.8 / 50.2 / 50.1, rank 5+ 35.8 / 43.3 / 43.5, question to question 31.2 / 32.2 / 32.0. J1 against J2 was not registered; the difference is 0.35 link F1 (J1 minus J2 per seed: 0.00 / +0.21 / +0.82), so jitter neither helps nor hurts visibly.
+
+**What this shows.** With the same joint code and data, replacing the LiLT backbone with BROS adds about 6 link F1 points and 4 entity F1 points, in every seed, and the recall gain is largest for answers above their question (+15.4 points; below +6.7) and smallest where the pair is on the same line (+3.9) or both ends are questions (+1.0). **What it does not show:** that BROS is better than LiLT in general (one recipe tuned for LiLT, one dataset); the size of the effect with a matched training session (A0 was trained in an earlier session); anything about languages, since BROS is English-only and XFUND is not (the gain appears despite that, so the advantage is probably the relative-position encoding, which is a guess, not tested here).
+
+**Evidence:** `results/bros_joint/` (`J1_e2e.json`, `J2_e2e.json`, `J1/`, `J2/`, `run_status.json`).
 
 
 ---
@@ -1868,9 +1885,13 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Pre-run checks done on CPU (2026-11-22).** The shared repair helpers moved to `scripts/row_repair.py` and both recipes were re-tested (ad-buy oracle 100.00 on 3 documents with the repair table unchanged, 83.72 with repair after shifted ids; DocILE oracle 99.98 / 99.79 on the 200 test documents); stub run, gate and scorer work, including a partly finished run (26 of 30 documents scored) and a re-run that retries failed pages (30 of 30). **Not checked:** the image path and the 8B model on DocILE pages (the notebook's smoke cell is the first test), and the PDF download inside Kaggle.
 
-**Results:** *pending*
+**Results (2026-11-22): the pilot gate failed, so the test run did not start; the registered reading (A2 row F1 on the 200 test documents) has no value.**
+- **Gate (`results/docile_sg/run/gate.json`; 30 pilot documents, 38 pages, image arm; the pilot took 0.44 h):** parse rate 100% (pass); pages with at least one row, 30 of 33 pages with gold rows = 90.9% (pass, bar 90%); **cited ids that exist 88.28% (565 of 640 segments; fail, bar 90%)**. Decision recorded by the script: `stop_and_review`. Also: 621 cells, 177 (28.5%) not grounded in any OCR piece, 46 row-position repairs, 23 empty rows.
+- **Pilot score (computed afterwards with `docile_sg.py score` on the pilot rows; not a registered cell, not the test documents, and the pilot documents were the gate's, so read it as a signal only):** strict row F1 **26.56**, cell F1 26.97; counts (matched, predicted, gold) rows 130 / 444 / 535. Precision about 29% and recall about 24%.
+- **How it reads:** the pilot sits at the "below 50" end of the registered bands (tables hard for the recipe), and next to study 39 it is far below BROS at N = 200 and N = 1000 (52.9 and 59.6 on the test documents), but the pilot and the test sets differ, so no interval and no verdict are given. The registered test run (about 2 to 3 h, 236 pages) was not made; its only purpose would have been to confirm a gap of this size.
+- **Not examined:** why 12% of cited ids do not exist (the gate says only that they do not), and the A1 (text-only) arm, which was conditional on A2 being informative.
 
-**Evidence:** `results/docile_sg/run/` (scores, gate and counts after the run); notebook `notebooks/kaggle_docile_sg.ipynb`.
+**Evidence:** `results/docile_sg/run/` (`gate.json`, `rows_pilot_*.jsonl`, `run_status.json`); notebook `notebooks/kaggle_docile_sg.ipynb`. The pilot answers contain document text and were pushed with the run (they are in the repository already); the terms of use are still unread.
 
 
 ---
@@ -1887,6 +1908,26 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** One training seed per run and three split seeds, one recipe not tuned for DocILE (learning rate, epochs, window size are those of VRDU), BROS has an English vocabulary and DocILE is English, the row rule was not tuned on DocILE, the test documents have a median of 2 gold rows each (886 rows in total), runs at N = 1000 are the least certain in time (a deadline of 11 h stops the notebook cleanly and finished runs are kept), and the predictions contain document text so they stay out of GitHub until the DocILE terms are read (scores and per-document counts are pushed).
 
-**Results:** *pending*
+**Results (2026-11-22; `results/docile_bros/run/report.json`; 12 runs, all finished, 2.16 h on two T4s, no failed shards; scored on the 200 test documents).**
 
-**Evidence:** `results/docile_bros/run/` (scores after the run).
+| N training documents | Row F1, split seeds 0 / 1 / 2 | Mean row F1 | Mean cell F1 |
+|---|---|---|---|
+| 10 | 0.25 / 0.18 / 0.34 | 0.3 | 0.3 |
+| 50 | 45.34 / 39.92 / 48.97 | 44.7 | 46.4 |
+| 200 | 54.12 / 52.57 / 51.91 | 52.9 | 54.7 |
+| 1000 | 60.40 / 58.90 / 59.38 | 59.6 | 61.8 |
+
+- **N = 10 is a training failure, not a measurement of 10 documents.** Training loss was still about 0.9 to 1.1 and validation F1 0.00 when early stopping ended each run after 7 epochs (best epoch 1). With so few windows an epoch is a handful of steps. On ad-buy the same recipe gave 68.9 at N = 10. Treat the 0.3 as "did not train", and note that **N = 50 is probably also step-limited**: one run (split 2) used all 20 epochs and was still improving (best epoch 20), two others peaked at epochs 13 and 16.
+- **From N = 200, the runs overfit the training layouts:** training loss 0.02 to 0.07 at the end, best validation epoch 4 to 11 of at most 14 run. The limit is generalisation to new layouts, not optimisation.
+- **Scaling:** +8.2 from N = 50 to 200, +6.7 from 200 to 1000 (five times the data), so more data helps but slowly; the oracle ceiling with these tags and the anchor rule is 94.4 row F1, and N = 1000 is 34.8 below it. No extrapolation is made.
+- **The comparison with the recipe (`docile_compare.py`) was not made:** study 38 has no test-set scores. Against the 30-document pilot only: recipe 26.6, BROS at N = 200 and N = 1000 about 53 and 60 on a different document set.
+
+**Post hoc error analysis (2026-11-22, after the results; CPU, saved predictions only; `scripts/docile_bros_errors.py`, `results/docile_bros/errors.json`; N = 200 and 1000, three split seeds each).** Each oracle below changes one stage and leaves the rest as predicted, so the gaps show where the row F1 points go. Row F1 means, N = 200 / N = 1000: **reported 52.9 / 59.6**; with the true row of every predicted span (grouping oracle) 54.7 / 61.8; with predicted extents relabelled by the gold field where the extent is exact (typing oracle, then the anchor rule) 62.4 / 67.2. Span F1 against the gold spans, N = 200 / 1000: typed 55.1 / 62.6, field ignored 64.9 / 70.1.
+- **Row grouping costs about 2 points** (the anchor rule is not the bottleneck; the grouping-oracle row F1 came out equal to the cell F1 in every run).
+- **Where the gold spans of N = 1000 end up (mean of 3 runs, 3,113 gold spans per run):** exactly right 64.2%; no predicted span touches it 21.6%; right extent but wrong field 7.8%; right field, wrong extent 4.8%; wrong field and extent 1.6%. At N = 200: 53.7 / 30.0 / 9.6 / 4.7 / 1.9.
+- **The field errors are mostly gross against net:** at N = 1000 the largest confusions (summed over 3 runs) are net amount predicted as gross amount 192, gross unit price predicted as gross amount 129, net unit price predicted as gross unit price 99. Recall of `amount_net` is 6.8% (78 gold spans per run) and of `code` 44.9%; description, quantity, unit price and amount are 65 to 77% recall with 55 to 66% precision (amount_gross: precision 54.8%, recall 77.1%).
+- **False spans:** about 2,000 predicted spans per run touch no gold word (largest: amount_gross 676, quantity 472, description 406 at N = 1000); 66 to 72% of those sit inside the vertical extent of the gold table on their page (580 / 539 / 506 of 809 / 779 / 767 for the three runs), the rest outside it (totals, headers).
+- **Misses are not whole-document failures:** at N = 1000, only 9 to 14 of the 200 test documents have under 25% of their gold spans touched (about 8 to 10% of the misses); 38 to 44 documents with 25 to 75% touched hold 59 to 74% of the misses. A look at three such documents showed three different causes: a column never tagged at all (a repeated code and a unit price on every row), OCR words that fuse two gold cells (`6431308/20/20` is a code and a date in one word), and a value column tagged as a different field in some rows. Three documents is an anecdote, not a count.
+- **What this says:** the loss is in tagging (detection first, then the field of an amount), not in row grouping; giving every exactly-found span its true field would still reach only 67 at N = 1000, because about 22% of gold spans are never touched by a predicted span. **What it does not say:** whether more data, more epochs or a different input would close the gap (not tested), or whether gross against net is learnable from the page at all (the annotation may depend on tax context the 384-word window sees badly).
+
+**Evidence:** `results/docile_bros/run/` (`report.json`, `run_status.json`, per-run `result.json`, `history.json`, `test_entities.jsonl`), `results/docile_bros/errors.json`.

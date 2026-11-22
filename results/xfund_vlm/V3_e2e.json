@@ -1,0 +1,194 @@
+{
+  "all|vlm|entity": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "gold": 11935,
+    "pred": 11935
+  },
+  "all|vlm|link": {
+    "precision": 0.191,
+    "recall": 0.3117,
+    "f1": 0.2369,
+    "gold": 8243,
+    "pred": 13448
+  },
+  "all|vlm|link_qa": {
+    "precision": 0.5062,
+    "recall": 0.3494,
+    "f1": 0.4134,
+    "gold": 6691,
+    "pred": 4619
+  },
+  "all|vlm|group|below": {
+    "precision": 1.0,
+    "recall": 0.2002,
+    "f1": 0.3336,
+    "gold": 4746,
+    "pred": 950
+  },
+  "all|vlm|group|same_line": {
+    "precision": 1.0,
+    "recall": 0.4764,
+    "f1": 0.6454,
+    "gold": 3077,
+    "pred": 1466
+  },
+  "all|vlm|group|above": {
+    "precision": 1.0,
+    "recall": 0.3643,
+    "f1": 0.534,
+    "gold": 420,
+    "pred": 153
+  },
+  "all|vlm|group|rank_0": {
+    "precision": 1.0,
+    "recall": 0.4008,
+    "f1": 0.5723,
+    "gold": 2143,
+    "pred": 859
+  },
+  "all|vlm|group|rank_1": {
+    "precision": 1.0,
+    "recall": 0.3834,
+    "f1": 0.5543,
+    "gold": 1171,
+    "pred": 449
+  },
+  "all|vlm|group|rank_2_4": {
+    "precision": 1.0,
+    "recall": 0.3467,
+    "f1": 0.5149,
+    "gold": 1921,
+    "pred": 666
+  },
+  "all|vlm|group|rank_5plus": {
+    "precision": 1.0,
+    "recall": 0.1978,
+    "f1": 0.3303,
+    "gold": 3008,
+    "pred": 595
+  },
+  "all|vlm|group|q_to_q": {
+    "precision": 1.0,
+    "recall": 0.1476,
+    "f1": 0.2573,
+    "gold": 1497,
+    "pred": 221
+  },
+  "sibling_free|vlm|entity": {
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1": 1.0,
+    "gold": 11026,
+    "pred": 11026
+  },
+  "sibling_free|vlm|link": {
+    "precision": 0.1873,
+    "recall": 0.3088,
+    "f1": 0.2332,
+    "gold": 7583,
+    "pred": 12501
+  },
+  "sibling_free|vlm|link_qa": {
+    "precision": 0.5043,
+    "recall": 0.3431,
+    "f1": 0.4084,
+    "gold": 6211,
+    "pred": 4226
+  },
+  "sibling_free|vlm|group|below": {
+    "precision": 1.0,
+    "recall": 0.2004,
+    "f1": 0.3338,
+    "gold": 4402,
+    "pred": 882
+  },
+  "sibling_free|vlm|group|same_line": {
+    "precision": 1.0,
+    "recall": 0.4752,
+    "f1": 0.6442,
+    "gold": 2801,
+    "pred": 1331
+  },
+  "sibling_free|vlm|group|above": {
+    "precision": 1.0,
+    "recall": 0.3395,
+    "f1": 0.5069,
+    "gold": 380,
+    "pred": 129
+  },
+  "sibling_free|vlm|group|rank_0": {
+    "precision": 1.0,
+    "recall": 0.3981,
+    "f1": 0.5695,
+    "gold": 1992,
+    "pred": 793
+  },
+  "sibling_free|vlm|group|rank_1": {
+    "precision": 1.0,
+    "recall": 0.3777,
+    "f1": 0.5483,
+    "gold": 1083,
+    "pred": 409
+  },
+  "sibling_free|vlm|group|rank_2_4": {
+    "precision": 1.0,
+    "recall": 0.3479,
+    "f1": 0.5162,
+    "gold": 1762,
+    "pred": 613
+  },
+  "sibling_free|vlm|group|rank_5plus": {
+    "precision": 1.0,
+    "recall": 0.1919,
+    "f1": 0.322,
+    "gold": 2746,
+    "pred": 527
+  },
+  "sibling_free|vlm|group|q_to_q": {
+    "precision": 1.0,
+    "recall": 0.1525,
+    "f1": 0.2646,
+    "gold": 1318,
+    "pred": 201
+  },
+  "arm": "V3",
+  "n_forms": 232,
+  "n_sibling_free": 216,
+  "models": {
+    "Qwen/Qwen2.5-VL-7B-Instruct": 232
+  },
+  "bootstrap_ci_f1": {
+    "entity": [
+      1.0,
+      1.0
+    ],
+    "link": [
+      0.2186,
+      0.2566
+    ],
+    "link_qa": [
+      0.3842,
+      0.4436
+    ]
+  },
+  "link_f1_by_language": {
+    "de": 0.3062,
+    "es": 0.2228,
+    "fr": 0.2386,
+    "it": 0.2399,
+    "pt": 0.1954
+  },
+  "parse_fail_rate": 0.0,
+  "error_rate": 0.0,
+  "truncated_rate": 0.2155,
+  "item_counts": {
+    "entity_lines": 16631,
+    "link_lines": 14564,
+    "bad_ranges": 0,
+    "unmatched": 0,
+    "dangling_links": 786
+  },
+  "mean_seconds_per_form": 38.37
+}
