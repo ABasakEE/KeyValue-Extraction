@@ -204,6 +204,139 @@
       "held_out": [
         "Dissemination_Report"
       ]
+    },
+    {
+      "test": {
+        "precision": 0.8152,
+        "recall": 0.4057,
+        "f1": 0.5418,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.7937,
+            "recall": 0.4307,
+            "f1": 0.5584,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.8934,
+            "recall": 0.8502,
+            "f1": 0.8713,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9808,
+            "recall": 0.9879,
+            "f1": 0.9843,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.0652,
+            "recall": 0.0147,
+            "f1": 0.024,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.8182,
+            "recall": 0.1095,
+            "f1": 0.1931,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.9241,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.3475,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0399,
+          "val_f1": 0.3909
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0161,
+          "val_f1": 0.8976
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0083,
+          "val_f1": 0.8534
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0067,
+          "val_f1": 0.8593
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0047,
+          "val_f1": 0.905
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0029,
+          "val_f1": 0.8932
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.003,
+          "val_f1": 0.9144
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0024,
+          "val_f1": 0.9194
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0019,
+          "val_f1": 0.9076
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.001,
+          "val_f1": 0.9241
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0007,
+          "val_f1": 0.9218
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0006,
+          "val_f1": 0.9103
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0004,
+          "val_f1": 0.9211
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 275,
+        "total_i_tags": 2027,
+        "rate": 0.1357
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5418 == independent F1=0.5418 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5083 (spread 0.0335)\n  malformed I- tags: 275/2027 (13.6%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 42,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
     }
   ],
   "gap": {}
