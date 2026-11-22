@@ -94,7 +94,7 @@ def main() -> None:
     docs = {g: B.doc_dict(g) for g in test}
     out = {}
     for n in a.sizes.split(","):
-        for run in sorted(Path(a.runs).glob(f"N{n}_S*")):
+        for run in sorted(Path(a.runs).glob(f"N{n}_*")):
             out[run.name] = analyse(run, test, docs)
             r = out[run.name]
             print(run.name, "typed span F1", r["typed_span_f1"], "untyped", r["untyped_span_f1"], "| row F1: reported", r["reported"]["row_f1"],

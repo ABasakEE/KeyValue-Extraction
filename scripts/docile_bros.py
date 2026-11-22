@@ -32,6 +32,7 @@ LABELS = ["O"] + [f"{p}-{f}" for f in FIELDS for p in "BI"]
 ID2LABEL = dict(enumerate(LABELS))
 LABEL2ID = {v: k for k, v in ID2LABEL.items()}
 SPLITS = ROOT / "results" / "docile_rows" / "splits.json"
+POOL = ROOT / "results" / "docile_rows" / "pool.json"   # all training-pool documents (3,108), written by docile_splits.py (study 41)
 
 
 def doc_dict(i: str) -> dict:
@@ -112,10 +113,12 @@ def cmd_train(a) -> None:
     from train import TrainConfig, train_single_seed
 
     config = TrainConfig.from_yaml(ROOT / a.config)
-    seed = config.seeds[0]
     out = Path(a.out)
     sp = json.loads(SPLITS.read_text(encoding="utf-8"))
-    tasks = [(n, s) for n in [int(x) for x in a.sizes.split(",")] for s in [int(x) for x in a.seeds.split(",")]]
+    if a.full_pool:   # study 41: the whole pool, one run per training seed (run directory NfullT<seed>)
+        tasks = [("full", None, int(x)) for x in a.train_seeds.split(",")]
+    else:
+        tasks = [(n, s, config.seeds[0]) for n in [int(x) for x in a.sizes.split(",")] for s in [int(x) for x in a.seeds.split(",")]]
     if a.smoke:
         out, tasks = Path(tempfile.mkdtemp()) / "smoke", tasks[:1]
         config.epochs, config.batch_size = 1, 2
@@ -127,18 +130,20 @@ def cmd_train(a) -> None:
     pick = lambda ids: [cache.setdefault(g, to_example(g, doc_dict(g))) for g in ids]
     device = torch.device(a.device)
     deadline = time.time() + a.deadline_hours * 3600 if a.deadline_hours else None
-    for n, s in tasks:
+    for n, s, seed in tasks:
         if deadline and time.time() > deadline:
             print(f"[shard {a.shard}] deadline reached; stopping cleanly (re-run resumes: finished runs are skipped)", flush=True)
             break
-        train_ex, val_ex, test_ex = pick(sp["train"][str(s)][:n]), pick(sp["val"]), pick(sp["test"])
+        train_ids = json.loads(POOL.read_text(encoding="utf-8")) if n == "full" else sp["train"][str(s)][:n]
+        name = f"Nfull_T{seed}" if n == "full" else f"N{n}_S{s}"
+        train_ex, val_ex, test_ex = pick(train_ids), pick(sp["val"]), pick(sp["test"])
         if a.smoke:
             train_ex, val_ex, test_ex = train_ex[:6], val_ex[:2], test_ex[:3]
-        print(f"[shard {a.shard}] N={n} S={s}: train {len(train_ex)} val {len(val_ex)} test {len(test_ex)}", flush=True)
-        res = train_single_seed(seed, config, train_ex, val_ex, test_ex, LABELS, ID2LABEL, device, out / f"N{n}_S{s}", log_prefix=f"[N{n} S{s}]")
-        print(f"[shard {a.shard}] N={n} S={s}: test entity F1 {res['test']['f1']:.4f}", flush=True)
+        print(f"[shard {a.shard}] {name}: train {len(train_ex)} val {len(val_ex)} test {len(test_ex)}", flush=True)
+        res = train_single_seed(seed, config, train_ex, val_ex, test_ex, LABELS, ID2LABEL, device, out / name, log_prefix=f"[{name}]")
+        print(f"[shard {a.shard}] {name}: test entity F1 {res['test']['f1']:.4f}", flush=True)
     if a.smoke:
-        run_dir = out / f"N{tasks[0][0]}_S{tasks[0][1]}" / f"seed_{seed}"
+        run_dir = out / name / f"seed_{seed}"
         assert (run_dir / "result.json").exists() and (run_dir / "test_entities.jsonl").exists(), list(run_dir.glob("*"))
         print("[+] docile_bros smoke passed:", sorted(p.name for p in run_dir.glob("*")), "| run dir", run_dir.parent)
 
@@ -147,7 +152,7 @@ def cmd_score(a) -> None:
     test = json.loads(SPLITS.read_text(encoding="utf-8"))["test"]
     docs = {g: doc_dict(g) for g in test}
     report: dict = {"tau": a.tau, "runs": {}, "per_size": {}}
-    for run in sorted(Path(a.runs).glob("N*_S*")):
+    for run in sorted(Path(a.runs).glob("N*_[ST]*")):
         f = next(run.glob("seed_*/test_entities.jsonl"), None)
         if f is None:
             continue
@@ -162,11 +167,11 @@ def cmd_score(a) -> None:
             per_doc[g] = c
         report["runs"][run.name] = {**show(tot), "counts": tot, "documents": len(per_doc), "per_doc": per_doc}
         print(run.name, show(tot), f"({len(per_doc)} documents)")
-    for n in sorted({int(k.split("_")[0][1:]) for k in report["runs"]}):
-        rs = [v for k, v in report["runs"].items() if int(k.split("_")[0][1:]) == n]
+    for n in sorted({k.split("_")[0][1:] for k in report["runs"]}, key=lambda x: (not x.isdigit(), int(x) if x.isdigit() else 0, x)):
+        rs = [v for k, v in report["runs"].items() if k.split("_")[0][1:] == n]
         report["per_size"][str(n)] = {m: round(st.mean(r[m] for r in rs), 2) for m in ("row_f1", "cell_f1")} | {"splits": len(rs)}
         print(f"N={n}: mean over {len(rs)} splits", report["per_size"][str(n)])
-    Path(a.runs, "report.json").write_text(json.dumps(report), encoding="utf-8")
+    Path(a.runs, a.report).write_text(json.dumps(report), encoding="utf-8")
 
 
 def main() -> None:
@@ -178,8 +183,9 @@ def main() -> None:
     p.add_argument("--sizes", default="10,50,200,1000"); p.add_argument("--seeds", default="0,1,2"); p.add_argument("--device", default="cuda:0")
     p.add_argument("--shard", type=int, default=0); p.add_argument("--num-shards", type=int, default=1); p.add_argument("--smoke", action="store_true")
     p.add_argument("--deadline-hours", type=float, default=0.0)
+    p.add_argument("--full-pool", action="store_true"); p.add_argument("--train-seeds", default="13,21")
     p = sub.add_parser("score")
-    p.add_argument("--runs", required=True); p.add_argument("--tau", type=float, default=0.5)
+    p.add_argument("--runs", required=True); p.add_argument("--tau", type=float, default=0.5); p.add_argument("--report", default="report.json")
     a = ap.parse_args()
     {"oracle": cmd_oracle, "train": cmd_train, "score": cmd_score}[a.cmd](a)
 

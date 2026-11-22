@@ -68,6 +68,7 @@ def main() -> None:
     stats["test"].pop("documents_with_rows_per_page_over_15")
     out = ROOT / "results" / "docile_rows" / "splits.json"
     out.write_text(json.dumps({"rules": __doc__, "stats": stats, "test": test, "val": val, "pilot": pilot, "train": train}, indent=1), encoding="utf-8")
+    (ROOT / "results" / "docile_rows" / "pool.json").write_text(json.dumps(pool), encoding="utf-8")   # every training-pool document (study 41: the full-pool run)
     print(json.dumps(stats, indent=1))
 
 
