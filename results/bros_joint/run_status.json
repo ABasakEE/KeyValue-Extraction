@@ -1,0 +1,11 @@
+{
+  "J1": {
+    "train_returncode": 0,
+    "eval_returncode": 0
+  },
+  "J2": {
+    "train_returncode": 0,
+    "eval_returncode": 0
+  },
+  "hours_used": 5.75
+}
