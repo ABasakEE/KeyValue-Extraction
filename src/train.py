@@ -126,6 +126,7 @@ class TrainConfig:
     jitter_scale_max: float = 1.15
     relative_coords: bool = False
     anchor_mode: str = "content_box"
+    image_mode: str = "none"               # "pages": LayoutLMv3 gets the page image of each window; "blank": a constant image (control); needs data_root/subcorpus/main/pdfs
     adversarial_dann: bool = False
     dann_weight: float = 0.1
     dann_gamma: float = 10.0
@@ -287,6 +288,9 @@ def make_collator(
             boxes_batch,
             [ex.ner_tags for ex in batch],
         )
+        image_loader = getattr(model, "image_loader", None)
+        if image_loader is not None:
+            encoded.inputs["pixel_values"] = torch.stack([image_loader(ex) for ex in batch])
         if is_joint:
             spans, links, types = prepare_entity_batch(batch, encoded.word_ids)
             return encoded, batch, spans, links, types
@@ -1107,6 +1111,15 @@ def build_model(config: TrainConfig, num_labels: int, id2label: dict[int, str], 
             link_threshold=getattr(config, "link_threshold", 0.5),
         )
     base = TokenClassifier(config.backbone, num_labels, id2label, config.max_length)
+    image_mode = getattr(config, "image_mode", "none")
+    if base.needs_image and image_mode == "none":
+        raise ValueError(f"backbone {config.backbone!r} needs page images: set image_mode to 'pages' (or 'blank' for the control)")
+    if image_mode != "none":
+        try:
+            from data.page_images import PageImages
+        except ImportError:
+            from src.data.page_images import PageImages
+        base.image_loader = PageImages(Path(config.data_root) / config.subcorpus / "main" / "pdfs", mode=image_mode)
     if getattr(config, "use_graph_bros", False):
         try:
             from models.graph_bros import GraphBrosForTokenClassification

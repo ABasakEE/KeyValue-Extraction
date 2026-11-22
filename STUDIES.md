@@ -2007,3 +2007,29 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Results:** *pending*
 
 **Evidence:** `results/docile_bros_full/run/` (after the run).
+
+
+---
+
+## 42. Does the page image help a fine-tuned encoder across templates? LayoutLMv3 with and without pixels on VRDU registration forms (UTL and MTL) — GPU (Kaggle T4 x 2), registered 2026-11-22
+
+**Question.** The project description (deliverable 2) asks for a representation that jointly captures textual, visual and layout information. The fine-tuned encoders so far (LiLT, BROS) see text and layout only; the systems that see pixels are vision-language models (the zero-shot recipe, 76.5 exact-span F1 on registration forms; a LoRA-tuned 3B model, 46.2 against 70.1 for BROS, study 29). LayoutLMv3 is a fine-tuned encoder that reads the page image next to the words and boxes; its wrapper existed (`src/models/token_clf.py`) but no VRDU or DocILE run was ever made. **Does adding the page image help on unseen templates (UTL), and does it change the seen-versus-unseen gap (MTL minus UTL)?**
+
+**Arms (matched-size protocol of the headline benchmark: N = 200 training documents, 3 folds, MTL and UTL, training seeds 13 and 42; 12 runs per arm).**
+- **`pages`** (`configs/vrdu_layoutlmv3.yaml`): LayoutLMv3-base; each window of words is paired with the image of the page that holds most of its words (the earliest page on a tie), rendered from the PDF at 100 dpi, resized to 224 x 224 and normalised (mean = std = 0.5), cached once per (document, page) (`src/data/page_images.py`).
+- **`blank`** (`configs/vrdu_layoutlmv3_blank.yaml`): the same model, recipe and seeds with a constant image (zeros) for every window, i.e. the visual stream switched off. This is the control: `pages` minus `blank` isolates the pixels.
+- **Recipe (identical in both arms; the Track-1 BROS recipe except the geometry options):** 20 epochs at most, early stopping on the validation documents, lr 5e-5, batch 4, windows of 384 words with overlap 128 and soft voting. **No coordinate jitter and no content-box anchoring**, because both move the boxes while the image stays put, so a box and its pixels would stop agreeing. Nothing tuned for LayoutLMv3.
+
+**References (same documents, folds, N; `results/vrdu_track1_bros/metrics.json`).** BROS Track-1 (windows, jitter, anchoring; 3 seeds): MTL 92.36, UTL 71.27 (std 11.24), gap 21.1. Plain BROS without windows reached only 22.7 / 7.5 because the 512-token limit drops most words of multi-page documents, so it is not a reference. The comparison of either arm with BROS Track-1 changes the backbone and the geometry options together and is reported, not tested.
+
+**Registered rule (primary cell: UTL F1, mean over folds and seeds, `pages` minus `blank`, paired by fold and seed, 6 pairs).** *Pixels help* if the mean difference is at least +2.0, positive in at least 5 of the 6 pairs and positive in all three fold means. *Pixels hurt* if it is at most -2.0 and negative in at least 5 of 6. Otherwise *no clear difference*. Reported, not tested: MTL (same quantities), the gap, the UTL fields `file_date`, `foreign_principle_name`, `signer_name` (the fields that failed for earlier models), per-fold values, both arms against BROS Track-1. No interval (6 pairs); the fold-to-fold spread of UTL is large (std 11 for BROS), which the pairing removes only partly.
+
+**Plumbing checked on CPU before any GPU run (2026-11-22; `tests/test_layoutlmv3_plumbing.py`, real VRDU documents and the real `microsoft/layoutlmv3-base` weights, under transformers 5.17 and 4.57.6).** The page of a window (majority, earliest on a tie, 0 when there are no page ids); the image tensor (3 x 224 x 224, in [-1, 1], not constant, cached, identical for repeated windows); the blank control (zeros, equal for every window); the collator adds `pixel_values` next to `bbox` (boxes at most 1000); one forward and backward step gives a finite loss and a gradient in the patch embedding; the image changes the logits; a backbone that needs images refuses `image_mode: none`. The two configs differ only in `image_mode` and `output_dir`.
+
+**Not checked.** transformers 4.51.3 (the Kaggle pin of the other notebooks; the CPU check under 5.x hid a tokenizer problem in study 37, so this is a real gap); GPU memory with 4 windows of up to 512 tokens plus 197 image patches (about 709 positions per window); the time per run (my guess is 2 to 4 h per arm on two T4s); whether LayoutLMv3 trains stably at lr 5e-5 (copied from BROS; a collapse to all-`O` would show as validation F1 near 0 in the first epochs of the log); that the VRDU PDFs are all present after the Kaggle clone (cell 2 of the notebook counts them against the documents).
+
+**Limits stated up front.** One recipe, two training seeds, one corpus (registration forms; English); the image enters at 224 x 224, too coarse for small print, so a negative result says only that this input does not help, not that pixels never do; a window that spans two pages sees one page image; LayoutLMv3 and BROS were both pre-trained on IIT-CDIP (external, not data of the held-out templates, so the zero-same-template rule is respected); the BROS reference uses three seeds and different geometry options; the weights are CC-BY-NC-SA (declared in the report).
+
+**Results:** *pending*
+
+**Evidence:** `results/vrdu_layoutlmv3/`, `results/vrdu_layoutlmv3_blank/`, `results/vrdu_layoutlmv3_summary_*.json` (after the run); notebook `notebooks/kaggle_layoutlmv3.ipynb`.

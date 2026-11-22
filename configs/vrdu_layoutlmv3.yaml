@@ -1,0 +1,27 @@
+# LayoutLMv3 (text + layout + page image) on VRDU registration-form, matched protocol, same recipe as Track-1 BROS except the geometry options:
+# no coordinate jitter and no content-box anchoring, because both move the boxes while the image stays put (box and pixel would no longer agree).
+# Control arm: configs/vrdu_layoutlmv3_blank.yaml (identical, constant image). Run with:
+#   python src/train.py --config configs/vrdu_layoutlmv3.yaml --protocol matched
+backbone: layoutlmv3
+dataset: vrdu
+data_root: data/vrdu
+subcorpus: registration-form
+image_mode: pages
+
+epochs: 20
+batch_size: 4
+lr: 5.0e-5
+weight_decay: 0.01
+warmup_ratio: 0.1
+max_length: 512
+
+sliding_window: true
+window_size: 384
+window_overlap: 128
+coordinate_jitter: false
+relative_coords: false
+
+seeds: [13, 42]
+n_train: 200
+save_weights: false
+output_dir: results/vrdu_layoutlmv3
