@@ -1,0 +1,587 @@
+{
+  "common_forms": 50,
+  "arms": {
+    "V3": {
+      "all|vlm|entity": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "gold": 2260,
+        "pred": 2260
+      },
+      "all|vlm|link": {
+        "precision": 0.2055,
+        "recall": 0.3558,
+        "f1": 0.2605,
+        "gold": 1442,
+        "pred": 2496
+      },
+      "all|vlm|link_qa": {
+        "precision": 0.5597,
+        "recall": 0.3889,
+        "f1": 0.459,
+        "gold": 1229,
+        "pred": 854
+      },
+      "all|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.2479,
+        "f1": 0.3974,
+        "gold": 726,
+        "pred": 180
+      },
+      "all|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.4726,
+        "f1": 0.6418,
+        "gold": 656,
+        "pred": 310
+      },
+      "all|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.3833,
+        "f1": 0.5542,
+        "gold": 60,
+        "pred": 23
+      },
+      "all|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.4572,
+        "f1": 0.6275,
+        "gold": 409,
+        "pred": 187
+      },
+      "all|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.3825,
+        "f1": 0.5533,
+        "gold": 217,
+        "pred": 83
+      },
+      "all|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.3827,
+        "f1": 0.5535,
+        "gold": 358,
+        "pred": 137
+      },
+      "all|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2314,
+        "f1": 0.3759,
+        "gold": 458,
+        "pred": 106
+      },
+      "all|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.1538,
+        "f1": 0.2667,
+        "gold": 208,
+        "pred": 32
+      },
+      "sibling_free|vlm|entity": {
+        "precision": 1.0,
+        "recall": 1.0,
+        "f1": 1.0,
+        "gold": 2144,
+        "pred": 2144
+      },
+      "sibling_free|vlm|link": {
+        "precision": 0.203,
+        "recall": 0.3473,
+        "f1": 0.2562,
+        "gold": 1385,
+        "pred": 2370
+      },
+      "sibling_free|vlm|link_qa": {
+        "precision": 0.5603,
+        "recall": 0.3805,
+        "f1": 0.4533,
+        "gold": 1172,
+        "pred": 796
+      },
+      "sibling_free|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.2469,
+        "f1": 0.396,
+        "gold": 725,
+        "pred": 179
+      },
+      "sibling_free|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.4672,
+        "f1": 0.6369,
+        "gold": 610,
+        "pred": 285
+      },
+      "sibling_free|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.34,
+        "f1": 0.5075,
+        "gold": 50,
+        "pred": 17
+      },
+      "sibling_free|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.453,
+        "f1": 0.6235,
+        "gold": 404,
+        "pred": 183
+      },
+      "sibling_free|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.3671,
+        "f1": 0.5371,
+        "gold": 207,
+        "pred": 76
+      },
+      "sibling_free|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.3728,
+        "f1": 0.5431,
+        "gold": 338,
+        "pred": 126
+      },
+      "sibling_free|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.2202,
+        "f1": 0.3609,
+        "gold": 436,
+        "pred": 96
+      },
+      "sibling_free|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.1538,
+        "f1": 0.2667,
+        "gold": 208,
+        "pred": 32
+      },
+      "arm": "V3",
+      "n_forms": 50,
+      "n_sibling_free": 47,
+      "models": {
+        "Qwen/Qwen2.5-VL-7B-Instruct": 50
+      },
+      "bootstrap_ci_f1": {
+        "entity": [
+          1.0,
+          1.0
+        ],
+        "link": [
+          0.2175,
+          0.3038
+        ],
+        "link_qa": [
+          0.3945,
+          0.521
+        ]
+      },
+      "link_f1_by_language": {
+        "de": 0.3492,
+        "es": 0.2095,
+        "fr": 0.3114,
+        "it": 0.239,
+        "pt": 0.2606
+      },
+      "parse_fail_rate": 0.0,
+      "error_rate": 0.0,
+      "truncated_rate": 0.2,
+      "item_counts": {
+        "entity_lines": 3257,
+        "link_lines": 2868,
+        "bad_ranges": 0,
+        "unmatched": 0,
+        "dangling_links": 146
+      },
+      "mean_seconds_per_form": 34.83
+    },
+    "V2": {
+      "all|vlm|entity": {
+        "precision": 0.1308,
+        "recall": 0.1168,
+        "f1": 0.1234,
+        "gold": 2260,
+        "pred": 2018
+      },
+      "all|vlm|link": {
+        "precision": 0.0279,
+        "recall": 0.027,
+        "f1": 0.0275,
+        "gold": 1442,
+        "pred": 1397
+      },
+      "all|vlm|link_qa": {
+        "precision": 0.0582,
+        "recall": 0.022,
+        "f1": 0.0319,
+        "gold": 1229,
+        "pred": 464
+      },
+      "all|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.0427,
+        "f1": 0.0819,
+        "gold": 726,
+        "pred": 31
+      },
+      "all|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.0107,
+        "f1": 0.0211,
+        "gold": 656,
+        "pred": 7
+      },
+      "all|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.0167,
+        "f1": 0.0328,
+        "gold": 60,
+        "pred": 1
+      },
+      "all|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.0293,
+        "f1": 0.057,
+        "gold": 409,
+        "pred": 12
+      },
+      "all|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.0507,
+        "f1": 0.0965,
+        "gold": 217,
+        "pred": 11
+      },
+      "all|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.0335,
+        "f1": 0.0649,
+        "gold": 358,
+        "pred": 12
+      },
+      "all|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.0087,
+        "f1": 0.0173,
+        "gold": 458,
+        "pred": 4
+      },
+      "all|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.0048,
+        "f1": 0.0096,
+        "gold": 208,
+        "pred": 1
+      },
+      "sibling_free|vlm|entity": {
+        "precision": 0.1326,
+        "recall": 0.1213,
+        "f1": 0.1267,
+        "gold": 2144,
+        "pred": 1961
+      },
+      "sibling_free|vlm|link": {
+        "precision": 0.028,
+        "recall": 0.0274,
+        "f1": 0.0277,
+        "gold": 1385,
+        "pred": 1356
+      },
+      "sibling_free|vlm|link_qa": {
+        "precision": 0.057,
+        "recall": 0.0222,
+        "f1": 0.0319,
+        "gold": 1172,
+        "pred": 456
+      },
+      "sibling_free|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.0414,
+        "f1": 0.0795,
+        "gold": 725,
+        "pred": 30
+      },
+      "sibling_free|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.0115,
+        "f1": 0.0227,
+        "gold": 610,
+        "pred": 7
+      },
+      "sibling_free|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.02,
+        "f1": 0.0392,
+        "gold": 50,
+        "pred": 1
+      },
+      "sibling_free|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.0297,
+        "f1": 0.0577,
+        "gold": 404,
+        "pred": 12
+      },
+      "sibling_free|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.0531,
+        "f1": 0.1009,
+        "gold": 207,
+        "pred": 11
+      },
+      "sibling_free|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.0325,
+        "f1": 0.063,
+        "gold": 338,
+        "pred": 11
+      },
+      "sibling_free|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.0092,
+        "f1": 0.0182,
+        "gold": 436,
+        "pred": 4
+      },
+      "sibling_free|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.0048,
+        "f1": 0.0096,
+        "gold": 208,
+        "pred": 1
+      },
+      "arm": "V2",
+      "n_forms": 50,
+      "n_sibling_free": 47,
+      "models": {
+        "Qwen/Qwen2.5-VL-7B-Instruct": 50
+      },
+      "bootstrap_ci_f1": {
+        "entity": [
+          0.0911,
+          0.1591
+        ],
+        "link": [
+          0.017,
+          0.0408
+        ],
+        "link_qa": [
+          0.0163,
+          0.0517
+        ]
+      },
+      "link_f1_by_language": {
+        "de": 0.0225,
+        "es": 0.0031,
+        "fr": 0.0343,
+        "it": 0.0303,
+        "pt": 0.0478
+      },
+      "parse_fail_rate": 0.0,
+      "error_rate": 0.0,
+      "truncated_rate": 0.4,
+      "item_counts": {
+        "entity_lines": 6,
+        "link_lines": 2098,
+        "bad_ranges": 774,
+        "unmatched": 0,
+        "dangling_links": 0
+      },
+      "mean_seconds_per_form": 78.82
+    },
+    "V4": {
+      "all|vlm|entity": {
+        "precision": 0.7385,
+        "recall": 0.8235,
+        "f1": 0.7787,
+        "gold": 2260,
+        "pred": 2520
+      },
+      "all|vlm|link": {
+        "precision": 0.1951,
+        "recall": 0.3093,
+        "f1": 0.2393,
+        "gold": 1442,
+        "pred": 2286
+      },
+      "all|vlm|link_qa": {
+        "precision": 0.347,
+        "recall": 0.3303,
+        "f1": 0.3385,
+        "gold": 1229,
+        "pred": 1170
+      },
+      "all|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.1791,
+        "f1": 0.3037,
+        "gold": 726,
+        "pred": 130
+      },
+      "all|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.4527,
+        "f1": 0.6233,
+        "gold": 656,
+        "pred": 297
+      },
+      "all|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.3167,
+        "f1": 0.481,
+        "gold": 60,
+        "pred": 19
+      },
+      "all|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.4059,
+        "f1": 0.5774,
+        "gold": 409,
+        "pred": 166
+      },
+      "all|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.3272,
+        "f1": 0.4931,
+        "gold": 217,
+        "pred": 71
+      },
+      "all|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.3352,
+        "f1": 0.5021,
+        "gold": 358,
+        "pred": 120
+      },
+      "all|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.1943,
+        "f1": 0.3254,
+        "gold": 458,
+        "pred": 89
+      },
+      "all|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.0913,
+        "f1": 0.1674,
+        "gold": 208,
+        "pred": 19
+      },
+      "sibling_free|vlm|entity": {
+        "precision": 0.7291,
+        "recall": 0.8148,
+        "f1": 0.7696,
+        "gold": 2144,
+        "pred": 2396
+      },
+      "sibling_free|vlm|link": {
+        "precision": 0.1919,
+        "recall": 0.3004,
+        "f1": 0.2342,
+        "gold": 1385,
+        "pred": 2168
+      },
+      "sibling_free|vlm|link_qa": {
+        "precision": 0.3409,
+        "recall": 0.3208,
+        "f1": 0.3305,
+        "gold": 1172,
+        "pred": 1103
+      },
+      "sibling_free|vlm|group|below": {
+        "precision": 1.0,
+        "recall": 0.1779,
+        "f1": 0.3021,
+        "gold": 725,
+        "pred": 129
+      },
+      "sibling_free|vlm|group|same_line": {
+        "precision": 1.0,
+        "recall": 0.4492,
+        "f1": 0.6199,
+        "gold": 610,
+        "pred": 274
+      },
+      "sibling_free|vlm|group|above": {
+        "precision": 1.0,
+        "recall": 0.26,
+        "f1": 0.4127,
+        "gold": 50,
+        "pred": 13
+      },
+      "sibling_free|vlm|group|rank_0": {
+        "precision": 1.0,
+        "recall": 0.401,
+        "f1": 0.5724,
+        "gold": 404,
+        "pred": 162
+      },
+      "sibling_free|vlm|group|rank_1": {
+        "precision": 1.0,
+        "recall": 0.314,
+        "f1": 0.4779,
+        "gold": 207,
+        "pred": 65
+      },
+      "sibling_free|vlm|group|rank_2_4": {
+        "precision": 1.0,
+        "recall": 0.3225,
+        "f1": 0.4877,
+        "gold": 338,
+        "pred": 109
+      },
+      "sibling_free|vlm|group|rank_5plus": {
+        "precision": 1.0,
+        "recall": 0.1835,
+        "f1": 0.3101,
+        "gold": 436,
+        "pred": 80
+      },
+      "sibling_free|vlm|group|q_to_q": {
+        "precision": 1.0,
+        "recall": 0.0913,
+        "f1": 0.1674,
+        "gold": 208,
+        "pred": 19
+      },
+      "arm": "V4",
+      "n_forms": 50,
+      "n_sibling_free": 47,
+      "models": {
+        "Qwen/Qwen2.5-VL-7B-Instruct": 50
+      },
+      "bootstrap_ci_f1": {
+        "entity": [
+          0.7459,
+          0.8129
+        ],
+        "link": [
+          0.2035,
+          0.2746
+        ],
+        "link_qa": [
+          0.2926,
+          0.3844
+        ]
+      },
+      "link_f1_by_language": {
+        "de": 0.3319,
+        "es": 0.2005,
+        "fr": 0.2866,
+        "it": 0.2102,
+        "pt": 0.2194
+      },
+      "parse_fail_rate": 0.0,
+      "error_rate": 0.0,
+      "truncated_rate": 0.16,
+      "item_counts": {
+        "entity_lines": 2520,
+        "link_lines": 2496,
+        "bad_ranges": 0,
+        "unmatched": 0,
+        "dangling_links": 190
+      },
+      "mean_seconds_per_form": 29.76
+    }
+  }
+}

@@ -1,0 +1,194 @@
+{
+  "all|vlm|entity": {
+    "precision": 0.7385,
+    "recall": 0.8235,
+    "f1": 0.7787,
+    "gold": 2260,
+    "pred": 2520
+  },
+  "all|vlm|link": {
+    "precision": 0.1951,
+    "recall": 0.3093,
+    "f1": 0.2393,
+    "gold": 1442,
+    "pred": 2286
+  },
+  "all|vlm|link_qa": {
+    "precision": 0.3467,
+    "recall": 0.3303,
+    "f1": 0.3383,
+    "gold": 1229,
+    "pred": 1171
+  },
+  "all|vlm|group|below": {
+    "precision": 1.0,
+    "recall": 0.1791,
+    "f1": 0.3037,
+    "gold": 726,
+    "pred": 130
+  },
+  "all|vlm|group|same_line": {
+    "precision": 1.0,
+    "recall": 0.4527,
+    "f1": 0.6233,
+    "gold": 656,
+    "pred": 297
+  },
+  "all|vlm|group|above": {
+    "precision": 1.0,
+    "recall": 0.3167,
+    "f1": 0.481,
+    "gold": 60,
+    "pred": 19
+  },
+  "all|vlm|group|rank_0": {
+    "precision": 1.0,
+    "recall": 0.4059,
+    "f1": 0.5774,
+    "gold": 409,
+    "pred": 166
+  },
+  "all|vlm|group|rank_1": {
+    "precision": 1.0,
+    "recall": 0.3272,
+    "f1": 0.4931,
+    "gold": 217,
+    "pred": 71
+  },
+  "all|vlm|group|rank_2_4": {
+    "precision": 1.0,
+    "recall": 0.3352,
+    "f1": 0.5021,
+    "gold": 358,
+    "pred": 120
+  },
+  "all|vlm|group|rank_5plus": {
+    "precision": 1.0,
+    "recall": 0.1943,
+    "f1": 0.3254,
+    "gold": 458,
+    "pred": 89
+  },
+  "all|vlm|group|q_to_q": {
+    "precision": 1.0,
+    "recall": 0.0913,
+    "f1": 0.1674,
+    "gold": 208,
+    "pred": 19
+  },
+  "sibling_free|vlm|entity": {
+    "precision": 0.7291,
+    "recall": 0.8148,
+    "f1": 0.7696,
+    "gold": 2144,
+    "pred": 2396
+  },
+  "sibling_free|vlm|link": {
+    "precision": 0.1919,
+    "recall": 0.3004,
+    "f1": 0.2342,
+    "gold": 1385,
+    "pred": 2168
+  },
+  "sibling_free|vlm|link_qa": {
+    "precision": 0.3406,
+    "recall": 0.3208,
+    "f1": 0.3304,
+    "gold": 1172,
+    "pred": 1104
+  },
+  "sibling_free|vlm|group|below": {
+    "precision": 1.0,
+    "recall": 0.1779,
+    "f1": 0.3021,
+    "gold": 725,
+    "pred": 129
+  },
+  "sibling_free|vlm|group|same_line": {
+    "precision": 1.0,
+    "recall": 0.4492,
+    "f1": 0.6199,
+    "gold": 610,
+    "pred": 274
+  },
+  "sibling_free|vlm|group|above": {
+    "precision": 1.0,
+    "recall": 0.26,
+    "f1": 0.4127,
+    "gold": 50,
+    "pred": 13
+  },
+  "sibling_free|vlm|group|rank_0": {
+    "precision": 1.0,
+    "recall": 0.401,
+    "f1": 0.5724,
+    "gold": 404,
+    "pred": 162
+  },
+  "sibling_free|vlm|group|rank_1": {
+    "precision": 1.0,
+    "recall": 0.314,
+    "f1": 0.4779,
+    "gold": 207,
+    "pred": 65
+  },
+  "sibling_free|vlm|group|rank_2_4": {
+    "precision": 1.0,
+    "recall": 0.3225,
+    "f1": 0.4877,
+    "gold": 338,
+    "pred": 109
+  },
+  "sibling_free|vlm|group|rank_5plus": {
+    "precision": 1.0,
+    "recall": 0.1835,
+    "f1": 0.3101,
+    "gold": 436,
+    "pred": 80
+  },
+  "sibling_free|vlm|group|q_to_q": {
+    "precision": 1.0,
+    "recall": 0.0913,
+    "f1": 0.1674,
+    "gold": 208,
+    "pred": 19
+  },
+  "arm": "V4",
+  "n_forms": 50,
+  "n_sibling_free": 47,
+  "models": {
+    "Qwen/Qwen2.5-VL-7B-Instruct": 50
+  },
+  "bootstrap_ci_f1": {
+    "entity": [
+      0.7459,
+      0.8129
+    ],
+    "link": [
+      0.2035,
+      0.2746
+    ],
+    "link_qa": [
+      0.2927,
+      0.3842
+    ]
+  },
+  "link_f1_by_language": {
+    "de": 0.3319,
+    "es": 0.2005,
+    "fr": 0.2866,
+    "it": 0.2102,
+    "pt": 0.2194
+  },
+  "parse_fail_rate": 0.0,
+  "error_rate": 0.0,
+  "truncated_rate": 0.16,
+  "item_counts": {
+    "entity_lines": 2520,
+    "link_lines": 2496,
+    "bad_ranges": 0,
+    "unmatched": 0,
+    "dangling_links": 190
+  },
+  "mean_seconds_per_form": 29.76
+}
