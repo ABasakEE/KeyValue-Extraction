@@ -1,0 +1,154 @@
+{
+  "test": {
+    "precision": 0.6349,
+    "recall": 0.691,
+    "f1": 0.6617,
+    "support": 82181,
+    "truncated_words": 0,
+    "per_type": {
+      "line_item_amount_gross": {
+        "precision": 0.5643,
+        "recall": 0.84,
+        "f1": 0.6751,
+        "support": 1150
+      },
+      "line_item_amount_net": {
+        "precision": 1.0,
+        "recall": 0.1029,
+        "f1": 0.1867,
+        "support": 204
+      },
+      "line_item_code": {
+        "precision": 0.4914,
+        "recall": 0.5733,
+        "f1": 0.5292,
+        "support": 450
+      },
+      "line_item_currency": {
+        "precision": 0.7215,
+        "recall": 0.5089,
+        "f1": 0.5969,
+        "support": 112
+      },
+      "line_item_date": {
+        "precision": 0.6751,
+        "recall": 0.8774,
+        "f1": 0.7631,
+        "support": 824
+      },
+      "line_item_description": {
+        "precision": 0.6123,
+        "recall": 0.6571,
+        "f1": 0.6339,
+        "support": 1747
+      },
+      "line_item_discount_amount": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "line_item_discount_rate": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "line_item_hts_number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "line_item_order_id": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 19
+      },
+      "line_item_person_name": {
+        "precision": 1.0,
+        "recall": 0.1,
+        "f1": 0.1818,
+        "support": 30
+      },
+      "line_item_position": {
+        "precision": 0.7389,
+        "recall": 0.9227,
+        "f1": 0.8206,
+        "support": 181
+      },
+      "line_item_quantity": {
+        "precision": 0.7105,
+        "recall": 0.8384,
+        "f1": 0.7692,
+        "support": 928
+      },
+      "line_item_tax": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 9
+      },
+      "line_item_unit_price_gross": {
+        "precision": 0.7738,
+        "recall": 0.5588,
+        "f1": 0.6489,
+        "support": 655
+      },
+      "line_item_unit_price_net": {
+        "precision": 0.5918,
+        "recall": 0.2042,
+        "f1": 0.3037,
+        "support": 142
+      },
+      "line_item_units_of_measure": {
+        "precision": 0.7662,
+        "recall": 0.3642,
+        "f1": 0.4937,
+        "support": 162
+      },
+      "line_item_weight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      }
+    }
+  },
+  "best_val_f1": 0.6768,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.5214,
+      "val_f1": 0.6039
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.1478,
+      "val_f1": 0.6768
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1079,
+      "val_f1": 0.6768
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0805,
+      "val_f1": 0.6684
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0661,
+      "val_f1": 0.67
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 187,
+    "total_i_tags": 5183,
+    "rate": 0.0361
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6617 == independent F1=0.6617 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6552 (spread 0.0065)\n  malformed I- tags: 187/5183 (3.6%)",
+  "peak_gpu_mem_gb": 7.86
+}
