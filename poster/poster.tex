@@ -70,7 +70,7 @@ New vendors send forms in layouts no model has seen. We extract named fields wit
 \toprule
 Intensive phase, VRDU & MTL & UTL & Gap \\
 \midrule
-LiLT\textsuperscript{*} & 91.6 & 64.2 & 27.4 \\                          % results/master_architectural_benchmark.csv
+LiLT\textsuperscript{*} & 91.6 & 64.2 & 27.3 \\                          % results/master_architectural_benchmark.csv
 Graph network (RSA-GNN)\textsuperscript{*} & 86.0 & 42.1 & 43.9 \\        % same CSV
 DANN-BROS & 91.8 & 69.6 & 22.2 \\                             % results/vrdu_dann_bros/metrics.json
 BROS Track-1 (windows, jitter) & \textbf{92.4} & \textbf{71.3} & \textbf{21.1} \\ % results/vrdu_track1_bros/metrics.json
@@ -86,7 +86,7 @@ Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every 
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
 \begin{enumerate}\setlength{\itemsep}{0.6ex}
-\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates; a per-field router scores \hl{79.2}.
+\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates\textsuperscript{\dag}; a per-field router scores \hl{79.2}.
 \item \textbf{The advantage reverses.} BROS overtakes the reader at 10 seen FATURA templates and on line-item tables.
 \item \textbf{Linking, measured end to end:} \hl{47.4}, not 65.5. BROS geometry adds \hl{+5.9}; a multilingual encoder costs 3.5.
 \end{enumerate}};
@@ -184,16 +184,16 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}
 \includegraphics[width=\linewidth]{f3_xfund_links.pdf}
-\captionof{figure}{XFUND link F1, end to end; LiLT-XLM = multilingual. Dots: 3 seeds.}
+\captionof{figure}{XFUND link F1, end to end. LiLT-XLM (multilingual) is −3.5 vs its own run's LiLT-en (47.7); 47.4 is a retrain.}
 \end{minipage}
 
 \vspace{0.8ex}
 \begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=\linewidth]{f6_example_shortform.pdf}
+\includegraphics[width=0.86\linewidth]{f6_example_shortform.pdf}
 \captionof{figure}{Unseen Short-Form: BROS tags the filer as registrant; the reader cites item 8.}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=\linewidth]{f4_docile_curve.pdf}
+\includegraphics[width=0.86\linewidth]{f4_docile_curve.pdf}
 \captionof{figure}{DocILE, BROS. Gap 2--9 points (VRDU: 21); 21.4\% of cells missed.}
 \end{minipage}
 
@@ -202,8 +202,8 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \begin{block}{Conclusion and limitations}
 \begin{itemize}\setlength{\itemsep}{0.2ex}
 \item Read when templates are new and few; train when 10+ are seen and for tables (ad-buy: reader 38.2 vs BROS 68.8--85.7 row F1).
-\item Linking: geometry helped (+5.9), multilingual text did not (−3.5). Next: a learned router.
-\item Limits: prompt tuned on dev/confirm, fresh-form test (S32) not run; LayoutLMv3 pixels vs blank: 92.24 vs 92.35 seen, unseen \todo{S42}.
+\item Linking: geometry +5.9, multilingual text −3.5. Pixels (LayoutLMv3 vs blank image): none on seen templates, +3.4 on unseen (63.8 vs 60.4), 14 below BROS. Next: a learned router.
+\item Limits: \textsuperscript{\dag}prompt tuned on dev/confirm, fresh-form test (S32) not run; Short-Form pixels pending.
 \end{itemize}
 \end{block}
 

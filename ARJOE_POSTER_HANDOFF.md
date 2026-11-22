@@ -36,12 +36,10 @@ Tectonic is a single binary (github.com/tectonic-typesetting/tectonic, releases)
    - add the URL to `CODES` in `poster/scripts/make_qr.py` and run it;
    - in `poster.tex`, replace `\fbox{\parbox[c][3.7cm][c]{3.7cm}{...\todo{demo QR}}}` with `\setlength{\qrunit}{3.9cm/\qrmodules}\input{figures/qr_demo.tex}`;
    - rebuild.
-2. **Study 42, LayoutLMv3 on unseen templates.** This is in the poster's Conclusion and in report section 2.5.
-   - What the Kaggle runner pushed today is `best_meta.json` files. Those hold `best_val_score`, a validation score on seen templates, not the unseen-template test F1, so I didn't use them.
-   - When the `results/vrdu_layoutlmv3_summary_*.json` files land, replace `\todo{S42}` in `poster.tex` and the "still going at submission" sentence in `report.tex`.
+2. **Study 42, LayoutLMv3 on unseen templates: filled in (22 Nov, 22:30).** Unseen folds 0 and 1, seeds 13 and 42: pages 63.8 vs blank 60.4 (+3.4; pair differences +4.5, +3.2, +8.3, -2.6), registered rule met but marginal; both 14 to 17 points below Track-1 BROS (77.7 on the same folds). Poster conclusion, report row 42 and section 2.5 updated, PDFs rebuilt. **Fold 2 (Short-Form) is still running on Kaggle**: if it lands before printing, add the three-fold numbers (`results/vrdu_layoutlmv3[_blank]_utl_f2/`) and remove "Short-Form pixels pending" from the poster.
 3. **Check two reference author lists against the paper pages:** FATURA (Limam, Dhiaf, Kessentini) and XFUND (Xu, Lv, Cui, et al., Findings of ACL 2022). The rest I'm confident in.
 4. **Check that the repo is public.** The GitHub QR points to `https://github.com/ABasakEE/KeyValue-Extraction/tree/feat/bros-relative-layout`.
-5. **Nothing is committed yet:** `poster/`, `novelty_report/` and this file are untracked on `feat/bros-relative-layout`. Commit and push when you're happy with them.
+5. Everything is committed on `feat/bros-relative-layout`.
 
 ## Numbers I changed from PARAM_HANDOFF.md (checked against the raw files)
 
