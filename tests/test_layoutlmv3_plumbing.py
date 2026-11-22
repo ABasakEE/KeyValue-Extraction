@@ -2,7 +2,7 @@
 
     python tests/test_layoutlmv3_plumbing.py
 
-Checks: the page of a window, the image tensor (shape, range, caching, blank control), that the collator adds `pixel_values`, that one forward and backward
+Checks: windows that never cross a page (every word covered), the page of a window, the image tensor (shape, range, caching, blank control), that the collator adds `pixel_values`, that one forward and backward
 step with the real model gives a finite loss and gradients on the visual stream, and that the page image changes the logits while the blank image does not depend on the page.
 """
 import sys
@@ -38,13 +38,29 @@ def test_page_images():
     assert PageImages.page_of(two) == 0 and PageImages.page_of(type(two)(guid="x", words=["a"], boxes=[[0, 0, 1, 1]], ner_tags=[0], template_id="t", page_ids=[])) == 0
 
 
+def test_windows_by_page():
+    exs, _ = examples(3)
+    for ex in exs:
+        wins = chunk_vrdu_examples([ex], window_size=60, overlap=20, by_page=True)
+        covered = set()
+        for w in wins:
+            assert len(set(w.page_ids)) == 1 and len(w.words) <= 60, (ex.guid, set(w.page_ids))
+            assert w.words == ex.words[w.word_offset:w.word_offset + len(w.words)] and w.total_doc_words == len(ex.words) and w.doc_guid == ex.guid
+            assert PageImages.page_of(w) == w.page_ids[0]
+            covered |= set(range(w.word_offset, w.word_offset + len(w.words)))
+        assert covered == set(range(len(ex.words))), "a word is in no window"
+    multi = [e for e in exs if e.n_pages > 1]
+    assert multi and len(chunk_vrdu_examples(multi, window_size=10_000, by_page=True)) >= 2   # a short multi-page document still gets one window per page
+    assert len(chunk_vrdu_examples(multi, window_size=10_000)) == len(multi)                  # the default windows would have cut it only by length
+
+
 def test_model_step():
     exs, id2label = examples()
     cfg = TrainConfig.from_yaml(ROOT / "configs" / "vrdu_layoutlmv3.yaml")
     cfg.max_length = 128
     model = build_model(cfg, len(id2label), id2label)
     assert model.image_loader.mode == "pages"
-    batch = chunk_vrdu_examples(exs, window_size=60, overlap=20)[:3]
+    batch = chunk_vrdu_examples(exs, window_size=60, overlap=20, by_page=True)[:3]
     loader = DataLoader(FormDataset(batch), batch_size=3, collate_fn=make_collator(model, is_train=True))
     encoded, _ = next(iter(loader))
     px = encoded.inputs["pixel_values"]
@@ -63,6 +79,7 @@ def test_model_step():
         blank = model.model(**{**inp, "pixel_values": torch.zeros_like(px)}).logits
     assert (real - other).abs().max() > 1e-6 or (real - blank).abs().max() > 1e-6, "the image has no effect on the logits"
     cfg_b = TrainConfig.from_yaml(ROOT / "configs" / "vrdu_layoutlmv3_blank.yaml")
+    assert cfg.window_by_page and cfg_b.window_by_page, "both arms must cut windows at page boundaries"
     assert cfg_b.image_mode == "blank" and cfg_b.backbone == "layoutlmv3" and cfg_b.relative_coords is False and cfg_b.coordinate_jitter is False
     try:
         cfg.image_mode = "none"
@@ -75,5 +92,7 @@ def test_model_step():
 if __name__ == "__main__":
     test_page_images()
     print("[+] page images ok")
+    test_windows_by_page()
+    print("[+] windows by page ok")
     test_model_step()
     print("[+] model step ok")

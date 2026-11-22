@@ -17,6 +17,7 @@ max_length: 512
 sliding_window: true
 window_size: 384
 window_overlap: 128
+window_by_page: true       # a window never crosses a page: one window, one page image (both arms use the same windows)
 coordinate_jitter: false
 relative_coords: false
 

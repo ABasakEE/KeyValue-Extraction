@@ -161,15 +161,57 @@ def chunk_vrdu_example(
     return chunks
 
 
+def chunk_vrdu_example_by_page(
+    example: VrduExample,
+    window_size: int = 384,
+    overlap: int = 128,
+) -> list[VrduExample]:
+    """Sliding windows that never cross a page: each page's words (contiguous in ``words``) are windowed on their own.
+
+    Needed when a window is paired with one page image (LayoutLMv3). ``word_offset`` stays the offset in the whole document, so soft voting is unchanged.
+    """
+    n_words = len(example.words)
+    pages = list(example.page_ids) if example.page_ids else [0] * n_words
+    segments, start = [], 0
+    for i in range(1, n_words + 1):
+        if i == n_words or pages[i] != pages[start]:
+            segments.append((start, i))
+            start = i
+    step = max(1, window_size - overlap)
+    chunks: list[VrduExample] = []
+    for a, b in segments:
+        for s0 in range(a, b, step):
+            e0 = min(b, s0 + window_size)
+            chunks.append(VrduExample(
+                guid=f"{example.guid}#chunk{len(chunks)}",
+                words=example.words[s0:e0],
+                boxes=example.boxes[s0:e0],
+                ner_tags=example.ner_tags[s0:e0],
+                template_id=example.template_id,
+                page_ids=pages[s0:e0],
+                n_pages=example.n_pages,
+                unaligned_entities=0,
+                doc_guid=example.doc_guid or example.guid,
+                word_offset=s0,
+                total_doc_words=n_words,
+                doc_envelope=example.doc_envelope,
+            ))
+            if e0 >= b:
+                break
+    return chunks
+
+
 def chunk_vrdu_examples(
     examples: list[VrduExample],
     window_size: int = 384,
     overlap: int = 128,
+    by_page: bool = False,
 ) -> list[VrduExample]:
-    """Chunk a list of VrduExamples into sliding windows of words."""
+    """Chunk a list of VrduExamples into sliding windows of words (``by_page``: no window crosses a page)."""
+    chunk = chunk_vrdu_example_by_page if by_page else chunk_vrdu_example
     chunked: list[VrduExample] = []
     for ex in examples:
-        chunked.extend(chunk_vrdu_example(ex, window_size=window_size, overlap=overlap))
+        chunked.extend(chunk(ex, window_size=window_size, overlap=overlap))
     return chunked
 
 

@@ -118,6 +118,7 @@ class TrainConfig:
     sliding_window: bool = False
     window_size: int = 384
     window_overlap: int = 128
+    window_by_page: bool = False           # True: windows never cross a page (one page image per window, LayoutLMv3)
     form_window: int = 0                   # > 0: train/validate on entity-aligned word windows of this many subwords (XFUND)
     form_window_stride: int = 255
     coordinate_jitter: bool = False
@@ -576,9 +577,10 @@ def train_one(
             from src.data.vrdu_loader import chunk_vrdu_examples
         w_size = getattr(config, "window_size", 384)
         w_overlap = getattr(config, "window_overlap", 128)
-        train_examples = chunk_vrdu_examples(train_examples, window_size=w_size, overlap=w_overlap)
-        val_examples = chunk_vrdu_examples(val_examples, window_size=w_size, overlap=w_overlap)
-        test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap)
+        by_page = getattr(config, "window_by_page", False)
+        train_examples = chunk_vrdu_examples(train_examples, window_size=w_size, overlap=w_overlap, by_page=by_page)
+        val_examples = chunk_vrdu_examples(val_examples, window_size=w_size, overlap=w_overlap, by_page=by_page)
+        test_examples = chunk_vrdu_examples(test_examples, window_size=w_size, overlap=w_overlap, by_page=by_page)
     if getattr(config, "crop_aug", False):
         try:
             from data.xfund_windows import crop_examples
