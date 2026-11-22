@@ -119,6 +119,20 @@ if CONFIG_PATH.exists():
         pass
 
 _MODEL_CACHE: tuple[Any, bool] = (None, False)
+_BACKBONE_NAMES = {"bros": "BROS", "lilt": "LiLT", "lilt_xlm": "LiLT-InfoXLM", "layoutlmv3": "LayoutLMv3"}
+
+
+def backbone_display_name() -> str:
+    """Name of the encoder of the checkpoint the demo loads (from its config; LiLT when no config exists), for the text shown in the interface."""
+    for meta, key in ((CONFIG_PATH, None), (CKPT_DIR / "metrics.json", "config"), (CKPT_DIR.parent / "metrics.json", "config")):
+        if meta.exists():
+            try:
+                d = json.loads(meta.read_text(encoding="utf-8"))
+                d = d.get(key, {}) if key else d
+                return _BACKBONE_NAMES.get(d.get("backbone", "lilt"), str(d.get("backbone", "LiLT")))
+            except Exception:
+                break
+    return "LiLT"
 
 def get_loaded_model() -> JointFormExtractor | None:
     global _MODEL_CACHE
@@ -808,7 +822,7 @@ def process_uploaded_document(
         ]
         inline_pairs = [(0, 1), (2, 3)]
 
-    # 3. Apply LiLT Neural Backbone predictions if checkpoint is loaded
+    # 3. Apply the neural backbone predictions (BROS or LiLT, whichever the checkpoint holds) if a checkpoint is loaded
     model = get_loaded_model()
     neural = None
     links = kv_records = None
@@ -962,7 +976,7 @@ def create_demo():
     )
 
     with gr.Blocks(title="Cross-Template Key-Value Field Extractor", theme=theme) as demo:
-        model_badge = f"🟢 **Trained Neural Model Active**: LiLT tagger + trained biaffine link head (`{CKPT_PATH.as_posix()}`); key-value links = colon pairs + trained head" if CKPT_PATH.exists() else "🟡 **Spatial Layout Engine Active** (Heuristic mode)"
+        model_badge = f"🟢 **Trained Neural Model Active**: {backbone_display_name()} tagger + trained biaffine link head (`{CKPT_PATH.as_posix()}`); key-value links = colon pairs + trained head" if CKPT_PATH.exists() else "🟡 **Spatial Layout Engine Active** (Heuristic mode)"
         gr.Markdown(
             f"""
             # 📄 Cross-Template Key-Value Field Extractor
