@@ -1,0 +1,95 @@
+% IE 643 poster theme.
+% Adapted from the Gemini theme by Anish Athalye (https://github.com/anishathalye/gemini, MIT licence,
+% see GEMINI_LICENSE.md). Changes: one font family (Fira Sans, two weights) loaded from ./fonts,
+% left-aligned section titles with a thin rule, ragged-right text, a five-line course header with logos.
+
+\RequirePackage{ragged2e}
+\RequirePackage{fontspec}
+\RequirePackage{calc}
+
+% -------------------------------------------------------------- colours (one accent)
+\definecolor{ink}{HTML}{1A1A1A}
+\definecolor{accent}{HTML}{1F4E79}
+\definecolor{muted}{HTML}{5F5F5F}
+\definecolor{rulegrey}{HTML}{BFBFBF}
+
+\setbeamercolor{background canvas}{bg=white}
+\setbeamercolor{normal text}{fg=ink,bg=white}
+\setbeamercolor{structure}{fg=accent}
+\setbeamercolor{block title}{fg=accent,bg=white}
+\setbeamercolor{block body}{fg=ink,bg=white}
+\setbeamercolor{itemize item}{fg=accent}
+\setbeamercolor{itemize subitem}{fg=accent}
+\setbeamercolor{enumerate item}{fg=accent}
+\setbeamercolor{caption name}{fg=ink}
+\setbeamercolor{caption}{fg=muted}
+\setbeamercolor{bibliography entry author}{fg=ink}
+\setbeamercolor{bibliography entry title}{fg=ink}
+\setbeamercolor{bibliography entry location}{fg=ink}
+\setbeamercolor{bibliography entry note}{fg=ink}
+
+% -------------------------------------------------------------- fonts (Fira Sans Regular + SemiBold)
+\usefonttheme{professionalfonts}
+\setsansfont{FiraSans}[
+  Path=./fonts/,
+  Extension=.ttf,
+  UprightFont=*-Regular,
+  BoldFont=*-SemiBold,
+  ItalicFont=*-Italic,
+  BoldItalicFont=*-SemiBold,
+  Ligatures=TeX
+]
+\setmainfont{FiraSans}[Path=./fonts/,Extension=.ttf,UprightFont=*-Regular,BoldFont=*-SemiBold,ItalicFont=*-Italic,BoldItalicFont=*-SemiBold]
+\renewcommand{\familydefault}{\sfdefault}
+
+\setbeamerfont{block title}{size=\fontsize{35}{41}\selectfont,series=\bfseries}
+\setbeamerfont{caption}{size=\fontsize{18}{22}\selectfont}
+
+% -------------------------------------------------------------- lists
+\setbeamertemplate{itemize item}{\raise0.32ex\hbox{\vrule width 0.42ex height 0.42ex}}
+\setbeamertemplate{itemize subitem}{\raise0.32ex\hbox{\vrule width 0.35ex height 0.35ex}}
+\setbeamertemplate{enumerate item}{\textbf{\insertenumlabel.}}
+\setlength{\leftmargini}{1.1em}
+\beamertemplatenavigationsymbolsempty
+
+% -------------------------------------------------------------- captions
+\setbeamertemplate{caption}{\raggedright\insertcaption\par}
+\setlength{\abovecaptionskip}{0.4ex}
+\setlength{\belowcaptionskip}{0ex}
+
+% -------------------------------------------------------------- bibliography
+\setbeamertemplate{bibliography item}{}
+\setbeamertemplate{bibliography entry article}{}
+\setbeamertemplate{bibliography entry title}{}
+\setbeamertemplate{bibliography entry location}{}
+\setbeamertemplate{bibliography entry note}{}
+
+% -------------------------------------------------------------- section block: title, thin rule, body
+\setbeamertemplate{block begin}{%
+  \par\vskip0pt
+  {\usebeamerfont{block title}\usebeamercolor[fg]{block title}\insertblocktitle\par}
+  \vskip0.25ex
+  {\color{rulegrey}\hrule height 1.2pt}
+  \vskip0.7ex
+  \usebeamerfont{block body}\usebeamercolor[fg]{block body}%
+  \RaggedRight
+  \setlength{\parskip}{0.6ex}%
+}
+\setbeamertemplate{block end}{\par\vskip2.6ex}
+
+% -------------------------------------------------------------- header: logos left/right, five centred lines
+\newcommand{\posterheader}[7]{% #1 left logo, #2 line1, #3 title, #4 team, #5 members, #6 emails, #7 right logo
+  \begin{columns}[c]
+    \begin{column}{0.12\paperwidth}\centering #1\end{column}
+    \begin{column}{0.70\paperwidth}\centering
+      {\fontsize{27}{32}\selectfont\color{muted} #2\par}\vskip0.3ex
+      {\fontsize{62}{70}\selectfont\bfseries\color{accent} #3\par}\vskip0.4ex
+      {\fontsize{29}{34}\selectfont\bfseries\color{ink} #4\par}\vskip0.2ex
+      {\fontsize{25}{30}\selectfont\color{ink} #5\par}
+      {\fontsize{22}{28}\selectfont\color{muted} #6\par}
+    \end{column}
+    \begin{column}{0.12\paperwidth}\centering #7\end{column}
+  \end{columns}
+  \vskip0.9ex
+  {\color{accent}\hrule height 3pt}
+}
