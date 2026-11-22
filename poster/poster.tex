@@ -86,7 +86,7 @@ Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every 
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
 \begin{enumerate}\setlength{\itemsep}{0.6ex}
-\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates\textsuperscript{\dag}; a per-field router scores \hl{79.2}.
+\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates; a per-field router scores \hl{79.2}.
 \item \textbf{The advantage reverses.} BROS overtakes the reader at 10 seen FATURA templates and on line-item tables.
 \item \textbf{Linking, measured end to end:} \hl{47.4} with LiLT, \hl{53.4} with BROS geometry (\hl{+5.9}); multilingual text costs 3.
 \end{enumerate}};
@@ -201,8 +201,8 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \begin{block}{Conclusion and Future Work}
 \begin{itemize}\setlength{\itemsep}{0.2ex}
 \item Read when templates are new and few; train when 10+ are seen and for tables (ad-buy: reader 38.2 vs BROS 68.8--85.7 row F1).
-\item Linking: geometry +5.9, multilingual text about −3. Pixels (LayoutLMv3 vs blank image): none on seen templates, +0.8 over three unseen (unstable seeds), 14 below BROS. Future work: a learned router.
-\item Limits: \textsuperscript{\dag}prompt tuned on dev/confirm, fresh-form test not run.
+\item Linking: geometry +5.9, multilingual text about −3. Pixels (LayoutLMv3 vs blank image): none on seen templates, +0.8 over three unseen (unstable seeds), 14 below BROS. 
+\item Not checked: open-schema decoding, field names never shown to the reader, other domains and languages.
 \end{itemize}
 \end{block}
 

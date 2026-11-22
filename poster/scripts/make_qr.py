@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 import style as S  # noqa: E402
 
 CODES = {
-    "qr_github": "https://github.com/ABasakEE/KeyValue-Extraction/tree/feat/bros-relative-layout",
+    "qr_github": "https://github.com/ABasakEE/KeyValue-Extraction",
     "qr_demo": "https://drive.google.com/file/d/1i64AbI8Imrkb3znjbTYlCjEstoRIstcv/view?usp=sharing",
 }
 
