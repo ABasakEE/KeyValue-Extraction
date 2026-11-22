@@ -146,6 +146,7 @@ class TrainConfig:
     gradient_checkpointing: bool = False
     max_folds: int | None = None
     regimes: tuple = ("MTL", "UTL")
+    folds: tuple | None = None            # matched protocol: run only these fold indices (None = all), e.g. to spread folds over notebooks
     dump_probs: bool = False                 # also write test_probs.jsonl (per-word field probabilities) for routing studies
     dump_probs_guids: str | None = None      # JSON list of document ids to keep (default: all test documents)
     crop_aug: bool = False                   # add link-preserving table crops of the training forms (study 26)
@@ -1430,6 +1431,8 @@ def main() -> None:
                         help="Disable saving best_model.pt weights to disk to conserve disk space on Kaggle")
     parser.add_argument("--max-folds", type=int, default=None,
                         help="Fast-track option: limit number of folds per regime in matched protocol (e.g. 2)")
+    parser.add_argument("--folds", default=None,
+                        help="Comma-separated fold indices to run in matched protocol, e.g. '1' (default: all folds up to --max-folds)")
     parser.add_argument("--regimes", default=None,
                         help="Comma-separated regimes to run in matched protocol, e.g. 'UTL'")
     args = parser.parse_args()
@@ -1476,6 +1479,8 @@ def main() -> None:
         config.max_folds = args.max_folds
     if args.regimes:
         config.regimes = tuple(r.strip() for r in args.regimes.split(","))
+    if args.folds:
+        config.folds = tuple(int(f) for f in args.folds.split(","))
 
     # Dynamically compute spatial_in_features to match active ablation groups
     if config.task == "joint" and config.use_spatial_relations:
@@ -1663,6 +1668,8 @@ def main() -> None:
         tasks = []
         for regime in config.regimes:
             for fold_idx in range(len(protocol[regime])):
+                if getattr(config, "folds", None) is not None and fold_idx not in config.folds:
+                    continue
                 for seed in seeds:
                     tasks.append((regime, fold_idx, seed))
 
