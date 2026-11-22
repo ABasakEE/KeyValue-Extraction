@@ -1,0 +1,328 @@
+{
+  "config": {
+    "backbone": "layoutlmv3",
+    "dataset": "vrdu",
+    "data_root": "data/vrdu",
+    "task": "tagging",
+    "linking_loss_weight": 1.0,
+    "pos_weight": 10.0,
+    "use_spatial_relations": true,
+    "spatial_in_features": 16,
+    "use_geometry": true,
+    "use_containment": true,
+    "use_line_of_sight": true,
+    "use_typography": true,
+    "loss_type": "focal",
+    "focal_gamma": 2.0,
+    "focal_alpha": 0.75,
+    "masking_mode": "soft",
+    "k_neighbors": 0,
+    "fallback_top_k": 0,
+    "decode_one_to_one": false,
+    "link_threshold": 0.5,
+    "languages": [
+      "es",
+      "fr",
+      "de",
+      "it",
+      "pt"
+    ],
+    "curriculum": false,
+    "patience_tolerance": 3,
+    "min_delta": 0.001,
+    "phase1_epochs": 10,
+    "phase2_epochs": 8,
+    "phase3_epochs": 10,
+    "max_phase1_epochs": 10,
+    "max_phase2_epochs": 8,
+    "max_phase3_epochs": 10,
+    "epochs": 20,
+    "batch_size": 4,
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 512,
+    "seeds": [
+      13,
+      42
+    ],
+    "subcorpus": "registration-form",
+    "n_train": 200,
+    "output_dir": "results/vrdu_layoutlmv3_utl_f0",
+    "sliding_window": true,
+    "window_size": 384,
+    "window_overlap": 128,
+    "window_by_page": true,
+    "form_window": 0,
+    "form_window_stride": 255,
+    "coordinate_jitter": false,
+    "jitter_shift": 80,
+    "jitter_scale_min": 0.85,
+    "jitter_scale_max": 1.15,
+    "relative_coords": false,
+    "anchor_mode": "content_box",
+    "image_mode": "pages",
+    "adversarial_dann": false,
+    "dann_weight": 0.1,
+    "dann_gamma": 10.0,
+    "dann_hidden_dim": 256,
+    "num_templates": 32,
+    "save_weights": false,
+    "use_graph_bros": false,
+    "lora_r": 16,
+    "lora_alpha": 32.0,
+    "lora_dropout": 0.05,
+    "beta_skeleton": 1.0,
+    "graph_eps": 0.01,
+    "merge_spans": true,
+    "freeze_base": false,
+    "graph_lr": 0.00025,
+    "gradient_checkpointing": false,
+    "max_folds": null,
+    "regimes": [
+      "UTL"
+    ],
+    "folds": [
+      0
+    ],
+    "dump_probs": false,
+    "dump_probs_guids": null,
+    "crop_aug": false,
+    "crop_max_per_form": 4,
+    "crop_merge_dist": 50.0,
+    "crop_seed": 13,
+    "init_checkpoint": ""
+  },
+  "protocol": "matched",
+  "n_train": 200,
+  "MTL": [],
+  "UTL": [
+    {
+      "test": {
+        "precision": 0.7529,
+        "recall": 0.6626,
+        "f1": 0.7049,
+        "support": 575978,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.7553,
+            "recall": 0.7246,
+            "f1": 0.7396,
+            "support": 690
+          },
+          "foreign_principle_name": {
+            "precision": 0.0132,
+            "recall": 0.1,
+            "f1": 0.0233,
+            "support": 20
+          },
+          "registrant_name": {
+            "precision": 0.7932,
+            "recall": 0.3966,
+            "f1": 0.5288,
+            "support": 706
+          },
+          "registration_num": {
+            "precision": 0.9876,
+            "recall": 0.8934,
+            "f1": 0.9381,
+            "support": 713
+          },
+          "signer_name": {
+            "precision": 0.6773,
+            "recall": 0.7224,
+            "f1": 0.6991,
+            "support": 616
+          },
+          "signer_title": {
+            "precision": 0.6719,
+            "recall": 0.3233,
+            "f1": 0.4365,
+            "support": 133
+          }
+        }
+      },
+      "best_val_f1": 0.9486,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.3856,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0408,
+          "val_f1": 0.7928
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0141,
+          "val_f1": 0.8894
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0083,
+          "val_f1": 0.9271
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0068,
+          "val_f1": 0.9278
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.005,
+          "val_f1": 0.9436
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0042,
+          "val_f1": 0.9486
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0031,
+          "val_f1": 0.9389
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.002,
+          "val_f1": 0.9388
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0022,
+          "val_f1": 0.933
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 488,
+        "total_i_tags": 6731,
+        "rate": 0.0725
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.7049 == independent F1=0.7049 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6317 (spread 0.0731)\n  malformed I- tags: 488/6731 (7.2%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 13,
+      "fold": 0,
+      "regime": "UTL",
+      "held_out": [
+        "Amendment"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.7316,
+        "recall": 0.6612,
+        "f1": 0.6947,
+        "support": 575978,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.6244,
+            "recall": 0.7493,
+            "f1": 0.6812,
+            "support": 690
+          },
+          "foreign_principle_name": {
+            "precision": 0.0221,
+            "recall": 0.15,
+            "f1": 0.0385,
+            "support": 20
+          },
+          "registrant_name": {
+            "precision": 0.7829,
+            "recall": 0.3371,
+            "f1": 0.4713,
+            "support": 706
+          },
+          "registration_num": {
+            "precision": 0.988,
+            "recall": 0.9229,
+            "f1": 0.9543,
+            "support": 713
+          },
+          "signer_name": {
+            "precision": 0.7257,
+            "recall": 0.7516,
+            "f1": 0.7384,
+            "support": 616
+          },
+          "signer_title": {
+            "precision": 0.8276,
+            "recall": 0.1805,
+            "f1": 0.2963,
+            "support": 133
+          }
+        }
+      },
+      "best_val_f1": 0.9435,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.3701,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0407,
+          "val_f1": 0.6975
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0158,
+          "val_f1": 0.798
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0116,
+          "val_f1": 0.8759
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0075,
+          "val_f1": 0.919
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.005,
+          "val_f1": 0.9255
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0042,
+          "val_f1": 0.9435
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0035,
+          "val_f1": 0.9434
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0019,
+          "val_f1": 0.9383
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0012,
+          "val_f1": 0.9123
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 577,
+        "total_i_tags": 6165,
+        "rate": 0.0936
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6947 == independent F1=0.6947 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6200 (spread 0.0746)\n  malformed I- tags: 577/6165 (9.4%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 42,
+      "fold": 0,
+      "regime": "UTL",
+      "held_out": [
+        "Amendment"
+      ]
+    }
+  ],
+  "gap": {}
+}
