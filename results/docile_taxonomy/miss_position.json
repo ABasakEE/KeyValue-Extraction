@@ -1,0 +1,94 @@
+{
+ "cells_in_row|1-2 cells": {
+  "gold_spans_all_runs": 2900,
+  "untouched_pct": 26.3
+ },
+ "cells_in_row|3-4 cells": {
+  "gold_spans_all_runs": 4860,
+  "untouched_pct": 16.0
+ },
+ "cells_in_row|5+ cells": {
+  "gold_spans_all_runs": 8040,
+  "untouched_pct": 23.3
+ },
+ "field|line_item_amount_gross": {
+  "gold_spans_all_runs": 2960,
+  "untouched_pct": 18.5
+ },
+ "field|line_item_amount_net": {
+  "gold_spans_all_runs": 395,
+  "untouched_pct": 9.4
+ },
+ "field|line_item_code": {
+  "gold_spans_all_runs": 1115,
+  "untouched_pct": 37.8
+ },
+ "field|line_item_currency": {
+  "gold_spans_all_runs": 295,
+  "untouched_pct": 44.7
+ },
+ "field|line_item_date": {
+  "gold_spans_all_runs": 1535,
+  "untouched_pct": 15.7
+ },
+ "field|line_item_description": {
+  "gold_spans_all_runs": 4205,
+  "untouched_pct": 19.6
+ },
+ "field|line_item_position": {
+  "gold_spans_all_runs": 380,
+  "untouched_pct": 13.7
+ },
+ "field|line_item_quantity": {
+  "gold_spans_all_runs": 2270,
+  "untouched_pct": 22.7
+ },
+ "field|line_item_unit_price_gross": {
+  "gold_spans_all_runs": 1540,
+  "untouched_pct": 17.6
+ },
+ "field|line_item_unit_price_net": {
+  "gold_spans_all_runs": 265,
+  "untouched_pct": 4.2
+ },
+ "field|line_item_units_of_measure": {
+  "gold_spans_all_runs": 665,
+  "untouched_pct": 40.8
+ },
+ "position|first row": {
+  "gold_spans_all_runs": 2200,
+  "untouched_pct": 17.0
+ },
+ "position|last row": {
+  "gold_spans_all_runs": 1905,
+  "untouched_pct": 23.6
+ },
+ "position|middle rows": {
+  "gold_spans_all_runs": 10340,
+  "untouched_pct": 22.9
+ },
+ "position|only row": {
+  "gold_spans_all_runs": 1355,
+  "untouched_pct": 16.6
+ },
+ "row_height|multi-line row": {
+  "gold_spans_all_runs": 3705,
+  "untouched_pct": 25.6
+ },
+ "row_height|single-line row": {
+  "gold_spans_all_runs": 12095,
+  "untouched_pct": 20.4
+ },
+ "table_size|1-2 rows": {
+  "gold_spans_all_runs": 2455,
+  "untouched_pct": 17.1
+ },
+ "table_size|3-6 rows": {
+  "gold_spans_all_runs": 3615,
+  "untouched_pct": 18.5
+ },
+ "table_size|7+ rows": {
+  "gold_spans_all_runs": 9730,
+  "untouched_pct": 23.9
+ }
+}

@@ -30,7 +30,8 @@ def doc_features(d: dict, ann: dict) -> dict:
     meta = ann["metadata"]
     grids = list(meta.get("page_to_table_grid", {}).values())
     first = grids[0] if grids else {}
-    rows, fields = d["rows"], Counter(f for r in rows for f, _, _ in r)
+    rows = d["rows"]
+    fields = Counter(f for r in rows for f, _, _ in r)
     amount = "both" if fields["line_item_amount_net"] and fields["line_item_amount_gross"] else "net" if fields["line_item_amount_net"] else "gross" if fields["line_item_amount_gross"] else "neither"
     heights = sorted(b[3] - b[1] for b in d["fboxes"]) or [0.01]
     med_h = heights[len(heights) // 2] or 0.01
