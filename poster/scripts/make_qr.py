@@ -9,7 +9,7 @@ import style as S  # noqa: E402
 
 CODES = {
     "qr_github": "https://github.com/ABasakEE/KeyValue-Extraction/tree/feat/bros-relative-layout",
-    # "qr_demo": "<demo video link>",   # TODO: add when the demo video is uploaded
+    "qr_demo": "https://drive.google.com/file/d/1i64AbI8Imrkb3znjbTYlCjEstoRIstcv/view?usp=sharing",
 }
 
 for name, url in CODES.items():
