@@ -1,0 +1,137 @@
+{
+  "test": {
+    "precision": 0.8361,
+    "recall": 0.5113,
+    "f1": 0.6346,
+    "support": 279131,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.8936,
+        "recall": 0.5109,
+        "f1": 0.6502,
+        "support": 411
+      },
+      "foreign_principle_name": {
+        "precision": 0.3869,
+        "recall": 0.1402,
+        "f1": 0.2058,
+        "support": 378
+      },
+      "registrant_name": {
+        "precision": 0.8528,
+        "recall": 0.8816,
+        "f1": 0.867,
+        "support": 414
+      },
+      "registration_num": {
+        "precision": 0.9757,
+        "recall": 0.9709,
+        "f1": 0.9733,
+        "support": 413
+      },
+      "signer_name": {
+        "precision": 0.5273,
+        "recall": 0.0711,
+        "f1": 0.1253,
+        "support": 408
+      },
+      "signer_title": {
+        "precision": 0.8386,
+        "recall": 0.455,
+        "f1": 0.5899,
+        "support": 411
+      }
+    }
+  },
+  "best_val_f1": 0.9333,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.3849,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0406,
+      "val_f1": 0.7996
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0148,
+      "val_f1": 0.861
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0068,
+      "val_f1": 0.8887
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0058,
+      "val_f1": 0.9118
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0049,
+      "val_f1": 0.9053
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0027,
+      "val_f1": 0.9049
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0022,
+      "val_f1": 0.913
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0016,
+      "val_f1": 0.916
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0015,
+      "val_f1": 0.9071
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0014,
+      "val_f1": 0.9153
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0007,
+      "val_f1": 0.921
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0006,
+      "val_f1": 0.9333
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0004,
+      "val_f1": 0.9262
+    },
+    {
+      "epoch": 15,
+      "train_loss": 0.0005,
+      "val_f1": 0.9185
+    },
+    {
+      "epoch": 16,
+      "train_loss": 0.0003,
+      "val_f1": 0.9208
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 330,
+    "total_i_tags": 3375,
+    "rate": 0.0978
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6346 == independent F1=0.6346 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6128 (spread 0.0217)\n  malformed I- tags: 330/3375 (9.8%)",
+  "peak_gpu_mem_gb": 7.25
+}

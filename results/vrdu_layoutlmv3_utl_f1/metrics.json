@@ -1,0 +1,398 @@
+{
+  "config": {
+    "backbone": "layoutlmv3",
+    "dataset": "vrdu",
+    "data_root": "data/vrdu",
+    "task": "tagging",
+    "linking_loss_weight": 1.0,
+    "pos_weight": 10.0,
+    "use_spatial_relations": true,
+    "spatial_in_features": 16,
+    "use_geometry": true,
+    "use_containment": true,
+    "use_line_of_sight": true,
+    "use_typography": true,
+    "loss_type": "focal",
+    "focal_gamma": 2.0,
+    "focal_alpha": 0.75,
+    "masking_mode": "soft",
+    "k_neighbors": 0,
+    "fallback_top_k": 0,
+    "decode_one_to_one": false,
+    "link_threshold": 0.5,
+    "languages": [
+      "es",
+      "fr",
+      "de",
+      "it",
+      "pt"
+    ],
+    "curriculum": false,
+    "patience_tolerance": 3,
+    "min_delta": 0.001,
+    "phase1_epochs": 10,
+    "phase2_epochs": 8,
+    "phase3_epochs": 10,
+    "max_phase1_epochs": 10,
+    "max_phase2_epochs": 8,
+    "max_phase3_epochs": 10,
+    "epochs": 20,
+    "batch_size": 4,
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 512,
+    "seeds": [
+      13,
+      42
+    ],
+    "subcorpus": "registration-form",
+    "n_train": 200,
+    "output_dir": "results/vrdu_layoutlmv3_utl_f1",
+    "sliding_window": true,
+    "window_size": 384,
+    "window_overlap": 128,
+    "window_by_page": true,
+    "form_window": 0,
+    "form_window_stride": 255,
+    "coordinate_jitter": false,
+    "jitter_shift": 80,
+    "jitter_scale_min": 0.85,
+    "jitter_scale_max": 1.15,
+    "relative_coords": false,
+    "anchor_mode": "content_box",
+    "image_mode": "pages",
+    "adversarial_dann": false,
+    "dann_weight": 0.1,
+    "dann_gamma": 10.0,
+    "dann_hidden_dim": 256,
+    "num_templates": 32,
+    "save_weights": false,
+    "use_graph_bros": false,
+    "lora_r": 16,
+    "lora_alpha": 32.0,
+    "lora_dropout": 0.05,
+    "beta_skeleton": 1.0,
+    "graph_eps": 0.01,
+    "merge_spans": true,
+    "freeze_base": false,
+    "graph_lr": 0.00025,
+    "gradient_checkpointing": false,
+    "max_folds": null,
+    "regimes": [
+      "UTL"
+    ],
+    "folds": [
+      1
+    ],
+    "dump_probs": false,
+    "dump_probs_guids": null,
+    "crop_aug": false,
+    "crop_max_per_form": 4,
+    "crop_merge_dist": 50.0,
+    "crop_seed": 13,
+    "init_checkpoint": ""
+  },
+  "protocol": "matched",
+  "n_train": 200,
+  "MTL": [],
+  "UTL": [
+    {
+      "test": {
+        "precision": 0.8361,
+        "recall": 0.5113,
+        "f1": 0.6346,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8936,
+            "recall": 0.5109,
+            "f1": 0.6502,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.3869,
+            "recall": 0.1402,
+            "f1": 0.2058,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.8528,
+            "recall": 0.8816,
+            "f1": 0.867,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9757,
+            "recall": 0.9709,
+            "f1": 0.9733,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.5273,
+            "recall": 0.0711,
+            "f1": 0.1253,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.8386,
+            "recall": 0.455,
+            "f1": 0.5899,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.9333,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.3849,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0406,
+          "val_f1": 0.7996
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0148,
+          "val_f1": 0.861
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0068,
+          "val_f1": 0.8887
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0058,
+          "val_f1": 0.9118
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0049,
+          "val_f1": 0.9053
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0027,
+          "val_f1": 0.9049
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0022,
+          "val_f1": 0.913
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0016,
+          "val_f1": 0.916
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0015,
+          "val_f1": 0.9071
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0014,
+          "val_f1": 0.9153
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0007,
+          "val_f1": 0.921
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0006,
+          "val_f1": 0.9333
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0004,
+          "val_f1": 0.9262
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.0005,
+          "val_f1": 0.9185
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0003,
+          "val_f1": 0.9208
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 330,
+        "total_i_tags": 3375,
+        "rate": 0.0978
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6346 == independent F1=0.6346 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6128 (spread 0.0217)\n  malformed I- tags: 330/3375 (9.8%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 13,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.674,
+        "recall": 0.4177,
+        "f1": 0.5157,
+        "support": 279131,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8593,
+            "recall": 0.4161,
+            "f1": 0.5607,
+            "support": 411
+          },
+          "foreign_principle_name": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 378
+          },
+          "registrant_name": {
+            "precision": 0.5281,
+            "recall": 0.8865,
+            "f1": 0.6619,
+            "support": 414
+          },
+          "registration_num": {
+            "precision": 0.9101,
+            "recall": 0.9806,
+            "f1": 0.9441,
+            "support": 413
+          },
+          "signer_name": {
+            "precision": 0.06,
+            "recall": 0.0074,
+            "f1": 0.0131,
+            "support": 408
+          },
+          "signer_title": {
+            "precision": 0.7553,
+            "recall": 0.1727,
+            "f1": 0.2812,
+            "support": 411
+          }
+        }
+      },
+      "best_val_f1": 0.9224,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.3643,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0396,
+          "val_f1": 0.7965
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0128,
+          "val_f1": 0.8697
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0082,
+          "val_f1": 0.8558
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0054,
+          "val_f1": 0.9085
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0044,
+          "val_f1": 0.8911
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0029,
+          "val_f1": 0.8969
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0028,
+          "val_f1": 0.9138
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.002,
+          "val_f1": 0.9106
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0013,
+          "val_f1": 0.9168
+        },
+        {
+          "epoch": 11,
+          "train_loss": 0.0009,
+          "val_f1": 0.8962
+        },
+        {
+          "epoch": 12,
+          "train_loss": 0.0012,
+          "val_f1": 0.9192
+        },
+        {
+          "epoch": 13,
+          "train_loss": 0.0005,
+          "val_f1": 0.9164
+        },
+        {
+          "epoch": 14,
+          "train_loss": 0.0006,
+          "val_f1": 0.9194
+        },
+        {
+          "epoch": 15,
+          "train_loss": 0.001,
+          "val_f1": 0.9224
+        },
+        {
+          "epoch": 16,
+          "train_loss": 0.0003,
+          "val_f1": 0.9234
+        },
+        {
+          "epoch": 17,
+          "train_loss": 0.0002,
+          "val_f1": 0.923
+        },
+        {
+          "epoch": 18,
+          "train_loss": 0.0002,
+          "val_f1": 0.9165
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 447,
+        "total_i_tags": 2990,
+        "rate": 0.1495
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5157 == independent F1=0.5157 (delta 0.00e+00)\n  lenient-IOB2 F1=0.4699 (spread 0.0458)\n  malformed I- tags: 447/2990 (14.9%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 42,
+      "fold": 1,
+      "regime": "UTL",
+      "held_out": [
+        "Dissemination_Report"
+      ]
+    }
+  ],
+  "gap": {}
+}
