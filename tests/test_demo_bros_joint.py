@@ -7,7 +7,7 @@ from pathlib import Path
 
 import torch
 
-ROOT = Path(r'D:\KeyValue-Extraction')
+ROOT = Path(__file__).resolve().parent.parent
 import tempfile; tmp = Path(tempfile.mkdtemp()) / 'J1'
 
 (tmp / 'seed_42').mkdir(parents=True)
