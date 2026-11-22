@@ -2074,3 +2074,23 @@ Training only on the training documents of each split (DocILE: the pool order of
 **Results:** *pending*
 
 **Evidence:** `results/docile_typer/` (after the run).
+
+
+---
+
+## 44. Failure taxonomy of the BROS line-item tagger on DocILE (unseen and seen layouts) — CPU, registered 2026-11-22 (before the script was run)
+
+**Question (deliverable 5 of the project: which layout, structural, textual or spatial assumptions fail and why).** Studies 39 and 41 gave the totals (row F1 about 60 on unseen layouts, a seen-versus-unseen gap of 2 to 9 points) and a first decomposition (22% of gold spans never touched, 8 to 9% with the wrong field, 5% with the wrong extent). **Which kinds of errors make up the loss, which documents carry it, and which of it is template-dependent (shrinks on seen layouts) and which is intrinsic?**
+
+**Data (saved predictions, no model run).** Unseen-layout test documents (200): `N1000_S0`, `N1000_S1`, `N1000_S2` (study 39) and `Nfull_T13`, `Nfull_T21` (study 41); seen-layout test documents (200): `Nfull_T13`, `Nfull_T21`. Seven jobs run in parallel (`scripts/docile_failure_taxonomy.py`, one process each).
+
+**Taxonomy (fixed here).** Every gold span gets exactly one outcome: *right*; *wrong field, same extent* (monetary family: unit price and amount, gross and net; or other); *right field, wrong extent* (predicted span inside the gold span, around it, or other overlap); *wrong field and extent*; *missed* (no predicted span touches it), split into field absent in the whole document, gold cell made of non-consecutive words, other. Every predicted span that touches no gold word is a *false span*, inside or outside the vertical extent of the gold table. Reported as a share of gold spans (false spans: of predicted spans), per run and mean; per gold field; and for unseen against seen layouts (the categories that shrink are the template-dependent part).
+**Document properties (fixed here; from the annotation metadata and the gold, diagnostic only: a deployed system would not have them).** table border type, table structure, document type, source, language, pages, gold rows, table columns, fields used, words, amount columns used (net, gross, both, neither), share of multi-line cells, whether a row repeats a field, missing columns. Row F1 by property (documents pooled over the runs, 95% bootstrap over the documents of the group, only for groups of five or more documents) and Spearman correlations of the per-document row F1 with the numeric properties.
+
+**What is and is not tested.** Descriptive: no registered threshold, no correction for the many groups and correlations; an interval or correlation is a pointer for the report, not a finding. **Expectation, before looking:** monetary typing and fields absent from a whole document dominate the loss; borderless tables, many columns and many rows go with low row F1; seen layouts reduce typing and detection errors more than boundary errors. If the data disagree, that goes in the report as it stands.
+
+**Limits stated up front.** Five runs share the same 200 test documents, so run-level means are not independent samples; properties are correlated with each other (many rows and many columns, a scanned source and a table structure) and a group difference is not a cause; groups are small (200 documents, 886 gold rows); the seen-layout documents are a different set from the unseen-layout ones, so the shrinkage is read from the two full-pool runs only.
+
+**Results:** *pending*
+
+**Evidence:** `results/docile_taxonomy/taxonomy.json`, `results/docile_taxonomy/per_document.jsonl`.
