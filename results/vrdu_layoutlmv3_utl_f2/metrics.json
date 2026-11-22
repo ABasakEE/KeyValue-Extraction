@@ -1,0 +1,323 @@
+{
+  "config": {
+    "backbone": "layoutlmv3",
+    "dataset": "vrdu",
+    "data_root": "data/vrdu",
+    "task": "tagging",
+    "linking_loss_weight": 1.0,
+    "pos_weight": 10.0,
+    "use_spatial_relations": true,
+    "spatial_in_features": 16,
+    "use_geometry": true,
+    "use_containment": true,
+    "use_line_of_sight": true,
+    "use_typography": true,
+    "loss_type": "focal",
+    "focal_gamma": 2.0,
+    "focal_alpha": 0.75,
+    "masking_mode": "soft",
+    "k_neighbors": 0,
+    "fallback_top_k": 0,
+    "decode_one_to_one": false,
+    "link_threshold": 0.5,
+    "languages": [
+      "es",
+      "fr",
+      "de",
+      "it",
+      "pt"
+    ],
+    "curriculum": false,
+    "patience_tolerance": 3,
+    "min_delta": 0.001,
+    "phase1_epochs": 10,
+    "phase2_epochs": 8,
+    "phase3_epochs": 10,
+    "max_phase1_epochs": 10,
+    "max_phase2_epochs": 8,
+    "max_phase3_epochs": 10,
+    "epochs": 20,
+    "batch_size": 4,
+    "lr": 5e-05,
+    "weight_decay": 0.01,
+    "warmup_ratio": 0.1,
+    "max_length": 512,
+    "seeds": [
+      13,
+      42
+    ],
+    "subcorpus": "registration-form",
+    "n_train": 200,
+    "output_dir": "results/vrdu_layoutlmv3_utl_f2",
+    "sliding_window": true,
+    "window_size": 384,
+    "window_overlap": 128,
+    "window_by_page": true,
+    "form_window": 0,
+    "form_window_stride": 255,
+    "coordinate_jitter": false,
+    "jitter_shift": 80,
+    "jitter_scale_min": 0.85,
+    "jitter_scale_max": 1.15,
+    "relative_coords": false,
+    "anchor_mode": "content_box",
+    "image_mode": "pages",
+    "adversarial_dann": false,
+    "dann_weight": 0.1,
+    "dann_gamma": 10.0,
+    "dann_hidden_dim": 256,
+    "num_templates": 32,
+    "save_weights": false,
+    "use_graph_bros": false,
+    "lora_r": 16,
+    "lora_alpha": 32.0,
+    "lora_dropout": 0.05,
+    "beta_skeleton": 1.0,
+    "graph_eps": 0.01,
+    "merge_spans": true,
+    "freeze_base": false,
+    "graph_lr": 0.00025,
+    "gradient_checkpointing": false,
+    "max_folds": null,
+    "regimes": [
+      "UTL"
+    ],
+    "folds": [
+      2
+    ],
+    "dump_probs": false,
+    "dump_probs_guids": null,
+    "crop_aug": false,
+    "crop_max_per_form": 4,
+    "crop_merge_dist": 50.0,
+    "crop_seed": 13,
+    "init_checkpoint": ""
+  },
+  "protocol": "matched",
+  "n_train": 200,
+  "MTL": [],
+  "UTL": [
+    {
+      "test": {
+        "precision": 0.6623,
+        "recall": 0.5031,
+        "f1": 0.5718,
+        "support": 961898,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.937,
+            "recall": 0.8247,
+            "f1": 0.8773,
+            "support": 776
+          },
+          "foreign_principle_name": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 734
+          },
+          "registrant_name": {
+            "precision": 0.0126,
+            "recall": 0.0128,
+            "f1": 0.0127,
+            "support": 782
+          },
+          "registration_num": {
+            "precision": 0.9785,
+            "recall": 0.9872,
+            "f1": 0.9829,
+            "support": 784
+          },
+          "signer_name": {
+            "precision": 0.8712,
+            "recall": 0.7895,
+            "f1": 0.8283,
+            "support": 437
+          },
+          "signer_title": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          }
+        }
+      },
+      "best_val_f1": 0.933,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.4444,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0499,
+          "val_f1": 0.6642
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.0204,
+          "val_f1": 0.8558
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0122,
+          "val_f1": 0.9031
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0084,
+          "val_f1": 0.8951
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0058,
+          "val_f1": 0.9302
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0049,
+          "val_f1": 0.933
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0032,
+          "val_f1": 0.8935
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.0035,
+          "val_f1": 0.9182
+        },
+        {
+          "epoch": 10,
+          "train_loss": 0.0021,
+          "val_f1": 0.9192
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 109,
+        "total_i_tags": 3319,
+        "rate": 0.0328
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5718 == independent F1=0.5718 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5595 (spread 0.0123)\n  malformed I- tags: 109/3319 (3.3%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 13,
+      "fold": 2,
+      "regime": "UTL",
+      "held_out": [
+        "Short-Form"
+      ]
+    },
+    {
+      "test": {
+        "precision": 0.5376,
+        "recall": 0.2295,
+        "f1": 0.3217,
+        "support": 961898,
+        "truncated_words": 0,
+        "per_type": {
+          "file_date": {
+            "precision": 0.8333,
+            "recall": 0.0129,
+            "f1": 0.0254,
+            "support": 776
+          },
+          "foreign_principle_name": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 734
+          },
+          "registrant_name": {
+            "precision": 0.0124,
+            "recall": 0.0102,
+            "f1": 0.0112,
+            "support": 782
+          },
+          "registration_num": {
+            "precision": 0.9898,
+            "recall": 0.8622,
+            "f1": 0.9216,
+            "support": 784
+          },
+          "signer_name": {
+            "precision": 0.7244,
+            "recall": 0.2586,
+            "f1": 0.3811,
+            "support": 437
+          },
+          "signer_title": {
+            "precision": 0.0,
+            "recall": 0.0,
+            "f1": 0.0,
+            "support": 3
+          }
+        }
+      },
+      "best_val_f1": 0.9392,
+      "history": [
+        {
+          "epoch": 1,
+          "train_loss": 0.4387,
+          "val_f1": 0.0
+        },
+        {
+          "epoch": 2,
+          "train_loss": 0.0552,
+          "val_f1": 0.3942
+        },
+        {
+          "epoch": 3,
+          "train_loss": 0.02,
+          "val_f1": 0.8345
+        },
+        {
+          "epoch": 4,
+          "train_loss": 0.0111,
+          "val_f1": 0.889
+        },
+        {
+          "epoch": 5,
+          "train_loss": 0.0064,
+          "val_f1": 0.9119
+        },
+        {
+          "epoch": 6,
+          "train_loss": 0.0053,
+          "val_f1": 0.9392
+        },
+        {
+          "epoch": 7,
+          "train_loss": 0.0037,
+          "val_f1": 0.9394
+        },
+        {
+          "epoch": 8,
+          "train_loss": 0.0024,
+          "val_f1": 0.935
+        },
+        {
+          "epoch": 9,
+          "train_loss": 0.002,
+          "val_f1": 0.931
+        }
+      ],
+      "malformed_tags": {
+        "invalid_i_tags": 112,
+        "total_i_tags": 1344,
+        "rate": 0.0833
+      },
+      "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.3217 == independent F1=0.3217 (delta 0.00e+00)\n  lenient-IOB2 F1=0.3113 (spread 0.0104)\n  malformed I- tags: 112/1344 (8.3%)",
+      "peak_gpu_mem_gb": 7.25,
+      "seed": 42,
+      "fold": 2,
+      "regime": "UTL",
+      "held_out": [
+        "Short-Form"
+      ]
+    }
+  ],
+  "gap": {}
+}

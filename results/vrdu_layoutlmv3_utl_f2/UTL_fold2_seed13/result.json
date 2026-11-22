@@ -1,0 +1,107 @@
+{
+  "test": {
+    "precision": 0.6623,
+    "recall": 0.5031,
+    "f1": 0.5718,
+    "support": 961898,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.937,
+        "recall": 0.8247,
+        "f1": 0.8773,
+        "support": 776
+      },
+      "foreign_principle_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 734
+      },
+      "registrant_name": {
+        "precision": 0.0126,
+        "recall": 0.0128,
+        "f1": 0.0127,
+        "support": 782
+      },
+      "registration_num": {
+        "precision": 0.9785,
+        "recall": 0.9872,
+        "f1": 0.9829,
+        "support": 784
+      },
+      "signer_name": {
+        "precision": 0.8712,
+        "recall": 0.7895,
+        "f1": 0.8283,
+        "support": 437
+      },
+      "signer_title": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      }
+    }
+  },
+  "best_val_f1": 0.933,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4444,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0499,
+      "val_f1": 0.6642
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0204,
+      "val_f1": 0.8558
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0122,
+      "val_f1": 0.9031
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0084,
+      "val_f1": 0.8951
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0058,
+      "val_f1": 0.9302
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0049,
+      "val_f1": 0.933
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0032,
+      "val_f1": 0.8935
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0035,
+      "val_f1": 0.9182
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0021,
+      "val_f1": 0.9192
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 109,
+    "total_i_tags": 3319,
+    "rate": 0.0328
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5718 == independent F1=0.5718 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5595 (spread 0.0123)\n  malformed I- tags: 109/3319 (3.3%)",
+  "peak_gpu_mem_gb": 7.25
+}
