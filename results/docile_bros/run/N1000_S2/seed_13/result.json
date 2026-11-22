@@ -1,0 +1,173 @@
+{
+  "test": {
+    "precision": 0.6126,
+    "recall": 0.6283,
+    "f1": 0.6204,
+    "support": 37228,
+    "truncated_words": 0,
+    "per_type": {
+      "line_item_amount_gross": {
+        "precision": 0.5957,
+        "recall": 0.753,
+        "f1": 0.6652,
+        "support": 591
+      },
+      "line_item_amount_net": {
+        "precision": 0.7143,
+        "recall": 0.1282,
+        "f1": 0.2174,
+        "support": 78
+      },
+      "line_item_code": {
+        "precision": 0.5188,
+        "recall": 0.3108,
+        "f1": 0.3887,
+        "support": 222
+      },
+      "line_item_currency": {
+        "precision": 0.2266,
+        "recall": 0.4915,
+        "f1": 0.3102,
+        "support": 59
+      },
+      "line_item_date": {
+        "precision": 0.7507,
+        "recall": 0.862,
+        "f1": 0.8025,
+        "support": 297
+      },
+      "line_item_description": {
+        "precision": 0.6707,
+        "recall": 0.5935,
+        "f1": 0.6298,
+        "support": 834
+      },
+      "line_item_discount_rate": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "line_item_hts_number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "line_item_order_id": {
+        "precision": 0.2,
+        "recall": 0.125,
+        "f1": 0.1538,
+        "support": 8
+      },
+      "line_item_person_name": {
+        "precision": 0.4643,
+        "recall": 0.9286,
+        "f1": 0.619,
+        "support": 14
+      },
+      "line_item_position": {
+        "precision": 0.8305,
+        "recall": 0.6447,
+        "f1": 0.7259,
+        "support": 76
+      },
+      "line_item_quantity": {
+        "precision": 0.5868,
+        "recall": 0.7086,
+        "f1": 0.642,
+        "support": 453
+      },
+      "line_item_tax": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      "line_item_unit_price_gross": {
+        "precision": 0.6355,
+        "recall": 0.6645,
+        "f1": 0.6497,
+        "support": 307
+      },
+      "line_item_unit_price_net": {
+        "precision": 0.5,
+        "recall": 0.1321,
+        "f1": 0.209,
+        "support": 53
+      },
+      "line_item_units_of_measure": {
+        "precision": 0.5876,
+        "recall": 0.5135,
+        "f1": 0.5481,
+        "support": 111
+      },
+      "line_item_weight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      }
+    }
+  },
+  "best_val_f1": 0.7027,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.8837,
+      "val_f1": 0.4351
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.2378,
+      "val_f1": 0.6171
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.1518,
+      "val_f1": 0.6355
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.1096,
+      "val_f1": 0.6395
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0813,
+      "val_f1": 0.6697
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0616,
+      "val_f1": 0.6563
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0526,
+      "val_f1": 0.7027
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0381,
+      "val_f1": 0.646
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0295,
+      "val_f1": 0.668
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0242,
+      "val_f1": 0.6838
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 123,
+    "total_i_tags": 2344,
+    "rate": 0.0525
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6204 == independent F1=0.6204 (delta 0.00e+00)\n  lenient-IOB2 F1=0.6200 (spread 0.0004)\n  malformed I- tags: 123/2344 (5.2%)",
+  "peak_gpu_mem_gb": 7.89
+}

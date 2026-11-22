@@ -1,0 +1,178 @@
+{
+  "test": {
+    "precision": 0.578,
+    "recall": 0.5188,
+    "f1": 0.5468,
+    "support": 37228,
+    "truncated_words": 0,
+    "per_type": {
+      "line_item_amount_gross": {
+        "precision": 0.5811,
+        "recall": 0.6971,
+        "f1": 0.6338,
+        "support": 591
+      },
+      "line_item_amount_net": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 78
+      },
+      "line_item_code": {
+        "precision": 0.6777,
+        "recall": 0.3694,
+        "f1": 0.4781,
+        "support": 222
+      },
+      "line_item_currency": {
+        "precision": 0.5862,
+        "recall": 0.2881,
+        "f1": 0.3864,
+        "support": 59
+      },
+      "line_item_date": {
+        "precision": 0.7119,
+        "recall": 0.8485,
+        "f1": 0.7742,
+        "support": 297
+      },
+      "line_item_description": {
+        "precision": 0.6144,
+        "recall": 0.6055,
+        "f1": 0.6099,
+        "support": 834
+      },
+      "line_item_discount_rate": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "line_item_hts_number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "line_item_order_id": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      },
+      "line_item_person_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "line_item_position": {
+        "precision": 0.3607,
+        "recall": 0.8684,
+        "f1": 0.5097,
+        "support": 76
+      },
+      "line_item_quantity": {
+        "precision": 0.5057,
+        "recall": 0.3929,
+        "f1": 0.4422,
+        "support": 453
+      },
+      "line_item_tax": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      "line_item_unit_price_gross": {
+        "precision": 0.4661,
+        "recall": 0.3355,
+        "f1": 0.3902,
+        "support": 307
+      },
+      "line_item_unit_price_net": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 53
+      },
+      "line_item_units_of_measure": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 111
+      },
+      "line_item_weight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      }
+    }
+  },
+  "best_val_f1": 0.618,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.7777,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.7631,
+      "val_f1": 0.0964
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.4133,
+      "val_f1": 0.3218
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.2397,
+      "val_f1": 0.4935
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.1704,
+      "val_f1": 0.5293
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.1222,
+      "val_f1": 0.5937
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0935,
+      "val_f1": 0.5788
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0696,
+      "val_f1": 0.618
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0554,
+      "val_f1": 0.6089
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0446,
+      "val_f1": 0.5483
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.037,
+      "val_f1": 0.5926
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 192,
+    "total_i_tags": 2859,
+    "rate": 0.0672
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5468 == independent F1=0.5468 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5352 (spread 0.0116)\n  malformed I- tags: 192/2859 (6.7%)",
+  "peak_gpu_mem_gb": 7.89
+}

@@ -1,0 +1,193 @@
+{
+  "test": {
+    "precision": 0.5786,
+    "recall": 0.5557,
+    "f1": 0.5669,
+    "support": 37228,
+    "truncated_words": 0,
+    "per_type": {
+      "line_item_amount_gross": {
+        "precision": 0.5605,
+        "recall": 0.6667,
+        "f1": 0.609,
+        "support": 591
+      },
+      "line_item_amount_net": {
+        "precision": 1.0,
+        "recall": 0.0128,
+        "f1": 0.0253,
+        "support": 78
+      },
+      "line_item_code": {
+        "precision": 0.6242,
+        "recall": 0.4414,
+        "f1": 0.5172,
+        "support": 222
+      },
+      "line_item_currency": {
+        "precision": 0.5333,
+        "recall": 0.2712,
+        "f1": 0.3596,
+        "support": 59
+      },
+      "line_item_date": {
+        "precision": 0.7546,
+        "recall": 0.8283,
+        "f1": 0.7897,
+        "support": 297
+      },
+      "line_item_description": {
+        "precision": 0.6007,
+        "recall": 0.6403,
+        "f1": 0.6198,
+        "support": 834
+      },
+      "line_item_discount_rate": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 2
+      },
+      "line_item_hts_number": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 1
+      },
+      "line_item_order_id": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 8
+      },
+      "line_item_person_name": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 14
+      },
+      "line_item_position": {
+        "precision": 0.4786,
+        "recall": 0.7368,
+        "f1": 0.5803,
+        "support": 76
+      },
+      "line_item_quantity": {
+        "precision": 0.5329,
+        "recall": 0.3929,
+        "f1": 0.4524,
+        "support": 453
+      },
+      "line_item_tax": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3
+      },
+      "line_item_unit_price_gross": {
+        "precision": 0.4706,
+        "recall": 0.5993,
+        "f1": 0.5272,
+        "support": 307
+      },
+      "line_item_unit_price_net": {
+        "precision": 0.5,
+        "recall": 0.0377,
+        "f1": 0.0702,
+        "support": 53
+      },
+      "line_item_units_of_measure": {
+        "precision": 0.5526,
+        "recall": 0.1892,
+        "f1": 0.2819,
+        "support": 111
+      },
+      "line_item_weight": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 4
+      }
+    }
+  },
+  "best_val_f1": 0.6269,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 1.705,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.6469,
+      "val_f1": 0.3316
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.3692,
+      "val_f1": 0.4147
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.2597,
+      "val_f1": 0.4741
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.174,
+      "val_f1": 0.5743
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.1299,
+      "val_f1": 0.5289
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0983,
+      "val_f1": 0.5706
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0745,
+      "val_f1": 0.5844
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0689,
+      "val_f1": 0.5891
+    },
+    {
+      "epoch": 10,
+      "train_loss": 0.0485,
+      "val_f1": 0.6085
+    },
+    {
+      "epoch": 11,
+      "train_loss": 0.0395,
+      "val_f1": 0.6269
+    },
+    {
+      "epoch": 12,
+      "train_loss": 0.0351,
+      "val_f1": 0.5385
+    },
+    {
+      "epoch": 13,
+      "train_loss": 0.0295,
+      "val_f1": 0.6046
+    },
+    {
+      "epoch": 14,
+      "train_loss": 0.0214,
+      "val_f1": 0.621
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 145,
+    "total_i_tags": 2623,
+    "rate": 0.0553
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.5669 == independent F1=0.5669 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5599 (spread 0.0071)\n  malformed I- tags: 145/2623 (5.5%)",
+  "peak_gpu_mem_gb": 7.89
+}
