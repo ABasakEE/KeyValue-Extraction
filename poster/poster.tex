@@ -78,17 +78,17 @@ BROS Track-1 (windows, jitter) & \textbf{92.4} & \textbf{71.3} & \textbf{21.1} \
 \end{tabularx}}
 {\scriptsize\color{muted}\textsuperscript{*} from the summary CSV only. BROS Track-1 UTL by fold: 83.4 / 72.1 / 58.4.\par}
 \vspace{0.5ex}
-Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every model; each template words it differently) and Short-Form registrants (95\% of BROS's errors are the filer block). Reported XFUND link F1 (65.5) counts only links inside 512 tokens, with gold entities.
+Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every model; each template words it differently) and Short-Form registrants (95\% of BROS's errors are the filer block).
 \end{block}
 
-\begin{block}{Novelty Assessment}
+\begin{block}{New Approaches}
 \begin{tikzpicture}
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
 \begin{enumerate}\setlength{\itemsep}{0.6ex}
 \item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates\textsuperscript{\dag}; a per-field router scores \hl{79.2}.
 \item \textbf{The advantage reverses.} BROS overtakes the reader at 10 seen FATURA templates and on line-item tables.
-\item \textbf{Linking, measured end to end:} \hl{47.4}, not 65.5. BROS geometry adds \hl{+5.9}; a multilingual encoder costs 3.5.
+\item \textbf{Linking, measured end to end:} \hl{47.4} with LiLT, \hl{53.4} with BROS geometry (\hl{+5.9}); a multilingual encoder costs 3.5.
 \end{enumerate}};
 \end{tikzpicture}
 
@@ -100,7 +100,6 @@ Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every 
 \midrule
 Wording & trained tagger: 70.5 & cited-line reader: \textbf{76.5}; router \textbf{79.2} \\
 Train/read & not measured & crossover at K = 5 templates \\
-Link metric & 512 tokens, gold entities: 65.5 & whole form, predicted: 47.4 \\
 Link model & LiLT 47.4; multilingual 44.2 & BROS joint: \textbf{53.4} \\
 Tables & not covered & DocILE row F1 \textbf{59.6} \\
 \bottomrule
@@ -142,7 +141,7 @@ Tables & not covered & DocILE row F1 \textbf{59.6} \\
 \node[wa, right=of b] (c) {\textbf{Zero-shot reader}\\+ router (S6--12)};
 \node[wa, below=of c] (d) {\textbf{Grounded prompt}\\VRDU 76.5 (S25, 31)};
 \node[wa, left=of d] (e) {\textbf{FATURA crossover}\\K = 1--40 (S33)};
-\node[wa, left=of e] (f) {\textbf{Linking re-measured}\\65.5 → 47.4 (S17--23)};
+\node[wa, left=of e] (f) {\textbf{Linking end to end}\\47.4 → 53.4 (S17--37)};
 \node[wa, below=of f] (g) {\textbf{Link backbone}\\XLM, crops, BROS (S24--37)};
 \node[wa, right=of g] (h) {\textbf{Tables}\\ad-buy, DocILE (S34--44)};
 \node[w, right=of h] (i) {\textbf{Page pixels}\\LayoutLMv3 (S42)};
