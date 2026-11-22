@@ -16,3 +16,10 @@ lenient-IOB2 F1=0.9025 (spread 0.0172)
 malformed I- tags: 91/4495 (2.0%)
 
 
+MTL/fold2/seed13] -> Test F1: 0.9330  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9330 == independent F1=0.9330 (delta 0.00e+00)
+lenient-IOB2 F1=0.9221 (spread 0.0109)
+malformed I- tags: 61/4248 (1.4%)
+
+MTL/fold2/seed42] -> Test F1: 0.9354  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9354 == independent F1=0.9354 (delta 0.00e+00)
+lenient-IOB2 F1=0.9217 (spread 0.0137)
+malformed I- tags: 76/4308 (1.8%)

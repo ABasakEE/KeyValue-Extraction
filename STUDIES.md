@@ -2055,12 +2055,12 @@ Training only on the training documents of each split (DocILE: the pool order of
 | Arm | Fold 0 (seed 13 / 42) | Fold 1 (13 / 42) | Fold 2 (13 / 42) | Mean of the finished tasks |
 |---|---|---|---|---|
 | `pages` | 92.08 / 91.16 | 93.33 / 92.49 | 92.10 / 92.25 | **92.24** (6 tasks) |
-| `blank` | 91.26 / 90.97 | 93.07 / 91.97 | not finished | **91.82** (4 tasks) |
+| `blank` | 91.26 / 90.97 | 93.07 / 91.97 | 93.30 / 93.54 | **92.35** (6 tasks) |
 | BROS Track-1 (3 seeds) | 92.21 | 92.37 | 92.50 | 92.36 |
 
-- **Pixels, seen templates, folds 0 and 1 (the four paired tasks):** `pages` minus `blank` = +0.82, +0.19, +0.26, +0.52 (mean **+0.45**, all four positive). On seen templates the page image is worth about half a point, a small effect.
-- **LayoutLMv3 against BROS on seen templates, folds 0 and 1:** `pages` 92.27 against BROS 92.29; `blank` 91.82. Level with BROS, so the seen-template ceiling is about 92 for these encoders; the interest is in the unseen-template result, which is still running.
-- The fold 2 MTL tasks of the `blank` arm were stopped to free the GPUs for the unseen-template runs; the MTL-minus-UTL gap will be computed on folds 0 and 1, where both regimes exist.
+- **Pixels, seen templates (the six paired tasks):** `pages` minus `blank` = +0.82, +0.19 (fold 0), +0.26, +0.52 (fold 1), **-1.20, -1.29 (fold 2)**; mean **-0.12**. The first four pairs alone suggested +0.45, and the two fold 2 tasks, which arrived last, reverse it: on seen templates the page image makes no difference (the spread between folds, up to 1.4 points, is larger than any arm effect). Not part of the registered rule.
+- **LayoutLMv3 against BROS Track-1 on seen templates (three folds):** `pages` 92.24, `blank` 92.35, BROS 92.36: all three within 0.15 points. For seen templates the ceiling is about 92 whatever the input; the interest is in the unseen-template result, which is still running.
+- **MTL-minus-UTL gap:** to be computed from the unseen-template runs (folds 0 and 1 are being run; fold 2, `Short-Form`, is not, so the gap is compared fold by fold with these MTL values).
 
 **Results (unseen templates, the registered cell):** *pending*
 
