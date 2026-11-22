@@ -1,5 +1,5 @@
 {
-  "epoch": 4,
-  "best_val_score": 0.9215,
-  "train_loss": 0.0107
+  "epoch": 7,
+  "best_val_score": 0.9374,
+  "train_loss": 0.0042
 }
