@@ -1,0 +1,97 @@
+{
+  "test": {
+    "precision": 0.753,
+    "recall": 0.5869,
+    "f1": 0.6596,
+    "support": 575978,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.7541,
+        "recall": 0.7377,
+        "f1": 0.7458,
+        "support": 690
+      },
+      "foreign_principle_name": {
+        "precision": 0.0182,
+        "recall": 0.2,
+        "f1": 0.0333,
+        "support": 20
+      },
+      "registrant_name": {
+        "precision": 0.8152,
+        "recall": 0.4249,
+        "f1": 0.5587,
+        "support": 706
+      },
+      "registration_num": {
+        "precision": 0.9963,
+        "recall": 0.7504,
+        "f1": 0.856,
+        "support": 713
+      },
+      "signer_name": {
+        "precision": 0.7682,
+        "recall": 0.5487,
+        "f1": 0.6402,
+        "support": 616
+      },
+      "signer_title": {
+        "precision": 1.0,
+        "recall": 0.0226,
+        "f1": 0.0441,
+        "support": 133
+      }
+    }
+  },
+  "best_val_f1": 0.9242,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.3783,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0324,
+      "val_f1": 0.814
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0129,
+      "val_f1": 0.8912
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0092,
+      "val_f1": 0.8899
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0076,
+      "val_f1": 0.9242
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0063,
+      "val_f1": 0.9158
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0046,
+      "val_f1": 0.8797
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0046,
+      "val_f1": 0.9084
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 641,
+    "total_i_tags": 6015,
+    "rate": 0.1066
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.6596 == independent F1=0.6596 (delta 0.00e+00)\n  lenient-IOB2 F1=0.5747 (spread 0.0849)\n  malformed I- tags: 641/6015 (10.7%)",
+  "peak_gpu_mem_gb": 7.25
+}
