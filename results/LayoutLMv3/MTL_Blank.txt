@@ -1,0 +1,18 @@
+MTL/fold0/seed13] -> Test F1: 0.9126  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9126 == independent F1=0.9126 (delta 0.00e+00)
+lenient-IOB2 F1=0.8879 (spread 0.0247)
+malformed I- tags: 134/4724 (2.8%)
+
+
+MTL/fold0/seed42] -> Test F1: 0.9097  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9097 == independent F1=0.9097 (delta 0.00e+00)
+lenient-IOB2 F1=0.8899 (spread 0.0198)
+malformed I- tags: 108/4420 (2.4%)
+
+MTL/fold1/seed13] -> Test F1: 0.9307  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9307 == independent F1=0.9307 (delta 0.00e+00)
+lenient-IOB2 F1=0.9170 (spread 0.0137)
+malformed I- tags: 87/4519 (1.9%)
+
+MTL/fold1/seed42] -> Test F1: 0.9197  |  METRIC CROSS-CHECK PASSED: seqeval F1=0.9197 == independent F1=0.9197 (delta 0.00e+00)
+lenient-IOB2 F1=0.9025 (spread 0.0172)
+malformed I- tags: 91/4495 (2.0%)
+
+

@@ -2050,9 +2050,21 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** One recipe, two training seeds, one corpus (registration forms; English); the image enters at 224 x 224, too coarse for small print, so a negative result says only that this input does not help, not that pixels never do; LayoutLMv3 and BROS were both pre-trained on IIT-CDIP (external, not data of the held-out templates, so the zero-same-template rule is respected); the BROS reference uses three seeds and different geometry options; the weights are CC-BY-NC-SA (declared in the report).
 
-**Results:** *pending*
+**Interim results: seen templates (MTL), from the logs of the first two sessions** (`results/LayoutLMv3/MTL_Pages.txt`, `MTL_Blank.txt`: the `-> Test F1` line of each finished task; micro entity F1, no per-field scores; copied by hand because those sessions push only at their end). Not part of the registered rule, which is about unseen templates.
 
-**Evidence:** `results/vrdu_layoutlmv3/`, `results/vrdu_layoutlmv3_blank/`, `results/vrdu_layoutlmv3_summary_*.json` (after the run); notebook `notebooks/kaggle_layoutlmv3.ipynb`.
+| Arm | Fold 0 (seed 13 / 42) | Fold 1 (13 / 42) | Fold 2 (13 / 42) | Mean of the finished tasks |
+|---|---|---|---|---|
+| `pages` | 92.08 / 91.16 | 93.33 / 92.49 | 92.10 / 92.25 | **92.24** (6 tasks) |
+| `blank` | 91.26 / 90.97 | 93.07 / 91.97 | not finished | **91.82** (4 tasks) |
+| BROS Track-1 (3 seeds) | 92.21 | 92.37 | 92.50 | 92.36 |
+
+- **Pixels, seen templates, folds 0 and 1 (the four paired tasks):** `pages` minus `blank` = +0.82, +0.19, +0.26, +0.52 (mean **+0.45**, all four positive). On seen templates the page image is worth about half a point, a small effect.
+- **LayoutLMv3 against BROS on seen templates, folds 0 and 1:** `pages` 92.27 against BROS 92.29; `blank` 91.82. Level with BROS, so the seen-template ceiling is about 92 for these encoders; the interest is in the unseen-template result, which is still running.
+- The fold 2 MTL tasks of the `blank` arm were stopped to free the GPUs for the unseen-template runs; the MTL-minus-UTL gap will be computed on folds 0 and 1, where both regimes exist.
+
+**Results (unseen templates, the registered cell):** *pending*
+
+**Evidence:** `results/vrdu_layoutlmv3*/`, `results/vrdu_layoutlmv3_summary_*.json` (after the runs); `results/LayoutLMv3/` (MTL logs); notebook `notebooks/kaggle_layoutlmv3.ipynb`.
 
 
 ---

@@ -1,0 +1,28 @@
+{
+ "table_good": {
+  "doc": "8bc8897b17ac474a846f6a77",
+  "tag": "Nfull_T21",
+  "figure": "D:\\KeyValue-Extraction\\figures\\example_table_good.png"
+ },
+ "table_failure": {
+  "doc": "60342157e5654d1292205df4",
+  "tag": "Nfull_T21",
+  "figure": "D:\\KeyValue-Extraction\\figures\\example_table_failure.png"
+ },
+ "form_good": {
+  "doc": "19970722_Squire Patton Boggs, LLP_Amendment_Amendment.pdf",
+  "fold": 0,
+  "exact": 5,
+  "pred": 5,
+  "gold": 5,
+  "figure": "D:\\KeyValue-Extraction\\figures\\example_form_good.png"
+ },
+ "form_failure": {
+  "doc": "20101206_India Tourism, New York_Rangarajan, Parthasarathy_Short-Form.pdf",
+  "fold": 2,
+  "exact": 2,
+  "pred": 7,
+  "gold": 5,
+  "figure": "D:\\KeyValue-Extraction\\figures\\example_form_failure.png"
+ }
+}
