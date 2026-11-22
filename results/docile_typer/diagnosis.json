@@ -1,0 +1,79 @@
+{
+ "candidates_with_a_valid_answer_and_a_monetary_gold_span": 1524,
+ "bros_vs_vlm": {
+  "bros_right/vlm_right": 655,
+  "bros_right/vlm_wrong": 575,
+  "bros_wrong/vlm_wrong": 196,
+  "bros_wrong/vlm_right": 98
+ },
+ "vlm_answer_distribution": {
+  "amount_gross": 890,
+  "amount_net": 534,
+  "unit_price_net": 406,
+  "unit_price_gross": 363,
+  "(none)": 195
+ },
+ "bros_field_distribution": {
+  "amount_gross": 1827,
+  "unit_price_gross": 508,
+  "amount_net": 27,
+  "unit_price_net": 26
+ },
+ "accuracy_by_gold_field": {
+  "amount_gross": {
+   "n": 889,
+   "bros_pct": 98.3,
+   "vlm_pct": 61.1
+  },
+  "amount_net": {
+   "n": 144,
+   "bros_pct": 4.9,
+   "vlm_pct": 16.0
+  },
+  "unit_price_gross": {
+   "n": 401,
+   "bros_pct": 84.5,
+   "vlm_pct": 36.7
+  },
+  "unit_price_net": {
+   "n": 90,
+   "bros_pct": 11.1,
+   "vlm_pct": 44.4
+  }
+ },
+ "accuracy_by_document_kind": {
+  "gross-only documents": {
+   "n": 1256,
+   "bros_pct": 95.1,
+   "vlm_pct": 52.9
+  },
+  "net-only documents": {
+   "n": 234,
+   "bros_pct": 7.7,
+   "vlm_pct": 26.9
+  },
+  "other documents": {
+   "n": 34,
+   "bros_pct": 50.0,
+   "vlm_pct": 76.5
+  }
+ },
+ "confusion_gold_to_vlm": {
+  "amount_gross -> amount_gross": 543,
+  "amount_gross -> amount_net": 249,
+  "unit_price_gross -> unit_price_net": 215,
+  "unit_price_gross -> unit_price_gross": 147,
+  "amount_net -> amount_gross": 101,
+  "amount_gross -> unit_price_gross": 82,
+  "unit_price_net -> unit_price_net": 40,
+  "unit_price_net -> unit_price_gross": 32,
+  "amount_net -> amount_net": 23,
+  "unit_price_gross -> amount_net": 21,
+  "unit_price_gross -> amount_gross": 18,
+  "amount_gross -> unit_price_net": 15,
+  "unit_price_net -> amount_gross": 14,
+  "amount_net -> unit_price_gross": 11,
+  "amount_net -> unit_price_net": 9,
+  "unit_price_net -> amount_net": 4
+ }
+}

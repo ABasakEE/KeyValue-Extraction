@@ -2075,9 +2075,23 @@ Training only on the training documents of each split (DocILE: the pool order of
 
 **Limits stated up front.** One model and one prompt, no tuning; the candidates are BROS's, so the 18 to 22% of gold spans BROS never touches are out of reach; only the four monetary fields are retyped (about two thirds of the wrong-field errors); two detector runs (a second session can add `N1000_S1` and `N1000_S2`); the test documents have a median of 2 gold rows each; the typer sees the document text as OCR and the image at the 1,280 visual-token budget; a candidate that is not a gold cell at all cannot be dropped by the typer.
 
-**Results:** *pending*
+**Results (2026-11-22; one session, tags `Nfull_T21` and `N1000_S0`; 394 pages, 0 errors, 0 out-of-memory retries, 0.55 h on two T4s, median 5.9 s per page, median prompt 1,312 tokens, longest 7,830, peak 8.4 GB; `results/docile_typer/scores_Nfull_T21_N1000_S0.json`).**
 
-**Evidence:** `results/docile_typer/` (after the run).
+| Tag | BROS row F1 | Typer row F1 | Difference | Upper bound | Typing accuracy on exactly-found monetary spans, BROS / VLM | Fields changed by the VLM | Candidates answered |
+|---|---|---|---|---|---|---|---|
+| `Nfull_T21` | 60.96 | 52.93 | **-8.03** | 66.82 | 76.6% / **45.9%** (n = 847) | 381 | 1,081 of 1,163 |
+| `N1000_S0` | 60.40 | 53.54 | **-6.86** | 66.38 | 77.1% / **51.9%** (n = 860) | 371 | 1,112 of 1,225 |
+
+**Registered rule: the typer hurts.** The mean difference is **-7.45**, 95% interval over documents [-10.03, -5.11], negative for both tags and far beyond the -1.0 line. The expected payoff (upper bound about +5.9) was not approached: the VLM labels fewer candidates correctly than BROS does, by 25 to 30 points.
+
+**Post hoc diagnosis (`scripts/docile_typer_diagnose.py`, `results/docile_typer/diagnosis.json`; both tags pooled, 1,524 exactly-found candidates with a valid answer; not registered).**
+- **Agreement with BROS:** both right 655; BROS right and VLM wrong 575; BROS wrong and VLM right 98; both wrong 196. The VLM fixes a third of BROS's errors (98 of 294) and breaks 47% of what BROS had right (575 of 1,230).
+- **By gold field (BROS / VLM accuracy):** `amount_gross` 98.3% / 61.1% (n = 889), `unit_price_gross` 84.5% / 36.7% (n = 401), `amount_net` 4.9% / 16.0% (n = 144), `unit_price_net` 11.1% / 44.4% (n = 90). The VLM is better on the rare net fields and much worse on the common gross ones. It calls 249 gold gross amounts net (28% of them) and 215 gold gross unit prices net (54%); over all candidates (some match no gold span) its answers are 534 amount_net and 406 unit_price_net, against 234 gold net spans among the exactly-found ones, so it over-uses net.
+- **By document kind:** on net-only documents (234 candidates) BROS is right 7.7% of the time and the VLM 26.9% (3.5 times better); on gross-only documents (1,256) BROS 95.1% and the VLM 52.9%. **There is signal in the VLM for net documents, but it cannot tell from the page which kind of document it is reading well enough to avoid damaging the gross majority** (gross-only documents are about 85% of the monetary candidates).
+- **What this shows:** a VLM given the page and the candidates does not type DocILE's monetary fields better than the tagger, and replacing the tagger's field with the VLM's costs 7 row F1 points. The label is not recovered by reading the page with this prompt: the upper bound of +5.9 stays an upper bound. **What it does not show:** that no reader can do it. The one lead is document-level: the VLM does better exactly where BROS fails (net-only documents). A different design (one question per document about whether the prices include tax, then a fixed rule for the fields; or the BROS field shown to the VLM as a prior) was **not** tested and would be a new, post hoc study; one prompt, one model, one arm were registered and run.
+- **Against the registered expectation (moderate to low prior):** the expectation was that the typer would not beat BROS's 77%, and it did not; it was worse than 'no clear difference', not better.
+
+**Evidence:** `results/docile_typer/` (`run/rows_*.jsonl` field-name answers, `scores_*.json`, `diagnosis.json`).
 
 
 ---
