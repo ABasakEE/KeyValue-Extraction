@@ -64,31 +64,31 @@ New vendors send forms in layouts no model has seen, and every new template othe
 \textbf{Protocol.} VRDU registration forms, 200 training documents, 3 folds. MTL: all templates seen. UTL: one held out. Metric: exact-span entity F1.
 \end{block}
 
-\begin{block}{Gap in existing work}
+\begin{block}{Starting point: the seen-unseen gap}
 {\small
 \begin{tabularx}{\linewidth}{@{}Lrrr@{}}
 \toprule
 Intensive phase, VRDU & MTL & UTL & Gap \\
 \midrule
-LiLT\textsuperscript{*} & 91.6 & 64.2 & 27.3 \\                          % results/master_architectural_benchmark.csv
-Graph network (RSA-GNN)\textsuperscript{*} & 86.0 & 42.1 & 43.9 \\        % same CSV
-DANN-BROS & 91.8 & 69.6 & 22.2 \\                             % results/vrdu_dann_bros/metrics.json
+LiLT & 91.6 & 64.2 & 27.3 \\                          % results/master_architectural_benchmark.csv
+Delaunay graph network & 86.0 & 42.1 & 43.9 \\        % same CSV
+BROS, template-adversarial & 91.8 & 69.6 & 22.2 \\                             % results/vrdu_dann_bros/metrics.json
 BROS Track-1 (windows, jitter) & \textbf{92.4} & \textbf{71.3} & \textbf{21.1} \\ % results/vrdu_track1_bros/metrics.json
 \bottomrule
 \end{tabularx}}
-{\scriptsize\color{muted}\textsuperscript{*} from the summary CSV only. BROS Track-1 UTL by fold: 83.4 / 72.1 / 58.4.\par}
+{\scriptsize\color{muted}BROS Track-1 UTL by fold: 83.4 / 72.1 / 58.4.\par}
 \vspace{0.5ex}
 Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every model; each template words it differently) and Short-Form registrants (95\% of BROS's errors are the filer block).
 \end{block}
 
-\begin{block}{New Approaches}
+\begin{block}{Novelty Assessment: New Approaches}
 \begin{tikzpicture}
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
 \begin{enumerate}\setlength{\itemsep}{0.6ex}
 \item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates\textsuperscript{\dag}; a per-field router scores \hl{79.2}.
 \item \textbf{The advantage reverses.} BROS overtakes the reader at 10 seen FATURA templates and on line-item tables.
-\item \textbf{Linking, measured end to end:} \hl{47.4} with LiLT, \hl{53.4} with BROS geometry (\hl{+5.9}); a multilingual encoder costs 3.5.
+\item \textbf{Linking, measured end to end:} \hl{47.4} with LiLT, \hl{53.4} with BROS geometry (\hl{+5.9}); multilingual text costs 3.
 \end{enumerate}};
 \end{tikzpicture}
 
@@ -111,7 +111,7 @@ Tables & not covered & DocILE row F1 \textbf{59.6} \\
 % ============================================================== COLUMN 2: method, workflow, data, first result
 \begin{column}{\colwidth}
 
-\begin{block}{Methodology}
+\begin{block}{Methods and Approaches}
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm]
 \node[box, text width=8cm] (in) at (0,0) {page image + OCR words and boxes};
@@ -137,18 +137,18 @@ Tables & not covered & DocILE row F1 \textbf{59.6} \\
 \begin{tikzpicture}[node distance=0.4cm and 0.6cm,
   w/.style={box, text width=7.1cm, minimum height=2.0cm}, wa/.style={w, draw=accent, line width=1.6pt}]
 \node[w] (a) {\textbf{Intensive phase}\\LiLT, BROS, DANN, GNN};
-\node[w, right=of a] (b) {\textbf{Error analysis}\\gap = 2 fields (S2--5)};
-\node[wa, right=of b] (c) {\textbf{Zero-shot reader}\\+ router (S6--12)};
-\node[wa, below=of c] (d) {\textbf{Grounded prompt}\\VRDU 76.5 (S25, 31)};
-\node[wa, left=of d] (e) {\textbf{FATURA crossover}\\K = 1--40 (S33)};
-\node[wa, left=of e] (f) {\textbf{Linking end to end}\\47.4 → 53.4 (S17--37)};
-\node[wa, below=of f] (g) {\textbf{Link backbone}\\XLM, crops, BROS (S24--37)};
-\node[wa, right=of g] (h) {\textbf{Tables}\\ad-buy, DocILE (S34--44)};
-\node[w, right=of h] (i) {\textbf{Page pixels}\\LayoutLMv3 (S42)};
+\node[w, right=of a] (b) {\textbf{Error analysis}\\gap = 2 fields};
+\node[wa, right=of b] (c) {\textbf{Zero-shot reader}\\+ router};
+\node[wa, below=of c] (d) {\textbf{Grounded prompt}\\VRDU 76.5};
+\node[wa, left=of d] (e) {\textbf{FATURA crossover}\\K = 1--40};
+\node[wa, left=of e] (f) {\textbf{Linking end to end}\\47.4 → 53.4};
+\node[wa, below=of f] (g) {\textbf{Link backbone}\\XLM, crops, BROS};
+\node[wa, right=of g] (h) {\textbf{Tables}\\ad-buy, DocILE};
+\node[w, right=of h] (i) {\textbf{Page pixels}\\LayoutLMv3};
 \draw[arr] (a)--(b); \draw[arr] (b)--(c); \draw[arr] (c)--(d); \draw[arr] (d)--(e); \draw[arr] (e)--(f);
 \draw[arr] (f)--(g); \draw[arr] (g)--(h); \draw[arr] (h)--(i);
 \end{tikzpicture}
-\captionof{figure}{Blue = novelty phase. S = study in STUDIES.md, each registered with a pass rule.}
+\captionof{figure}{Blue = novelty phase.}
 \end{block}
 
 \begin{block}{Dataset Details}
@@ -160,7 +160,7 @@ Dataset & Task and size & Unseen split \\
 VRDU forms & 6 fields; 1,915 docs, 3 templates & 1 held out \\
 VRDU ad-buy & line items; 641 docs & N = 10--200 \\
 FATURA & 9 fields; 50 templates × 200 & K = 1--40 seen \\
-XFUND & links, 5 languages; 250 val forms & 94\% sibling-free \\
+XFUND & links, 5 languages; 250 val forms & 94\% unseen \\
 DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \bottomrule
 \end{tabularx}}
@@ -183,16 +183,16 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}
 \includegraphics[width=\linewidth]{f3_xfund_links.pdf}
-\captionof{figure}{XFUND link F1, end to end. LiLT-XLM (multilingual) is −3.5 vs its own run's LiLT-en (47.7); 47.4 is a retrain.}
+\captionof{figure}{XFUND link F1, end to end. LiLT-XLM is the multilingual encoder.}
 \end{minipage}
 
-\vspace{0.8ex}
-\begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=0.7\linewidth]{f6_example_shortform.pdf}
-\captionof{figure}{Unseen Short-Form: BROS tags the filer as registrant; the reader cites item 8.}
+\vspace{-0.4ex}
+\begin{minipage}[t]{0.52\linewidth}
+\includegraphics[width=\linewidth]{linking_fr.png}
+\captionof{figure}{XFUND, unseen French form: our BROS model tags questions (blue) and answers (green) and links each question to its answer (red arrows).}
 \end{minipage}\hfill
-\begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=0.7\linewidth]{f4_docile_curve.pdf}
+\begin{minipage}[t]{0.45\linewidth}
+\includegraphics[width=0.9\linewidth]{f4_docile_curve.pdf}
 \captionof{figure}{DocILE, BROS. Gap 2--9 points (VRDU: 21); 21.4\% of cells missed.}
 \end{minipage}
 
@@ -201,8 +201,8 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \begin{block}{Conclusion and Future Work}
 \begin{itemize}\setlength{\itemsep}{0.2ex}
 \item Read when templates are new and few; train when 10+ are seen and for tables (ad-buy: reader 38.2 vs BROS 68.8--85.7 row F1).
-\item Linking: geometry +5.9, multilingual text −3.5. Pixels (LayoutLMv3 vs blank image): none on seen templates, +0.8 over three unseen (unstable seeds), 14 below BROS. Future work: a learned router.
-\item Limits: \textsuperscript{\dag}prompt tuned on dev/confirm, fresh-form test (S32) not run.
+\item Linking: geometry +5.9, multilingual text about −3. Pixels (LayoutLMv3 vs blank image): none on seen templates, +0.8 over three unseen (unstable seeds), 14 below BROS. Future work: a learned router.
+\item Limits: \textsuperscript{\dag}prompt tuned on dev/confirm, fresh-form test not run.
 \end{itemize}
 \end{block}
 
