@@ -1,95 +1,95 @@
-% IE 643 novelty-assessment report (max 2 pages).  Build from this folder: tectonic report.tex
-% Numbers come from results/ (paths in comments) and STUDIES.md (study numbers in the text).
+% IE 643 novelty-assessment report (max 2 pages), in the style of the intensive-assessment report (report_IE643.pdf).
+% Build from this folder: pdflatex report.tex (twice). Numbers come from STUDIES.md (study numbers in the text) and results/.
 \documentclass[10pt,a4paper]{article}
-\usepackage[a4paper,margin=1.4cm,top=1.1cm,bottom=1.2cm]{geometry}
-\usepackage{fontspec}
-\setmainfont{FiraSans}[Path=../poster/fonts/,Extension=.ttf,UprightFont=*-Regular,BoldFont=*-SemiBold,ItalicFont=*-Italic,BoldItalicFont=*-SemiBold]
-\usepackage{graphicx,booktabs,tabularx,array,xcolor,titlesec,enumitem,ragged2e,xurl}
-\urlstyle{same}
-\definecolor{accent}{HTML}{1F4E79}
-\titleformat{\section}{\color{accent}\large\bfseries}{\thesection}{0.5em}{}
+\usepackage[a4paper,margin=1.5cm,top=1.2cm,bottom=1.2cm]{geometry}
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{lmodern}
+\usepackage{graphicx,booktabs,enumitem,caption,titlesec,xurl,tabularx,array}
+\captionsetup{font=small,labelfont=bf,skip=2pt}
+\titleformat{\section}{\large\bfseries}{\thesection}{0.6em}{}
 \titlespacing*{\section}{0pt}{6pt}{2pt}
-\titleformat{\subsection}{\bfseries}{\thesubsection}{0.5em}{}
-\titlespacing*{\subsection}{0pt}{4pt}{1pt}
-\setlist{nosep,leftmargin=1.2em}
-\setlength{\parindent}{0pt}\setlength{\parskip}{2pt}
-\linespread{1.0}
-\newcolumntype{L}{>{\RaggedRight\arraybackslash}X}
+\titleformat{\subsection}{\normalsize\bfseries}{\thesubsection}{0.5em}{}
+\titlespacing*{\subsection}{0pt}{3pt}{1pt}
+\setlist{nosep,leftmargin=1.3em}
+\setlength{\parindent}{1.1em}\setlength{\parskip}{0pt}
 \pagestyle{empty}
+\newcolumntype{L}{>{\raggedright\arraybackslash}X}
 
 \begin{document}
-\RaggedRight
-{\color{accent}\large\bfseries Novelty Assessment Report: Cross-Template Key-Value Extraction from Scanned Forms}\par
-\vspace{2pt}
-{\small IE 643 Course Project \textbullet{} Team Unemployed and Unsupervised \textbullet{} Param Mehta (23b2439), Arjoe Basak (23b1295) \textbullet{} 23b2439@iitb.ac.in, 23b1295@iitb.ac.in}\par
-\vspace{-2pt}\textcolor{accent}{\rule{\linewidth}{0.8pt}}
+\begin{center}
+{\Large\bfseries Cross-Template Key-Value Field Extraction from Scanned Forms}\\[2pt]
+{\large\bfseries Novelty Assessment Report}\\[2pt]
+IE 643 Course Project \quad Team: Unemployed and Unsupervised\\[1pt]
+Param Mehta (23b2439) \quad Arjoe Basak (23b1295) \quad Indian Institute of Technology Bombay \quad 22 November 2026
+\end{center}
+\vspace{-4pt}
+\begin{center}\begin{minipage}{0.93\linewidth}\small
+\textbf{Abstract.} We extract named fields and key-value pairs from scanned forms whose template the model has never seen. After the intensive phase, our best trained model was BROS with sliding windows (92.4 F1 on seen templates, 71.3 on unseen ones). The novelty phase asks four questions. Can a zero-shot vision-language reader, which reads field names, beat the trained tagger on new wording? How well does key-value linking really work when measured end to end? Do tables fit the same pipeline? Do page pixels help? A grounded zero-shot reader scores 76.5 against 70.5 for BROS, but training wins once about 10 templates are seen and on tables. End-to-end linking rises from 47.4 to 53.4 with BROS, and falls with a multilingual encoder. Code: \url{https://github.com/ABasakEE/KeyValue-Extraction}.
+\end{minipage}\end{center}
 
-\section{Starting point}
-The task is to extract named fields from scanned forms whose template the model has never seen, with no document of that template in training. Our protocol is VRDU registration forms with 200 training documents and 3 folds: MTL keeps all templates in training, UTL holds one out. We score exact-span entity F1. At the end of the intensive phase our best model was BROS with sliding windows, coordinate jitter and content-box anchoring (``Track-1''). It scored 92.4 MTL and 71.3 UTL, a 21-point gap (UTL by fold 83.4 / 72.1 / 58.4). An error analysis put most of the gap in two fields. \emph{foreign\_principle\_name} scored 0--13 F1 for every trained model, because each template words it differently. On Short-Form, 95\% of BROS's wrong \emph{registrant\_name} predictions were the filer block. A tagger trained on 200 documents cannot learn which text a field name refers to on a new template, so we tried models that read the field names. Each study below was registered in \texttt{STUDIES.md}, with its pass rule, before it ran.
+\section{Introduction}
+A deployed form reader keeps meeting forms it was not trained on: a new vendor, a revised filing. Random splits hide this: a model can remember where each field usually sits. Our protocol holds out whole templates: VRDU [3] registration forms, 200 training documents, three folds, scored by exact-span entity F1; MTL keeps every template in training and UTL holds one out. An error analysis of the intensive phase put most of the unseen-template loss in two fields. \emph{foreign\_principle\_name} scored 0--13 F1 for every trained model, because each template words it differently, and on Short-Form 95\% of the wrong \emph{registrant\_name} predictions were the filer block. A tagger trained on 200 documents cannot learn which text a field name refers to, so we tried models that read field names. Each study was registered in \texttt{STUDIES.md} with its pass rule first.
 
 \section{Approaches and experiments}
-\vspace{2pt}
-{\small
-\begin{tabularx}{\linewidth}{@{}p{1.25cm}p{5.9cm}Lp{2.3cm}@{}}
+\begin{table}[h]\centering\footnotesize
+\caption{Summary of the novelty-phase studies (S = study number in \texttt{STUDIES.md}).}
+\begin{tabularx}{\linewidth}{@{}p{1.15cm}p{4.6cm}Lp{2.4cm}@{}}
 \toprule
 Study & Approach & Main result & Verdict \\
 \midrule
-6--12 & Zero-shot VLM (3B) + per-field router & router +3.8 F1 [+2.6, +5.0] over BROS on 300 fresh forms & passed \\
-25 & Schema-guided grounded prompt (LMDX-style) & 8B: 60.2 F1 (60.5 with a fallback decode), +2.5 over the old pipeline against a +3.0 bar & not adopted \\
-31 & Prompt v2 (copy value, cite line), 8B & \textbf{76.5} / 75.2 (confirm/dev) vs BROS 70.5 / 69.8; router 79.2 & helps (tuned) \\
-29 & LoRA fine-tuning of the 3B VLM & UTL 46.2 vs BROS 70.1 (−23.9 [−25.9, −21.6]) & worse \\
-33 & Reader vs BROS on K FATURA templates & reader wins at K = 1, 2; tie at 5; BROS wins at 10, 40 & crossover \\
-17--23 & Re-measure XFUND linking & 65.5 → 49.9 (cut-off links counted) → 47.7 end to end & correction \\
-24 & Multilingual text (LiLT-InfoXLM) & link F1 47.7 → 44.2 (−3.5, all 3 seeds) & worse \\
-26 & Link-preserving crops; synthetic data & crops 47.4 → 49.7; synthetic alone +0.1 & crops help \\
-37 & BROS backbone in tagger + linker & link F1 47.4 → \textbf{53.4} (+4.8 / +5.9 / +7.1 per seed) & better \\
-27 & Zero-shot VLM as linker & 23.7 with gold entities, 3.0 end to end, vs 47.4 & worse \\
-34--41 & Line items: BROS tagger + anchor rule & ad-buy 68.8--85.7 row F1; DocILE \textbf{59.6} unseen & works \\
-35--43 & Learned grouper; column rules; VLM typer & DocILE −4.3; −2.7 / +0.0; −7.45 row F1 & not adopted \\
-42 & LayoutLMv3: page image vs blank & unseen 63.8 vs 60.4 (+3.4, 2 folds); seen 92.2 vs 92.4; both 14--17 below BROS & pixels help, marginal \\
+S6--12 & Zero-shot VLM (3B) with a per-field router & router $+3.8$ F1 [$+2.6$, $+5.0$] over BROS on 300 fresh forms & passed \\
+S25, 31 & Grounded prompt, Qwen3-VL-8B; prompt v2 & 76.5 / 75.2 vs BROS 70.5 / 69.8; with router 79.2 & helps (prompt tuned) \\
+S29 & LoRA fine-tuning of the 3B VLM & 46.2 vs 70.1 for BROS & worse \\
+S33 & Reader vs BROS trained on $K$ FATURA templates & reader wins at $K{=}1,2$, ties at 5, BROS wins at 10, 40 & crossover \\
+S17--23 & Re-measure XFUND linking & 65.5 $\to$ 49.9 $\to$ 47.7 end to end & correction \\
+S24, 26, 37 & Multilingual text; crops; BROS backbone & 47.7 $\to$ 44.2; 47.4 $\to$ 49.7; 47.4 $\to$ \textbf{53.4} & worse; helps; better \\
+S34--41 & Line items: BROS tagger + anchor rule & ad-buy 68.8--85.7 row F1; DocILE \textbf{59.6} (whole pool 60.4) & works \\
+S35, 40, 43 & Learned row grouper; column rules; VLM typer & $-4.3$; $-2.7$ / $+0.0$; $-7.45$ row F1 & not adopted \\
+S42 & LayoutLMv3, page image vs blank image & unseen 63.8 vs 60.4; seen 92.2 vs 92.4 & helps, marginal \\
 \bottomrule
-\end{tabularx}}
+\end{tabularx}
+\end{table}
 
-\subsection{A zero-shot reader for unseen wording (Studies 6--12, 25, 29, 31)}
-We first ran Qwen2.5-VL-3B zero-shot on the page and mapped its keys to our fields. Under a strict matched metric, BROS stayed ahead, but the errors were complementary: the VLM was better on role fields, BROS on dates, signatures and span boundaries. A per-field router, fitted on the other two templates, was confirmed on 300 fresh forms (+3.8 [+2.6, +5.0]). Nearly all of the gain came from \emph{foreign\_principle\_name}. We then moved to a schema-guided, grounded recipe. The model gets each page's OCR lines with ids plus a short description of each field. It must answer in JSON, copying the value and citing its line, and we ground the answer back to OCR words. The first version (Study 25) missed its pass rule. With prompt v2 (Study 31), Qwen3-VL-8B in 4-bit reached \textbf{76.5 / 75.2} on the confirm and dev sets, against 70.5 / 69.8 for BROS. Text alone gives 73.3 / 71.7, so the image adds about 3 points. The router reaches 79.2 (+8.7 [+6.9, +10.6]), but it loses 4.6 on Amendment, so it fails the ``no template worse'' part of its rule. The prompt and field descriptions were changed after we saw dev and confirm results. The replication on 300 untouched forms (Study 32) is registered but has not run, and the gain should be read with that caveat. Fine-tuning the 3B model with LoRA on 180 documents per fold made it worse (46.2 vs 70.1). It got span boundaries wrong and left 22--30\% of gold fields empty.
+\subsection{A zero-shot reader for unseen wording (S6--12, 25, 29, 31)}
+We first ran Qwen2.5-VL-3B zero-shot on the page and mapped its keys to our fields. Under a strict matched metric BROS [1] stayed ahead, but the errors were complementary: the VLM was better on role fields, BROS on dates, signatures and span boundaries. We then built a schema-guided, grounded recipe [5]: the model sees each page's OCR lines with ids and a short description of each field, answers in JSON by copying the value and citing its line, and we ground the answer back to OCR words. With prompt v2, Qwen3-VL-8B [6] in 4-bit reached \textbf{76.5 / 75.2} on the confirm and dev sets against 70.5 / 69.8 for BROS; text alone gives 73.3 / 71.7, so the image adds about 3 points. The router reaches 79.2 but loses 4.6 on Amendment. The prompt was changed after we saw dev and confirm results, and the replication on 300 untouched forms (S32) did not run, so the gain carries that caveat. Fine-tuning the 3B model with LoRA made it worse (46.2).
 
-\begin{figure}[h]\vspace{-4pt}
-\centering
+\subsection{Where training wins (S18, 33, 34, 38, 43)}
+On FATURA invoices the recipe scores 91.7; BROS trained on $K = 1, 2, 5, 10, 40$ templates scores 32.5, 69.2, 90.8, 95.9, 99.9. The reader wins at $K = 1, 2$ ($+59.4$, $+22.5$), ties at 5, and loses at 10 and 40 (Figure~1). On tables it loses at every size: 38.2 row F1 on VRDU ad-buy against 68.8--85.7 for BROS, and on DocILE its pilot failed the output-format gate. As a field typer on top of BROS's DocILE cells the VLM cost 7.45 row F1, with typing accuracy 46--52\% against 77\%. The two systems fail together (the VLM is right on 32\% of the spans BROS misses, 70\% of those BROS gets right), so a confidence gate added nothing.
+
+\subsection{Key-value linking, measured end to end (S17--24, 26, 27, 37)}
+The intensive-phase linker reported 65.5 link F1 on XFUND. That scored only the 61\% of links visible in 512 tokens and gave the linker gold entities. Counting cut-off links as misses gives 49.9, and fully end to end, with predicted entities, the score is 47.7 (47.4 when the same LiLT [2] recipe was retrained later). XFUND validation is about 94\% sibling-free, close to a template-disjoint test. LiLT's multilingual text stream lowered link F1 by 3.5 in all three seeds; link-preserving crops raised it to 49.7; replacing LiLT by BROS, which encodes relative layout, raised it to 53.4 (entity F1 75.8 $\to$ 80.2; answers above their question $+15.4$ recall). Most linking errors are geometric (downward and question-to-question links). BROS is English-only, so the gain appears despite the language mismatch.
+
+\subsection{Tables in the same pipeline (S34--41, 44) and page pixels (S42)}
+A table row is another linking problem: detect cells as word sets, then attach each cell to the nearest anchor cell at or above it. With gold cells this rule reaches 94.4 row F1 on DocILE [4], our ceiling. With the unchanged BROS tagger, unseen-layout row F1 is 44.7 / 52.9 / 59.6 at 50 / 200 / 1,000 training documents and 60.4 on the whole pool, level with the published RoBERTa baseline on unseen layouts (59.8; different test documents). Seen layouts score 65.9, a gap of 2--9 points against 21 on VRDU forms. On unseen layouts 64\% of gold cells are right, 21\% missed, 8\% typed wrongly, 5\% wrongly bounded. LayoutLMv3 with and without the page image scores 92.24 and 92.35 on seen templates, and 63.8 and 60.4 on unseen ones (folds 0 and 1: the image adds $+3.4$, on the signature fields, with one unstable seed), 14--17 points below Track-1 BROS, which also uses anchoring and jitter.
+
+\section{Qualitative results}
+\begin{figure}[h]\centering
+\begin{minipage}[t]{0.40\linewidth}\centering
+\includegraphics[width=\linewidth]{../poster/figures/f2_fatura_crossover.pdf}
+\end{minipage}\hfill
+\begin{minipage}[t]{0.40\linewidth}\centering
+\includegraphics[width=\linewidth]{../poster/figures/f3_xfund_links.pdf}
+\end{minipage}\\[4pt]
 \begin{minipage}[t]{0.49\linewidth}\centering
-\includegraphics[width=0.74\linewidth]{../poster/figures/f2_fatura_crossover.pdf}\par
-{\footnotesize\RaggedRight\textbf{Figure 1.} FATURA: the zero-shot reader (no training) vs BROS trained on K templates (\texttt{results/fatura\_sg/run/report.json}).\par}
+\includegraphics[width=\linewidth]{figures/linking_example_de.png}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}\centering
-\includegraphics[width=0.74\linewidth]{../poster/figures/f3_xfund_links.pdf}\par
-{\footnotesize\RaggedRight\textbf{Figure 2.} XFUND end-to-end link F1, 250 val forms; dots are seeds 13, 21, 42. LiLT-XLM is the multilingual stream.\par}
+\includegraphics[width=\linewidth]{figures/linking_example_fr.png}
 \end{minipage}
+\caption{Top: FATURA field F1 of the zero-shot reader against BROS trained on $K$ templates (left); XFUND end-to-end link F1 (right; dots are seeds). Bottom: our finished BROS joint model, run locally on two unseen XFUND validation forms (German, French) through the OCR, word-splitting and windowing pipeline of the demo. Blue boxes are questions, green boxes answers, red arrows the predicted key-to-value links. German: six of seven links correct (birth date missed); French: eight links, each to the answer on its own line.}
 \end{figure}
 
-\subsection{Where training wins (Studies 18, 33, 34, 38, 43)}
-On FATURA invoices the same recipe scores 91.7. BROS trained on K templates scores 32.5 / 69.2 / 90.8 / 95.9 / 99.9 at K = 1 / 2 / 5 / 10 / 40. The reader wins at K = 1 and 2 (+59.4, +22.5), ties at K = 5 (+0.9 [−1.8, +3.7]) and loses at K = 10 and 40 (−4.2, −8.2) (Figure 1). On tables it loses at every training size. On VRDU ad-buy line items it reaches 38.2 row F1 against 68.8--85.7 for BROS trained on 10--200 documents, partly because it predicts 1.71 times too many rows. On DocILE the pilot failed its gate (88.3\% of cited ids existed; the bar was 90\%). As a cell typer on top of BROS's cells, the VLM cost 7.45 row F1 [−10.0, −5.1], with typing accuracy of 46--52\% against 77\% for BROS. The errors of the two systems are positively correlated: the VLM is right on 32\% of the spans BROS misses but on 70\% of the spans BROS gets right. A per-document confidence gate therefore added nothing on VRDU (−0.2).
+\section{Conclusions and what is missing}
+A reader that must cite OCR lines handles new wording better than a tagger trained on 200 documents (76.5 vs 70.5), training wins once about 10 templates are seen and on dense tables, and for linking layout geometry helped (+5.9) where multilingual text did not ($-3.5$). Not run for lack of time: the fresh-set replication of prompt v2 (S32), the output-format test for the tuned VLM (S30), a learned router (S36 found up to $+5.8$ headroom on FATURA), and LayoutLMv3 on the hardest fold (Short-Form; still running at submission). Several analyses are post hoc; \texttt{STUDIES.md} flags each one.
 
-\subsection{Key-value linking, measured end to end (Studies 17--24, 26, 27, 37)}
-Our intensive-phase linker reported 65.5 link F1 on XFUND. That figure scored only the 61\% of links visible in 512 tokens and gave the linker gold entities. Counting cut-off links as misses gives 49.9; windows at inference raise it to 59.8 with gold entities. Fully end to end, with predicted entities, the score is 47.7 (47.4 when we retrained the same LiLT recipe for the later comparisons). XFUND validation is about 94\% sibling-free, so this is close to a template-disjoint linking test. We then tested three fixes. LiLT's multilingual text stream lowered link F1 by 3.5 in all three seeds. Link-preserving crops raised it from 47.4 to 49.7. Replacing LiLT with BROS, which encodes relative layout, raised it to 53.4, with entity F1 rising from 75.8 to 80.2 (Figure 2). Recall on answers placed above their question rose by 15.4 points. That matches Study 22, where most linking errors were geometric: downward links, question-to-question links and pairs no window could reach. BROS is English-only, so the gain appears despite the language mismatch. A zero-shot VLM linker over-linked, with precision about 19\% (23.7 F1 with gold entities).
-
-\subsection{Tables in the same pipeline (Studies 34, 35, 39--41, 44)}
-We treat a table row as another linking problem: detect cells as word sets, then attach each cell to the nearest anchor cell at or above it. With gold cells this rule reaches 94.4 row F1 on DocILE, our ceiling. With the unchanged Track-1 BROS tagger on layout-disjoint test documents, row F1 is 44.7 / 52.9 / 59.6 at 50 / 200 / 1,000 training documents, and 60.4 on the whole pool. That is level with the published RoBERTa-base baseline on unseen layouts (59.8; different test documents, so the comparison is rough). Seen layouts score 65.9, a gap of 2--9 points depending on the seed, against 21 on VRDU forms. The loss budget on unseen layouts: 64.0\% of gold cells right, 21.4\% missed, 8.2\% with a wrong field, 4.8\% with a wrong extent. A learned row grouper (+2.4 on ad-buy, −4.3 on DocILE) and two column rules (−2.7, +0.0) did not beat the plain rule.
-
-\subsection{Page pixels (Study 42)}
-LayoutLMv3 with real page images and the same model with a blank image score 92.24 and 92.35 on seen templates (6 paired runs), so the pixels add nothing there. On unseen templates (folds 0 and 1, 2 seeds) the image adds \textbf{+3.4} (63.8 vs 60.4; the four paired differences are +4.5, +3.2, +8.3 and −2.6), and our pass rule (mean $\geq$ +2.0, at least 3 of 4 pairs positive) is met. The gain is on the signature fields (\emph{signer\_title} +28.5, \emph{signer\_name} +7.9) and slightly negative on \emph{registrant\_name} (−4.4). One seed on the harder fold scored 51.6 against 63.5 for the other, so we call it marginal. Both arms sit 14--17 points below Track-1 BROS on the same folds (77.7); these runs had no coordinate jitter or anchoring, so that is not a clean backbone comparison.
-
-\section{What we take from this, and what is missing}
-\begin{itemize}
-\item A reader that must cite OCR lines handles new wording better than a tagger trained on 200 documents (76.5 vs 70.5). Training wins once about 10 templates are seen, and on dense tables.
-\item For linking, layout geometry helped (+5.9) and multilingual text did not (−3.5), with one recipe and one dataset each.
-\item Not run, for lack of time: the fresh-set replication of prompt v2 (Study 32), the output-format test for the tuned VLM (Study 30), a learned router (Study 36 found up to +5.8 headroom on FATURA), and LayoutLMv3 on the hardest fold (Short-Form; still running at submission). Several analyses are post hoc; \texttt{STUDIES.md} flags each one.
-\end{itemize}
-
-\section*{References}
-{\footnotesize
-Teakgyu Hong, Donghyun Kim, Mingi Ji, Wonseok Hwang, Daehyun Nam and Sungrae Park. BROS: A Pre-trained Language Model Focusing on Text and Layout for Better Key Information Extraction from Documents, AAAI, 2022. \url{https://arxiv.org/abs/2108.04539}\par
-Jiapeng Wang, Lianwen Jin and Kai Ding. LiLT: A Simple yet Effective Language-Independent Layout Transformer for Structured Document Understanding, ACL, 2022. \url{https://arxiv.org/abs/2202.13669}\par
-Zilong Wang, Yichao Zhou, Wei Wei, Chen-Yu Lee and Sandeep Tata. VRDU: A Benchmark for Visually-rich Document Understanding, KDD, 2023. \url{https://arxiv.org/abs/2211.15421}\par
-Štěpán Šimsa, Milan Šulc, Michal Uřičář, et al. DocILE Benchmark for Document Information Localization and Extraction, ICDAR, 2023. \url{https://arxiv.org/abs/2302.05658}\par
-Vincent Perot, Kai Kang, Florian Luisier, et al. LMDX: Language Model-based Document Information Extraction and Localization, arXiv, 2023. \url{https://arxiv.org/abs/2309.10952}\par
-Qwen Team. https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct, Accessed on: 22nd November, 2026.\par}
+\begingroup\footnotesize\setlength{\parindent}{0pt}
+\begin{thebibliography}{9}\setlength{\itemsep}{0pt}\setlength{\parsep}{0pt}
+\bibitem{bros} Teakgyu Hong, Donghyun Kim, Mingi Ji, et al. BROS: A Pre-trained Language Model Focusing on Text and Layout for Better Key Information Extraction from Documents, AAAI, 2022. \url{https://arxiv.org/abs/2108.04539}
+\bibitem{lilt} Jiapeng Wang, Lianwen Jin and Kai Ding. LiLT: A Simple yet Effective Language-Independent Layout Transformer for Structured Document Understanding, ACL, 2022. \url{https://arxiv.org/abs/2202.13669}
+\bibitem{vrdu} Zilong Wang, Yichao Zhou, Wei Wei, Chen-Yu Lee and Sandeep Tata. VRDU: A Benchmark for Visually-rich Document Understanding, KDD, 2023. \url{https://arxiv.org/abs/2211.15421}
+\bibitem{docile} Štěpán Šimsa, Milan Šulc, Michal Uřičář, et al. DocILE Benchmark for Document Information Localization and Extraction, ICDAR, 2023. \url{https://arxiv.org/abs/2302.05658}
+\bibitem{lmdx} Vincent Perot, Kai Kang, Florian Luisier, et al. LMDX: Language Model-based Document Information Extraction and Localization, arXiv, 2023. \url{https://arxiv.org/abs/2309.10952}
+\bibitem{qwen} Qwen Team. \url{https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct}, Accessed on: 22nd November, 2026.
+\end{thebibliography}\endgroup
 \end{document}
