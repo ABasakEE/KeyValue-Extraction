@@ -1,0 +1,33 @@
+{
+  "reference": {
+    "BROS Track-1 (jitter + anchoring)": {
+      "MTL": 92.36,
+      "UTL": 71.27,
+      "gap": 21.1
+    }
+  },
+  "arms": {
+    "blank": {
+      "runs": {
+        "UTL_fold0_seed13": 65.96,
+        "UTL_fold0_seed42": 66.23
+      },
+      "MTL": null,
+      "MTL_by_fold": {},
+      "MTL_weak_fields": {},
+      "UTL": {
+        "mean": 66.09,
+        "std": 0.14,
+        "n": 2
+      },
+      "UTL_by_fold": {
+        "0": 66.09
+      },
+      "UTL_weak_fields": {
+        "file_date": 72.97,
+        "foreign_principle_name": 2.72,
+        "signer_name": 60.57
+      }
+    }
+  }
+}
