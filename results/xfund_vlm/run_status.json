@@ -79,5 +79,13 @@
     "stopped": "time cap reached before forms 50-100",
     "forms_done": 50,
     "arm_hours": 0.42
+  },
+  "V1": {
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "started_at_h": 10.61,
+    "chunks": [],
+    "stopped": "time cap reached before forms 0-50",
+    "forms_done": 0,
+    "arm_hours": 0.0
   }
 }
