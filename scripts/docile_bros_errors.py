@@ -88,9 +88,10 @@ def main() -> None:
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", default=str(B.ROOT / "results" / "docile_bros" / "run"))
     ap.add_argument("--sizes", default="200,1000")
+    ap.add_argument("--mtl", action="store_true", help="score the held-out seen-layout documents of the full-pool run (study 41) instead of the unseen-layout test documents")
     ap.add_argument("--out", default=str(B.ROOT / "results" / "docile_bros" / "errors.json"))
     a = ap.parse_args()
-    test = json.loads(B.SPLITS.read_text(encoding="utf-8"))["test"]
+    test = json.loads((B.MTL if a.mtl else B.SPLITS).read_text(encoding="utf-8"))["test"]
     docs = {g: B.doc_dict(g) for g in test}
     out = {}
     for n in a.sizes.split(","):
