@@ -32,5 +32,38 @@
     "stopped": "stopped at 232 forms (returncode 0)",
     "forms_done": 232,
     "arm_hours": 2.52
+  },
+  "V2": {
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "started_at_h": 4.22,
+    "chunks": [
+      {
+        "upto": 50,
+        "returncode": 0,
+        "elapsed_h": 5.32
+      },
+      {
+        "upto": 100,
+        "returncode": 0,
+        "elapsed_h": 6.49
+      },
+      {
+        "upto": 150,
+        "returncode": 0,
+        "elapsed_h": 7.61
+      },
+      {
+        "upto": 200,
+        "returncode": 0,
+        "elapsed_h": 8.85
+      },
+      {
+        "upto": 250,
+        "returncode": 0,
+        "elapsed_h": 10.18
+      }
+    ],
+    "forms_done": 250,
+    "arm_hours": 5.96
   }
 }
