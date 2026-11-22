@@ -31,3 +31,10 @@ Key-to-value arrows come from the Gradio linking demo (`python demo.py`) and nee
 | LayoutLMv3 with and without pixels, UTL folds 0 and 1 | `notebooks/kaggle_layoutlmv3.ipynb` (`REGIMES="UTL"`, `FOLDS`, `ARMS`) | 13, 42 |
 | Detector and typer on DocILE | `notebooks/kaggle_docile_typer.ipynb` | detector runs `Nfull_T21`, `N1000_S0` |
 | DocILE failure taxonomy | `python scripts/docile_failure_taxonomy.py` (CPU, 7 processes) | five saved runs |
+
+## 5. Linking demo with the BROS joint model (study 37, arm J1)
+
+`src/demo.py` now reads the backbone from the checkpoint's `metrics.json` config, so a BROS joint checkpoint loads without code changes (checked with a random-weight BROS checkpoint: `tests/test_demo_bros_joint.py`).
+1. Get `best_model.pt` of seed 42 (best link F1, 54.01): Kaggle, the `kaggle_xfund_bros_joint` notebook, the committed version, Output tab, `results/bros_joint/J1/seed_42/best_model.pt` (about 500 MB). If it is not there, retrain one seed (about 2 h): in that notebook set `ARMS = {"J1": "configs/xfund_joint_bros_J1.yaml"}` and add `"--seeds", "42"` to the train command of cell 4; it already deletes pushed result files that lack weights and retrains.
+2. Put the file at `results/bros_joint/J1/seed_42/best_model.pt` (the folder already holds that seed's result files; `results/bros_joint/J1/metrics.json` supplies the config).
+3. Run: `set DEMO_CKPT_DIR=resultsros_joint\J1\seed_42` then `python demo.py` (PowerShell: `$env:DEMO_CKPT_DIR="resultsros_joint\J1\seed_42"`).

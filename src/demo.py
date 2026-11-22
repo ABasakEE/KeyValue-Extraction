@@ -127,14 +127,15 @@ def get_loaded_model() -> JointFormExtractor | None:
         return model
     if CKPT_PATH.exists():
         try:
-            spatial = 10
+            spatial, backbone = 10, "lilt"
             for meta, key in ((CONFIG_PATH, None), (CKPT_DIR / "metrics.json", "config"), (CKPT_DIR.parent / "metrics.json", "config")):
                 if meta.exists():
                     d = json.loads(meta.read_text(encoding="utf-8"))
                     d = d.get(key, {}) if key else d
                     spatial = int(d.get("spatial_in_features", spatial))
+                    backbone = d.get("backbone", backbone)   # "bros" for the study 37 joint model (results/bros_joint/J1/seed_*)
                     break
-            m = JointFormExtractor("lilt", len(ID2LABEL), ID2LABEL, spatial_in_features=spatial)
+            m = JointFormExtractor(backbone, len(ID2LABEL), ID2LABEL, spatial_in_features=spatial)
             st = torch.load(CKPT_PATH, map_location="cpu", weights_only=False)
             m.load_state_dict(st["model_state_dict"] if isinstance(st, dict) and "model_state_dict" in st else st)
             m.eval()
