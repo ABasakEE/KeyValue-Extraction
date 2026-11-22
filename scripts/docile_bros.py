@@ -32,7 +32,7 @@ LABELS = ["O"] + [f"{p}-{f}" for f in FIELDS for p in "BI"]
 ID2LABEL = dict(enumerate(LABELS))
 LABEL2ID = {v: k for k, v in ID2LABEL.items()}
 SPLITS = ROOT / "results" / "docile_rows" / "splits.json"
-POOL = ROOT / "results" / "docile_rows" / "pool.json"   # all training-pool documents (3,108), written by docile_splits.py (study 41)
+MTL = ROOT / "results" / "docile_rows" / "mtl.json"   # study 41: held-out documents of seen layouts ("test") and the pool without them ("train"), written by docile_splits.py
 
 
 def doc_dict(i: str) -> dict:
@@ -134,9 +134,10 @@ def cmd_train(a) -> None:
         if deadline and time.time() > deadline:
             print(f"[shard {a.shard}] deadline reached; stopping cleanly (re-run resumes: finished runs are skipped)", flush=True)
             break
-        train_ids = json.loads(POOL.read_text(encoding="utf-8")) if n == "full" else sp["train"][str(s)][:n]
+        mtl = json.loads(MTL.read_text(encoding="utf-8")) if n == "full" else None
+        train_ids = mtl["train"] if n == "full" else sp["train"][str(s)][:n]
         name = f"Nfull_T{seed}" if n == "full" else f"N{n}_S{s}"
-        train_ex, val_ex, test_ex = pick(train_ids), pick(sp["val"]), pick(sp["test"])
+        train_ex, val_ex, test_ex = pick(train_ids), pick(sp["val"]), pick(sp["test"] + (mtl["test"] if mtl else []))   # full pool: unseen-layout test, then seen-layout test
         if a.smoke:
             train_ex, val_ex, test_ex = train_ex[:6], val_ex[:2], test_ex[:3]
         print(f"[shard {a.shard}] {name}: train {len(train_ex)} val {len(val_ex)} test {len(test_ex)}", flush=True)
@@ -149,7 +150,7 @@ def cmd_train(a) -> None:
 
 
 def cmd_score(a) -> None:
-    test = json.loads(SPLITS.read_text(encoding="utf-8"))["test"]
+    test = json.loads((MTL if a.mtl else SPLITS).read_text(encoding="utf-8"))["test"]   # --mtl: the held-out documents of seen layouts (study 41)
     docs = {g: doc_dict(g) for g in test}
     report: dict = {"tau": a.tau, "runs": {}, "per_size": {}}
     for run in sorted(Path(a.runs).glob("N*_[ST]*")):
@@ -185,7 +186,7 @@ def main() -> None:
     p.add_argument("--deadline-hours", type=float, default=0.0)
     p.add_argument("--full-pool", action="store_true"); p.add_argument("--train-seeds", default="13,21")
     p = sub.add_parser("score")
-    p.add_argument("--runs", required=True); p.add_argument("--tau", type=float, default=0.5); p.add_argument("--report", default="report.json")
+    p.add_argument("--runs", required=True); p.add_argument("--tau", type=float, default=0.5); p.add_argument("--report", default="report.json"); p.add_argument("--mtl", action="store_true")
     a = ap.parse_args()
     {"oracle": cmd_oracle, "train": cmd_train, "score": cmd_score}[a.cmd](a)
 

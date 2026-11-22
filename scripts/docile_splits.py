@@ -23,7 +23,7 @@ ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data" / "docile"
 SIZES = (10, 50, 100, 200, 500, 1000)
 SEEDS = (0, 1, 2)
-N_TEST, N_VAL, N_PILOT = 200, 100, 30
+N_TEST, N_VAL, N_PILOT, N_MTL = 200, 100, 30, 200
 
 
 def main() -> None:
@@ -69,6 +69,16 @@ def main() -> None:
     out = ROOT / "results" / "docile_rows" / "splits.json"
     out.write_text(json.dumps({"rules": __doc__, "stats": stats, "test": test, "val": val, "pilot": pilot, "train": train}, indent=1), encoding="utf-8")
     (ROOT / "results" / "docile_rows" / "pool.json").write_text(json.dumps(pool), encoding="utf-8")   # every training-pool document (study 41: the full-pool run)
+    by_pool = defaultdict(list)   # study 41: MTL test = one pool document of each of 200 pool layouts that have at least two documents, held out of training
+    for i in pool:
+        by_pool[info[i]["layout"]].append(i)
+    multi = sorted(l for l, v in by_pool.items() if len(v) >= 2)
+    rng_mtl = random.Random(41)
+    rng_mtl.shuffle(multi)
+    mtl = [rng_mtl.choice(by_pool[l]) for l in multi[:N_MTL]]
+    mtl_train = [i for i in pool if i not in set(mtl)]
+    assert len(mtl) == N_MTL and {info[i]["layout"] for i in mtl} <= {info[i]["layout"] for i in mtl_train}
+    (ROOT / "results" / "docile_rows" / "mtl.json").write_text(json.dumps({"test": mtl, "train": mtl_train, "layouts_in_train": len({info[i]["layout"] for i in mtl_train}), "layouts_with_two_or_more": len(multi)}), encoding="utf-8")
     print(json.dumps(stats, indent=1))
 
 
