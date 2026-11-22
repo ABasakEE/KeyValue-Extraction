@@ -1,0 +1,53 @@
+﻿Guidelines for IE 643 Course Project Novelty Assessment
+(Please check carefully!)
+
+
+The IE 643 course project novelty assessment will be done via a poster presentation. Each team must prepare a poster based on the instructions given below and must present the poster in person on the allotted date (one of 23rd and 25th November will be allotted for each team) (Time: 10 AM to 1 PM, Venue: to be announced soon.). Please note that there will be penalties for the posters not complying with the instructions provided. Teams which are absent for poster presentation will be discarded from the entire course project evaluation. 
+
+
+Instructions for Poster
+A template for the poster is available at this link. Please note that this template will automatically be extended to full paper size, as the content gets filled.
+Please use the template for preparing your poster. Other poster styles can be used, however the header and content should follow the instructions below. Any other arbitrary formats and arbitrary contents will render the poster unviable for a meaningful evaluation. 
+The following are generic guidelines useful for preparing the poster, but you are free to make your poster perfect by suitable amendments. 
+NOTE: Poster must be printed on A1-size sheet by the team. 
+A good poster generally contains the following content:
+1. Header containing the following contents: 
+   1. Line 1: IE 643 Course Project
+   2. Line 2: Title of the project (reflecting the task/problem under consideration),
+   3. Line 3: Team Name
+   4. Line 4,5: Team member details (Names, Roll Numbers, e-mail IDs) 
+   5. IITB logo on the left side of the header and IE 643 logo on the right side of the header, as given in the template
+2. Abstract containing a crisp description of the task attempted in the project. 
+3. Introduction describing the overall perspective of the task/problem, the relevance of the task/problem in the current scenario, its importance and significance, and how (and why) deep learning techniques can be used to solve the task/problem. 
+4. Workflow flowchart indicating the progress of the team towards completing the task. 
+5. Methods and Approaches:  Relevant figures of the full combined deep learning architecture used for the project. Relevant points about the methods and approaches should be incorporated. 
+6. Dataset Details: A tabulation of the dataset characteristics should be presented. Include the most relevant data set details that are important for the project.  
+7. Novelty Assessment: Illustrate the tasks attempted for novelty assessment 
+8. Results: Suitable qualitative results (e.g., figures) and quantitative results (e.g., plots and tables), describing the results obtained during the intensive assessment and novelty assessment phases of the project. Comparative results should be included if new ideas are tried. 
+9. Conclusions and Future Work: Summarize the project and give a few pointers for future work. 
+10. References: References should be in proper format as specified in the template provided. 
+11. Acknowledgements
+12. Link to github repo: Can be a QR code
+13. Link to Demo video: Can be a QR code
+References should be in proper format as specified below.
+For including the references about a research paper, the reference should be of the following format:
+<< authorname_1, authorname_2, … and authorname_n >>. <<Paper_title>>,  <<Journal or conference name>>, <<year>>.  <<paper_url>> 
+e.g.   Steven Raskinov, Bob Dietterich and Rita Barnard. SVMs for Multi-label anomaly detection, Journal of Machine Learning, 2013. https://arxiv.org/1303.1231223 
+For including references to the website, the reference should be of the following format:  
+<<authorname_1, authorname_2, …, and authorname_n>>. <<url for website>>, <<access_time>>. 
+e.g. Chris Bisred. https://blog.com/samplewebsite. Accessed on:  7th March, 2024.
+
+
+ IMPORTANT: A badly designed poster will be awarded a very less (e.g.zero) score.
+
+
+Sharing your poster PDF and 2-page report in the shared Google Drive folder
+All teams need to upload the following materials to the same drive folder, which was shared with TAs and the instructor during Intensive Assessment. 
+1. The PDF of the poster (Naming Convention: Teamname_IE643_CourseProject_Poster.pdf).
+2. A short report containing the details of approaches tried out and experiments conducted for novelty assessment. The report should not have more than 2 pages.
+(Naming convention for report: Teamname_IE643_NoveltyAssessment_report.pdf)
+The deadline for the report and poster submission is 22nd November, 11.59 PM (IST).
+[IMPORTANT] Reports and posters will be considered for evaluation only for those teams that participate in-person in the novelty assessment poster presentation.
+Printing Options: 
+                         1. Near Market Gate IITB: AV Print Vision, Patel Printing 
+                         2. Front of Main IITB Gate: There are several printing shops in this area

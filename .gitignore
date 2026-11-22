@@ -64,3 +64,6 @@ presentation_scripts/*
 
 # access tokens (DocILE etc.) - never commit
 /.secrets/
+
+# written into the repository root by src/train.py at the start of every run
+current_run.txt
