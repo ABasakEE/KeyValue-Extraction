@@ -13,7 +13,7 @@ Written 2026-11-22 from the study log (`STUDIES.md`). A model is listed for the 
 
 ## 2. Models that are results, not demos (metric too low or negative)
 
-Zero-shot VLM linking on XFUND (link F1 3 to 24, study 27); the recipe on DocILE tables (pilot row F1 26.6, study 38); the detector-and-typer on DocILE (-7.45 row F1, study 43); the LoRA-tuned 3B VLM (46.2 against 70.1 for BROS, study 29); LiLT variants (BROS beats them in every comparison); the graph and adversarial variants and the GNN models; the column rules (study 40). LayoutLMv3 (study 42) only if its unseen-template result beats the blank control and BROS.
+Zero-shot VLM linking on XFUND (link F1 3 to 24, study 27); the recipe on DocILE tables (pilot row F1 26.6, study 38); the detector-and-typer on DocILE (-7.45 row F1, study 43); the LoRA-tuned 3B VLM (46.2 against 70.1 for BROS, study 29); LiLT variants (BROS beats them in every comparison); the graph and adversarial variants and the GNN models; the column rules (study 40). LayoutLMv3 (study 42): pixels help unseen templates by about 3 points but it is 14-17 points below BROS Track-1 on the same folds, so it is a result, not a demo model.
 
 ## 3. Reproduce the figures without any weights
 

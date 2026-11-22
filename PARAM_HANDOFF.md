@@ -126,8 +126,11 @@ Registered rule (≥ +1.5 and positive in all seed pairs): **BROS better**. Reca
 ### 5.4 LayoutLMv3 (text + layout + **page image**) vs BROS — "does adding pixels help?" (Study 42, deliverable 2 asks for text + visual + layout)
 - Plumbing built this week: page images (224², one image per window; windows cut at page boundaries so each window has exactly one page image), blank-image control arm (same model, constant image), no jitter/anchoring (they would move boxes but not pixels). `configs/vrdu_layoutlmv3.yaml`, `..._blank.yaml`.
 - **Seen templates (MTL), 3 folds × 2 seeds, F1:** pages 92.08 / 91.16, 93.33 / 92.49, 92.10 / 92.25 (mean **92.24**); blank 91.26 / 90.97, 93.07 / 91.97, 93.30 / 93.54 (mean **92.35**); BROS Track-1 **92.36**. Pixel effect on seen templates: **−0.12** (six paired tasks) — none.
-- **Unseen templates (UTL, folds 0 and 1, seeds 13 and 42; registered rule: pixels help if mean difference ≥ +2.0, positive in ≥ 3 of 4 pairs and both fold means): partly in, verdict `[RUNNING]`.** Fold 0 (Amendment held out): **pages 69.98 (70.49 / 69.47) vs blank 66.10 (65.96 / 66.23): +3.89, positive in both seeds**; BROS Track-1 83.38. Fold 1 (Dissemination_Report): **blank 54.70 (55.21 / 54.18); pages `[RUNNING]`**; BROS 72.07. Pixels help most on the signature-block fields of fold 0 (`signer_title` 36.6 vs 9.7, `signer_name` 71.9 vs 60.6) and not on `registrant_name` (50.0 vs 53.3; BROS 91.1). Gap fold 0: pages 21.6, blank 25.0, BROS 8.8. **LayoutLMv3 is 13–17 points below BROS on unseen templates; these runs have no jitter/anchoring, so this is a recipe-plus-backbone difference, not a clean backbone comparison.** Fill when done: pages fold 1 `[RUNNING]`, final difference `[RUNNING]`, verdict `[RUNNING]`. BROS Track-1 on the same two folds: UTL **77.72** (83.38 / 72.07), MTL 92.29. MTL–UTL gap for LayoutLMv3 `[RUNNING]`. The hardest template (Short-Form, fold 2) is **not** covered by the UTL runs (time) — say so.
-- Files when done: `results/vrdu_layoutlmv3_utl_f0|f1/`, `results/vrdu_layoutlmv3_blank_utl_f0|f1/`, summaries `results/vrdu_layoutlmv3_summary_*.json`.
+- **Unseen templates (UTL, folds 0 and 1, seeds 13 and 42) — final.** Registered rule (pixels help if mean `pages` − `blank` ≥ +2.0, positive in ≥ 3 of 4 pairs and both fold means): pair differences +4.53, +3.24 (fold 0) and +8.25, −2.61 (fold 1); mean **+3.35**; 3 of 4 positive; fold means +3.88 and +2.82 → **pixels help (rule met)**. UTL F1: fold 0 **pages 69.98 vs blank 66.09** (BROS 83.38); fold 1 **pages 57.52 vs blank 54.69** (BROS 72.07); folds 0–1 mean pages **63.75**, blank **60.39**, BROS **77.72**. **Say plainly:** the pass is marginal (fold 1 rests on seed 13; `pages` seed 42 scored 51.57, below its blank pair), so write "helps by about 3 points, with unstable seeds on the harder fold".
+- **Which fields:** pixels help the signature block (`signer_title` +28.5 and `signer_name` +7.9 on average over the two folds) and slightly hurt `registrant_name` (−4.4) and `file_date` (−2.6).
+- **Gap (MTL − UTL, folds 0 / 1):** pages 21.6 / 35.4, blank 25.0 / 37.8, **BROS Track-1 8.8 / 20.3** (means 28.5 / 31.4 / 14.6). **LayoutLMv3 is 14–17 points below BROS on unseen templates; these runs have no jitter/anchoring, so it is a recipe-plus-backbone difference, not a clean backbone comparison.** Fold 2 (`Short-Form`) was not run.
+- **Message for the poster:** *adding the page image to a fine-tuned layout encoder helps unseen templates (+3.4 points) and does nothing on seen ones; it does not replace Track-1's anchored geometry, which halves the seen-vs-unseen gap.* LayoutLMv3 is a result, not a demo model.
+- Files: `results/vrdu_layoutlmv3_utl_f0|f1/`, `results/vrdu_layoutlmv3_blank_utl_f0|f1/`, summaries `results/vrdu_layoutlmv3_summary_*.json`; MTL logs `results/LayoutLMv3/`.
 
 ---
 
@@ -179,12 +182,12 @@ Registered rule (≥ +1.5 and positive in all seed pairs): **BROS better**. Reca
 3. Multilingual encoder: −3.5 link F1; BROS: +5.9.
 4. Tables: 59.6–60.4 row F1 on unseen DocILE layouts ≈ published baseline; small seen/unseen gap; failure taxonomy.
 5. Measurement correction for XFUND linking.
-6. Pixels do not change seen-template F1 (−0.12); unseen-template effect `[RUNNING]`.
+6. Pixels do not change seen-template F1 (−0.12) and help unseen templates by about 3 points (fold 0 +3.9, fold 1 +2.8; marginal, unstable seeds on fold 1); LayoutLMv3 stays 14–17 points below BROS Track-1 (no anchoring in these runs).
 
 **Do not claim:**
 - that the VLM prompt was not tuned (it was tuned on dev/confirm; fresh set pending);
 - that multilingual encoders cannot help, or that BROS is better than LiLT in general (one recipe, English BROS, XFUND);
-- the 3-fold UTL mean for LayoutLMv3 (only folds 0 and 1 run);
+- a 3-fold UTL mean for LayoutLMv3 (only folds 0 and 1 ran; Short-Form not run);
 - anything from the DocILE leaderboard comparison as a head-to-head (different test documents);
 - the MTL–UTL gap on DocILE as a stable number (2 seeds, 2–9 points).
 
@@ -196,8 +199,8 @@ Registered rule (≥ +1.5 and positive in all seed pairs): **BROS better**. Reca
 
 | Item | Where it goes | File to read when done | Status |
 |---|---|---|---|
-| LayoutLMv3 unseen templates, folds 0–1, pages vs blank, seeds 13/42 (Study 42 primary cell) | Results table, section 5.4, Conclusions | `results/vrdu_layoutlmv3_utl_f0\|f1/`, `..._blank_utl_f0\|f1/`, `results/vrdu_layoutlmv3_summary_*.json`; STUDIES.md Study 42 | `[RUNNING]` (four Kaggle notebooks, ~1.4 h each) |
-| LayoutLMv3 MTL–UTL gap (folds 0–1; MTL values already above) | Seen-vs-unseen table | same | `[RUNNING]` |
+| LayoutLMv3 unseen templates, folds 0–1, pages vs blank, seeds 13/42 (Study 42 primary cell) | Results table, section 5.4, Conclusions | STUDIES.md Study 42 | **DONE 2026-11-22** (pixels help, +3.35; filled in section 5.4) |
+| LayoutLMv3 MTL–UTL gap (folds 0–1) | Seen-vs-unseen table | same | **DONE** (pages 28.5, blank 31.4, BROS 14.6) |
 | Study 32 — prompt v2 + rules on 300 fresh forms | Claim 1 caveat | `results/fresh_set3/` | `[RUNNING / NOT STARTED]` (commit queue) |
 | BROS Track-1 demo weights (MTL + UTL fold 0) | Live demo / demo video | download from `notebooks/kaggle_demo_weights.ipynb` Output tab | `[RUNNING / NOT STARTED]` |
 | BROS joint J1 weights for the linking demo | arrow figure / demo | Kaggle Output of `kaggle_xfund_bros_joint` (`results/bros_joint/J1/seed_42/best_model.pt`, not verified) | `[TODO check]` |
@@ -211,7 +214,7 @@ Registered rule (≥ +1.5 and positive in all seed pairs): **BROS better**. Reca
 
 - `figures/example_table_good.png`, `example_table_failure.png` — DocILE line items, BROS full pool (seed 21) on unseen layouts: boxes by predicted field, numbered rows, gold alongside.
 - `figures/example_form_good.png`, `example_form_failure.png` — VRDU registration forms, BROS Track-1 on unseen templates (Amendment good case; Short-Form failure: green exactly right, red wrong/extra, blue dashed missed). Regenerate / change documents: `python scripts/make_example_figures.py`.
-- Tables to build from sections 3–6: (a) prior benchmarks vs Track-1 BROS (P row); (b) recipe vs BROS on VRDU (70.5 / 69.8 vs 76.5 / 75.2) and hybrid; (c) FATURA crossover K = 1…40; (d) XFUND link F1: LiLT-en 47.7 → LiLT-XLM 44.2 → crops 49.7 → BROS 53.4; (e) DocILE N-curve and published baselines; (f) failure taxonomy bars; (g) LayoutLMv3 pages vs blank (MTL done, UTL `[RUNNING]`).
+- Tables to build from sections 3–6: (a) prior benchmarks vs Track-1 BROS (P row); (b) recipe vs BROS on VRDU (70.5 / 69.8 vs 76.5 / 75.2) and hybrid; (c) FATURA crossover K = 1…40; (d) XFUND link F1: LiLT-en 47.7 → LiLT-XLM 44.2 → crops 49.7 → BROS 53.4; (e) DocILE N-curve and published baselines; (f) failure taxonomy bars; (g) LayoutLMv3 pages vs blank vs BROS, UTL and MTL (done).
 - Suggested plots: FATURA crossover curve (Study 33 numbers); DocILE UTL F1 vs number of training layouts (46 → 110 → 285 → 562: 44.7 → 52.9 → 59.6 → 60.4); stacked loss-budget bars unseen vs seen (section 6.3).
 
 ---
@@ -231,7 +234,7 @@ Registered rule (≥ +1.5 and positive in all seed pairs): **BROS better**. Reca
 
 ## 12. 2-page report plan (Teamname_IE643_NoveltyAssessment_report.pdf)
 - Page 1: problem and protocol (5 lines); what existed at submission; the four novelty threads with one headline number each; one table (VRDU recipe vs BROS vs hybrid) and one figure (FATURA crossover).
-- Page 2: linking (47.7 → 53.4, correction 65.5 → 47.7); tables (DocILE N-curve, published baseline, taxonomy, negative results list); pixels/LayoutLMv3 (`[RUNNING]`); limitations and what was not run; references (compact).
+- Page 2: linking (47.7 → 53.4, correction 65.5 → 47.7); tables (DocILE N-curve, published baseline, taxonomy, negative results list); pixels/LayoutLMv3 (+3.4 on unseen templates, none on seen; 14–17 below BROS); limitations and what was not run; references (compact).
 
 ## 13. References (author lists are written from memory: check every author list and URL against the paper page before printing; format per Novelty.txt)
 - Teakgyu Hong, Donghyun Kim, Mingi Ji, Wonseok Hwang, Daehyun Nam and Sungrae Park. BROS: A Pre-trained Language Model Focusing on Text and Layout for Better Key Information Extraction from Documents, AAAI, 2022. https://arxiv.org/abs/2108.04539
