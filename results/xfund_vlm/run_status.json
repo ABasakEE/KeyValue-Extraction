@@ -65,5 +65,19 @@
     ],
     "forms_done": 250,
     "arm_hours": 5.96
+  },
+  "V4": {
+    "model": "Qwen/Qwen2.5-VL-7B-Instruct",
+    "started_at_h": 10.18,
+    "chunks": [
+      {
+        "upto": 50,
+        "returncode": 0,
+        "elapsed_h": 10.6
+      }
+    ],
+    "stopped": "time cap reached before forms 50-100",
+    "forms_done": 50,
+    "arm_hours": 0.42
   }
 }
