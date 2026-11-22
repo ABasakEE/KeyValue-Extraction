@@ -39,7 +39,7 @@
 
 \begin{document}
 \begin{frame}[t]
-\vspace*{0.3cm}
+\vspace*{0.6cm}
 \posterheader
   {\includegraphics[height=5.0cm]{logo.png}}
   {IE 643 Course Project}
@@ -59,8 +59,8 @@
 Form extractors trained on a few templates lose 21 F1 points on unseen templates. A zero-shot vision-language reader that must cite OCR lines beats a trained tagger there (\hl{76.5} vs 70.5 F1). The tagger wins again once it has seen 10 templates, and on tables. End-to-end key-value linking improves with layout geometry, not multilingual text.
 \end{block}
 
-\begin{block}{Problem}
-New vendors send forms in layouts no model has seen. We extract named fields with no document of the held-out template in training. Layout-aware transformers (LiLT, BROS, LayoutLMv3) encode each word with its box; vision-language models also read field names.\par
+\begin{block}{Introduction}
+New vendors send forms in layouts no model has seen, and every new template otherwise means relabelling and retraining. We extract named fields with no document of the held-out template in training. Layout-aware transformers (LiLT, BROS, LayoutLMv3) encode each word with its box; vision-language models also read field names.\par
 \textbf{Protocol.} VRDU registration forms, 200 training documents, 3 folds. MTL: all templates seen. UTL: one held out. Metric: exact-span entity F1.
 \end{block}
 
@@ -81,7 +81,7 @@ BROS Track-1 (windows, jitter) & \textbf{92.4} & \textbf{71.3} & \textbf{21.1} \
 Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every model; each template words it differently) and Short-Form registrants (95\% of BROS's errors are the filer block). Reported XFUND link F1 (65.5) counts only links inside 512 tokens, with gold entities.
 \end{block}
 
-\begin{block}{Our contribution}
+\begin{block}{Novelty Assessment}
 \begin{tikzpicture}
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
@@ -112,7 +112,7 @@ Tables & not covered & DocILE row F1 \textbf{59.6} \\
 % ============================================================== COLUMN 2: method, workflow, data, first result
 \begin{column}{\colwidth}
 
-\begin{block}{Method}
+\begin{block}{Methodology}
 \centering
 \begin{tikzpicture}[x=1cm,y=1cm]
 \node[box, text width=8cm] (in) at (0,0) {page image + OCR words and boxes};
@@ -152,7 +152,7 @@ Tables & not covered & DocILE row F1 \textbf{59.6} \\
 \captionof{figure}{Blue = novelty phase. S = study in STUDIES.md, each registered with a pass rule.}
 \end{block}
 
-\begin{block}{Datasets}
+\begin{block}{Dataset Details}
 {\small
 \begin{tabularx}{\linewidth}{@{}p{4.4cm}Lp{5.4cm}@{}}
 \toprule
@@ -168,7 +168,7 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 \end{block}
 
 \begin{block}{Results: unseen form templates}
-\includegraphics[width=\linewidth]{f1_vrdu_templates.pdf}
+\includegraphics[width=0.84\linewidth]{f1_vrdu_templates.pdf}
 \captionof{figure}{VRDU confirm set, 100 forms per template; BROS = mean of 2 seeds. Router +8.7 [+6.9, +10.6] pooled but −4.6 on Amendment. Dev set: 75.2 vs 69.8.}
 \end{block}
 
@@ -189,20 +189,20 @@ DocILE & 19 line-item fields; 5,680 docs & 200 new layouts \\
 
 \vspace{0.8ex}
 \begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=0.86\linewidth]{f6_example_shortform.pdf}
+\includegraphics[width=0.7\linewidth]{f6_example_shortform.pdf}
 \captionof{figure}{Unseen Short-Form: BROS tags the filer as registrant; the reader cites item 8.}
 \end{minipage}\hfill
 \begin{minipage}[t]{0.49\linewidth}
-\includegraphics[width=0.86\linewidth]{f4_docile_curve.pdf}
+\includegraphics[width=0.7\linewidth]{f4_docile_curve.pdf}
 \captionof{figure}{DocILE, BROS. Gap 2--9 points (VRDU: 21); 21.4\% of cells missed.}
 \end{minipage}
 
 \end{block}
 
-\begin{block}{Conclusion and limitations}
+\begin{block}{Conclusion and Future Work}
 \begin{itemize}\setlength{\itemsep}{0.2ex}
 \item Read when templates are new and few; train when 10+ are seen and for tables (ad-buy: reader 38.2 vs BROS 68.8--85.7 row F1).
-\item Linking: geometry +5.9, multilingual text −3.5. Pixels (LayoutLMv3 vs blank image): none on seen templates, +3.4 on unseen (63.8 vs 60.4), 14 below BROS. Next: a learned router.
+\item Linking: geometry +5.9, multilingual text −3.5. Pixels (LayoutLMv3 vs blank image): none on seen templates, +3.4 on unseen (63.8 vs 60.4), 14 below BROS. Future work: a learned router.
 \item Limits: \textsuperscript{\dag}prompt tuned on dev/confirm, fresh-form test (S32) not run; Short-Form pixels pending.
 \end{itemize}
 \end{block}
@@ -219,7 +219,7 @@ Yiheng Xu, Tengchao Lv, Lei Cui, et al. XFUND: A Benchmark Dataset for Multiling
 Qwen Team. https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct, Accessed on: 22nd November, 2026.\par
 \end{block}
 
-\vspace{-1.2ex}
+\vspace{-0.8ex}
 \begin{columns}[t,onlytextwidth]
 \begin{column}{0.52\linewidth}
 \begin{block}{Acknowledgements}
@@ -227,10 +227,10 @@ Qwen Team. https://huggingface.co/Qwen/Qwen3-VL-8B-Instruct, Accessed on: 22nd N
 \end{block}
 \end{column}
 \begin{column}{0.22\linewidth}\centering{\footnotesize\textbf{GitHub}\par}\vspace{0.4ex}
-\setlength{\qrunit}{3.9cm/\qrmodules}\input{figures/qr_github.tex}
+\setlength{\qrunit}{3.5cm/\qrmodules}\input{figures/qr_github.tex}
 \end{column}
 \begin{column}{0.22\linewidth}\centering{\footnotesize\textbf{Demo video}\par}\vspace{0.4ex}
-\fbox{\parbox[c][3.7cm][c]{3.7cm}{\centering\scriptsize\todo{demo QR}}}
+\fbox{\parbox[c][3.3cm][c]{3.3cm}{\centering\scriptsize\todo{demo QR}}}
 \end{column}
 \end{columns}
 
