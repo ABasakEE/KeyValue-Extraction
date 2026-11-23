@@ -91,7 +91,7 @@ DocILE line items (row F1) & BROS + row grouping & 66.0 & 60.4 & 5.6 (2.0--9.1) 
 \begin{itemize}
 \item \emph{Few seen templates, or new field wording: use the zero-shot reader.} It needs no labelled example of the new template and reads the field name instead of memorising where it sits: 76.5 against 70.5 on unseen VRDU forms, and $+59.4$ / $+22.5$ at one / two seen FATURA templates.
 \item \emph{About 10 or more seen templates, tables, or fields with exact boundaries: train BROS.} Training learns exact spans and column layout that the reader gets wrong: 95.9--99.9 against 91.7 on FATURA, 68.8--85.7 against 38.2 on ad-buy line items, about 60 row F1 on unseen DocILE layouts.
-\item \emph{In between: route per field.} The reader and the tagger make different mistakes, so choosing between them per field gives 79.2 on VRDU, and an abstaining vote with BROS reaches 82.4 on fresh forms, above either alone.
+\item \emph{In between: route per field.} The reader and the tagger make different mistakes, so choosing between them per field gives 79.2 on VRDU, and an abstaining vote with BROS reaches 82.4, above either alone.
 \item \emph{Linking: add relative layout, not multilingual text or pixels.} BROS gives $+5.9$ link F1 (47.4 to 53.4); the multilingual stream costs about 3 and pixels add under one point.
 \end{itemize}
 \noindent\textbf{What we established.} Seen-to-unseen transfer is weak for forms (21 points lost by the best model) and mild for tables (2--9); relative geometry transfers best; the reader transfers wording, training transfers structure.
