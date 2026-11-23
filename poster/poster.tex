@@ -86,7 +86,7 @@ Two fields cause most of the loss: foreign\_principle\_name (0--13 F1 for every 
 \node[draw=accent, line width=2.6pt, inner sep=12pt, text width=\linewidth-28pt, align=left] {%
 \fontsize{27}{33.5}\selectfont
 \begin{enumerate}\setlength{\itemsep}{0.6ex}
-\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader scores \hl{76.5} vs \hl{70.5} for BROS on unseen templates; a per-field router scores \hl{79.2}.
+\item \textbf{Read, don't train, for unseen wording.} A grounded zero-shot reader beats BROS on unseen templates, \hl{76.5} vs \hl{70.5} (300 fresh forms: 76.5 vs 70.0, +6.5 [4.0, 9.1]); router \hl{79.2}, vote with BROS \hl{82.4}.
 \item \textbf{The advantage reverses.} BROS overtakes the reader at 10 seen FATURA templates and on line-item tables.
 \item \textbf{Linking, measured end to end:} \hl{47.4} with LiLT, \hl{53.4} with BROS geometry (\hl{+5.9}); multilingual text costs 3.
 \end{enumerate}};
