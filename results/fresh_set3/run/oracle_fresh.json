@@ -1,0 +1,20 @@
+{
+  "docs": 100,
+  "oracle_f1": 0.9957,
+  "tp_fp_fn": [
+    467,
+    469,
+    469
+  ],
+  "grounding_reasons": {
+    "exact": 457,
+    "disjoint_truncated": 12,
+    "empty": 1
+  },
+  "collisions": null,
+  "docs_with_misses": 2,
+  "example_misses": [
+    "19930701_Hill and Knowlton Strategies, LLC_Dissemination Report_Dissemination Report.pdf",
+    "19950724_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf"
+  ]
+}
