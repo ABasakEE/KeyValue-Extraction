@@ -38,3 +38,18 @@ Key-to-value arrows come from the Gradio linking demo (`python demo.py`) and nee
 1. Get `best_model.pt` of seed 42 (best link F1, 54.01): Kaggle, the `kaggle_xfund_bros_joint` notebook, the committed version, Output tab, `results/bros_joint/J1/seed_42/best_model.pt` (about 500 MB). If it is not there, retrain one seed (about 2 h): in that notebook set `ARMS = {"J1": "configs/xfund_joint_bros_J1.yaml"}` and add `"--seeds", "42"` to the train command of cell 4; it already deletes pushed result files that lack weights and retrains.
 2. Put the file at `results/bros_joint/J1/seed_42/best_model.pt` (the folder already holds that seed's result files; `results/bros_joint/J1/metrics.json` supplies the config).
 3. Run: `set DEMO_CKPT_DIR=resultsros_joint\J1\seed_42` then `python demo.py` (PowerShell: `$env:DEMO_CKPT_DIR="resultsros_joint\J1\seed_42"`).
+
+## 7. The four-dataset demo (`python demo_all.py`, port 7862)
+
+One page with a dataset dropdown (VRDU registration forms, FATURA invoices, DocILE line items, XFUND key-value linking). The model list, the example list, the legend and every text block follow the dataset; an uploaded file is read with RapidOCR, dataset examples use the dataset's own words and boxes and are scored against gold (exact-span entity F1; for DocILE the line-item row F1 and numbered rows).
+
+Checkpoints it looks for (downloaded from the Kaggle notebooks `kaggle_demo_weights_{vrdu,fatura,docile}.ipynb`, seed 13; none is pushed to GitHub):
+
+| Dataset | Model in the menu | Path |
+|---|---|---|
+| VRDU | unseen template (Amendment held out), seen templates | `results/demo_weights/vrdu/UTL_fold0_seed13/best_model.pt`, `.../MTL_fold0_seed13/best_model.pt` |
+| FATURA | K = 40, K = 2 | `results/demo_weights/fatura/fold0/seed_13/best_model.pt`, `.../K2/fold0/seed_13/best_model.pt` |
+| DocILE | N = 1,000 split seed 0, split seed 1 | `results/demo_weights/docile/N1000_S0/seed_13/best_model.pt`, `.../N1000_S1/seed_13/best_model.pt` |
+| XFUND | BROS joint J1 seed 42 | `results/bros_joint/J1/seed_42/best_model.pt` |
+
+A menu entry without its checkpoint says so (`[no checkpoint yet]`) and refuses to run. `DEMO_ALLOW_UNTRAINED=1 python demo_all.py` runs an untrained head for a plumbing test (the page labels the predictions meaningless). Tests: `tests/test_demo_all.py` (texts, legend, menu; no weights needed).
