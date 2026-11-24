@@ -56,17 +56,21 @@ INTRO = {
         "registration number, signer name, signer title**. Model: **BROS + Track 1** (384-word windows, overlap 128, soft voting, coordinate jitter, content-box anchoring), "
         "trained on **200 documents**.\n\n"
         "**The point of this tab:** a form model scores about 92 F1 on templates it has seen and loses about 21 points on a template it has not. "
-        "Pick the *unseen-template* model, then a form of the held-out template, to see what an unseen template looks like to the model."),
+        "Pick the *unseen-template* model, then a form of the held-out template, to see what an unseen template looks like to the model.\n\n"
+        "**Two views.** The field tagger (boxes with field names) and, as a second picture, the **key-value linker** (red arrows from each question to its answer). "
+        "The linker is the XFUND-trained BROS joint model run on the form's first page: VRDU has no link labels, so these arrows are not scored."),
     FATURA_NAME: (
         "## FATURA invoices: nine fields, 50 templates\n"
         "Synthetic invoices. The tagger marks **title, number, date, due date, seller name, seller address, buyer, sub-total, total**. Model: **BROS + Track 1** trained on invoices of "
         "**K seen templates**; the test invoices come from templates the model has never seen.\n\n"
         "**The point of this tab:** the effect of the number of training templates. With **K = 40** seen templates the tagger is near perfect on new templates (99.9 F1, mean of five folds); "
-        "with **K = 2** it reaches 69.2. Our zero-shot reader scores 91.7 whatever K, so it wins below about 5 templates and loses from 10."),
+        "with **K = 2** it reaches 69.2. Our zero-shot reader scores 91.7 whatever K, so it wins below about 5 templates and loses from 10.\n\n"
+        "**Two views.** The field tagger and, as a second picture, the **key-value linker** (red arrows from each label to its value; the XFUND-trained BROS joint model, "
+        "FATURA has no link labels, so the arrows are not scored)."),
     DOCILE_NAME: (
         "## DocILE invoices: line items (tables)\n"
         "Business documents with a table of line items. The tagger marks the cells of **19 line-item fields** (description, quantity, unit price, amount, ...); an **anchor rule** then "
-        "attaches every cell to the row it belongs to (numbered circles on the page). Model: **BROS + Track 1** trained on **1,000 documents**; the examples are from "
+        "attaches every cell to the row it belongs to: **a row is a link**, drawn as a numbered circle and red arrows from each cell to the anchor cell of its row. Model: **BROS + Track 1** trained on **1,000 documents**; the examples are from "
         "**layouts the model has never seen**.\n\n"
         "**The point of this tab:** a table row is a link between cells. On unseen layouts the tagger reaches **59.6 row F1** (level with the published RoBERTa baseline, 59.8); "
         "with gold cells the anchor rule would reach 94.4, so the loss is in finding and typing cells, not in grouping them."),
@@ -301,7 +305,36 @@ def _font(size=16):
     return ImageFont.load_default()
 
 
-def draw(pages, ex, spans, gold_spans, colors, rows=None):
+def _arrow(dr, p0, p1, color="#c0392b", width=3, head=12):
+    import math
+
+    dr.line([p0, p1], fill=color, width=width)
+    ang = math.atan2(p1[1] - p0[1], p1[0] - p0[0])
+    pts = [p1] + [(p1[0] - head * math.cos(ang + d), p1[1] - head * math.sin(ang + d)) for d in (math.pi / 6, -math.pi / 6)]
+    dr.polygon(pts, fill=color)
+
+
+def row_links(spans, d, rows):
+    """Cell -> row-anchor arrows as (page, (x0, y0), (x1, y1)) in page fractions; the anchor field of a page is the one with most spans (the anchor rule)."""
+    from collections import Counter
+
+    counts: dict[int, Counter] = {}
+    for f, a, b in spans:
+        counts.setdefault(d["pages"][a], Counter())[f] += 1
+    anchor = {pg: max(c, key=lambda f: (c[f], f)) for pg, c in counts.items()}
+    centre = lambda ws: (sum((d["fboxes"][i][0] + d["fboxes"][i][2]) / 2 for i in ws) / len(ws), sum((d["fboxes"][i][1] + d["fboxes"][i][3]) / 2 for i in ws) / len(ws))
+    out = []
+    for cells in rows:
+        pg = d["pages"][min(min(ws) for _, ws in cells)]
+        anc = [ws for f, ws in cells if f == anchor.get(pg)]
+        if not anc:
+            continue
+        target = centre(min(anc, key=min))
+        out += [(pg, centre(ws), target) for f, ws in cells if f != anchor.get(pg)]
+    return out
+
+
+def draw(pages, ex, spans, gold_spans, colors, rows=None, links=None):
     out = [p.copy() for p in pages]
     font = _font(max(14, min(24, pages[0].width // 60)))
     pset = set(spans)
@@ -330,6 +363,10 @@ def draw(pages, ex, spans, gold_spans, colors, rows=None):
         tw = dr.textlength(tag, font=font)
         dr.rectangle([x0, max(0, y0 - font.size - 4), x0 + tw + 6, max(0, y0 - 2)], fill="white")
         dr.text((x0 + 3, max(0, y0 - font.size - 4)), tag, fill=color, font=font)
+    for pg, c0, c1 in links or []:
+        if pg < len(out):
+            w, h = out[pg].size
+            _arrow(ImageDraw.Draw(out[pg]), (c0[0] * w, c0[1] * h), (c1[0] * w, c1[1] * h))
     if rows:
         for k, (pi, y) in enumerate(rows):
             if pi >= len(out):
@@ -351,7 +388,23 @@ def f1_text(pred, gold):
     return (2 * p * r / (p + r) if p + r else 0.0), tp
 
 
-def run_tagger(dataset, key, example, upload):
+def doc_path(dataset, example, upload):
+    if upload is not None:
+        return str(upload if isinstance(upload, str) else upload.name)
+    if dataset == VRDU_NAME:
+        return str(VRDU_DIR / "pdfs" / example)
+    if dataset == FATURA_NAME:
+        return str(FATURA_DIR / "images" / f"{example}.jpg")
+    return str(DOCILE_DIR / "pdfs" / f"{example}.pdf")
+
+
+def run_links(path, threshold):
+    os.environ.setdefault("DEMO_CKPT_DIR", str(ROOT / "results" / "bros_joint" / "J1" / "seed_42"))
+    D = importlib.import_module("src.demo")
+    return D.process_uploaded_document(path, float(threshold), True, True, True)
+
+
+def run_tagger(dataset, key, example, upload, link_on=False, threshold=0.5):
     spec = next(m for m in MODELS[dataset] if m["key"] == key)
     clf, id2label, dev, trained, ck = get_model(dataset, key)
     if upload is not None:
@@ -370,7 +423,7 @@ def run_tagger(dataset, key, example, upload):
              f"**Model:** `{ck.relative_to(ROOT) if ck else 'UNTRAINED head'}`" if trained else
              "**Model: UNTRAINED classifier head. This is a plumbing test, the predictions are meaningless.**",
              f"**Input:** {source}; {len(ex.words)} words on {len(pages)} page(s)."]
-    row_marks = None
+    row_marks, arrows = None, None
     if dataset == DOCILE_NAME:
         from lir_metric import f1 as lir_f1
         from row_group import group_rows
@@ -389,11 +442,12 @@ def run_tagger(dataset, key, example, upload):
             recs.append(rec)
         table = pd.DataFrame(recs)
         row_marks = marks
+        arrows = row_links(spans, d, rows)
         if has_gold and d["rows"]:
             c = DBR.counts(group_rows(span_list, d, 0.5, merge=False), d)
             lines.append(f"**Against gold (DocILE line-item rule):** row F1 **{100 * lir_f1(c['lir']):.0f}%**, cell F1 {100 * lir_f1(c['cell']):.0f}%; "
                          f"{len(rows)} rows predicted, {len(d['rows'])} gold rows.")
-        lines.append("Numbered circles are the rows found by the anchor rule. Dashed blue boxes are gold cells the tagger missed.")
+        lines.append("Numbered circles are the rows found by the anchor rule; red arrows link each cell to the anchor cell of its row. Dashed blue boxes are gold cells the tagger missed.")
     else:
         recs = [{"Field": _short(t), "Extracted text": " ".join(ex.words[a:b]), "Page": (ex.page_ids[a] + 1) if ex.page_ids else 1,
                  "Matches gold": ("yes" if (t, a, b) in gold else "no") if has_gold else "-"} for t, a, b in spans]
@@ -407,7 +461,18 @@ def run_tagger(dataset, key, example, upload):
         else:
             lines.append("No gold labels for an uploaded file.")
     lines += ["", NOTES[dataset]]
-    return draw(pages, ex, spans, gold, colors, row_marks), table, "\n\n".join(lines), legend_md(dataset)
+    shown = [(im, f"Field tagger, page {i + 1}") for i, im in enumerate(draw(pages, ex, spans, gold, colors, row_marks, arrows))]
+    link_table = pd.DataFrame()
+    if link_on and dataset != DOCILE_NAME:
+        path = doc_path(dataset, example, upload)
+        try:
+            img, link_table, meta = run_links(path, threshold)
+            shown.append((img, "Key-value linker (XFUND-trained BROS joint, first page): question to answer"))
+            lines.append(f"**Key-value linker:** {meta.get('num_entities', 0)} entities and {meta.get('num_links', 0)} links on the first page at threshold {threshold}. "
+                         "Trained on XFUND, applied here without any training on this dataset; no gold links exist, so these are not scored.")
+        except Exception as e:  # the linker is a second view: never lose the tagger result because it failed
+            lines.append(f"**Key-value linker unavailable:** {type(e).__name__}: {str(e)[:160]}")
+    return shown, table, "\n\n".join(lines), legend_md(dataset), link_table
 
 
 def run_xfund(example, upload, threshold):
@@ -419,13 +484,14 @@ def run_xfund(example, upload, threshold):
     img, df, meta = D.process_uploaded_document(str(path if isinstance(path, str) else path.name), float(threshold), True, True, True)
     lines = [MODELS[XFUND_NAME][0]["text"], "", f"**Model:** `{D.CKPT_PATH.relative_to(ROOT) if D.CKPT_PATH.exists() else 'none'}`",
              f"**Found:** {meta.get('num_entities', 0)} entities and {meta.get('num_links', 0)} key-value links at threshold {threshold}.", "", NOTES[XFUND_NAME]]
-    return [img], df, "\n\n".join(lines), legend_md(XFUND_NAME)
+    ents = pd.DataFrame([{"Label": e.get("label"), "Text": e.get("text")} for e in meta.get("entities", [])])
+    return [(img, "Entities and key-value links (BROS joint)")], ents, "\n\n".join(lines), legend_md(XFUND_NAME), df
 
 
-def run(dataset, key, example, upload, threshold):
+def run(dataset, key, example, upload, threshold, link_on):
     if dataset == XFUND_NAME:
         return run_xfund(example, upload, threshold)
-    return run_tagger(dataset, key, example, upload)
+    return run_tagger(dataset, key, example, upload, link_on, threshold)
 
 
 # --------------------------------------------------------------------------------------------- interface
@@ -435,7 +501,8 @@ def on_dataset(dataset):
     spec = next(m for m in MODELS[dataset] if m["key"] == key)
     ex = example_choices(dataset, key)
     return (INTRO[dataset], gr.update(choices=choices, value=key), spec["text"],
-            gr.update(choices=ex, value=ex[0][1] if ex else None), gr.update(visible=dataset == XFUND_NAME), None, legend_md(dataset))
+            gr.update(choices=ex, value=ex[0][1] if ex else None), gr.update(visible=dataset != DOCILE_NAME), None, legend_md(dataset),
+            gr.update(visible=dataset in (VRDU_NAME, FATURA_NAME)))
 
 
 def on_model(dataset, key):
@@ -458,16 +525,18 @@ def create_demo(default_dataset: str = VRDU_NAME) -> gr.Blocks:
                 ex0 = example_choices(default_dataset, mchoices[0][1])
                 example = gr.Dropdown(label="Example document", choices=ex0, value=ex0[0][1] if ex0 else None)
                 upload = gr.File(label="...or upload your own document (PDF or image; read with RapidOCR)", file_types=[".pdf", ".png", ".jpg", ".jpeg"])
-                threshold = gr.Slider(0.1, 0.9, value=0.5, step=0.05, label="Link confidence threshold", visible=default_dataset == XFUND_NAME)
+                link_cb = gr.Checkbox(label="Also run the key-value linker (XFUND-trained; second picture, not scored)", value=True, visible=default_dataset in (VRDU_NAME, FATURA_NAME))
+                threshold = gr.Slider(0.1, 0.9, value=0.5, step=0.05, label="Link confidence threshold", visible=default_dataset != DOCILE_NAME)
                 btn = gr.Button("Run the tagger", variant="primary", size="lg")
                 legend = gr.Markdown(legend_md(default_dataset))
             with gr.Column(scale=6):
                 gallery = gr.Gallery(label="Predictions on the document", columns=2, height=640, object_fit="contain")
                 summary = gr.Markdown()
-                table = gr.Dataframe(label="Extracted fields", interactive=False, wrap=True)
-        dataset.change(on_dataset, inputs=[dataset], outputs=[intro, model, model_text, example, threshold, upload, legend])
+                table = gr.Dataframe(label="Extracted fields / entities / rows", interactive=False, wrap=True)
+                link_table = gr.Dataframe(label="Key-value pairs found by the linker", interactive=False, wrap=True)
+        dataset.change(on_dataset, inputs=[dataset], outputs=[intro, model, model_text, example, threshold, upload, legend, link_cb])
         model.change(on_model, inputs=[dataset, model], outputs=[model_text, example])
-        btn.click(run, inputs=[dataset, model, example, upload, threshold], outputs=[gallery, table, summary, legend])
+        btn.click(run, inputs=[dataset, model, example, upload, threshold, link_cb], outputs=[gallery, table, summary, legend, link_table])
     return demo
 
 

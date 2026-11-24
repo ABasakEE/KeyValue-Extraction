@@ -31,8 +31,9 @@ def test_dataset_change_updates_models_and_hides_the_slider():
     r = A.on_dataset(A.FATURA_NAME)
     assert r[0] == A.INTRO[A.FATURA_NAME]
     assert [c[1] for c in r[1]["choices"]] == ["K40", "K2"]
-    assert r[4]["visible"] is False
-    assert A.on_dataset(A.XFUND_NAME)[4]["visible"] is True
+    assert r[4]["visible"] is True and r[7]["visible"] is True        # the linker view and its slider exist for FATURA
+    assert A.on_dataset(A.DOCILE_NAME)[4]["visible"] is False and A.on_dataset(A.DOCILE_NAME)[7]["visible"] is False   # DocILE draws row arrows instead
+    assert A.on_dataset(A.XFUND_NAME)[4]["visible"] is True and A.on_dataset(A.XFUND_NAME)[7]["visible"] is False
 
 
 def test_missing_checkpoint_is_flagged_in_the_menu():

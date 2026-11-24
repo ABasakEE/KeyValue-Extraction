@@ -1,0 +1,78 @@
+{
+ "S0": [
+  {
+   "guid": "8bc8897b17ac474a846f6a77",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "9ebdec30843146c584f0a713",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "ecd1566f99f5422a88f09cba",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "c3fb1ae263a34aab94da6f6e",
+   "template": "unseen layout",
+   "f1": 64.0,
+   "role": "typical"
+  },
+  {
+   "guid": "b434fe4846e64ce48784453f",
+   "template": "unseen layout",
+   "f1": 66.7,
+   "role": "typical"
+  },
+  {
+   "guid": "685f7be21127477583114af0",
+   "template": "unseen layout",
+   "f1": 0.0,
+   "role": "worst"
+  }
+ ],
+ "S1": [
+  {
+   "guid": "8bc8897b17ac474a846f6a77",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "8c1efc1a497540be96afefb4",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "9ebdec30843146c584f0a713",
+   "template": "unseen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "3c31b69abae14f408acdb051",
+   "template": "unseen layout",
+   "f1": 62.1,
+   "role": "typical"
+  },
+  {
+   "guid": "c3fb1ae263a34aab94da6f6e",
+   "template": "unseen layout",
+   "f1": 64.0,
+   "role": "typical"
+  },
+  {
+   "guid": "e6f9545c0890402c99c71306",
+   "template": "unseen layout",
+   "f1": 0.0,
+   "role": "worst"
+  }
+ ]
+}
