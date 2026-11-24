@@ -1,0 +1,27 @@
+{
+  "jobs": [
+    "docile"
+  ],
+  "weights_to_download": {
+    "results/demo_weights/docile/N1000_S0/seed_13/best_model.pt": 417.9,
+    "results/demo_weights/docile/N1000_S1/seed_13/best_model.pt": 417.9
+  },
+  "scores": {
+    "results/demo_weights/docile/N1000_S0/seed_13": {
+      "test_f1": 63.41,
+      "best_val_f1": 0.7034
+    },
+    "results/demo_weights/docile/N1000_S1/seed_13": {
+      "test_f1": 62.24,
+      "best_val_f1": 0.6836
+    },
+    "results/demo_weights/fatura/K2/fold0/seed_13": {
+      "test_f1": 60.67,
+      "best_val_f1": 1.0
+    },
+    "results/demo_weights/fatura/fold0/seed_13": {
+      "test_f1": 99.9,
+      "best_val_f1": 1.0
+    }
+  }
+}

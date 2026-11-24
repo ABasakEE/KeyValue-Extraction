@@ -1,0 +1,16 @@
+{
+  "jobs": {
+    "docile_N1000_S1": {
+      "returncode": 0,
+      "hours": 0.56
+    },
+    "docile_N1000_S0": {
+      "returncode": 0,
+      "hours": 0.95
+    }
+  },
+  "jobs_selected": [
+    "docile"
+  ],
+  "hours_used": 0.95
+}
