@@ -46,6 +46,7 @@ VRDU_DIR = ROOT / "data" / "vrdu" / "registration-form" / "main"
 FATURA_DIR = ROOT / "data" / "fatura" / "raw" / "invoices_dataset_final"
 DOCILE_DIR = ROOT / "data" / "docile"
 XFUND_NAME = "XFUND forms (key-value linking)"
+READER_NAME = "Zero-shot reader: saved Qwen3-VL-8B outputs (VRDU)"
 VRDU_NAME, FATURA_NAME, DOCILE_NAME = "VRDU registration forms", "FATURA invoices", "DocILE line items"
 
 # --------------------------------------------------------------------------------------------- texts that follow the dataset
@@ -74,6 +75,13 @@ INTRO = {
         "**layouts the model has never seen**.\n\n"
         "**The point of this tab:** a table row is a link between cells. On unseen layouts the tagger reaches **59.6 row F1** (level with the published RoBERTa baseline, 59.8); "
         "with gold cells the anchor rule would reach 94.4, so the loss is in finding and typing cells, not in grouping them."),
+    READER_NAME: (
+        "## The zero-shot reader: saved outputs of an 8B vision-language model\n"
+        "A vision-language model (**Qwen3-VL-8B, 4-bit**) reads the page image and the page's OCR lines (each with an id), is given the six field names with one-line descriptions, "
+        "and must **copy the value and cite the line it came from**. Every answer is checked against the cited line (grounding) and becomes a span. **No form of any template was used to train it.**\n\n"
+        "**These are preserved outputs, not a live run.** The 8B model needs a GPU (it ran on Kaggle T4s) and does not run on a laptop, so this tab replays its saved answers on "
+        "300 VRDU forms that nobody tuned on. The trained tagger's predictions (BROS Track 1, seed 13) are saved too, so you can compare them with the reader and with the gold.\n\n"
+        "**The point of this tab:** the two make different mistakes. The reader wins where the field's *wording* varies (`foreign_principle_name`, the registrant), BROS where position and span boundaries matter."),
     XFUND_NAME: (
         "## XFUND forms: entities and key-value links\n"
         "Forms in five languages. The model tags **questions, answers and headers** and a trained biaffine head links each **question to its answer** (red arrows). "
@@ -101,6 +109,11 @@ MODELS = {
         dict(key="S1", label="Trained on 1,000 documents (split seed 1, a second model)", paths=[W / "docile/N1000_S1/seed_13/best_model.pt"],
              text="**N = 1,000 training documents, split seed 1.** A second, independent model with the same recipe; same test layouts."),
     ],
+    READER_NAME: [
+        dict(key="V2A2", label="Qwen3-VL-8B reader, prompt v2 (saved outputs)", paths=[W / "reader_vrdu.json"],
+             text="**Qwen3-VL-8B (4-bit), prompt v2, one call per page and field, greedy.** On the 300 forms: reader 76.5 F1 against 70.0 for BROS (+6.5 [4.0, 9.1]); with the latest-page rule on ties 80.9; "
+                  "a vote of reader, reader without the image and BROS reaches 82.4. The per-form scores shown here are per-document, so they average differently from those pooled numbers."),
+    ],
     XFUND_NAME: [
         dict(key="J1", label="BROS joint (J1, seed 42)", paths=[ROOT / "results/bros_joint/J1/seed_42/best_model.pt"],
              text="**BROS joint tagger + biaffine linker, seed 42.** End-to-end link F1 on the 250 validation forms: 53.4 (mean of three seeds)."),
@@ -111,6 +124,7 @@ NOTES = {
     VRDU_NAME: "Dataset examples use the benchmark's own words and boxes; the page shows exact-span F1 against gold. An uploaded form is read with RapidOCR.",
     FATURA_NAME: "FATURA is synthetic and its text blocks are the annotations (perfect OCR), so both the tagger and the reader are favoured. An uploaded invoice is read with RapidOCR.",
     DOCILE_NAME: "Dataset examples use DocILE's own OCR words; row F1 uses the DocILE line-item rule against the gold rows of the document. An uploaded invoice is read with RapidOCR (no gold).",
+    READER_NAME: "Saved outputs (not a live model run). Boxes come from the benchmark's own words; the reader's answers were grounded to those words.",
     XFUND_NAME: "Dataset examples are XFUND validation forms read with the demo's OCR pipeline; the slider sets the link confidence threshold.",
 }
 
@@ -128,7 +142,7 @@ def find_ckpt(dataset: str, key: str) -> Path | None:
 
 
 def label_maps(dataset: str):
-    if dataset == VRDU_NAME:
+    if dataset in (VRDU_NAME, READER_NAME):
         labels, _, id2label = build_label_maps(VRDU_DIR / "meta.json")
         return labels, id2label
     if dataset == FATURA_NAME:
@@ -253,8 +267,17 @@ def curated(dataset_tag: str, key: str):
 ROLE = {"best": "good case", "typical": "typical case", "worst": "failure case"}
 
 
+def reader_data():
+    if "reader" not in _C:
+        import json
+        _C["reader"] = json.loads((W / "reader_vrdu.json").read_text(encoding="utf-8"))
+    return _C["reader"]
+
+
 def example_choices(dataset: str, key: str):
     try:
+        if dataset == READER_NAME:
+            return [(f"{e['template']}: {e['guid'][:40]} ({e['why']}; reader {e['reader_f1']:.0f}%, BROS {e['bros_f1']:.0f}% on this form)", e["guid"]) for e in reader_data()["examples"]]
         cur = curated("vrdu", key) if dataset == VRDU_NAME else None
         if cur:
             kind = "unseen template" if key == "UTL" else "seen template"
@@ -504,7 +527,51 @@ def run_xfund(example, upload, threshold):
     return [(img, "Entities and key-value links (BROS joint)")], ents, "\n\n".join(lines), legend_md(XFUND_NAME), df
 
 
+PROMPT_V2 = """<Document>
+{every OCR line of the page, each followed by its id, e.g. "Date of signature 62|15"}
+</Document>
+<Task>
+From the document, extract the value of the field "{field}" ({one-line description}). Every document line ends with its identifier.
+Copy the value exactly from ONE line and write it followed by that line's identifier, for example "Jane Q. Public 42|17".
+Copy only the value itself: not the label in front of it and not other words on the same line (for a person's name, leave out their title or position).
+If the value spans several lines, write one 'text identifier' per line. If the field does not occur on this page, answer NONE.
+</Task>
+ANSWER: """
+
+
+def run_reader(example):
+    ent = next(e for e in reader_data()["examples"] if e["guid"] == example)
+    by_guid, _, _ = vrdu_protocol()
+    ex = by_guid[example]
+    pages = render_pdf(VRDU_DIR / "pdfs" / example)
+    colors = field_colors(VRDU_NAME)
+    tup = lambda spans: [(f, a, b) for f, a, b, _ in spans]
+    gold, reader, bros = set(tup(ent["gold"])), tup(ent["reader"]), tup(ent["bros"])
+    used = sorted({ex.page_ids[a] for _, a, _ in list(gold) + reader + bros if a < len(ex.page_ids)})
+    shown = []
+    for name, spans in (("Zero-shot reader (Qwen3-VL-8B, saved)", reader), ("BROS Track 1 (saved, seed 13)", bros)):
+        for pi, im in zip(range(len(pages)), draw(pages, ex, spans, gold, colors)):
+            if pi in used:
+                shown.append((im, f"{name}, page {pi + 1}"))
+    txt = lambda spans: {f: t for f, _, _, t in spans}
+    r_t, b_t, g_t = txt(ent["reader"]), txt(ent["bros"]), txt(ent["gold"])
+    recs = []
+    for f in sorted(set(r_t) | set(b_t) | set(g_t) | {x["field"] for x in ent["raw_answers"] if x["answer"].strip().upper() != "NONE"}):
+        raw = "; ".join(f"p{x['page']}: {x['answer'].strip()[:60]}" for x in ent["raw_answers"] if x["field"] == f and x["answer"].strip().upper() != "NONE")
+        recs.append({"Field": f, "Reader's raw answer (page: text, cited line)": raw or "(NONE on every page)", "Reader span": r_t.get(f, ""), "BROS span": b_t.get(f, ""),
+                     "Gold": g_t.get(f, ""), "Reader right": "yes" if any(ff == f and (ff, a, b) in gold for ff, a, b, _ in ent["reader"]) else "no",
+                     "BROS right": "yes" if any(ff == f and (ff, a, b) in gold for ff, a, b, _ in ent["bros"]) else "no"})
+    st = reader_data()["stats"]
+    lines = [MODELS[READER_NAME][0]["text"], "", f"**This form:** reader {ent['reader_f1']:.0f}% F1, BROS {ent['bros_f1']:.0f}% ({ent['why']}). "
+             f"Over all {st['n_docs']} forms the per-form mean is {st['reader_mean_f1']}% for the reader and {st['bros_seed13_mean_f1']}% for BROS seed 13.",
+             "**Source of these outputs:** " + reader_data()["model"] + ".", "", NOTES[READER_NAME], "",
+             "<details><summary>The exact prompt the reader was given (one call per page and field)</summary>\n\n```\n" + PROMPT_V2 + "\n```\n</details>"]
+    return shown, pd.DataFrame(recs), "\n\n".join(lines), legend_md(READER_NAME), pd.DataFrame()
+
+
 def run(dataset, key, example, upload, threshold, link_on):
+    if dataset == READER_NAME:
+        return run_reader(example)
     if dataset == XFUND_NAME:
         return run_xfund(example, upload, threshold)
     return run_tagger(dataset, key, example, upload, link_on, threshold)
@@ -517,7 +584,7 @@ def on_dataset(dataset):
     spec = next(m for m in MODELS[dataset] if m["key"] == key)
     ex = example_choices(dataset, key)
     return (INTRO[dataset], gr.update(choices=choices, value=key), spec["text"],
-            gr.update(choices=ex, value=ex[0][1] if ex else None), gr.update(visible=dataset != DOCILE_NAME), None, legend_md(dataset),
+            gr.update(choices=ex, value=ex[0][1] if ex else None), gr.update(visible=dataset not in (DOCILE_NAME, READER_NAME)), None, legend_md(dataset),
             gr.update(visible=dataset in (VRDU_NAME, FATURA_NAME)))
 
 
@@ -531,7 +598,7 @@ def create_demo(default_dataset: str = VRDU_NAME) -> gr.Blocks:
     with gr.Blocks(title="Cross-template key-value extraction: four datasets") as demo:
         gr.Markdown("# Cross-Template Key-Value Extraction (IE 643)\n"
                     "One model recipe (BROS with relative layout), four datasets. Pick a dataset; the model choices, the examples and every text below follow it.")
-        dataset = gr.Dropdown(label="Dataset", choices=[VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME], value=default_dataset)
+        dataset = gr.Dropdown(label="Dataset", choices=[VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME, READER_NAME], value=default_dataset)
         intro = gr.Markdown(INTRO[default_dataset])
         with gr.Row():
             with gr.Column(scale=4):
@@ -542,7 +609,7 @@ def create_demo(default_dataset: str = VRDU_NAME) -> gr.Blocks:
                 example = gr.Dropdown(label="Example document", choices=ex0, value=ex0[0][1] if ex0 else None)
                 upload = gr.File(label="...or upload your own document (PDF or image; read with RapidOCR)", file_types=[".pdf", ".png", ".jpg", ".jpeg"])
                 link_cb = gr.Checkbox(label="Also run the key-value linker (XFUND-trained; second picture, not scored)", value=True, visible=default_dataset in (VRDU_NAME, FATURA_NAME))
-                threshold = gr.Slider(0.1, 0.9, value=0.5, step=0.05, label="Link confidence threshold", visible=default_dataset != DOCILE_NAME)
+                threshold = gr.Slider(0.1, 0.9, value=0.5, step=0.05, label="Link confidence threshold", visible=default_dataset not in (DOCILE_NAME, READER_NAME))
                 btn = gr.Button("Run the tagger", variant="primary", size="lg")
                 legend = gr.Markdown(legend_md(default_dataset))
             with gr.Column(scale=6):
@@ -561,9 +628,9 @@ def main() -> None:
     ap.add_argument("--port", type=int, default=7862)
     ap.add_argument("--share", action="store_true")
     ap.add_argument("--server_name", default="127.0.0.1")
-    ap.add_argument("--dataset", default=VRDU_NAME, choices=[VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME])
+    ap.add_argument("--dataset", default=VRDU_NAME, choices=[VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME, READER_NAME])
     a = ap.parse_args()
-    for ds in (VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME):
+    for ds in (VRDU_NAME, FATURA_NAME, DOCILE_NAME, XFUND_NAME, READER_NAME):
         print(f"[+] {ds}: " + ", ".join(f"{m['key']}={'ok' if find_ckpt(ds, m['key']) else 'MISSING'}" for m in MODELS[ds]))
     create_demo(a.dataset).launch(server_name=a.server_name, server_port=a.port, share=a.share)
 

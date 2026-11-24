@@ -40,3 +40,10 @@ def test_missing_checkpoint_is_flagged_in_the_menu():
     labels = {key: label for label, key in A.model_choices(A.DOCILE_NAME)}
     ck = A.find_ckpt(A.DOCILE_NAME, "S0")
     assert ("[no checkpoint yet]" in labels["S0"]) == (ck is None)
+
+
+def test_reader_tab_replays_saved_outputs():
+    ch = A.example_choices(A.READER_NAME, "V2A2")
+    assert len(ch) >= 8 and any("reader beats BROS" in l for l, _ in ch) and any("BROS beats the reader" in l for l, _ in ch)
+    assert "preserved outputs" in A.INTRO[A.READER_NAME] and "GPU" in A.INTRO[A.READER_NAME]
+    assert A.on_dataset(A.READER_NAME)[7]["visible"] is False and A.on_dataset(A.READER_NAME)[4]["visible"] is False

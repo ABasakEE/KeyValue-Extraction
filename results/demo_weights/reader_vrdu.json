@@ -1,0 +1,1516 @@
+{
+ "stats": {
+  "n_docs": 300,
+  "reader_mean_f1": 79.7,
+  "bros_seed13_mean_f1": 67.9
+ },
+ "model": "Qwen3-VL-8B-Instruct, 4-bit nf4, prompt v2, one call per page and field, greedy; fresh-forms run (Kaggle T4 x 2)",
+ "examples": [
+  {
+   "guid": "19950411_Representative of the Turkish Republic of Northern Cyprus_Dissemination Report_Dissemination Report.pdf",
+   "template": "Dissemination_Report",
+   "reader_f1": 90.9090909090909,
+   "bros_f1": 25.0,
+   "why": "reader beats BROS",
+   "gold": [
+    [
+     "file_date",
+     417,
+     421,
+     "April 7 , 1995"
+    ],
+    [
+     "foreign_principle_name",
+     191,
+     194,
+     "R. R. Denktas"
+    ],
+    [
+     "registrant_name",
+     118,
+     129,
+     "Office of the Representative of the Turkish Republic of Northern Cyprus"
+    ],
+    [
+     "registration_num",
+     132,
+     133,
+     "2619"
+    ],
+    [
+     "signer_name",
+     424,
+     426,
+     "Osman Ertug"
+    ],
+    [
+     "signer_title",
+     427,
+     430,
+     "Director / Representative"
+    ]
+   ],
+   "bros": [
+    [
+     "registrant_name",
+     191,
+     194,
+     "R. R. Denktas"
+    ],
+    [
+     "registration_num",
+     132,
+     133,
+     "2619"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     417,
+     421,
+     "April 7 , 1995"
+    ],
+    [
+     "foreign_principle_name",
+     191,
+     194,
+     "R. R. Denktas"
+    ],
+    [
+     "registration_num",
+     132,
+     133,
+     "2619"
+    ],
+    [
+     "signer_name",
+     424,
+     426,
+     "Osman Ertug"
+    ],
+    [
+     "signer_title",
+     427,
+     430,
+     "Director / Representative"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "April 7, 1995 13|93"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "R. R. Denktas 62|28"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Office of the Representative of the Turkish Republic of Northern Cyprus 35|18"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "2619 73|17"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "Osman Ertug 28|93"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "Director/Representative 47|93"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "78|86"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "20130408_Karv Communications, Inc._Frank, Andrew D._Short-Form.pdf",
+   "template": "Short-Form",
+   "reader_f1": 88.8888888888889,
+   "bros_f1": 25.0,
+   "why": "reader beats BROS",
+   "gold": [
+    [
+     "file_date",
+     1113,
+     1114,
+     "4-5.13"
+    ],
+    [
+     "foreign_principle_name",
+     652,
+     657,
+     "Emirate of Ras Al Khaimah"
+    ],
+    [
+     "registrant_name",
+     593,
+     597,
+     "Karv Communications , Inc."
+    ],
+    [
+     "registration_num",
+     504,
+     506,
+     "61 62"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     1113,
+     1114,
+     "4-5.13"
+    ],
+    [
+     "registrant_name",
+     501,
+     504,
+     "Andrew D. Frank"
+    ],
+    [
+     "registration_num",
+     504,
+     505,
+     "61"
+    ],
+    [
+     "registration_num",
+     505,
+     506,
+     "62"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     1113,
+     1114,
+     "4-5.13"
+    ],
+    [
+     "foreign_principle_name",
+     652,
+     657,
+     "Emirate of Ras Al Khaimah"
+    ],
+    [
+     "registrant_name",
+     593,
+     597,
+     "Karv Communications , Inc."
+    ],
+    [
+     "registration_num",
+     504,
+     506,
+     "61 62"
+    ],
+    [
+     "signer_name",
+     501,
+     504,
+     "Andrew D. Frank"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "Emirate of Ras Al Khaimah 20|76"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Karv Communications, Inc. 21|64"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "61 65|40\n62 71|41"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "Andrew D. Frank 15|41"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "4-5-13 23|68"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "19630701_KOTRA_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 60.0,
+   "bros_f1": 0.0,
+   "why": "reader beats BROS",
+   "gold": [
+    [
+     "file_date",
+     517,
+     518,
+     "2524"
+    ],
+    [
+     "foreign_principle_name",
+     84,
+     88,
+     "Korea Trade Promotion Corporation"
+    ],
+    [
+     "registrant_name",
+     76,
+     80,
+     "Korea Trade Promotion Center"
+    ],
+    [
+     "registration_num",
+     33,
+     34,
+     "16/9"
+    ],
+    [
+     "registration_num",
+     57,
+     58,
+     "1619"
+    ]
+   ],
+   "bros": [
+    [
+     "signer_name",
+     524,
+     527,
+     "JOHN Y. DEE"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     30,
+     31,
+     "JUL26"
+    ],
+    [
+     "foreign_principle_name",
+     84,
+     88,
+     "Korea Trade Promotion Corporation"
+    ],
+    [
+     "registrant_name",
+     76,
+     80,
+     "Korea Trade Promotion Center"
+    ],
+    [
+     "registration_num",
+     57,
+     58,
+     "1619"
+    ],
+    [
+     "signer_name",
+     542,
+     545,
+     "John y Lee"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "JUL26 21|15"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "Korea Trade Promotion Corporation 41|42"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Korea Trade Promotion Center 40|38"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "1619 48|25"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "file_date",
+     "answer": "the 25th day of July 36|64"
+    },
+    {
+     "page": 3,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registration_num",
+     "answer": "31-2292175 27|68"
+    },
+    {
+     "page": 3,
+     "field": "signer_name",
+     "answer": "John Y. Lee 67|67"
+    },
+    {
+     "page": 3,
+     "field": "signer_title",
+     "answer": "JOHN Y. LEE 67|67"
+    }
+   ]
+  },
+  {
+   "guid": "20000720_Office of the Nagorno Karabakh Republic in the USA_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 50.0,
+   "bros_f1": 100.0,
+   "why": "BROS beats the reader",
+   "gold": [
+    [
+     "file_date",
+     737,
+     741,
+     "July 14 , 2000"
+    ],
+    [
+     "registrant_name",
+     344,
+     351,
+     "Permanent Mission of the Nagorno Karabagh Republic"
+    ],
+    [
+     "registration_num",
+     351,
+     352,
+     "5342"
+    ],
+    [
+     "signer_name",
+     743,
+     745,
+     "Vardan Barseghyan"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     737,
+     741,
+     "July 14 , 2000"
+    ],
+    [
+     "registrant_name",
+     344,
+     351,
+     "Permanent Mission of the Nagorno Karabagh Republic"
+    ],
+    [
+     "registration_num",
+     351,
+     352,
+     "5342"
+    ],
+    [
+     "signer_name",
+     743,
+     745,
+     "Vardan Barseghyan"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     424,
+     427,
+     "20 JUL 20"
+    ],
+    [
+     "foreign_principle_name",
+     743,
+     745,
+     "Vardan Barseghyan"
+    ],
+    [
+     "registrant_name",
+     344,
+     351,
+     "Permanent Mission of the Nagorno Karabagh Republic"
+    ],
+    [
+     "registration_num",
+     351,
+     352,
+     "5342"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "20 JUL 20 84|57"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Permanent Mission of the 23|32\nNagorno Karabagh Republic 21|34"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "5342 64|34"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "July 14, 2000 24|24"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "Vardan Barseghyan 68|28"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "Vardan Barseghyan 68|28"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "20090528_KOTRA_Kim, Joon Kyoo_Short-Form.pdf",
+   "template": "Short-Form",
+   "reader_f1": 57.14285714285715,
+   "bros_f1": 100.0,
+   "why": "BROS beats the reader",
+   "gold": [
+    [
+     "file_date",
+     927,
+     928,
+     "05/11/2009"
+    ],
+    [
+     "registrant_name",
+     402,
+     405,
+     "Joon Kyoo Kim"
+    ],
+    [
+     "registration_num",
+     405,
+     406,
+     "1619"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     927,
+     928,
+     "05/11/2009"
+    ],
+    [
+     "registrant_name",
+     402,
+     405,
+     "Joon Kyoo Kim"
+    ],
+    [
+     "registration_num",
+     405,
+     406,
+     "1619"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     927,
+     928,
+     "05/11/2009"
+    ],
+    [
+     "foreign_principle_name",
+     483,
+     487,
+     "Korea Trade Promotion Center"
+    ],
+    [
+     "registration_num",
+     405,
+     406,
+     "1619"
+    ],
+    [
+     "signer_name",
+     926,
+     927,
+     "Thürin"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "2009 MAY 28 AM 9:52 83|56"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "Korea Trade Promotion Center 29|63"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Korea Trade Promotion Center 29|63"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "1619 59|37"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "Joon Kyoo Kim 14|36"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "05/11/2009 23|72"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "Thürin 76|71"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "19710901_Hogan Lovells US LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 100.0,
+   "bros_f1": 100.0,
+   "why": "both right",
+   "gold": [
+    [
+     "registrant_name",
+     53,
+     56,
+     "Hogan & Hartson"
+    ],
+    [
+     "registration_num",
+     68,
+     69,
+     "2244"
+    ]
+   ],
+   "bros": [
+    [
+     "registrant_name",
+     53,
+     56,
+     "Hogan & Hartson"
+    ],
+    [
+     "registration_num",
+     68,
+     69,
+     "2244"
+    ]
+   ],
+   "reader": [
+    [
+     "registrant_name",
+     53,
+     56,
+     "Hogan & Hartson"
+    ],
+    [
+     "registration_num",
+     68,
+     69,
+     "2244"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Hogan & Hartson 25|22"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "2244 66|22"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "20110317_Daniel J. Edelman, Inc._Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 100.0,
+   "bros_f1": 100.0,
+   "why": "both right",
+   "gold": [
+    [
+     "file_date",
+     758,
+     759,
+     "3/11/11"
+    ],
+    [
+     "registrant_name",
+     406,
+     411,
+     "Daniel J. Edelman , Inc."
+    ],
+    [
+     "registration_num",
+     411,
+     412,
+     "3634"
+    ],
+    [
+     "signer_name",
+     759,
+     761,
+     "Randall Corley"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     758,
+     759,
+     "3/11/11"
+    ],
+    [
+     "registrant_name",
+     406,
+     411,
+     "Daniel J. Edelman , Inc."
+    ],
+    [
+     "registration_num",
+     411,
+     412,
+     "3634"
+    ],
+    [
+     "signer_name",
+     759,
+     761,
+     "Randall Corley"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     758,
+     759,
+     "3/11/11"
+    ],
+    [
+     "registrant_name",
+     406,
+     411,
+     "Daniel J. Edelman , Inc."
+    ],
+    [
+     "registration_num",
+     411,
+     412,
+     "3634"
+    ],
+    [
+     "signer_name",
+     759,
+     761,
+     "Randall Corley"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "2011 MAR 14 PM 12/08"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Daniel J. Edelman, Inc. 13|36"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "3634 51|36"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "3/11/11 20|27"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "Randall Corley 55|32"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "20110912_Picard Kentz _ Rowe, LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 100.0,
+   "bros_f1": 100.0,
+   "why": "both right",
+   "gold": [
+    [
+     "file_date",
+     819,
+     823,
+     "September 12 , 2011"
+    ],
+    [
+     "registrant_name",
+     454,
+     458,
+     "Picard Kentz & Rowe"
+    ],
+    [
+     "registration_num",
+     458,
+     459,
+     "5939"
+    ],
+    [
+     "signer_name",
+     826,
+     828,
+     "Justin Cawley"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     819,
+     823,
+     "September 12 , 2011"
+    ],
+    [
+     "registrant_name",
+     454,
+     458,
+     "Picard Kentz & Rowe"
+    ],
+    [
+     "registration_num",
+     458,
+     459,
+     "5939"
+    ],
+    [
+     "signer_name",
+     826,
+     828,
+     "Justin Cawley"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     819,
+     823,
+     "September 12 , 2011"
+    ],
+    [
+     "registrant_name",
+     454,
+     458,
+     "Picard Kentz & Rowe"
+    ],
+    [
+     "registration_num",
+     458,
+     459,
+     "5939"
+    ],
+    [
+     "signer_name",
+     826,
+     828,
+     "Justin Cawley"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Picard Kentz & Rowe 15|43"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "5939 52|43"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "September 12, 2011 15|23"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "Justin Cawley 59|23"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "19650501_Italian Government Tourist Board, New York_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 25.0,
+   "bros_f1": 0.0,
+   "why": "both fail",
+   "gold": [
+    [
+     "file_date",
+     712,
+     717,
+     "5 day of may 1965"
+    ],
+    [
+     "foreign_principle_name",
+     90,
+     97,
+     "Rookefeller Center - low York N.Y. it"
+    ],
+    [
+     "registrant_name",
+     75,
+     76,
+     "2ND"
+    ],
+    [
+     "registration_num",
+     59,
+     60,
+     "568"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     711,
+     715,
+     "this 5 day of"
+    ],
+    [
+     "file_date",
+     715,
+     717,
+     "may 1965"
+    ],
+    [
+     "registrant_name",
+     90,
+     93,
+     "Rookefeller Center -"
+    ],
+    [
+     "signer_name",
+     593,
+     594,
+     "Inementeneto"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     712,
+     713,
+     "5"
+    ],
+    [
+     "foreign_principle_name",
+     83,
+     96,
+     "Italian State Tourist Office 626 Fifth Ave. Rookefeller Center - low York N.Y."
+    ],
+    [
+     "registration_num",
+     59,
+     60,
+     "568"
+    ],
+    [
+     "signer_name",
+     593,
+     594,
+     "Inementeneto"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "Italian State Tourist Office 54|41\n626 Fifth Ave. 83|41\nRookefeller Center - low York N.Y. 59|44"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Italian State Tourist Office 54|41"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "568 55|28"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "file_date",
+     "answer": "5 18|65\nmay 39|65\n1965 54|65"
+    },
+    {
+     "page": 3,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registrant_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registration_num",
+     "answer": "41-2500600 45|74"
+    },
+    {
+     "page": 3,
+     "field": "signer_name",
+     "answer": "Inementeneto 71|34"
+    },
+    {
+     "page": 3,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  },
+  {
+   "guid": "19760201_Italian Government Tourist Board (ENIT), Los Angeles_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "reader_f1": 0.0,
+   "bros_f1": 28.571428571428577,
+   "why": "both fail",
+   "gold": [
+    [
+     "registrant_name",
+     50,
+     68,
+     "Italian Government Travel Office - E.N.I.T 360 Post Street , Suite 801 , San Francisco , Cal ."
+    ],
+    [
+     "registration_num",
+     69,
+     70,
+     "1884"
+    ]
+   ],
+   "bros": [
+    [
+     "file_date",
+     520,
+     525,
+     "October 1 12 , 1975"
+    ],
+    [
+     "registrant_name",
+     50,
+     56,
+     "Italian Government Travel Office - E.N.I.T"
+    ],
+    [
+     "registration_num",
+     68,
+     69,
+     "#"
+    ],
+    [
+     "registration_num",
+     69,
+     70,
+     "1884"
+    ],
+    [
+     "signer_name",
+     765,
+     767,
+     "Sam Burchell"
+    ]
+   ],
+   "reader": [
+    [
+     "file_date",
+     520,
+     525,
+     "October 1 12 , 1975"
+    ],
+    [
+     "foreign_principle_name",
+     50,
+     56,
+     "Italian Government Travel Office - E.N.I.T"
+    ],
+    [
+     "registration_num",
+     68,
+     70,
+     "# 1884"
+    ]
+   ],
+   "raw_answers": [
+    {
+     "page": 1,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "foreign_principle_name",
+     "answer": "Italian Government Travel Office-E.N.I.T 28|24"
+    },
+    {
+     "page": 1,
+     "field": "registrant_name",
+     "answer": "Italian Government Travel Office-E.N.I.T 28|24"
+    },
+    {
+     "page": 1,
+     "field": "registration_num",
+     "answer": "#1884 56|24"
+    },
+    {
+     "page": 1,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 1,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "file_date",
+     "answer": "October 1 - 12, 1975 46|12"
+    },
+    {
+     "page": 2,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "registrant_name",
+     "answer": "Premier Travel Center 18|19\nMarina Travel 14|26\nHaley Corporation 16|34\nRegency Travel 15|41\nFugazi/Dana Giusti 17|49\nZander Travel 15|5"
+    },
+    {
+     "page": 2,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 2,
+     "field": "signer_title",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "file_date",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "foreign_principle_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "registrant_name",
+     "answer": "Italian Government Travel Office 69|31"
+    },
+    {
+     "page": 3,
+     "field": "registration_num",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "signer_name",
+     "answer": "NONE"
+    },
+    {
+     "page": 3,
+     "field": "signer_title",
+     "answer": "NONE"
+    }
+   ]
+  }
+ ]
+}
