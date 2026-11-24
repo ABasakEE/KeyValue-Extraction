@@ -1,0 +1,16 @@
+{
+  "jobs": {
+    "fatura_K2_fold0": {
+      "returncode": 0,
+      "hours": 0.04
+    },
+    "fatura_K40_fold0": {
+      "returncode": 0,
+      "hours": 0.07
+    }
+  },
+  "jobs_selected": [
+    "fatura"
+  ],
+  "hours_used": 0.07
+}
