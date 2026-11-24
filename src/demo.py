@@ -46,15 +46,63 @@ except ImportError:
     except ImportError:
         HAVE_PYMUPDF = False
 
-# RapidOCR lazy loader for live image OCR
+class _DoctrOCR:
+    """docTR (python-doctr) behind the RapidOCR call signature: `ocr(np_img) -> ([(4 points, text, confidence)], None)`.
+
+    Unlike RapidOCR (text lines), docTR returns every word with its own box, which is the input the trained tagger saw; one item per word.
+    Select it with DEMO_OCR=doctr.
+    """
+
+    HUB_DET = "Felix92/doctr-torch-db-mobilenet-v3-large"
+    HUB_RECO = "Felix92/doctr-torch-crnn-mobilenet-v3-large-french"
+
+    def __init__(self):
+        """Hugging Face Hub weights first (docTR's own download host redirects to GitHub release assets, which some networks block), else docTR's default pretrained models."""
+        from doctr.models import ocr_predictor
+        try:
+            import json
+
+            import torch
+            from doctr.models.detection import db_mobilenet_v3_large
+            from doctr.models.recognition import crnn_mobilenet_v3_large
+            from huggingface_hub import hf_hub_download
+
+            cfg = json.load(open(hf_hub_download(self.HUB_RECO, "config.json"), encoding="utf-8"))
+            det = db_mobilenet_v3_large(pretrained=False, pretrained_backbone=False)
+            det.load_state_dict(torch.load(hf_hub_download(self.HUB_DET, "pytorch_model.bin"), map_location="cpu"))
+            reco = crnn_mobilenet_v3_large(pretrained=False, pretrained_backbone=False, vocab=cfg["vocab"])
+            reco.load_state_dict(torch.load(hf_hub_download(self.HUB_RECO, "pytorch_model.bin"), map_location="cpu"))
+            self.predictor = ocr_predictor(det_arch=det, reco_arch=reco, pretrained=False, assume_straight_pages=True,
+                                           detect_orientation=False, detect_language=False, straighten_pages=False)
+        except Exception as e:
+            print(f"[!] docTR Hub weights unavailable ({type(e).__name__}: {str(e)[:80]}); trying docTR's default models")
+            self.predictor = ocr_predictor(pretrained=True)
+
+    def __call__(self, np_img):
+        h, w = np_img.shape[:2]
+        items = []
+        for page in self.predictor([np_img]).pages:
+            for block in page.blocks:
+                for line in block.lines:
+                    for word in line.words:
+                        (x0, y0), (x1, y1) = word.geometry
+                        items.append(([[x0 * w, y0 * h], [x1 * w, y0 * h], [x1 * w, y1 * h], [x0 * w, y1 * h]], word.value, float(word.confidence)))
+        return items, None
+
+
+# OCR lazy loader for live image OCR: RapidOCR by default, docTR with DEMO_OCR=doctr
 _RAPID_OCR = None
 def get_ocr():
     global _RAPID_OCR
     if _RAPID_OCR is None:
         try:
-            from rapidocr_onnxruntime import RapidOCR
-            _RAPID_OCR = RapidOCR()
-        except Exception:
+            if os.environ.get("DEMO_OCR", "rapid") == "doctr":
+                _RAPID_OCR = _DoctrOCR()
+            else:
+                from rapidocr_onnxruntime import RapidOCR
+                _RAPID_OCR = RapidOCR()
+        except Exception as e:
+            print(f"[!] OCR engine unavailable ({type(e).__name__}: {str(e)[:100]})")
             _RAPID_OCR = False
     return _RAPID_OCR if _RAPID_OCR is not False else None
 

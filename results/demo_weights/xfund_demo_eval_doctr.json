@@ -1,0 +1,86 @@
+{
+ "showcase/funsd/82253245_3247_m.pdf": {
+  "pairs": 63,
+  "gold": 41,
+  "tp": 6,
+  "link_f1": 11.5
+ },
+ "showcase/funsd/82504862_g.pdf": {
+  "pairs": 14,
+  "gold": 6,
+  "tp": 2,
+  "link_f1": 20.0
+ },
+ "showcase/funsd/83443897_g.pdf": {
+  "pairs": 16,
+  "gold": 14,
+  "tp": 8,
+  "link_f1": 53.3
+ },
+ "showcase/xfund/de_val_13_g.pdf": {
+  "pairs": 9,
+  "gold": 8,
+  "tp": 4,
+  "link_f1": 47.1
+ },
+ "showcase/xfund/es_val_38_g.pdf": {
+  "pairs": 47,
+  "gold": 30,
+  "tp": 6,
+  "link_f1": 15.6
+ },
+ "showcase/xfund/fr_val_7_g.pdf": {
+  "pairs": 8,
+  "gold": 8,
+  "tp": 7,
+  "link_f1": 87.5
+ },
+ "showcase/xfund/it_val_38_g.pdf": {
+  "pairs": 15,
+  "gold": 17,
+  "tp": 10,
+  "link_f1": 62.5
+ },
+ "unseen_template/funsd/83635935_m.pdf": {
+  "pairs": 5,
+  "gold": 4,
+  "tp": 3,
+  "link_f1": 66.7
+ },
+ "unseen_template/funsd/83772145_m.pdf": {
+  "pairs": 10,
+  "gold": 9,
+  "tp": 4,
+  "link_f1": 42.1
+ },
+ "unseen_template/funsd/89856243_b.pdf": {
+  "pairs": 35,
+  "gold": 17,
+  "tp": 5,
+  "link_f1": 19.2
+ },
+ "unseen_template/xfund/it_val_34_m.pdf": {
+  "pairs": 102,
+  "gold": 55,
+  "tp": 19,
+  "link_f1": 24.2
+ },
+ "unseen_template/xfund/pt_val_17_b.pdf": {
+  "pairs": 20,
+  "gold": 24,
+  "tp": 2,
+  "link_f1": 9.1
+ },
+ "unseen_template/xfund/pt_val_28_m.pdf": {
+  "pairs": 98,
+  "gold": 48,
+  "tp": 14,
+  "link_f1": 19.2
+ },
+ "unseen_template/xfund/pt_val_41_m.pdf": {
+  "pairs": 87,
+  "gold": 60,
+  "tp": 15,
+  "link_f1": 20.4
+ }
+}
