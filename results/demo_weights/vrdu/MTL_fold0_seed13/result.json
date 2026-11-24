@@ -1,0 +1,102 @@
+{
+  "test": {
+    "precision": 0.9172,
+    "recall": 0.9209,
+    "f1": 0.9191,
+    "support": 362369,
+    "truncated_words": 0,
+    "per_type": {
+      "file_date": {
+        "precision": 0.933,
+        "recall": 0.8954,
+        "f1": 0.9138,
+        "support": 373
+      },
+      "foreign_principle_name": {
+        "precision": 0.9238,
+        "recall": 0.9115,
+        "f1": 0.9176,
+        "support": 226
+      },
+      "registrant_name": {
+        "precision": 0.9133,
+        "recall": 0.9421,
+        "f1": 0.9275,
+        "support": 380
+      },
+      "registration_num": {
+        "precision": 0.9513,
+        "recall": 0.9815,
+        "f1": 0.9661,
+        "support": 378
+      },
+      "signer_name": {
+        "precision": 0.9032,
+        "recall": 0.875,
+        "f1": 0.8889,
+        "support": 288
+      },
+      "signer_title": {
+        "precision": 0.7951,
+        "recall": 0.8661,
+        "f1": 0.8291,
+        "support": 112
+      }
+    }
+  },
+  "best_val_f1": 0.9341,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 0.4505,
+      "val_f1": 0.0
+    },
+    {
+      "epoch": 2,
+      "train_loss": 0.0348,
+      "val_f1": 0.8451
+    },
+    {
+      "epoch": 3,
+      "train_loss": 0.0104,
+      "val_f1": 0.9033
+    },
+    {
+      "epoch": 4,
+      "train_loss": 0.0081,
+      "val_f1": 0.9178
+    },
+    {
+      "epoch": 5,
+      "train_loss": 0.0054,
+      "val_f1": 0.9089
+    },
+    {
+      "epoch": 6,
+      "train_loss": 0.0049,
+      "val_f1": 0.9341
+    },
+    {
+      "epoch": 7,
+      "train_loss": 0.0048,
+      "val_f1": 0.9306
+    },
+    {
+      "epoch": 8,
+      "train_loss": 0.0031,
+      "val_f1": 0.9254
+    },
+    {
+      "epoch": 9,
+      "train_loss": 0.0025,
+      "val_f1": 0.9319
+    }
+  ],
+  "malformed_tags": {
+    "invalid_i_tags": 90,
+    "total_i_tags": 4568,
+    "rate": 0.0197
+  },
+  "cross_check": "METRIC CROSS-CHECK PASSED: seqeval F1=0.9191 == independent F1=0.9191 (delta 0.00e+00)\n  lenient-IOB2 F1=0.9166 (spread 0.0024)\n  malformed I- tags: 90/4568 (2.0%)",
+  "peak_gpu_mem_gb": 7.87
+}

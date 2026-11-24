@@ -1,0 +1,16 @@
+{
+  "jobs": {
+    "vrdu_MTL_fold0": {
+      "returncode": 0,
+      "hours": 0.71
+    },
+    "vrdu_UTL_fold0": {
+      "returncode": 0,
+      "hours": 0.79
+    }
+  },
+  "jobs_selected": [
+    "vrdu"
+  ],
+  "hours_used": 0.79
+}

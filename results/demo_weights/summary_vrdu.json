@@ -1,0 +1,19 @@
+{
+  "jobs": [
+    "vrdu"
+  ],
+  "weights_to_download": {
+    "results/demo_weights/vrdu/MTL_fold0_seed13/best_model.pt": 417.8,
+    "results/demo_weights/vrdu/UTL_fold0_seed13/best_model.pt": 417.8
+  },
+  "scores": {
+    "results/demo_weights/vrdu/MTL_fold0_seed13": {
+      "test_f1": 91.91,
+      "best_val_f1": 0.9341
+    },
+    "results/demo_weights/vrdu/UTL_fold0_seed13": {
+      "test_f1": 82.75,
+      "best_val_f1": 0.9492
+    }
+  }
+}
