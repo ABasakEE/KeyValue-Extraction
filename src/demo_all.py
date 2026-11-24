@@ -81,15 +81,15 @@ MODELS = {
     VRDU_NAME: [
         dict(key="UTL", label="Unseen-template model: Amendment held out (UTL fold 0)", paths=[W / "vrdu/UTL_fold0_seed13/best_model.pt", ROOT / "results/vrdu_track1_bros_demo/UTL_fold0_seed13/best_model.pt"],
              text="**Trained on 200 documents of Dissemination_Report and Short-Form only. Amendment never appeared in training.** The examples below are Amendment forms, so every one is a new template to this model. "
-                  "On this fold BROS Track 1 scores **83.4 F1** (mean of three seeds), the best of the three folds; the mean over the three folds is **71.3**."),
+                  "**This checkpoint (seed 13): 82.8 F1 on the held-out Amendment forms.** BROS Track 1 averages 83.4 on this fold over three seeds, the best of the three folds; the mean over the three folds is **71.3**."),
         dict(key="MTL", label="Seen-template model (MTL fold 0)", paths=[W / "vrdu/MTL_fold0_seed13/best_model.pt", ROOT / "results/vrdu_track1_bros_demo/MTL_fold0_seed13/best_model.pt"],
-             text="**Trained on 200 documents drawn from all three templates.** The examples below are forms it did not train on, but of templates it has seen. BROS Track 1 scores about **92.4 F1** in this setting."),
+             text="**Trained on 200 documents drawn from all three templates.** The examples below are forms it did not train on, but of templates it has seen. **This checkpoint (seed 13): 91.9 F1** on its test documents; BROS Track 1 averages about 92.4 in this setting."),
     ],
     FATURA_NAME: [
         dict(key="K40", label="Trained on 40 seen templates (K = 40)", paths=[W / "fatura/fold0/seed_13/best_model.pt"],
-             text="**Fold 0, trained on 200 invoices of the 40 seen templates.** Held-out (unseen) templates: 2, 4, 7, 10, 12, 25, 32, 39, 49, 50. Mean unseen-template F1 over five folds: **99.9**."),
+             text="**Fold 0, trained on 200 invoices of the 40 seen templates.** Held-out (unseen) templates: 2, 4, 7, 10, 12, 25, 32, 39, 49, 50. **This checkpoint: 99.9 F1** on the unseen-template test invoices of fold 0 (99.9 over five folds)."),
         dict(key="K2", label="Trained on 2 seen templates (K = 2)", paths=[W / "fatura/K2/fold0/seed_13/best_model.pt"],
-             text="**Fold 0, trained on 20 invoices of only 2 seen templates** (10 each). Mean unseen-template F1 over five folds: **69.2**; this is the data-starved case in which the zero-shot reader (91.7) is better."),
+             text="**Fold 0, trained on 20 invoices of only 2 seen templates** (10 each). **This checkpoint: 60.7 F1** on the unseen-template test invoices of fold 0 (69.2 mean over five folds and two seeds); this is the data-starved case in which the zero-shot reader (91.7) is better."),
     ],
     DOCILE_NAME: [
         dict(key="S0", label="Trained on 1,000 documents (split seed 0, the poster's setting)", paths=[W / "docile/N1000_S0/seed_13/best_model.pt"],
