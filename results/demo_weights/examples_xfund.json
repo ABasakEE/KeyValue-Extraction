@@ -1,0 +1,58 @@
+[
+ {
+  "source": "showcase/xfund/de_val_13_g.pdf",
+  "link_f1": 66.7,
+  "pairs_predicted": 7,
+  "gold_links": 8,
+  "links_right": 5
+ },
+ {
+  "source": "showcase/xfund/it_val_38_g.pdf",
+  "link_f1": 64.5,
+  "pairs_predicted": 14,
+  "gold_links": 17,
+  "links_right": 10
+ },
+ {
+  "source": "showcase/xfund/fr_val_7_g.pdf",
+  "link_f1": 62.5,
+  "pairs_predicted": 8,
+  "gold_links": 8,
+  "links_right": 5
+ },
+ {
+  "source": "unseen_template/xfund/it_val_34_m.pdf",
+  "link_f1": 31.2,
+  "pairs_predicted": 86,
+  "gold_links": 55,
+  "links_right": 22
+ },
+ {
+  "source": "unseen_template/xfund/pt_val_28_m.pdf",
+  "link_f1": 24.7,
+  "pairs_predicted": 106,
+  "gold_links": 48,
+  "links_right": 19
+ },
+ {
+  "source": "unseen_template/xfund/pt_val_41_m.pdf",
+  "link_f1": 12.1,
+  "pairs_predicted": 39,
+  "gold_links": 60,
+  "links_right": 6
+ },
+ {
+  "source": "showcase/xfund/es_val_38_g.pdf",
+  "link_f1": 11.1,
+  "pairs_predicted": 42,
+  "gold_links": 30,
+  "links_right": 4
+ },
+ {
+  "source": "unseen_template/xfund/pt_val_17_b.pdf",
+  "link_f1": 6.2,
+  "pairs_predicted": 40,
+  "gold_links": 24,
+  "links_right": 2
+ }
+]

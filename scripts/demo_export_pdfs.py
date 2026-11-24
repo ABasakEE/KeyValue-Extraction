@@ -4,8 +4,9 @@
 
 Suffix = the checkpoint's own score on the document, the same bands everywhere: g >= 90, m 50 to 90, b < 50 (the convention of demo_pdfs/showcase).
   * VRDU   : the curated lists of scripts/demo_curate_examples.py; unseen_template/ (Amendment held out) and seen_template/.
-  * DocILE : the curated list for split seed 0 (the poster's setting). The PDFs are DocILE documents: they stay out of git (see .gitignore) until the dataset terms are confirmed.
-  * FATURA : the six unseen-template invoices of fold 0, scored by BOTH checkpoints; the suffix follows the K = 2 model (g >= 90, m 50 to 90, b < 50), because that is the
+  * DocILE : the curated lists for split seed 0 (the poster's setting), unseen_layout/ and seen_layout/. The PDFs are DocILE documents: they stay out of git (see .gitignore) until the dataset terms are confirmed.
+  * XFUND  : the eight cached validation forms, scored by J1's link F1 through the demo pipeline (g >= 60, m 25 to 60, b < 25).
+  * FATURA : unseen_template/ (six invoices of fold 0) and seen_template/ (four invoices of the K = 2 model's two templates), scored by BOTH checkpoints; the suffix follows the K = 2 model (g >= 90, m 50 to 90, b < 50), because that is the
              model whose behaviour changes from invoice to invoice; the K = 40 score is in the README.
 """
 from __future__ import annotations
@@ -52,44 +53,83 @@ def vrdu(readme: list[str], truth: dict) -> None:
 def fatura(readme: list[str], truth: dict) -> None:
     held = A.FL.folds()[0]
     unseen, _ = A.fatura_pick("K2")
-    d = OUT / "fatura"
-    d.mkdir(parents=True, exist_ok=True)
-    readme += ["", "## FATURA invoices (BROS Track 1, nine fields; unseen-template invoices of fold 0)", "",
-               "The suffix follows the K = 2 model; both scores are listed. These are image-derived PDFs (the invoices are JPG in the dataset).", "",
+    # seen templates: invoices of the two templates the K = 2 model trained on (also seen by the K = 40 model), excluding every training and validation invoice of both
+    t2, v2 = A.FL.starved_sample(held, 13, 0, 2)
+    t40, v40 = A.FL.train_val_sample(held, 13, 0)
+    used = set(t2) | set(v2) | set(t40) | set(v40)
+    seen = []
+    for t in sorted({int(n.split("_")[0][8:]) for n in t2}):
+        seen += [(f"Template {t}: seen template", n) for n in (f"Template{t}_Instance{k}" for k in range(200)) if n not in used][:2]
+    readme += ["", "## FATURA invoices (BROS Track 1, nine fields)", "",
+               "`unseen_template/`: invoices of fold-0 held-out templates (never seen by either model). `seen_template/`: other invoices of the two templates the K = 2 model trained on "
+               "(also among the 40 the K = 40 model trained on); none of these invoices was a training or validation invoice. The suffix follows the K = 2 model; both scores are listed. "
+               "The files are PDFs made from the dataset's JPG invoices.", "",
                "| File | Template | K = 40 entity F1 | K = 2 entity F1 | Gold fields (exact text) |", "|---|---|---|---|---|"]
     models = {k: A.get_model(A.FATURA_NAME, k) for k in ("K40", "K2")}
-    for label, name in unseen:
-        ex, pages, _ = A.load_example(A.FATURA_NAME, name)
-        sc = {}
-        for k, (clf, id2label, dev, trained, ck) in models.items():
-            assert trained, f"no checkpoint for FATURA {k}"
-            spans = set(DB.spans_of(DB.tag_document(clf, dev, ex), id2label))
-            gold = set(DB.spans_of(ex.ner_tags, id2label))
-            sc[k] = round(100 * A.f1_text(spans, gold)[0])
-        role = sfx(sc["K2"])
-        fname = f"{name}_{role}.pdf"
-        pages[0].convert("RGB").save(d / fname, "PDF", resolution=72.0)
-        g = {t: " ".join(ex.words[a:b]) for t, a, b in DB.spans_of(ex.ner_tags, models["K40"][1])}
-        truth[f"fatura/{fname}"] = {"entity_f1": sc, "gold": g, "held_out_templates": held}
-        readme.append(f"| `fatura/{fname}` | {label.split(':')[0]} | {sc['K40']}% | {sc['K2']}% | " + "; ".join(f"{k}: {v[:40]}" for k, v in g.items()) + " |")
+    for folder, items in (("unseen_template", unseen), ("seen_template", seen)):
+        d = OUT / "fatura" / folder
+        d.mkdir(parents=True, exist_ok=True)
+        for label, name in items:
+            ex, pages, _ = A.load_example(A.FATURA_NAME, name)
+            sc = {}
+            for k, (clf, id2label, dev, trained, ck) in models.items():
+                assert trained, f"no checkpoint for FATURA {k}"
+                spans = set(DB.spans_of(DB.tag_document(clf, dev, ex), id2label))
+                gold = set(DB.spans_of(ex.ner_tags, id2label))
+                sc[k] = round(100 * A.f1_text(spans, gold)[0])
+            fname = f"{name}_{sfx(sc['K2'])}.pdf"
+            pages[0].convert("RGB").save(d / fname, "PDF", resolution=72.0)
+            g = {t: " ".join(ex.words[a:b]) for t, a, b in DB.spans_of(ex.ner_tags, models["K40"][1])}
+            truth[f"fatura/{folder}/{fname}"] = {"entity_f1": sc, "gold": g, "held_out_templates": held, "template_seen_in_training": folder == "seen_template"}
+            readme.append(f"| `fatura/{folder}/{fname}` | {label.split(':')[0]} ({folder.split('_')[0]}) | {sc['K40']}% | {sc['K2']}% | " + "; ".join(f"{k}: {v[:40]}" for k, v in g.items()) + " |")
 
 
 def docile(readme: list[str], truth: dict) -> None:
     import docile_bros as DBR
 
-    cur = json.loads((ROOT / "results" / "demo_weights" / "examples_docile.json").read_text(encoding="utf-8"))["S0"]
-    d = OUT / "docile"
-    d.mkdir(parents=True, exist_ok=True)
-    readme += ["", "## DocILE line items (BROS Track 1, 19 line-item fields; N = 1,000 split seed 0; unseen layouts)", "",
-               "Local only: these are DocILE documents and are not committed (see .gitignore).", "",
+    cur = json.loads((ROOT / "results" / "demo_weights" / "examples_docile.json").read_text(encoding="utf-8"))
+    readme += ["", "## DocILE line items (BROS Track 1, 19 line-item fields; N = 1,000 split seed 0)", "",
+               "`unseen_layout/`: test documents whose layout and vendor appear in no training document. `seen_layout/`: documents that were NOT in the 1,000 training documents "
+               "but share a layout (cluster) with some of them. Local only: these are DocILE documents and are not committed (see .gitignore).", "",
                "| File | Row F1 on this document (this checkpoint) | Gold rows |", "|---|---|---|"]
+    for folder, key in (("unseen_layout", "S0"), ("seen_layout", "S0_seen")):
+        d = OUT / "docile" / folder
+        d.mkdir(parents=True, exist_ok=True)
+        for c in cur.get(key, []):
+            doc = DBR.doc_dict(c["guid"])
+            fname = f"{c['guid']}_{sfx(c['f1'])}.pdf"
+            shutil.copy(A.DOCILE_DIR / "pdfs" / f"{c['guid']}.pdf", d / fname)
+            rows = [{A._short(f): " ".join(doc["words"][i] for i in sorted(ws)) for f, ws, _ in row} for row in doc["rows"]]
+            truth[f"docile/{folder}/{fname}"] = {"row_f1": c["f1"], "gold_rows": rows}
+            readme.append(f"| `docile/{folder}/{fname}` | {c['f1']:.0f}% | {len(rows)} rows; first: " + "; ".join(f"{k}: {v[:30]}" for k, v in (rows[0].items() if rows else [])) + " |")
+
+
+def sfx_link(f1: float) -> str:
+    """XFUND is scored by end-to-end link F1 through the demo's OCR pipeline: g >= 60, m 25 to 60, b < 25 (the old demo_pdfs convention, b = link < 25)."""
+    return "g" if f1 >= 60 else ("m" if f1 >= 25 else "b")
+
+
+def xfund(readme: list[str], truth: dict) -> None:
+    cur = json.loads((ROOT / "results" / "demo_weights" / "examples_xfund.json").read_text(encoding="utf-8"))
+    gt = json.loads((ROOT / "demo_pdfs" / "ground_truth.json").read_text(encoding="utf-8"))
+    d = OUT / "xfund"
+    d.mkdir(parents=True, exist_ok=True)
+    readme += ["", "## XFUND forms (BROS joint tagger + linker, J1 seed 42; entities and key-value links)", "",
+               "The forms the demo's linking tab shows: XFUND validation forms in five languages (about 94% have no training form of the same template). "
+               "Score = link F1 of J1 through the demo pipeline (RapidOCR words, the model's own entities, text-matched pairs): `_g` >= 60, `_m` 25 to 60, `_b` < 25. "
+               "This is lower than the 53.4 end-to-end benchmark average because the demo reads the page with OCR and matches pairs by text. The `_g/_m/_b` suffixes of the older "
+               "`demo_pdfs/showcase` and `unseen_template` copies came from an earlier LiLT demo and are superseded by these.", "",
+               "| File | Language | Link F1 (J1, this form) | Pairs predicted / gold | Gold key-value pairs (first three) |", "|---|---|---|---|---|"]
     for c in cur:
-        doc = DBR.doc_dict(c["guid"])
-        fname = f"{c['guid']}_{sfx(c['f1'])}.pdf"
-        shutil.copy(A.DOCILE_DIR / "pdfs" / f"{c['guid']}.pdf", d / fname)
-        rows = [{A._short(f): " ".join(doc["words"][i] for i in sorted(ws)) for f, ws, _ in row} for row in doc["rows"]]
-        truth[f"docile/{fname}"] = {"row_f1": c["f1"], "gold_rows": rows}
-        readme.append(f"| `docile/{fname}` | {c['f1']:.0f}% | {len(rows)} rows; first: " + "; ".join(f"{k}: {v[:30]}" for k, v in (rows[0].items() if rows else [])) + " |")
+        src = ROOT / "demo_pdfs" / c["source"]
+        stem = src.stem.rsplit("_", 1)[0] if src.stem[-2:] in ("_g", "_m", "_b") else src.stem
+        fname = f"{stem}_{sfx_link(c['link_f1'])}.pdf"
+        shutil.copy(src, d / fname)
+        g = gt.get(c["source"], {})
+        links = g.get("links", [])
+        truth[f"xfund/{fname}"] = {"link_f1": c["link_f1"], "pairs_predicted": c["pairs_predicted"], "gold_links": links, "gold_entities": g.get("entities", [])}
+        first = "; ".join(f"{l[1]} -> {l[3]}" if isinstance(l, list) and len(l) > 3 else str(l) for l in links[:3])
+        readme.append(f"| `xfund/{fname}` | {stem.split('_')[0]} | {c['link_f1']:.0f}% | {c['pairs_predicted']} / {c['gold_links']} | {first[:150]} |")
 
 
 def main() -> None:
@@ -105,6 +145,7 @@ def main() -> None:
     vrdu(readme, truth)
     fatura(readme, truth)
     docile(readme, truth)
+    xfund(readme, truth)
     (OUT / "README.md").write_text("\n".join(readme) + "\n", encoding="utf-8")
     (OUT / "ground_truth.json").write_text(json.dumps(truth, indent=1, ensure_ascii=False), encoding="utf-8")
     print("wrote", sum(1 for _ in OUT.rglob("*.pdf")), "pdfs;", OUT)

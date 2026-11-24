@@ -126,7 +126,7 @@
    "file_date": "2"
   }
  },
- "fatura/Template2_Instance74_m.pdf": {
+ "fatura/unseen_template/Template2_Instance74_m.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 71
@@ -152,9 +152,10 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "fatura/Template4_Instance148_m.pdf": {
+ "fatura/unseen_template/Template4_Instance148_m.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 57
@@ -179,9 +180,10 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "fatura/Template7_Instance59_m.pdf": {
+ "fatura/unseen_template/Template7_Instance59_m.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 71
@@ -207,9 +209,10 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "fatura/Template10_Instance170_b.pdf": {
+ "fatura/unseen_template/Template10_Instance170_b.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 31
@@ -234,9 +237,10 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "fatura/Template12_Instance44_b.pdf": {
+ "fatura/unseen_template/Template12_Instance44_b.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 43
@@ -263,9 +267,10 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "fatura/Template25_Instance125_m.pdf": {
+ "fatura/unseen_template/Template25_Instance125_m.pdf": {
   "entity_f1": {
    "K40": 100,
    "K2": 77
@@ -291,9 +296,120 @@
    39,
    49,
    50
-  ]
+  ],
+  "template_seen_in_training": false
  },
- "docile/8bc8897b17ac474a846f6a77_g.pdf": {
+ "fatura/seen_template/Template15_Instance0_g.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 100
+  },
+  "gold": {
+   "title": "INVOICE",
+   "date": "Date: 27-Aug-1993",
+   "seller_address": "Address:744 Hernandez Hollow Apt. 459 Rossville, UT 53295 US",
+   "number": "INVOICE ID INV38499489",
+   "due_date": "Due Date : 16-Nov-2006",
+   "buyer": "Buyer :Megan Smith 744 Hernandez Hollow Apt. 459 Rossville, UT 53295 US Tel:+(980)960-3031 Email:stephenfoster@example.net Site:https://bennett.org/",
+   "sub_total": "SUB_TOTAL : 1057.19 USD"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ],
+  "template_seen_in_training": true
+ },
+ "fatura/seen_template/Template15_Instance2_g.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 100
+  },
+  "gold": {
+   "title": "TAX INVOICE",
+   "date": "Invoice Date: 19-Dec-2003",
+   "seller_address": "Address:744 Hernandez Hollow Apt. 459 Rossville, UT 53295 US",
+   "number": "INVOICE ID INV/95-26/957",
+   "due_date": "Due Date : 22-Feb-2007",
+   "buyer": "Bill to:Rachel Brandt 57355 Haynes Islands Lambview, NV 62648 US Tel:+(428)346-7729 Email:anneallen@example.net Site:http://www.hayes.com/",
+   "sub_total": "SUB_TOTAL : 730.06 USD"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ],
+  "template_seen_in_training": true
+ },
+ "fatura/seen_template/Template36_Instance0_g.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 100
+  },
+  "gold": {
+   "buyer": "Bill to:Michael Green 047 Jackson Meadows Apt. 391 Pearsonmouth, OH 83042 US Tel:+(652)704-9470 Email:porterelizabeth@example.com Site:https://church.com/",
+   "seller_address": "Address:047 Jackson Meadows Apt. 391 Pearsonmouth, OH 83042 US",
+   "title": "INVOICE",
+   "number": "INVOICE # INV37478055",
+   "date": "Invoice Date: 02-Aug-2021",
+   "sub_total": "SUB_TOTAL : 1113.41 USD"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ],
+  "template_seen_in_training": true
+ },
+ "fatura/seen_template/Template36_Instance1_g.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 100
+  },
+  "gold": {
+   "buyer": "Bill to:Tammy Fisher 93159 Anderson Crossing Russochester, WY 64384 US Tel:+(742)713-4533 Email:zmorgan@example.com Site:http://dunlap.info/",
+   "seller_address": "Address:047 Jackson Meadows Apt. 391 Pearsonmouth, OH 83042 US",
+   "title": "COMMERCIAL INVOICE",
+   "number": "INVOICE # 5811-948",
+   "date": "Date: 27-Jul-1999",
+   "sub_total": "SUB_TOTAL : 399.25 EUR"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ],
+  "template_seen_in_training": true
+ },
+ "docile/unseen_layout/8bc8897b17ac474a846f6a77_g.pdf": {
   "row_f1": 100.0,
   "gold_rows": [
    {
@@ -346,7 +462,7 @@
    }
   ]
  },
- "docile/9ebdec30843146c584f0a713_g.pdf": {
+ "docile/unseen_layout/9ebdec30843146c584f0a713_g.pdf": {
   "row_f1": 100.0,
   "gold_rows": [
    {
@@ -366,7 +482,7 @@
    }
   ]
  },
- "docile/ecd1566f99f5422a88f09cba_g.pdf": {
+ "docile/unseen_layout/ecd1566f99f5422a88f09cba_g.pdf": {
   "row_f1": 100.0,
   "gold_rows": [
    {
@@ -382,7 +498,7 @@
    }
   ]
  },
- "docile/c3fb1ae263a34aab94da6f6e_m.pdf": {
+ "docile/unseen_layout/c3fb1ae263a34aab94da6f6e_m.pdf": {
   "row_f1": 64.0,
   "gold_rows": [
    {
@@ -411,7 +527,7 @@
    }
   ]
  },
- "docile/b434fe4846e64ce48784453f_m.pdf": {
+ "docile/unseen_layout/b434fe4846e64ce48784453f_m.pdf": {
   "row_f1": 66.7,
   "gold_rows": [
    {
@@ -452,7 +568,7 @@
    }
   ]
  },
- "docile/685f7be21127477583114af0_b.pdf": {
+ "docile/unseen_layout/685f7be21127477583114af0_b.pdf": {
   "row_f1": 0.0,
   "gold_rows": [
    {
@@ -464,6 +580,3893 @@
    {
     "description": "Qualifiers:"
    }
+  ]
+ },
+ "docile/seen_layout/fba13e6e07144f8f9056f4ee_g.pdf": {
+  "row_f1": 100.0,
+  "gold_rows": [
+   {
+    "position": "1",
+    "unit_price_gross": "$20",
+    "quantity": "8"
+   },
+   {
+    "position": "2",
+    "unit_price_gross": "$18",
+    "quantity": "6"
+   },
+   {
+    "position": "3",
+    "unit_price_gross": "$18",
+    "quantity": "8"
+   }
+  ]
+ },
+ "docile/seen_layout/ea05d3675a7944c19a95b2be_g.pdf": {
+  "row_f1": 100.0,
+  "gold_rows": [
+   {
+    "position": "1",
+    "date": "10/04/22-10/1022",
+    "unit_price_gross": "120.00",
+    "quantity": "15",
+    "amount_gross": "1,800.00"
+   },
+   {
+    "position": "2",
+    "date": "10/04/22-10/1022",
+    "unit_price_gross": "120.00",
+    "quantity": "10",
+    "amount_gross": "1,200.00"
+   },
+   {
+    "position": "3",
+    "date": "10/04/22-10/1022",
+    "unit_price_gross": "120.00",
+    "quantity": "10",
+    "amount_gross": "1,200.00"
+   },
+   {
+    "position": "4",
+    "date": "10/04/22-10/1022",
+    "unit_price_gross": "70.00",
+    "quantity": "2",
+    "amount_gross": "140.00"
+   },
+   {
+    "position": "5",
+    "date": "10/04/22-10/1022",
+    "unit_price_gross": "70.00",
+    "quantity": "2",
+    "amount_gross": "140.00"
+   }
+  ]
+ },
+ "docile/seen_layout/72a7e1a870f040b38b6df8e0_m.pdf": {
+  "row_f1": 84.4,
+  "gold_rows": [
+   {
+    "date": "4/20/2021",
+    "description": "1:00WABK/WBAK 09:20:12 AM 03:33:16 PM",
+    "quantity": "2",
+    "unit_price_gross": "$100.00"
+   },
+   {
+    "date": "4/21/2021",
+    "description": "1:00WABKWBAK 06:05:10. AM 11:19:52AM 03:19:39PM",
+    "quantity": "3",
+    "unit_price_gross": "$100.00"
+   },
+   {
+    "date": "4/22/2021",
+    "description": "1:00WABK/WBAK 08: 50:00. AM 02:35:04 PM 05:15:21PM",
+    "quantity": "3",
+    "unit_price_gross": "$100.00"
+   },
+   {
+    "date": "4/23/2021",
+    "description": "1:00WABK/WBAK 09: 45:05 AM 12:27:23 PM",
+    "quantity": "2",
+    "unit_price_gross": "$100.00"
+   },
+   {
+    "date": "4/24/2021",
+    "description": "1:00WABKAWBAK 07:44:45 AM 10:43:21AM 01:30:27 PM 03:37:44PM",
+    "quantity": "4",
+    "unit_price_gross": "$75.00"
+   },
+   {
+    "date": "4/25/2021",
+    "description": "1,00WABK/WBAK 08: 16:38 AM 10:20:32AM 12:41:39 PM 06:43:23PM",
+    "quantity": "4",
+    "unit_price_gross": "$75.00"
+   },
+   {
+    "date": "4/25/2021",
+    "description": "Agency Discount"
+   }
+  ]
+ },
+ "docile/seen_layout/4a9d2670f8854db5af301fa0_m.pdf": {
+  "row_f1": 85.7,
+  "gold_rows": [
+   {
+    "description": "Spot",
+    "quantity": "0",
+    "amount_net": "$0.00",
+    "tax": "$0.00",
+    "amount_gross": "$0.00"
+   },
+   {
+    "description": "Misc",
+    "quantity": "1",
+    "amount_net": "$219.42",
+    "tax": "$0.00",
+    "amount_gross": "$219.42"
+   },
+   {
+    "quantity": "1",
+    "description": "Misc-Sales Tax",
+    "date": "10/08/2018",
+    "unit_price_gross": "$219.42",
+    "amount_gross": "$219.42"
+   }
+  ]
+ },
+ "docile/seen_layout/5dd535c7d6e54fd8bb8d077a_b.pdf": {
+  "row_f1": 44.4,
+  "gold_rows": [
+   {
+    "date": "Mo, 7/6/20",
+    "quantity": "60",
+    "code": "20TGIA0008R",
+    "amount_gross": "$614.00",
+    "description": "Hurt R"
+   },
+   {
+    "date": "Mo, 7/6/20",
+    "quantity": "60",
+    "code": "20TGIA0008R",
+    "amount_gross": "$614.00",
+    "description": "Hurt R"
+   },
+   {
+    "date": "Mo, 7/6/20",
+    "quantity": "60",
+    "code": "20TGIA0008R",
+    "amount_gross": "$614.00",
+    "description": "Hurt R"
+   }
+  ]
+ },
+ "xfund/de_val_13_g.pdf": {
+  "link_f1": 66.7,
+  "pairs_predicted": 7,
+  "gold_links": [
+   [
+    "question",
+    "Vorname, Name:",
+    "answer",
+    "Helen Schmitz"
+   ],
+   [
+    "question",
+    "Adresse:",
+    "answer",
+    "Tauberfranken 8"
+   ],
+   [
+    "question",
+    "PLZ, Ort:",
+    "answer",
+    "97922 Lauda-Königshofen"
+   ],
+   [
+    "question",
+    "Telefon:",
+    "answer",
+    "15289203232"
+   ],
+   [
+    "question",
+    "E-Mail:",
+    "answer",
+    "15289203232@gmail.com"
+   ],
+   [
+    "question",
+    "Geburtsdatum:",
+    "answer",
+    "04.04.1989"
+   ],
+   [
+    "question",
+    "Berufliche Ausbildung und Berufserfahrung:",
+    "answer",
+    "Bank, Bankerfahrung in Sparkasse"
+   ],
+   [
+    "question",
+    "Aktuelle Tätigkeit, Arbeitgeber:",
+    "answer",
+    "Sparkasse in München"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "scfm"
+   ],
+   [
+    "other",
+    "ZENTRUM FÜR ACHTSAMKEIT"
+   ],
+   [
+    "other",
+    "CenterForMindfulness.ch GmbH"
+   ],
+   [
+    "header",
+    "Bewerbung für die Weiterbildung zum/ zur MBSR-Lehrerin Lehrgang 2019-2021"
+   ],
+   [
+    "question",
+    "Vorname, Name:"
+   ],
+   [
+    "answer",
+    "Helen Schmitz"
+   ],
+   [
+    "question",
+    "Adresse:"
+   ],
+   [
+    "answer",
+    "Tauberfranken 8"
+   ],
+   [
+    "question",
+    "PLZ, Ort:"
+   ],
+   [
+    "answer",
+    "97922 Lauda-Königshofen"
+   ],
+   [
+    "question",
+    "Telefon:"
+   ],
+   [
+    "answer",
+    "15289203232"
+   ],
+   [
+    "question",
+    "E-Mail:"
+   ],
+   [
+    "answer",
+    "15289203232@gmail.com"
+   ],
+   [
+    "question",
+    "Geburtsdatum:"
+   ],
+   [
+    "question",
+    "Berufliche Ausbildung und Berufserfahrung:"
+   ],
+   [
+    "answer",
+    "Bank, Bankerfahrung in Sparkasse"
+   ],
+   [
+    "other",
+    "Erfahrungen im Bereich Erwachsenenbildung:"
+   ],
+   [
+    "question",
+    "Aktuelle Tätigkeit, Arbeitgeber:"
+   ],
+   [
+    "answer",
+    "Sparkasse in München"
+   ],
+   [
+    "other",
+    "Neptunstrasse 25, 8032 Zürich"
+   ],
+   [
+    "other",
+    "info@centerformindfulness.ch"
+   ],
+   [
+    "other",
+    "Tel. Nr. : +41 (0)79 60 88 100"
+   ],
+   [
+    "other",
+    "www.centerformindfulness.ch"
+   ],
+   [
+    "answer",
+    "04.04.1989"
+   ]
+  ]
+ },
+ "xfund/it_val_38_g.pdf": {
+  "link_f1": 64.5,
+  "pairs_predicted": 14,
+  "gold_links": [
+   [
+    "question",
+    "Responsabile documento *:",
+    "answer",
+    "Rivieri Michele"
+   ],
+   [
+    "question",
+    "Redazione *:",
+    "answer",
+    "de Simone"
+   ],
+   [
+    "question",
+    "Redazione *:",
+    "answer",
+    "Carlotta"
+   ],
+   [
+    "question",
+    "Emissione *:",
+    "answer",
+    "ISEC"
+   ],
+   [
+    "question",
+    "Data*",
+    "answer",
+    "09/01/2018"
+   ],
+   [
+    "question",
+    "Approvazione *:",
+    "answer",
+    "SERV"
+   ],
+   [
+    "question",
+    "Data",
+    "answer",
+    "09/01/2018"
+   ],
+   [
+    "question",
+    "Codice Documento *:",
+    "answer",
+    "IA00Q001-2"
+   ],
+   [
+    "question",
+    "Stato Documento *:",
+    "answer",
+    "Pubblicato"
+   ],
+   [
+    "question",
+    "Distribuzione:",
+    "answer",
+    "Pubblica"
+   ],
+   [
+    "question",
+    "Data Emissione Prima Versione:",
+    "answer",
+    "12-04-2017"
+   ],
+   [
+    "question",
+    "Data di Stampa:",
+    "answer",
+    "14-04-2017"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "• Pubblica, se il documento può circolare senza restrizioni, sia internamente che esternamente;"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "• Riservata, se il documento è distribuibile solo agli Utenti Cedacri o all'interno di un Gruppo di Progetto (specificare il Gruppo"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "di progetto);"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "• Confidenziale, se il documento è distribuibile internamente a livello personale (specificare le persone)"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "• Utente, se il documento è destinato all'Organizzazione del Cliente"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:",
+    "answer",
+    "• <altro>, da specificare."
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "CEDACRI"
+   ],
+   [
+    "other",
+    "GROUP"
+   ],
+   [
+    "other",
+    "IA00Q001- 2"
+   ],
+   [
+    "other",
+    "09/01/2018- Codice di comportamento per visitatori occasionali e consulenti continuativi"
+   ],
+   [
+    "question",
+    "Responsabile documento *:"
+   ],
+   [
+    "answer",
+    "Rivieri Michele"
+   ],
+   [
+    "question",
+    "Redazione *:"
+   ],
+   [
+    "answer",
+    "de Simone"
+   ],
+   [
+    "answer",
+    "Carlotta"
+   ],
+   [
+    "question",
+    "Emissione *:"
+   ],
+   [
+    "answer",
+    "ISEC"
+   ],
+   [
+    "answer",
+    "09/01/2018"
+   ],
+   [
+    "question",
+    "Data*"
+   ],
+   [
+    "question",
+    "Approvazione *:"
+   ],
+   [
+    "answer",
+    "SERV"
+   ],
+   [
+    "answer",
+    "09/01/2018"
+   ],
+   [
+    "question",
+    "Data"
+   ],
+   [
+    "question",
+    "Codice Documento *:"
+   ],
+   [
+    "answer",
+    "IA00Q001-2"
+   ],
+   [
+    "question",
+    "Stato Documento *:"
+   ],
+   [
+    "answer",
+    "Pubblicato"
+   ],
+   [
+    "question",
+    "Distribuzione:"
+   ],
+   [
+    "answer",
+    "Pubblica"
+   ],
+   [
+    "question",
+    "Data Emissione Prima Versione:"
+   ],
+   [
+    "answer",
+    "12-04-2017"
+   ],
+   [
+    "question",
+    "Data di Stampa:"
+   ],
+   [
+    "answer",
+    "14-04-2017"
+   ],
+   [
+    "other",
+    "LEGENDA"
+   ],
+   [
+    "other",
+    "Il redattore non deve compilare i campi contrassegnati con asterisco \" * \" in quanto le informazioni relative vengono aggiornate"
+   ],
+   [
+    "other",
+    "automaticamente in sede di stampa sulla base di quanto indicato nel frontespizio del documento."
+   ],
+   [
+    "other",
+    "Distribuzione"
+   ],
+   [
+    "question",
+    "La distribuzione è un campo da compilare manualmente e può assumere i valori:"
+   ],
+   [
+    "answer",
+    "• Pubblica, se il documento può circolare senza restrizioni, sia internamente che esternamente;"
+   ],
+   [
+    "answer",
+    "• Riservata, se il documento è distribuibile solo agli Utenti Cedacri o all'interno di un Gruppo di Progetto (specificare il Gruppo"
+   ],
+   [
+    "answer",
+    "di progetto);"
+   ],
+   [
+    "answer",
+    "• Confidenziale, se il documento è distribuibile internamente a livello personale (specificare le persone)"
+   ],
+   [
+    "answer",
+    "• Utente, se il documento è destinato all'Organizzazione del Cliente"
+   ],
+   [
+    "answer",
+    "• <altro>, da specificare."
+   ],
+   [
+    "other",
+    "Pag. 2 di 12"
+   ],
+   [
+    "other",
+    "Q001-008"
+   ],
+   [
+    "other",
+    "Il contenuto del presente documento costituisce materiale riservato e soggetto a copyright. Ogni violazione sarà perseguita ai sensi di legge"
+   ]
+  ]
+ },
+ "xfund/fr_val_7_g.pdf": {
+  "link_f1": 62.5,
+  "pairs_predicted": 8,
+  "gold_links": [
+   [
+    "question",
+    "Civilité :",
+    "answer",
+    "Madame"
+   ],
+   [
+    "question",
+    "Nom :",
+    "answer",
+    "Robert"
+   ],
+   [
+    "question",
+    "Prénom :",
+    "answer",
+    "Katel"
+   ],
+   [
+    "question",
+    "Date de naissance :",
+    "answer",
+    "09/09/1992"
+   ],
+   [
+    "question",
+    "Lieu de naissance :",
+    "answer",
+    "Lyon"
+   ],
+   [
+    "question",
+    "Adresse :",
+    "answer",
+    "89 rue Alain, Paris"
+   ],
+   [
+    "question",
+    "Téléphone :",
+    "answer",
+    "0682732476"
+   ],
+   [
+    "question",
+    "Courriel :",
+    "answer",
+    "Katel@hotmail.com"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "PRIX DE THÈSE DE LA"
+   ],
+   [
+    "other",
+    "COUR DE CASSATION"
+   ],
+   [
+    "other",
+    "La Cour de cassation a créé un prix de thèse destiné à récompenser un docteur en droit ou en"
+   ],
+   [
+    "other",
+    "histoire du droit dont les travaux de thèse portent principalement sur l'activité, la jurisprudence,"
+   ],
+   [
+    "other",
+    "les missions de la Cour de cassation et leurs évolutions."
+   ],
+   [
+    "other",
+    "Le prix de thèse de la Cour de cassation entend également encourager les travaux de"
+   ],
+   [
+    "other",
+    "recherche qui abordent le rôle de la Cour de cassation en lien avec l'organisation, le"
+   ],
+   [
+    "other",
+    "fonctionnement, les compétences et les enjeux de l'institution judiciaire."
+   ],
+   [
+    "header",
+    "FORMULAIRE DE CANDIDATURE - session 2020"
+   ],
+   [
+    "other",
+    "À remplir par le candidat en caractères d'imprimerie et à joindre au dossier de candidature"
+   ],
+   [
+    "other",
+    "Coordonnées"
+   ],
+   [
+    "question",
+    "Civilité :"
+   ],
+   [
+    "answer",
+    "Madame"
+   ],
+   [
+    "question",
+    "Nom :"
+   ],
+   [
+    "answer",
+    "Robert"
+   ],
+   [
+    "question",
+    "Prénom :"
+   ],
+   [
+    "answer",
+    "Katel"
+   ],
+   [
+    "question",
+    "Date de naissance :"
+   ],
+   [
+    "answer",
+    "09/09/1992"
+   ],
+   [
+    "question",
+    "Lieu de naissance :"
+   ],
+   [
+    "answer",
+    "Lyon"
+   ],
+   [
+    "question",
+    "Adresse :"
+   ],
+   [
+    "answer",
+    "89 rue Alain, Paris"
+   ],
+   [
+    "question",
+    "Téléphone :"
+   ],
+   [
+    "answer",
+    "0682732476"
+   ],
+   [
+    "question",
+    "Courriel :"
+   ],
+   [
+    "answer",
+    "Katel@hotmail.com"
+   ],
+   [
+    "other",
+    "COUR DE CASSATION"
+   ],
+   [
+    "other",
+    "Lextenso"
+   ],
+   [
+    "other",
+    "1"
+   ],
+   [
+    "other",
+    "étudiant"
+   ]
+  ]
+ },
+ "xfund/it_val_34_m.pdf": {
+  "link_f1": 31.2,
+  "pairs_predicted": 86,
+  "gold_links": [
+   [
+    "question",
+    "Code:",
+    "answer",
+    "AbbPar"
+   ],
+   [
+    "question",
+    "Ed. 01",
+    "answer",
+    "Rev. 00-09/2009"
+   ],
+   [
+    "question",
+    "Pagina:",
+    "answer",
+    "1 di 2"
+   ],
+   [
+    "question",
+    "Rif .:",
+    "answer",
+    "PiaProCPR"
+   ],
+   [
+    "question",
+    "ORDINARIOP&P Mod_2",
+    "answer",
+    "COMUNE DI FAENZA (RA)"
+   ],
+   [
+    "question",
+    "Data di presentazione",
+    "answer",
+    "20/11/2020"
+   ],
+   [
+    "question",
+    "Cognome",
+    "answer",
+    "MERLINO"
+   ],
+   [
+    "question",
+    "Nome",
+    "answer",
+    "ANNA"
+   ],
+   [
+    "question",
+    "Doc. ID nr.",
+    "answer",
+    "234"
+   ],
+   [
+    "question",
+    "Residente in via",
+    "answer",
+    "SAN DONATO 43"
+   ],
+   [
+    "question",
+    "Civico Interno",
+    "answer",
+    "34"
+   ],
+   [
+    "question",
+    "Cap",
+    "answer",
+    "10291"
+   ],
+   [
+    "question",
+    "Comune",
+    "answer",
+    "PIEMONTE"
+   ],
+   [
+    "question",
+    "Provincia",
+    "answer",
+    "TO"
+   ],
+   [
+    "question",
+    "C.F",
+    "answer",
+    "MEA7738447384773"
+   ],
+   [
+    "question",
+    "E-mail",
+    "answer",
+    "MERLINO ANNA@GMAIL.COM"
+   ],
+   [
+    "question",
+    "Data",
+    "answer",
+    "10/12/2020"
+   ],
+   [
+    "question",
+    "Firma",
+    "answer",
+    "MERLINO"
+   ],
+   [
+    "question",
+    "Cognome",
+    "answer",
+    "CONTINO"
+   ],
+   [
+    "question",
+    "Nome",
+    "answer",
+    "LUIGI"
+   ],
+   [
+    "question",
+    "Residente in via",
+    "answer",
+    "SAN DONATO 43"
+   ],
+   [
+    "question",
+    "Civico Interno",
+    "answer",
+    "44"
+   ],
+   [
+    "question",
+    "Cap",
+    "answer",
+    "10283"
+   ],
+   [
+    "question",
+    "Comune",
+    "answer",
+    "PIEMONTE"
+   ],
+   [
+    "question",
+    "Provincia",
+    "answer",
+    "TO"
+   ],
+   [
+    "question",
+    "Tipologia abbonamento",
+    "answer",
+    "MENSILE (30 giorni continuativi)"
+   ],
+   [
+    "question",
+    "Tipologia abbonamento",
+    "answer",
+    "[X SEMESTRALE (180 giorni continuativi)"
+   ],
+   [
+    "question",
+    "Tipologia abbonamento",
+    "answer",
+    "□ ANNUALE (365 giorni continuativi)"
+   ],
+   [
+    "question",
+    "TARIFFA",
+    "answer",
+    "€ 30,00"
+   ],
+   [
+    "question",
+    "TARIFFA",
+    "answer",
+    "€ 170,00"
+   ],
+   [
+    "question",
+    "TARIFFA",
+    "answer",
+    "€ 325,00"
+   ],
+   [
+    "question",
+    "Con decorrenza dal:",
+    "answer",
+    "12/12/2020"
+   ],
+   [
+    "question",
+    "e fino al:",
+    "answer",
+    "30/12/2020"
+   ],
+   [
+    "question",
+    "Marca",
+    "answer",
+    "MIMOSA"
+   ],
+   [
+    "question",
+    "Modello",
+    "answer",
+    "VENDITA"
+   ],
+   [
+    "question",
+    "Targa",
+    "answer",
+    "782"
+   ],
+   [
+    "question",
+    "che venga riconosciuta la seguente riduzione alla quale ho diritto:",
+    "answer",
+    "auto elettrica (sconto 50%)"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "[ G) utilizzare/per accedere ad un garage / cortile privato sito in via"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "all'interno della ZTL, di proprieta"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "☒ svolgere l'attività di rifornimento della propria attività, sita all'interno della ZTL (S);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ svolgere l'attività di rifornimento di attività commerciali ed artigiani all'interno della ZTL (S);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ svolgere l'attività di corriere e/o trasportatore di merci per conto terzi (S);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ svolgere l'attività di trasporto merci e documentazione amministrativa per conto di Istituto di Credito in ZTL (S);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ svolgere l'attività di ambulante con posto fisso assegnato nei mercati cittadini (AM);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ effettuare visite domiciliari urgenti in qualità di medico (M);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "answer",
+    "□ svolgere attività istituzionali (SP);"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "[X] raggiungere il cantiere edile sito all'interno della ZTL in Via _"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "□ potersi recare presso lo Studio Medico/ Ambulatorio_"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "fino al"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:",
+    "question",
+    "sito all'interno della ZTL in Via"
+   ],
+   [
+    "question",
+    "[ G) utilizzare/per accedere ad un garage / cortile privato sito in via",
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "question",
+    "all'interno della ZTL, di proprieta",
+    "answer",
+    "IDENDITA"
+   ],
+   [
+    "question",
+    "[X] raggiungere il cantiere edile sito all'interno della ZTL in Via _",
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "question",
+    "□ potersi recare presso lo Studio Medico/ Ambulatorio_",
+    "answer",
+    "N.781234"
+   ],
+   [
+    "question",
+    "fino al",
+    "answer",
+    "30/12/2020"
+   ],
+   [
+    "question",
+    "sito all'interno della ZTL in Via",
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "question",
+    "esclusivamente per eseguire cure continuative fino al",
+    "answer",
+    "30/12/2020"
+   ],
+   [
+    "question",
+    "Tel. /Cell.",
+    "answer",
+    "3374464883"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "I Movs"
+   ],
+   [
+    "other",
+    "FAENZA"
+   ],
+   [
+    "header",
+    "MODULO RICHIESTA ABBONAMENTO"
+   ],
+   [
+    "header",
+    "ALLA SOSTA"
+   ],
+   [
+    "header",
+    "Comune di Faenza (RA)"
+   ],
+   [
+    "question",
+    "Code:"
+   ],
+   [
+    "question",
+    "Ed. 01"
+   ],
+   [
+    "question",
+    "Pagina:"
+   ],
+   [
+    "question",
+    "Rif .:"
+   ],
+   [
+    "answer",
+    "AbbPar"
+   ],
+   [
+    "answer",
+    "Rev. 00-09/2009"
+   ],
+   [
+    "answer",
+    "1 di 2"
+   ],
+   [
+    "answer",
+    "PiaProCPR"
+   ],
+   [
+    "question",
+    "ORDINARIOP&P Mod_2"
+   ],
+   [
+    "answer",
+    "COMUNE DI FAENZA (RA)"
+   ],
+   [
+    "question",
+    "Data di presentazione"
+   ],
+   [
+    "answer",
+    "20/11/2020"
+   ],
+   [
+    "other",
+    "IL SOTTOSCRITTO:"
+   ],
+   [
+    "question",
+    "Cognome"
+   ],
+   [
+    "answer",
+    "MERLINO"
+   ],
+   [
+    "question",
+    "Nome"
+   ],
+   [
+    "answer",
+    "ANNA"
+   ],
+   [
+    "question",
+    "Doc. ID nr."
+   ],
+   [
+    "answer",
+    "234"
+   ],
+   [
+    "question",
+    "Residente in via"
+   ],
+   [
+    "answer",
+    "SAN DONATO 43"
+   ],
+   [
+    "question",
+    "Civico Interno"
+   ],
+   [
+    "answer",
+    "34"
+   ],
+   [
+    "question",
+    "Cap"
+   ],
+   [
+    "answer",
+    "10291"
+   ],
+   [
+    "question",
+    "Comune"
+   ],
+   [
+    "answer",
+    "PIEMONTE"
+   ],
+   [
+    "question",
+    "Provincia"
+   ],
+   [
+    "answer",
+    "TO"
+   ],
+   [
+    "question",
+    "C.F"
+   ],
+   [
+    "answer",
+    "MEA7738447384773"
+   ],
+   [
+    "question",
+    "E-mail"
+   ],
+   [
+    "answer",
+    "MERLINO ANNA@GMAIL.COM"
+   ],
+   [
+    "answer",
+    "3374464883"
+   ],
+   [
+    "other",
+    "DICHIARAZIONE SOSTITUTIVA ATTO DI NOTORIETA'"
+   ],
+   [
+    "other",
+    "(ART. 47 d.p.r. 445 DEL 28.12.2000)"
+   ],
+   [
+    "other",
+    "Consapevole che in caso di dichiarazione mendace sarà punito ai sensi del Codice Penale secondo quanto prescritto dall'art. 76 del succitato D.P.R. 445/2000 e"
+   ],
+   [
+    "other",
+    "che, inoltre, qualora dal controllo effettuato emerga la non veridicità del contenuto di taluna delle dichiarazioni rese, decadrà dai benefici conseguiti al"
+   ],
+   [
+    "other",
+    "provvedimento eventualmente emanato sulla base della dichiarazione non veritiera (art. 75 D.P.R. 445/2000)."
+   ],
+   [
+    "question",
+    "Data"
+   ],
+   [
+    "answer",
+    "10/12/2020"
+   ],
+   [
+    "question",
+    "Firma"
+   ],
+   [
+    "answer",
+    "MERLINO"
+   ],
+   [
+    "other",
+    "DELEGA"
+   ],
+   [
+    "question",
+    "Cognome"
+   ],
+   [
+    "answer",
+    "CONTINO"
+   ],
+   [
+    "question",
+    "Nome"
+   ],
+   [
+    "answer",
+    "LUIGI"
+   ],
+   [
+    "question",
+    "Residente in via"
+   ],
+   [
+    "answer",
+    "SAN DONATO 43"
+   ],
+   [
+    "answer",
+    "44"
+   ],
+   [
+    "question",
+    "Civico Interno"
+   ],
+   [
+    "question",
+    "Cap"
+   ],
+   [
+    "answer",
+    "10283"
+   ],
+   [
+    "question",
+    "Comune"
+   ],
+   [
+    "answer",
+    "PIEMONTE"
+   ],
+   [
+    "question",
+    "Provincia"
+   ],
+   [
+    "answer",
+    "TO"
+   ],
+   [
+    "other",
+    "all'espletamento della pratica di rilascio del seguente abbonamento:"
+   ],
+   [
+    "other",
+    "CHIEDE il rilascio del seguente abbonamento:"
+   ],
+   [
+    "question",
+    "Tipologia abbonamento"
+   ],
+   [
+    "question",
+    "TARIFFA"
+   ],
+   [
+    "answer",
+    "MENSILE (30 giorni continuativi)"
+   ],
+   [
+    "answer",
+    "[X SEMESTRALE (180 giorni continuativi)"
+   ],
+   [
+    "answer",
+    "□ ANNUALE (365 giorni continuativi)"
+   ],
+   [
+    "answer",
+    "€ 30,00"
+   ],
+   [
+    "answer",
+    "€ 170,00"
+   ],
+   [
+    "answer",
+    "€ 325,00"
+   ],
+   [
+    "question",
+    "Con decorrenza dal:"
+   ],
+   [
+    "question",
+    "e fino al:"
+   ],
+   [
+    "other",
+    "per l'autovettura:"
+   ],
+   [
+    "question",
+    "Marca"
+   ],
+   [
+    "question",
+    "Modello"
+   ],
+   [
+    "question",
+    "Targa"
+   ],
+   [
+    "answer",
+    "MIMOSA"
+   ],
+   [
+    "answer",
+    "VENDITA"
+   ],
+   [
+    "answer",
+    "782"
+   ],
+   [
+    "question",
+    "che venga riconosciuta la seguente riduzione alla quale ho diritto:"
+   ],
+   [
+    "answer",
+    "auto elettrica (sconto 50%)"
+   ],
+   [
+    "question",
+    "dichiara inoltre che sussiste il presupposto per la richiesta di accesso in ZTL per:"
+   ],
+   [
+    "question",
+    "[ G) utilizzare/per accedere ad un garage / cortile privato sito in via"
+   ],
+   [
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "question",
+    "all'interno della ZTL, di proprieta"
+   ],
+   [
+    "answer",
+    "IDENDITA"
+   ],
+   [
+    "answer",
+    "☒ svolgere l'attività di rifornimento della propria attività, sita all'interno della ZTL (S);"
+   ],
+   [
+    "answer",
+    "□ svolgere l'attività di rifornimento di attività commerciali ed artigiani all'interno della ZTL (S);"
+   ],
+   [
+    "answer",
+    "□ svolgere l'attività di corriere e/o trasportatore di merci per conto terzi (S);"
+   ],
+   [
+    "answer",
+    "□ svolgere l'attività di trasporto merci e documentazione amministrativa per conto di Istituto di Credito in ZTL (S);"
+   ],
+   [
+    "answer",
+    "□ svolgere l'attività di ambulante con posto fisso assegnato nei mercati cittadini (AM);"
+   ],
+   [
+    "answer",
+    "□ effettuare visite domiciliari urgenti in qualità di medico (M);"
+   ],
+   [
+    "answer",
+    "□ svolgere attività istituzionali (SP);"
+   ],
+   [
+    "question",
+    "[X] raggiungere il cantiere edile sito all'interno della ZTL in Via _"
+   ],
+   [
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "answer",
+    "N.781234"
+   ],
+   [
+    "question",
+    "□ potersi recare presso lo Studio Medico/ Ambulatorio_"
+   ],
+   [
+    "question",
+    "fino al"
+   ],
+   [
+    "question",
+    "sito all'interno della ZTL in Via"
+   ],
+   [
+    "answer",
+    "SAN DONATO 23"
+   ],
+   [
+    "question",
+    "esclusivamente per eseguire cure continuative fino al"
+   ],
+   [
+    "other",
+    "(H)"
+   ],
+   [
+    "other",
+    "A)"
+   ],
+   [
+    "other",
+    "Essere a conoscenza e accettare le modalità di fruizione della sosta nonché le seguenti condizioni generali di abbonamento:"
+   ],
+   [
+    "other",
+    "Movs Faenza è un progetto dell'RTI Abaco S.p.A. - Input S.r.l. per la gestione del piano sosta nel Comune di Faenza - www.movs.it"
+   ],
+   [
+    "question",
+    "Tel. /Cell."
+   ],
+   [
+    "answer",
+    "12/12/2020"
+   ],
+   [
+    "answer",
+    "30/12/2020"
+   ],
+   [
+    "answer",
+    "30/12/2020"
+   ],
+   [
+    "other",
+    "(C);"
+   ],
+   [
+    "answer",
+    "30/12/2020"
+   ]
+  ]
+ },
+ "xfund/pt_val_28_b.pdf": {
+  "link_f1": 24.7,
+  "pairs_predicted": 106,
+  "gold_links": [
+   [
+    "question",
+    "Proponente:",
+    "answer",
+    "Embraer S.A."
+   ],
+   [
+    "question",
+    "CNPJ:",
+    "answer",
+    "17.115.437/0001-73"
+   ],
+   [
+    "question",
+    "Endereço:",
+    "answer",
+    "Vila Coelho Xavier 1973"
+   ],
+   [
+    "question",
+    "CEP:",
+    "answer",
+    "15800-3401"
+   ],
+   [
+    "question",
+    "Município:",
+    "answer",
+    "Fortaleza"
+   ],
+   [
+    "question",
+    "UF:",
+    "answer",
+    "SP"
+   ],
+   [
+    "question",
+    "DDD:",
+    "answer",
+    "(85)"
+   ],
+   [
+    "question",
+    "Telefone:",
+    "answer",
+    "2501-2316"
+   ],
+   [
+    "question",
+    "Fax:",
+    "answer",
+    "(85) 8614-3556"
+   ],
+   [
+    "question",
+    "E-mail:",
+    "answer",
+    "zzu19@linshiyouxiang.net"
+   ],
+   [
+    "question",
+    "População do município:",
+    "answer",
+    "1 bilhão"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "Direito Público"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "Direito Privado"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "Federal"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "Estadual"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "Municipal"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "☑"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "☑"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "□"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "□"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:",
+    "answer",
+    "□"
+   ],
+   [
+    "question",
+    "CPF:",
+    "answer",
+    "107.672.200-80"
+   ],
+   [
+    "question",
+    "Representante legal:",
+    "answer",
+    "Renan R Barros"
+   ],
+   [
+    "question",
+    "RG / órgão expedidor:",
+    "answer",
+    "1.234.543 SE"
+   ],
+   [
+    "question",
+    "Cargo:",
+    "answer",
+    "escretária"
+   ],
+   [
+    "question",
+    "Função:",
+    "answer",
+    "administração"
+   ],
+   [
+    "question",
+    "E-mail:",
+    "answer",
+    "kkqg58|@payspun.com"
+   ],
+   [
+    "question",
+    "Endereço residencial:",
+    "answer",
+    "Rua Teresópolis 294"
+   ],
+   [
+    "question",
+    "Telefone:",
+    "answer",
+    "(24) 2501-2316"
+   ],
+   [
+    "question",
+    "CEP:",
+    "answer",
+    "15800-3567"
+   ],
+   [
+    "question",
+    "Município:",
+    "answer",
+    "Petrópolis"
+   ],
+   [
+    "question",
+    "Data:",
+    "answer",
+    "1\\1\\2019"
+   ],
+   [
+    "question",
+    "Assinatura:",
+    "answer",
+    "Renan R Barros"
+   ],
+   [
+    "question",
+    "UF:",
+    "answer",
+    "RJ"
+   ],
+   [
+    "question",
+    "Período de execução",
+    "question",
+    "Início:"
+   ],
+   [
+    "question",
+    "Período de execução",
+    "question",
+    "Término:"
+   ],
+   [
+    "question",
+    "Título do projeto:",
+    "answer",
+    "Aquisições"
+   ],
+   [
+    "question",
+    "Início:",
+    "answer",
+    "8/2018"
+   ],
+   [
+    "question",
+    "Identificação do objeto:",
+    "answer",
+    "SMOO"
+   ],
+   [
+    "question",
+    "Justificativa da proposição:",
+    "answer",
+    "A empresa atualmente precisa se expandir, SMOO enfrenta falência"
+   ],
+   [
+    "question",
+    "Metas:",
+    "answer",
+    "Aquisições com sucesso"
+   ],
+   [
+    "question",
+    "Nome do Coordenador I:",
+    "answer",
+    "Tiago Lopes"
+   ],
+   [
+    "question",
+    "Término:",
+    "answer",
+    "8/2019"
+   ],
+   [
+    "question",
+    "CPF",
+    "answer",
+    "603.216.025-44"
+   ],
+   [
+    "question",
+    "DDD:",
+    "answer",
+    "85"
+   ],
+   [
+    "question",
+    "Telefone:",
+    "answer",
+    "8614-3556"
+   ],
+   [
+    "question",
+    "E-mail:",
+    "answer",
+    "zzu19@linshiyouxiang.net"
+   ],
+   [
+    "question",
+    "Assinatura:",
+    "answer",
+    "Tiago Lopes"
+   ],
+   [
+    "question",
+    "Nome do Coordenador II:",
+    "answer",
+    "Nuno Rodrigues"
+   ],
+   [
+    "question",
+    "CPF",
+    "answer",
+    "603.216.025-44"
+   ],
+   [
+    "question",
+    "DDD:",
+    "answer",
+    "21"
+   ],
+   [
+    "question",
+    "Telefone:",
+    "answer",
+    "5380-6371"
+   ],
+   [
+    "question",
+    "E-mail:",
+    "answer",
+    "zzu19@linshiyouxiang.com"
+   ],
+   [
+    "question",
+    "Assinatura:",
+    "answer",
+    "Nuno Rodrigues"
+   ],
+   [
+    "question",
+    "Site:",
+    "answer",
+    "www.embraersa.br"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "FUNDO ESTADUAL DE DEFESA DOS INTERESSES DIFUSOS"
+   ],
+   [
+    "header",
+    "FORMULÁRIO PLANO DE TRABALHO"
+   ],
+   [
+    "other",
+    "1. IDENTIFICAÇÃO DA INSTITUIÇÃO PROPONENTE"
+   ],
+   [
+    "question",
+    "Proponente:"
+   ],
+   [
+    "answer",
+    "Embraer S.A."
+   ],
+   [
+    "question",
+    "CNPJ:"
+   ],
+   [
+    "answer",
+    "17.115.437/0001-73"
+   ],
+   [
+    "question",
+    "Endereço:"
+   ],
+   [
+    "answer",
+    "Vila Coelho Xavier 1973"
+   ],
+   [
+    "question",
+    "CEP:"
+   ],
+   [
+    "answer",
+    "15800-3401"
+   ],
+   [
+    "question",
+    "Município:"
+   ],
+   [
+    "answer",
+    "Fortaleza"
+   ],
+   [
+    "question",
+    "UF:"
+   ],
+   [
+    "question",
+    "DDD:"
+   ],
+   [
+    "question",
+    "Telefone:"
+   ],
+   [
+    "answer",
+    "2501-2316"
+   ],
+   [
+    "question",
+    "Fax:"
+   ],
+   [
+    "answer",
+    "(85) 8614-3556"
+   ],
+   [
+    "question",
+    "E-mail:"
+   ],
+   [
+    "answer",
+    "zzu19@linshiyouxiang.net"
+   ],
+   [
+    "answer",
+    "www.embraersa.br"
+   ],
+   [
+    "question",
+    "População do município:"
+   ],
+   [
+    "answer",
+    "SP"
+   ],
+   [
+    "answer",
+    "1 bilhão"
+   ],
+   [
+    "question",
+    "Regime jurídico / Esfera administrativa:"
+   ],
+   [
+    "answer",
+    "Direito Público"
+   ],
+   [
+    "answer",
+    "Direito Privado"
+   ],
+   [
+    "answer",
+    "Federal"
+   ],
+   [
+    "answer",
+    "Estadual"
+   ],
+   [
+    "answer",
+    "Municipal"
+   ],
+   [
+    "question",
+    "CPF:"
+   ],
+   [
+    "answer",
+    "107.672.200-80"
+   ],
+   [
+    "question",
+    "Representante legal:"
+   ],
+   [
+    "answer",
+    "Renan R Barros"
+   ],
+   [
+    "question",
+    "RG / órgão expedidor:"
+   ],
+   [
+    "answer",
+    "1.234.543 SE"
+   ],
+   [
+    "question",
+    "Cargo:"
+   ],
+   [
+    "question",
+    "Função:"
+   ],
+   [
+    "answer",
+    "escretária"
+   ],
+   [
+    "answer",
+    "administração"
+   ],
+   [
+    "question",
+    "E-mail:"
+   ],
+   [
+    "answer",
+    "kkqg58|@payspun.com"
+   ],
+   [
+    "question",
+    "Endereço residencial:"
+   ],
+   [
+    "answer",
+    "Rua Teresópolis 294"
+   ],
+   [
+    "question",
+    "Telefone:"
+   ],
+   [
+    "answer",
+    "(24) 2501-2316"
+   ],
+   [
+    "question",
+    "CEP:"
+   ],
+   [
+    "answer",
+    "15800-3567"
+   ],
+   [
+    "question",
+    "Município:"
+   ],
+   [
+    "answer",
+    "Petrópolis"
+   ],
+   [
+    "question",
+    "Data:"
+   ],
+   [
+    "answer",
+    "1\\1\\2019"
+   ],
+   [
+    "question",
+    "Assinatura:"
+   ],
+   [
+    "answer",
+    "Renan R Barros"
+   ],
+   [
+    "other",
+    "2. DESCRIÇÃO DO PROJETO"
+   ],
+   [
+    "question",
+    "UF:"
+   ],
+   [
+    "answer",
+    "RJ"
+   ],
+   [
+    "question",
+    "Período de execução"
+   ],
+   [
+    "question",
+    "Título do projeto:"
+   ],
+   [
+    "answer",
+    "Aquisições"
+   ],
+   [
+    "question",
+    "Início:"
+   ],
+   [
+    "question",
+    "Identificação do objeto:"
+   ],
+   [
+    "answer",
+    "SMOO"
+   ],
+   [
+    "question",
+    "Justificativa da proposição:"
+   ],
+   [
+    "answer",
+    "A empresa atualmente precisa se expandir, SMOO enfrenta falência"
+   ],
+   [
+    "question",
+    "Metas:"
+   ],
+   [
+    "answer",
+    "Aquisições com sucesso"
+   ],
+   [
+    "other",
+    "3. IDENTIFICAÇÃO DOS RESPONSÁVEIS PELA EXECUÇÃO DO PROJETO"
+   ],
+   [
+    "question",
+    "Nome do Coordenador I:"
+   ],
+   [
+    "question",
+    "Término:"
+   ],
+   [
+    "answer",
+    "603.216.025-44"
+   ],
+   [
+    "answer",
+    "Tiago Lopes"
+   ],
+   [
+    "question",
+    "CPF"
+   ],
+   [
+    "question",
+    "DDD:"
+   ],
+   [
+    "answer",
+    "85"
+   ],
+   [
+    "question",
+    "Telefone:"
+   ],
+   [
+    "answer",
+    "8614-3556"
+   ],
+   [
+    "question",
+    "E-mail:"
+   ],
+   [
+    "answer",
+    "zzu19@linshiyouxiang.net"
+   ],
+   [
+    "question",
+    "Assinatura:"
+   ],
+   [
+    "answer",
+    "Tiago Lopes"
+   ],
+   [
+    "question",
+    "Nome do Coordenador II:"
+   ],
+   [
+    "answer",
+    "Nuno Rodrigues"
+   ],
+   [
+    "question",
+    "CPF"
+   ],
+   [
+    "answer",
+    "603.216.025-44"
+   ],
+   [
+    "question",
+    "DDD:"
+   ],
+   [
+    "answer",
+    "21"
+   ],
+   [
+    "question",
+    "Telefone:"
+   ],
+   [
+    "answer",
+    "5380-6371"
+   ],
+   [
+    "question",
+    "E-mail:"
+   ],
+   [
+    "answer",
+    "zzu19@linshiyouxiang.com"
+   ],
+   [
+    "question",
+    "Assinatura:"
+   ],
+   [
+    "answer",
+    "Nuno Rodrigues"
+   ],
+   [
+    "other",
+    "42"
+   ],
+   [
+    "other",
+    "DOS INTERSSES DIFUSOS"
+   ],
+   [
+    "other",
+    "FUNDO ESTADUAL DE DEFPSA"
+   ],
+   [
+    "other",
+    "FD"
+   ],
+   [
+    "answer",
+    "(85)"
+   ],
+   [
+    "question",
+    "Site:"
+   ],
+   [
+    "answer",
+    "☑"
+   ],
+   [
+    "answer",
+    "☑"
+   ],
+   [
+    "answer",
+    "□"
+   ],
+   [
+    "answer",
+    "□"
+   ],
+   [
+    "answer",
+    "□"
+   ],
+   [
+    "answer",
+    "8/2018"
+   ],
+   [
+    "answer",
+    "8/2019"
+   ]
+  ]
+ },
+ "xfund/pt_val_41_b.pdf": {
+  "link_f1": 12.1,
+  "pairs_predicted": 39,
+  "gold_links": [
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Nome Completo:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "RG:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Local e Data de Nascimento:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Nome completo do Pai:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Nome completo da Mãe:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Bairro:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Cidade:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Telefone Fixo:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "CEP:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Celular:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Recado:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Ponto de Referência:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO",
+    "question",
+    "Rua e número:"
+   ],
+   [
+    "question",
+    "Nome Completo:",
+    "answer",
+    "Isabelle M Souza"
+   ],
+   [
+    "question",
+    "RG:",
+    "answer",
+    "278.064-1"
+   ],
+   [
+    "question",
+    "Local e Data de Nascimento:",
+    "answer",
+    "Ponta Grossa 11/2/2003"
+   ],
+   [
+    "question",
+    "Nome completo do Pai:",
+    "answer",
+    "Pedro Nuno Souza"
+   ],
+   [
+    "question",
+    "Nome completo da Mãe:",
+    "answer",
+    "Ana Maria Souza"
+   ],
+   [
+    "question",
+    "Bairro:",
+    "answer",
+    "centro"
+   ],
+   [
+    "question",
+    "Cidade:",
+    "answer",
+    "Ponta Grossa"
+   ],
+   [
+    "question",
+    "Telefone Fixo:",
+    "answer",
+    "(42) 4512-8746"
+   ],
+   [
+    "question",
+    "CEP:",
+    "answer",
+    "70.675-628"
+   ],
+   [
+    "question",
+    "Celular:",
+    "answer",
+    "(42) 46512-8746Tel. Para"
+   ],
+   [
+    "question",
+    "Recado:",
+    "answer",
+    "(24) 2501-2316"
+   ],
+   [
+    "question",
+    "Ponto de Referência:",
+    "answer",
+    "jardim"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Com quem o candidato reside?"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Situação de trabalho dos pais e ou responsável:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Se empregado, qual a função?"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Salário do Pai:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Em caso de residir com responsável que não os genitores qual a situação de"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "Mãe:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO",
+    "question",
+    "trabalho do responsável?"
+   ],
+   [
+    "question",
+    "Com quem o candidato reside?",
+    "answer",
+    "Pai (1 ) Mãe(v) Padrasto( ) Madrasta( ) Outro Responsável( ) Quem?"
+   ],
+   [
+    "question",
+    "Situação de trabalho dos pais e ou responsável:",
+    "answer",
+    "Pai: Empregado(V ) Desempregado( ) Aposentado( ) Autônomo( ) Não"
+   ],
+   [
+    "question",
+    "Situação de trabalho dos pais e ou responsável:",
+    "answer",
+    "sabe informar( )"
+   ],
+   [
+    "question",
+    "Se empregado, qual a função?",
+    "answer",
+    "professor"
+   ],
+   [
+    "question",
+    "Salário do Pai:",
+    "answer",
+    "R$ 15000"
+   ],
+   [
+    "question",
+    "Em caso de residir com responsável que não os genitores qual a situação de",
+    "answer",
+    "Empregada( ) Desempregada( ) Aposentada(V )"
+   ],
+   [
+    "question",
+    "Em caso de residir com responsável que não os genitores qual a situação de",
+    "answer",
+    "Autonoma( ) Não sabe informar( )"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Número de irmãos:"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Quantos destes irmãos residem com o candidato?"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Quantos destes irmãos trabalham?"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Qual a renda do(a) irmão(ã) que trabalha?"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Ha outro familiar que reside com o candidato:"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "Caso haja outro familiar residindo com a família, qual o valor da renda deste"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família",
+    "question",
+    "familiar?"
+   ],
+   [
+    "question",
+    "Número de irmãos:",
+    "answer",
+    "Fernanda Souza"
+   ],
+   [
+    "question",
+    "Quantos destes irmãos residem com o candidato?",
+    "answer",
+    "1"
+   ],
+   [
+    "question",
+    "Quantos destes irmãos trabalham?",
+    "answer",
+    "1"
+   ],
+   [
+    "question",
+    "Qual a renda do(a) irmão(ã) que trabalha?",
+    "answer",
+    "R$3500"
+   ],
+   [
+    "question",
+    "Ha outro familiar que reside com o candidato:",
+    "answer",
+    "sim( ) não(√ ) quem?"
+   ],
+   [
+    "question",
+    "Caso haja outro familiar residindo com a família, qual o valor da renda deste",
+    "answer",
+    "R$1000"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES ACADÊMICAS DO CANDIDATO",
+    "question",
+    "Nome da escola que o candidato estuda: escola de Ponta Grossa"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES ACADÊMICAS DO CANDIDATO",
+    "question",
+    "Que série está cursando no Ensino Médio:"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES ACADÊMICAS DO CANDIDATO",
+    "question",
+    "O candidato já frequentou algum tipo de curso? Qual?"
+   ],
+   [
+    "question",
+    "Nome da escola que o candidato estuda: escola de Ponta Grossa",
+    "answer",
+    "Horário das aulas: Matutino(V ) Vespertino( ) Noturno( )"
+   ],
+   [
+    "question",
+    "Nome da escola que o candidato estuda: escola de Ponta Grossa",
+    "answer",
+    "1º( √) 2º( ) 3º( )"
+   ],
+   [
+    "question",
+    "O candidato já frequentou algum tipo de curso? Qual?",
+    "answer",
+    "sim. cultura portuguesa."
+   ],
+   [
+    "question",
+    "Rua e número:",
+    "answer",
+    "Rua Leopoldo Miquez 1174"
+   ],
+   [
+    "question",
+    "Mãe:",
+    "answer",
+    "Empregada( ) Desempregada( V) Aposentada( ) Autônoma( ) Não"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "UNIVALI"
+   ],
+   [
+    "header",
+    "FICHA DE INSCRIÇÃO JOVEM APRENDIZ UNIVALI"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE O CANDIDATO"
+   ],
+   [
+    "question",
+    "Nome Completo:"
+   ],
+   [
+    "question",
+    "RG:"
+   ],
+   [
+    "answer",
+    "278.064-1"
+   ],
+   [
+    "question",
+    "Local e Data de Nascimento:"
+   ],
+   [
+    "other",
+    "Filiação"
+   ],
+   [
+    "question",
+    "Nome completo do Pai:"
+   ],
+   [
+    "question",
+    "Nome completo da Mãe:"
+   ],
+   [
+    "answer",
+    "Pedro Nuno Souza"
+   ],
+   [
+    "answer",
+    "Ana Maria Souza"
+   ],
+   [
+    "other",
+    "Endereço para contato:"
+   ],
+   [
+    "answer",
+    "Rua Leopoldo Miquez 1174"
+   ],
+   [
+    "question",
+    "Bairro:"
+   ],
+   [
+    "question",
+    "Cidade:"
+   ],
+   [
+    "question",
+    "Telefone Fixo:"
+   ],
+   [
+    "question",
+    "CEP:"
+   ],
+   [
+    "answer",
+    "70.675-628"
+   ],
+   [
+    "question",
+    "Celular:"
+   ],
+   [
+    "question",
+    "Recado:"
+   ],
+   [
+    "question",
+    "Ponto de Referência:"
+   ],
+   [
+    "answer",
+    "jardim"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES SOBRE A FAMÍLIA DO CANDIDATO"
+   ],
+   [
+    "question",
+    "Com quem o candidato reside?"
+   ],
+   [
+    "answer",
+    "Pai (1 ) Mãe(v) Padrasto( ) Madrasta( ) Outro Responsável( ) Quem?"
+   ],
+   [
+    "question",
+    "Situação de trabalho dos pais e ou responsável:"
+   ],
+   [
+    "answer",
+    "Pai: Empregado(V ) Desempregado( ) Aposentado( ) Autônomo( ) Não"
+   ],
+   [
+    "answer",
+    "sabe informar( )"
+   ],
+   [
+    "question",
+    "Se empregado, qual a função?"
+   ],
+   [
+    "question",
+    "Salário do Pai:"
+   ],
+   [
+    "answer",
+    "R$ 15000"
+   ],
+   [
+    "answer",
+    "Empregada( ) Desempregada( V) Aposentada( ) Autônoma( ) Não"
+   ],
+   [
+    "other",
+    "sabe informar( )"
+   ],
+   [
+    "other",
+    "Se empregada, qual a função?"
+   ],
+   [
+    "other",
+    "Salário da Mãe:"
+   ],
+   [
+    "question",
+    "Em caso de residir com responsável que não os genitores qual a situação de"
+   ],
+   [
+    "answer",
+    "Empregada( ) Desempregada( ) Aposentada(V )"
+   ],
+   [
+    "answer",
+    "Autonoma( ) Não sabe informar( )"
+   ],
+   [
+    "other",
+    "Se empregado, qual a função?"
+   ],
+   [
+    "question",
+    "Em relação aos demais membros da família"
+   ],
+   [
+    "question",
+    "Número de irmãos:"
+   ],
+   [
+    "question",
+    "Quantos destes irmãos residem com o candidato?"
+   ],
+   [
+    "question",
+    "Quantos destes irmãos trabalham?"
+   ],
+   [
+    "question",
+    "Qual a renda do(a) irmão(ã) que trabalha?"
+   ],
+   [
+    "answer",
+    "R$3500"
+   ],
+   [
+    "other",
+    "Salário:"
+   ],
+   [
+    "question",
+    "Ha outro familiar que reside com o candidato:"
+   ],
+   [
+    "question",
+    "Caso haja outro familiar residindo com a família, qual o valor da renda deste"
+   ],
+   [
+    "question",
+    "familiar?"
+   ],
+   [
+    "question",
+    "INFORMAÇÕES ACADÊMICAS DO CANDIDATO"
+   ],
+   [
+    "question",
+    "Nome da escola que o candidato estuda: escola de Ponta Grossa"
+   ],
+   [
+    "question",
+    "Que série está cursando no Ensino Médio:"
+   ],
+   [
+    "answer",
+    "Horário das aulas: Matutino(V ) Vespertino( ) Noturno( )"
+   ],
+   [
+    "question",
+    "O candidato já frequentou algum tipo de curso? Qual?"
+   ],
+   [
+    "answer",
+    "sim. cultura portuguesa."
+   ],
+   [
+    "answer",
+    "Isabelle M Souza"
+   ],
+   [
+    "answer",
+    "Ponta Grossa 11/2/2003"
+   ],
+   [
+    "question",
+    "Rua e número:"
+   ],
+   [
+    "answer",
+    "centro"
+   ],
+   [
+    "answer",
+    "Ponta Grossa"
+   ],
+   [
+    "answer",
+    "(42) 4512-8746"
+   ],
+   [
+    "answer",
+    "(24) 2501-2316"
+   ],
+   [
+    "answer",
+    "(42) 46512-8746Tel. Para"
+   ],
+   [
+    "answer",
+    "professor"
+   ],
+   [
+    "question",
+    "Mãe:"
+   ],
+   [
+    "question",
+    "trabalho do responsável?"
+   ],
+   [
+    "answer",
+    "Fernanda Souza"
+   ],
+   [
+    "answer",
+    "1"
+   ],
+   [
+    "answer",
+    "1"
+   ],
+   [
+    "answer",
+    "sim( ) não(√ ) quem?"
+   ],
+   [
+    "answer",
+    "R$1000"
+   ],
+   [
+    "answer",
+    "1º( √) 2º( ) 3º( )"
+   ]
+  ]
+ },
+ "xfund/es_val_38_b.pdf": {
+  "link_f1": 11.1,
+  "pairs_predicted": 42,
+  "gold_links": [
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Nombre completo"
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Fecha de nacimiento"
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Número de ID de Anthem (indicado en la tarjeta de ID)"
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Número de ID de Medicaid (indicado en la tarjeta de ID)"
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Número telefónico"
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:",
+    "question",
+    "Nombre del tutor legal (si es menor de 18 años)"
+   ],
+   [
+    "question",
+    "Nombre completo",
+    "answer",
+    "Irene Joan"
+   ],
+   [
+    "question",
+    "Fecha de nacimiento",
+    "answer",
+    "12-19-1987"
+   ],
+   [
+    "question",
+    "Número de ID de Anthem (indicado en la tarjeta de ID)",
+    "answer",
+    "7834 3498 9232"
+   ],
+   [
+    "question",
+    "Número de ID de Medicaid (indicado en la tarjeta de ID)",
+    "answer",
+    "RED4 776T 187J"
+   ],
+   [
+    "question",
+    "Número telefónico",
+    "answer",
+    "34 958 135 343"
+   ],
+   [
+    "question",
+    "Nombre del tutor legal (si es menor de 18 años)",
+    "answer",
+    "Rosario Mendoza"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Fecha de la solicitud (o fecha efectiva)"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Nombre del PCP solicitado"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Número de ID del proveedor"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Dirección del proveedor"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Número telefónico del proveedor"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:",
+    "question",
+    "Número de fax del proveedor"
+   ],
+   [
+    "question",
+    "Fecha de la solicitud (o fecha efectiva)",
+    "answer",
+    "03-12-2019"
+   ],
+   [
+    "question",
+    "Nombre del PCP solicitado",
+    "answer",
+    "3478323223"
+   ],
+   [
+    "question",
+    "Número de ID del proveedor",
+    "answer",
+    "47834792332"
+   ],
+   [
+    "question",
+    "Dirección del proveedor",
+    "answer",
+    "Callejón del Ángel, 2, 18006, Granada"
+   ],
+   [
+    "question",
+    "Número telefónico del proveedor",
+    "answer",
+    "34 935 135 343"
+   ],
+   [
+    "question",
+    "Número de fax del proveedor",
+    "answer",
+    "3847259341"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "No elegí mi último PCP"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "¿ No estaba satisfecho con mi último PCP"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "_ Tuve problemas para conseguir citas con mi último PCP"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "Me mude, o mi PCP se mudo"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "LEI consultorio de mi PCP estaba demasiado lejos o era muy difícil ir"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:",
+    "answer",
+    "LOtro (explique abajo)."
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "Anthem."
+   ],
+   [
+    "other",
+    "BlueCross BlueShield"
+   ],
+   [
+    "header",
+    "Formulario de solicitud de cambio de proveedor de cuidado primario"
+   ],
+   [
+    "other",
+    "Su proveedor de cuidado primario (PCP) es la persona principal a la que usted acude para su"
+   ],
+   [
+    "other",
+    "cuidado de la salud. Si quiere solicitar un nuevo PCP de la red, complete este formulario y"
+   ],
+   [
+    "other",
+    "envíelo por fax al 1-866-840-4993. El procesamiento se hará en 24 a 72 horas."
+   ],
+   [
+    "other",
+    "Para solicitudes urgentes, llame a la línea gratuita de Servicios al Miembro al 1-844-396-2329"
+   ],
+   [
+    "other",
+    "(TTY 711) de lunes a viernes de 7 a.m. a 7 p.m. hora del Pacífico."
+   ],
+   [
+    "question",
+    "Información del miembro/paciente:"
+   ],
+   [
+    "question",
+    "Nombre completo"
+   ],
+   [
+    "answer",
+    "Irene Joan"
+   ],
+   [
+    "question",
+    "Fecha de nacimiento"
+   ],
+   [
+    "answer",
+    "12-19-1987"
+   ],
+   [
+    "question",
+    "Número de ID de Anthem (indicado en la tarjeta de ID)"
+   ],
+   [
+    "answer",
+    "7834 3498 9232"
+   ],
+   [
+    "question",
+    "Número de ID de Medicaid (indicado en la tarjeta de ID)"
+   ],
+   [
+    "answer",
+    "RED4 776T 187J"
+   ],
+   [
+    "question",
+    "Número telefónico"
+   ],
+   [
+    "answer",
+    "34 958 135 343"
+   ],
+   [
+    "question",
+    "Nombre del tutor legal (si es menor de 18 años)"
+   ],
+   [
+    "answer",
+    "Rosario Mendoza"
+   ],
+   [
+    "question",
+    "Información del nuevo PCP:"
+   ],
+   [
+    "question",
+    "Fecha de la solicitud (o fecha efectiva)"
+   ],
+   [
+    "answer",
+    "03-12-2019"
+   ],
+   [
+    "question",
+    "Nombre del PCP solicitado"
+   ],
+   [
+    "answer",
+    "3478323223"
+   ],
+   [
+    "question",
+    "Número de ID del proveedor"
+   ],
+   [
+    "answer",
+    "47834792332"
+   ],
+   [
+    "question",
+    "Dirección del proveedor"
+   ],
+   [
+    "answer",
+    "Callejón del Ángel, 2, 18006, Granada"
+   ],
+   [
+    "question",
+    "Número telefónico del proveedor"
+   ],
+   [
+    "answer",
+    "34 935 135 343"
+   ],
+   [
+    "question",
+    "Número de fax del proveedor"
+   ],
+   [
+    "answer",
+    "3847259341"
+   ],
+   [
+    "question",
+    "Motivo para la solicitud:"
+   ],
+   [
+    "answer",
+    "No elegí mi último PCP"
+   ],
+   [
+    "answer",
+    "¿ No estaba satisfecho con mi último PCP"
+   ],
+   [
+    "answer",
+    "_ Tuve problemas para conseguir citas con mi último PCP"
+   ],
+   [
+    "answer",
+    "Me mude, o mi PCP se mudo"
+   ],
+   [
+    "answer",
+    "LEI consultorio de mi PCP estaba demasiado lejos o era muy difícil ir"
+   ],
+   [
+    "answer",
+    "LOtro (explique abajo)."
+   ],
+   [
+    "other",
+    "Denos más detalles:"
+   ],
+   [
+    "other",
+    "Anthem Blue Cross and Blue Shield Healthcare Solutions es el nombre comercial de"
+   ],
+   [
+    "other",
+    "Community Care Health Plan of Nevada, Inc ., un licenciatario independiente de Blue Cross and"
+   ],
+   [
+    "other",
+    "Blue Shield Association. ANTHEM es una marca comercial registrada de Anthem Insurance"
+   ],
+   [
+    "other",
+    "Companies, Inc."
+   ],
+   [
+    "other",
+    "MF-ANV-0024-17"
+   ]
+  ]
+ },
+ "xfund/pt_val_17_b.pdf": {
+  "link_f1": 6.2,
+  "pairs_predicted": 40,
+  "gold_links": [
+   [
+    "question",
+    "Agência",
+    "answer",
+    "MC"
+   ],
+   [
+    "question",
+    "CPF/CNPJ/MF",
+    "answer",
+    "881.334.667-13"
+   ],
+   [
+    "question",
+    "Código da Agência",
+    "answer",
+    "MC"
+   ],
+   [
+    "question",
+    "E-mail do Funcionário",
+    "answer",
+    "bgc657@gmail.com"
+   ],
+   [
+    "question",
+    "Nome,",
+    "answer",
+    "Vitór A Barbosa"
+   ],
+   [
+    "question",
+    "Data de Nascimento",
+    "answer",
+    "1975-8-17"
+   ],
+   [
+    "question",
+    "CPF/MF",
+    "answer",
+    "798.441.444-00"
+   ],
+   [
+    "question",
+    "Profissão",
+    "answer",
+    "Medical Translator"
+   ],
+   [
+    "question",
+    "Sexo",
+    "answer",
+    "Masculino Feminino"
+   ],
+   [
+    "question",
+    "Estado Civil",
+    "answer",
+    "AM"
+   ],
+   [
+    "question",
+    "Sua profissão é sua principal Fonte de Renda?",
+    "answer",
+    "Sim Não"
+   ],
+   [
+    "question",
+    "Finalidade do Imóvel",
+    "answer",
+    "1 - Comercial 2 - Residencial 3 - Lazer 4 - Lote"
+   ],
+   [
+    "question",
+    "Discriminação",
+    "answer",
+    "1 - Esteve ou está afastado de suas atividades profissionais? Por que motivo?"
+   ],
+   [
+    "question",
+    "Discriminação",
+    "answer",
+    "Esclareça:"
+   ],
+   [
+    "question",
+    "Discriminação",
+    "answer",
+    "2 - Está em gozo de benefício previdenciário de invalidez? Por que motivo?"
+   ],
+   [
+    "question",
+    "Discriminação",
+    "answer",
+    "Esclareça:"
+   ],
+   [
+    "question",
+    "Sim",
+    "answer",
+    "√"
+   ],
+   [
+    "question",
+    "Sim",
+    "answer",
+    "√"
+   ],
+   [
+    "question",
+    "Mod .:",
+    "answer",
+    "4840-605E"
+   ],
+   [
+    "question",
+    "Versão:",
+    "answer",
+    "05/2016"
+   ],
+   [
+    "question",
+    "Sistema de Amortização Escolhido (Prestação Atualizada)",
+    "answer",
+    "1 - SAC - Sistema de Amortização Constante"
+   ],
+   [
+    "question",
+    "Sistema de Amortização Escolhido (Prestação Atualizada)",
+    "answer",
+    "2 - TP - Tabela Price"
+   ],
+   [
+    "question",
+    "Funcionário Responsável",
+    "answer",
+    "Bruno G Cunha"
+   ],
+   [
+    "question",
+    "Díg.",
+    "answer",
+    "387"
+   ],
+   [
+    "question",
+    "Conta",
+    "answer",
+    "7558651504"
+   ],
+   [
+    "question",
+    "Díg.",
+    "answer",
+    "526"
+   ]
+  ],
+  "gold_entities": [
+   [
+    "other",
+    "Bradesco"
+   ],
+   [
+    "question",
+    "Agência"
+   ],
+   [
+    "question",
+    "CPF/CNPJ/MF"
+   ],
+   [
+    "answer",
+    "MC"
+   ],
+   [
+    "header",
+    "Crédito Imobiliário - Declaração Pessoal de Saúde"
+   ],
+   [
+    "header",
+    "Seguro Habitacional em Apólices de Mercado"
+   ],
+   [
+    "other",
+    "Para uso exclusivo da agência"
+   ],
+   [
+    "question",
+    "Código da Agência"
+   ],
+   [
+    "answer",
+    "MC"
+   ],
+   [
+    "answer",
+    "Bruno G Cunha"
+   ],
+   [
+    "question",
+    "E-mail do Funcionário"
+   ],
+   [
+    "answer",
+    "bgc657@gmail.com"
+   ],
+   [
+    "other",
+    "Dados do Proponente"
+   ],
+   [
+    "question",
+    "Nome,"
+   ],
+   [
+    "answer",
+    "Vitór A Barbosa"
+   ],
+   [
+    "question",
+    "Data de Nascimento"
+   ],
+   [
+    "answer",
+    "1975-8-17"
+   ],
+   [
+    "question",
+    "CPF/MF"
+   ],
+   [
+    "answer",
+    "798.441.444-00"
+   ],
+   [
+    "question",
+    "Profissão"
+   ],
+   [
+    "answer",
+    "Medical Translator"
+   ],
+   [
+    "question",
+    "Sexo"
+   ],
+   [
+    "question",
+    "Estado Civil"
+   ],
+   [
+    "answer",
+    "Masculino Feminino"
+   ],
+   [
+    "question",
+    "Sua profissão é sua principal Fonte de Renda?"
+   ],
+   [
+    "answer",
+    "Sim Não"
+   ],
+   [
+    "other",
+    "Em caso negativo, especifique:"
+   ],
+   [
+    "question",
+    "Finalidade do Imóvel"
+   ],
+   [
+    "answer",
+    "1 - Comercial 2 - Residencial 3 - Lazer 4 - Lote"
+   ],
+   [
+    "other",
+    "Renda Líquida"
+   ],
+   [
+    "other",
+    "Valor de Venda"
+   ],
+   [
+    "other",
+    "Valor Financiado (Finan. + Desp. Iniciais)*"
+   ],
+   [
+    "answer",
+    "1 - SAC - Sistema de Amortização Constante"
+   ],
+   [
+    "answer",
+    "2 - TP - Tabela Price"
+   ],
+   [
+    "other",
+    "* O Valor Financiado deve conter o valor do Financiamento + Despesas Iniciais se houver."
+   ],
+   [
+    "other",
+    "Observação:"
+   ],
+   [
+    "other",
+    "Ao responder os quesitos abaixo, chamamos a sua atenção para o disposto nos Artigos 765 e 766 do Código"
+   ],
+   [
+    "other",
+    "Civil Brasileiro, que prevêem: Art. 765 - O segurado e o segurador são obrigados a guardar na conclusão e na"
+   ],
+   [
+    "other",
+    "execução do contrato, a mais estrita boa-fé e veracidade, tanto a respeito do objeto como das circunstâncias e"
+   ],
+   [
+    "other",
+    "declarações à ele concernentes. Art. 766 - Se o Segurado fizer declarações inexatas ou omitir circunstâncias"
+   ],
+   [
+    "other",
+    "que possam influir na aceitação da proposta ou na taxa do prêmio, perderá o direito à garantia, além de ficar"
+   ],
+   [
+    "other",
+    "obrigado ao prêmio vencido."
+   ],
+   [
+    "other",
+    "Assim, para sua própria garantia, preencha corretamente os campos abaixo. Havendo necessidade de informações"
+   ],
+   [
+    "other",
+    "complementares, tais como laudos e exames médicos, estes serão solicitados pela seguradora e deverão ser"
+   ],
+   [
+    "other",
+    "encaminhados à mesma, de forma a permitir a análise e eventual aceitação desta proposta."
+   ],
+   [
+    "other",
+    "Em todos os laudos requeridos deverão constar com precisão o início da doença, o diagnóstico, a etiologia, os"
+   ],
+   [
+    "other",
+    "resultados de exames complementares, o(s) tipo(s) de tratamento(s) ministrado(s), com respectivas datas e as"
+   ],
+   [
+    "other",
+    "condições clínicas e funcionais atuais do proponente."
+   ],
+   [
+    "other",
+    "Caso o proponente faça indicação de uso de algum medicamento, somente poderá ser definido o médico que"
+   ],
+   [
+    "other",
+    "deverá fornecer laudo complementar após a análise da DPS pela Consultoria Médica desta Seguradora, face a"
+   ],
+   [
+    "other",
+    "necessidade de identificação da doença relacionada ao medicamento utilizado. Informamos, ainda, que:"
+   ],
+   [
+    "other",
+    "1 - A apresentação dos documentos não implica na impossibilidade de se requerer outros documentos (laudos e/"
+   ],
+   [
+    "other",
+    "ou exames complementares), o que somente será avaliado após a análise da documentação por nossa Consultoria"
+   ],
+   [
+    "other",
+    "Médica."
+   ],
+   [
+    "other",
+    "2 - A apresentação da DPS e de documentação complementar não implica na aceitação automática do risco (com"
+   ],
+   [
+    "other",
+    "ou sem cláusula restrita), que somente será definida após parecer de nossa Consultoria Médica."
+   ],
+   [
+    "other",
+    "Caso o proponente mencione determinadas doenças (DPS Positivada) deverão ser enviados junto a DPS os"
+   ],
+   [
+    "other",
+    "seguintes laudos complementares, tendo como base o campo assinalado como positivo conforme abaixo:"
+   ],
+   [
+    "question",
+    "Discriminação"
+   ],
+   [
+    "question",
+    "Sim"
+   ],
+   [
+    "other",
+    "Não"
+   ],
+   [
+    "answer",
+    "1 - Esteve ou está afastado de suas atividades profissionais? Por que motivo?"
+   ],
+   [
+    "answer",
+    "Esclareça:"
+   ],
+   [
+    "answer",
+    "2 - Está em gozo de benefício previdenciário de invalidez? Por que motivo?"
+   ],
+   [
+    "answer",
+    "Esclareça:"
+   ],
+   [
+    "answer",
+    "√"
+   ],
+   [
+    "question",
+    "Mod .:"
+   ],
+   [
+    "answer",
+    "05/2016"
+   ],
+   [
+    "other",
+    "2ª Via - Cliente"
+   ],
+   [
+    "other",
+    "1/4"
+   ],
+   [
+    "answer",
+    "√"
+   ],
+   [
+    "question",
+    "Versão:"
+   ],
+   [
+    "answer",
+    "4840-605E"
+   ],
+   [
+    "other",
+    "Prazo Amortização"
+   ],
+   [
+    "question",
+    "Sistema de Amortização Escolhido (Prestação Atualizada)"
+   ],
+   [
+    "answer",
+    "AM"
+   ],
+   [
+    "question",
+    "Funcionário Responsável"
+   ],
+   [
+    "question",
+    "Díg."
+   ],
+   [
+    "answer",
+    "387"
+   ],
+   [
+    "answer",
+    "881.334.667-13"
+   ],
+   [
+    "question",
+    "Conta"
+   ],
+   [
+    "answer",
+    "7558651504"
+   ],
+   [
+    "question",
+    "Díg."
+   ],
+   [
+    "answer",
+    "526"
+   ]
   ]
  }
 }

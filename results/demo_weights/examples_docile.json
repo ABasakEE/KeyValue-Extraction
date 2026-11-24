@@ -74,5 +74,69 @@
    "f1": 0.0,
    "role": "worst"
   }
+ ],
+ "S0_seen": [
+  {
+   "guid": "fba13e6e07144f8f9056f4ee",
+   "template": "seen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "ea05d3675a7944c19a95b2be",
+   "template": "seen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "72a7e1a870f040b38b6df8e0",
+   "template": "seen layout",
+   "f1": 84.4,
+   "role": "typical"
+  },
+  {
+   "guid": "4a9d2670f8854db5af301fa0",
+   "template": "seen layout",
+   "f1": 85.7,
+   "role": "typical"
+  },
+  {
+   "guid": "5dd535c7d6e54fd8bb8d077a",
+   "template": "seen layout",
+   "f1": 44.4,
+   "role": "worst"
+  }
+ ],
+ "S1_seen": [
+  {
+   "guid": "de0b57290cc74fdf8226136b",
+   "template": "seen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "d3e4a0a5faaa4624bf260d84",
+   "template": "seen layout",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "629cb080fe7f4122accac23e",
+   "template": "seen layout",
+   "f1": 72.7,
+   "role": "typical"
+  },
+  {
+   "guid": "6f577b961fe545f598e3855e",
+   "template": "seen layout",
+   "f1": 75.0,
+   "role": "typical"
+  },
+  {
+   "guid": "d0873c8d6986482c95753931",
+   "template": "seen layout",
+   "f1": 0.0,
+   "role": "worst"
+  }
  ]
 }

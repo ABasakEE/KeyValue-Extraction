@@ -223,8 +223,22 @@ def docile_pick():
 
 
 def xfund_pick():
-    base = ROOT / "demo_pdfs" / "showcase" / "xfund"
-    return [(p.stem, str(p)) for p in sorted(base.glob("*.pdf"))]
+    """The cached XFUND forms, best link F1 first, labelled with J1's own score on each (scripts/demo_export_pdfs.py writes the files)."""
+    import json
+    cur = W / "examples_xfund.json"
+    base = ROOT / "demo_pdfs" / "tagger" / "xfund"
+    if not cur.exists() or not base.exists():
+        old = ROOT / "demo_pdfs" / "showcase" / "xfund"
+        return [(p.stem, str(p)) for p in sorted(old.glob("*.pdf"))]
+    out = []
+    for c in json.loads(cur.read_text(encoding="utf-8")):
+        stem = Path(c["source"]).stem
+        stem = stem.rsplit("_", 1)[0] if stem[-2:] in ("_g", "_m", "_b") else stem
+        role = "good case" if c["link_f1"] >= 60 else ("moderate case" if c["link_f1"] >= 25 else "failure case")
+        f = next(base.glob(f"{stem}_*.pdf"), None)
+        if f:
+            out.append((f"{stem.split('_')[0].upper()}: {stem}; {role}, J1 link F1 {c['link_f1']:.0f}% on this form", str(f)))
+    return out
 
 
 def curated(dataset_tag: str, key: str):
@@ -259,7 +273,9 @@ def example_choices(dataset: str, key: str):
         if dataset == DOCILE_NAME:
             cur = curated("docile", key)
             if cur:
-                return [(f"Document {c['guid'][:8]}: unseen layout; {ROLE[c['role']]}, this checkpoint row F1 {c['f1']:.0f}%", c["guid"]) for c in cur]
+                seen = curated("docile", key + "_seen") or []
+                return ([(f"Document {c['guid'][:8]}: unseen layout; {ROLE[c['role']]}, this checkpoint row F1 {c['f1']:.0f}%", c["guid"]) for c in cur]
+                        + [(f"Document {c['guid'][:8]}: SEEN layout; {ROLE[c['role']]}, this checkpoint row F1 {c['f1']:.0f}%", c["guid"]) for c in seen])
             return docile_pick()
         return xfund_pick()
     except Exception as e:  # missing data folder: the dropdown stays usable for uploads

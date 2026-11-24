@@ -69,18 +69,45 @@ def vrdu() -> dict:
     return out
 
 
-def docile() -> dict:
+def docile(seen_only: bool = False) -> dict:
     import docile_bros as DBR
+    import docile_sg as DSG
     from lir_metric import f1 as lir_f1
     from row_group import group_rows
 
     sp = json.loads((ROOT / "results" / "docile_rows" / "splits.json").read_text(encoding="utf-8"))
-    out = {}
+    pool = json.loads((ROOT / "results" / "docile_rows" / "pool.json").read_text(encoding="utf-8"))
+    path = ROOT / "results" / "demo_weights" / "examples_docile.json"
+    out = json.loads(path.read_text(encoding="utf-8")) if seen_only and path.exists() else {}
+
+    def row_f1(clf, dev, id2label, i, d):
+        ex = DBR.to_example(i, d)
+        spans = DB.spans_of(DB.tag_document(clf, dev, ex), id2label)
+        rows = [r for r in group_rows([[t, a, b, ""] for t, a, b in spans], d, 0.5, merge=False) if r]
+        return 100 * lir_f1(DBR.counts(rows, d)["lir"])
+
     for key in ("S0", "S1"):
         if A.find_ckpt(A.DOCILE_NAME, key) is None:
             print(f"[skip] no checkpoint for {key}")
             continue
         clf, id2label, dev, trained, ck = A.get_model(A.DOCILE_NAME, key)
+        # seen layouts: pool documents NOT in this model's 1,000 training documents whose layout (cluster_id) is among theirs
+        train = set(sp["train"][key[1]])
+        layouts = {DSG.ann_of(i)["metadata"]["cluster_id"] for i in train}
+        rng = random.Random(0)
+        cands = [i for i in pool if i not in train and DSG.ann_of(i)["metadata"]["cluster_id"] in layouts]
+        rng.shuffle(cands)
+        seen = []
+        for i in cands:
+            d = DBR.doc_dict(i)
+            if 3 <= len(d["rows"]) <= 14 and len(d["words"]) <= 420:
+                seen.append((row_f1(clf, dev, id2label, i, d), i, "seen layout"))
+                print(key, "seen", round(seen[-1][0]), i[:8], flush=True)
+            if len(seen) >= 30:
+                break
+        out[f"{key}_seen"] = pick(seen, 2, 2, 1)
+        if seen_only:
+            continue
         scored = []
         for i in sp["test"]:
             d = DBR.doc_dict(i)
@@ -102,7 +129,7 @@ def main() -> None:
     which = sys.argv[1] if len(sys.argv) > 1 else "vrdu"
     if which not in ("vrdu", "docile"):
         raise SystemExit("usage: demo_curate_examples.py vrdu|docile")
-    res = vrdu() if which == "vrdu" else docile()
+    res = vrdu() if which == "vrdu" else docile(seen_only="--seen-only" in sys.argv)
     path = ROOT / "results" / "demo_weights" / f"examples_{which}.json"
     path.write_text(json.dumps(res, indent=1), encoding="utf-8")
     print(json.dumps(res, indent=1))
