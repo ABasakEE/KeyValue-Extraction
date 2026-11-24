@@ -1,0 +1,78 @@
+{
+ "UTL": [
+  {
+   "guid": "20090930_Garvey, Schubert _ Barer_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "20160720_Glover Park Group, LLC_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "20030331_Hogan Lovells US LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "19991228_Crowell _ Moring International, Ltd._Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 85.7,
+   "role": "typical"
+  },
+  {
+   "guid": "20050323_Arnold _ Porter Kaye Scholer, LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 85.7,
+   "role": "typical"
+  },
+  {
+   "guid": "19850701_Squire Patton Boggs, LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 25.0,
+   "role": "worst"
+  }
+ ],
+ "MTL": [
+  {
+   "guid": "20130628_Picard Kentz _ Rowe, LLP_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "19760701_Tourism Authority of Thailand, New York_Amendment_Amendment.pdf",
+   "template": "Amendment",
+   "f1": 88.9,
+   "role": "typical"
+  },
+  {
+   "guid": "19920801_JETRO, New York_Dissemination Report_Dissemination Report.pdf",
+   "template": "Dissemination_Report",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "19920701_JETRO, Houston_Dissemination Report_Dissemination Report.pdf",
+   "template": "Dissemination_Report",
+   "f1": 100.0,
+   "role": "typical"
+  },
+  {
+   "guid": "20180308_Akin, Gump, Strauss, Hauer _ Feld, LLP_Verhoff, Geoff_Short-Form.pdf",
+   "template": "Short-Form",
+   "f1": 100.0,
+   "role": "best"
+  },
+  {
+   "guid": "20110203_BGR Government Affairs, LLC_Birnbaum, Jeffrey_Short-Form.pdf",
+   "template": "Short-Form",
+   "f1": 100.0,
+   "role": "typical"
+  }
+ ]
+}

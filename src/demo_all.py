@@ -223,8 +223,24 @@ def xfund_pick():
     return [(p.stem, str(p)) for p in sorted(base.glob("*.pdf"))]
 
 
+def curated(dataset_tag: str, key: str):
+    """Examples picked by scripts/demo_curate_examples.py (best / typical / worst for this checkpoint), or None."""
+    path = W / f"examples_{dataset_tag}.json"
+    if not path.exists():
+        return None
+    import json
+    return json.loads(path.read_text(encoding="utf-8")).get(key)
+
+
+ROLE = {"best": "good case", "typical": "typical case", "worst": "failure case"}
+
+
 def example_choices(dataset: str, key: str):
     try:
+        cur = curated("vrdu", key) if dataset == VRDU_NAME else None
+        if cur:
+            kind = "unseen template" if key == "UTL" else "seen template"
+            return [(f"{c['template']}: {c['guid'][:40]} ({kind}; {ROLE[c['role']]}, this checkpoint {c['f1']:.0f}% F1)", c["guid"]) for c in cur]
         if dataset == VRDU_NAME:
             by_guid, utl, mtl = vrdu_protocol()
             docs = utl.test if key == "UTL" else mtl.test
@@ -237,6 +253,9 @@ def example_choices(dataset: str, key: str):
             unseen, seen = fatura_pick(key)
             return [(l, v) for l, v in unseen + seen]
         if dataset == DOCILE_NAME:
+            cur = curated("docile", key)
+            if cur:
+                return [(f"Document {c['guid'][:8]}: unseen layout; {ROLE[c['role']]}, this checkpoint row F1 {c['f1']:.0f}%", c["guid"]) for c in cur]
             return docile_pick()
         return xfund_pick()
     except Exception as e:  # missing data folder: the dropdown stays usable for uploads
