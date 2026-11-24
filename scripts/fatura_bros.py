@@ -54,6 +54,7 @@ def main() -> None:
     ap.add_argument("--per-template", type=int, default=10)
     ap.add_argument("--test-set", choices=["all", "eval"], default="all")
     ap.add_argument("--seeds", default="", help="comma-separated seeds, overriding the config (study 16 uses 5 for K=2,5)")
+    ap.add_argument("--folds", default="", help="comma-separated fold indices to run (default: all five); the demo-weights notebook trains fold 0 only")
     ap.add_argument("--dump-probs", action="store_true", help="also write test_probs.jsonl (per-word field probabilities)")
     args = ap.parse_args()
 
@@ -67,7 +68,8 @@ def main() -> None:
     out = Path(args.out or config.output_dir)
     held = fl.folds()
     ks = [int(k) for k in args.k_list.split(",") if k.strip()] or [0]
-    tasks = [(k, f, s) for k in ks for f in range(len(held)) for s in config.seeds]
+    folds = [int(f) for f in args.folds.split(",") if f.strip()] or list(range(len(held)))
+    tasks = [(k, f, s) for k in ks for f in folds for s in config.seeds]
     if args.smoke:
         out, tasks = Path(tempfile.mkdtemp()) / "smoke", [(ks[0], 0, config.seeds[0])]
         config.epochs, config.batch_size = 1, 2
