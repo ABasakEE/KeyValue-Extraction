@@ -1,0 +1,469 @@
+{
+ "vrdu/unseen_template/20090930_Garvey, Schubert _ Barer_Amendment_Amendment_g.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "Garvey Schubert Barer",
+   "registration_num": "3047",
+   "file_date": "September 30 , 2009",
+   "signer_name": "Harold G. Bailey , Jr."
+  }
+ },
+ "vrdu/unseen_template/20160720_Glover Park Group, LLC_Amendment_Amendment_g.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "The Glover Park Group , LLC",
+   "registration_num": "5666",
+   "file_date": "July 20 , 2016",
+   "signer_name": "Joel Johnson"
+  }
+ },
+ "vrdu/unseen_template/20030331_Hogan Lovells US LLP_Amendment_Amendment_g.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "Hogan & Hartson L.L.P.",
+   "registration_num": "2244",
+   "file_date": "March 31 , 2003",
+   "signer_name": "Mark S. McConnell"
+  }
+ },
+ "vrdu/unseen_template/19991228_Crowell _ Moring International, Ltd._Amendment_Amendment_m.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 85.7,
+  "gold": {
+   "registrant_name": "Crowell & Moring International , Ltd.",
+   "registration_num": "3988",
+   "signer_name": "Christopher S. Wilson",
+   "file_date": "28th day of December .199"
+  }
+ },
+ "vrdu/unseen_template/20050323_Arnold _ Porter Kaye Scholer, LLP_Amendment_Amendment_m.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 85.7,
+  "gold": {
+   "registration_num": "1750",
+   "registrant_name": "Arnold & Porter LLP",
+   "signer_name": "Mark H. Stumpf",
+   "file_date": "March 23 , 2005"
+  }
+ },
+ "vrdu/unseen_template/19850701_Squire Patton Boggs, LLP_Amendment_Amendment_b.pdf": {
+  "checkpoint": "UTL",
+  "entity_f1": 25.0,
+  "gold": {
+   "registrant_name": "Patton , Boggs & Blow",
+   "registration_num": "2165",
+   "signer_name": "imothy J. May , Esquire",
+   "signer_title": "Managing Partner",
+   "file_date": "Washington"
+  }
+ },
+ "vrdu/seen_template/20130628_Picard Kentz _ Rowe, LLP_Amendment_Amendment_g.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "Picard Kentz & Rowe LLP",
+   "registration_num": "5939",
+   "file_date": "June 28 , 2013",
+   "signer_name": "B.Donovan Picard"
+  }
+ },
+ "vrdu/seen_template/19760701_Tourism Authority of Thailand, New York_Amendment_Amendment_m.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 88.9,
+  "gold": {
+   "registration_num": "1897",
+   "registrant_name": "Tourist Organization of Thailand",
+   "signer_name": "Staporn Sirisinha",
+   "signer_title": "Assistant - Chief , T.O.T. , N.Y. Office",
+   "file_date": "16 day of"
+  }
+ },
+ "vrdu/seen_template/19920801_JETRO, New York_Dissemination Report_Dissemination Report_g.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "JETRO , New York",
+   "registration_num": "1643",
+   "foreign_principle_name": "Japan External Trade Organization",
+   "file_date": "August 17 , 1992",
+   "signer_name": "Kunio Ito",
+   "signer_title": "Director , Public Affairs"
+  }
+ },
+ "vrdu/seen_template/19920701_JETRO, Houston_Dissemination Report_Dissemination Report_g.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registrant_name": "JETRO , Houston",
+   "registration_num": "2277",
+   "foreign_principle_name": "Japan External Trade Organization Tokyo , Japan",
+   "signer_name": "Hisashi Yamada",
+   "file_date": "July 8 , 1991",
+   "signer_title": "Director , Public Relations"
+  }
+ },
+ "vrdu/seen_template/20180308_Akin, Gump, Strauss, Hauer _ Feld, LLP_Verhoff, Geoff_Short-Form_g.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registration_num": "3492",
+   "registrant_name": "Akin Gump Strauss Hauer & Feld LLP",
+   "foreign_principle_name": "Public Investment Fund",
+   "signer_name": "Geoff Verhoff",
+   "file_date": "March 08 , 2018"
+  }
+ },
+ "vrdu/seen_template/20110203_BGR Government Affairs, LLC_Birnbaum, Jeffrey_Short-Form_g.pdf": {
+  "checkpoint": "MTL",
+  "entity_f1": 100.0,
+  "gold": {
+   "registration_num": "5430",
+   "registrant_name": "Barbour , Griffith & Rogers , LLC d / b / a BGR Government Affairs",
+   "foreign_principle_name": "Republic of India",
+   "file_date": "2"
+  }
+ },
+ "fatura/Template2_Instance74_m.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 71
+  },
+  "gold": {
+   "title": "TAX INVOICE",
+   "number": "INVOICE # 7Y9M4d-818",
+   "date": "Date: 17-Jun-2014",
+   "seller_name": "Barnes, Garcia and Martin",
+   "seller_address": "Address:13868 Michael Wall North Cindytown, CT 45483 US",
+   "buyer": "Buyer :Karen Manning 679 Brown Haven Suite 854 Jacksonside, WI 62137 US Tel:+(544)736-3380 Email:murraychelsea@example.net Site:http://www.williams.com/",
+   "sub_total": "SUB_TOTAL : 881.76 USD",
+   "total": "TOTAL : 931.61 USD"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "fatura/Template4_Instance148_m.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 57
+  },
+  "gold": {
+   "seller_name": "Huff-Bryan",
+   "seller_address": "Address:2180 Michael Ridges Apt. 385 Port Lindsey, MP 98258 US",
+   "title": "COMMERCIAL INVOICE",
+   "total": "TOTAL : 1168.66 EUR",
+   "due_date": "Due Date : 23-Mar-2018",
+   "date": "Date: 24-Apr-2004",
+   "sub_total": "SUB_TOTAL : 1157.45 EUR"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "fatura/Template7_Instance59_m.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 71
+  },
+  "gold": {
+   "seller_name": "White and Sons",
+   "title": "INVOICE",
+   "number": "Invoice number 9696-199",
+   "buyer": "Buyer :Oscar Roberts 74227 Gabriel Ville Apt. 181 Shelleybury, MT 02810 US Tel:+(116)484-7619 Email:angelashea@example.org Site:http://garcia-sanchez.org/",
+   "date": "Invoice Date: 10-Jan-2023",
+   "due_date": "Due Date : 16-Jan-2009",
+   "sub_total": "SUB_TOTAL : 661.24 $",
+   "total": "TOTAL : 677.84 $"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "fatura/Template10_Instance170_b.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 31
+  },
+  "gold": {
+   "seller_address": "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US",
+   "date": "Invoice Date: 26-Aug-2018",
+   "number": "Invoice number INV/26-68/435",
+   "seller_name": "Mclean-Cochran",
+   "due_date": "Due Date : 23-May-2018",
+   "buyer": "Bill to:James Smith 456 Cox Mall Apt. 438 Richardmouth, NE 38427 US Tel:+(427)023-7752 Email:brittany32@example.net Site:http://moss-zimmerman.com/",
+   "total": "TOTAL : 40.29 EUR"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "fatura/Template12_Instance44_b.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 43
+  },
+  "gold": {
+   "title": "TAX INVOICE",
+   "number": "INVOICE # INV/39-45/178",
+   "date": "Date: 17-Nov-2005",
+   "due_date": "Due Date : 13-Jul-2000",
+   "buyer": "Buyer :Nicholas Holmes 3590 Kyle Locks Suite 695 Erinhaven, UT 60977 US Tel:+(935)694-9140 Email:justinhickman@example.org Site:http://vang.com/",
+   "seller_name": "Richardson-Davis",
+   "seller_address": "Address:6479 Smith Causeway East Camerontown, AS 38212 US",
+   "sub_total": "SUB_TOTAL : 751.85 $",
+   "total": "TOTAL : 776.92 $"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "fatura/Template25_Instance125_m.pdf": {
+  "entity_f1": {
+   "K40": 100,
+   "K2": 77
+  },
+  "gold": {
+   "buyer": "Buyer :Brent Lamb 3124 Robert Cape Mirandaland, ND 27109 US Tel:+(808)599-5895 Email:clementsthomas@example.com Site:https://moore.info/",
+   "seller_name": "Kelly-Moss",
+   "seller_address": "Address:6030 Willie Shores Suite 354 Guerraton, TX 60058 US",
+   "number": "Invoice number INV67289395",
+   "due_date": "Due Date : 31-Mar-2016",
+   "date": "Date: 06-Dec-2020",
+   "sub_total": "SUB_TOTAL : 758.83 USD",
+   "total": "TOTAL : 774.97 USD"
+  },
+  "held_out_templates": [
+   2,
+   4,
+   7,
+   10,
+   12,
+   25,
+   32,
+   39,
+   49,
+   50
+  ]
+ },
+ "docile/8bc8897b17ac474a846f6a77_g.pdf": {
+  "row_f1": 100.0,
+  "gold_rows": [
+   {
+    "description": "COST OF MENU",
+    "amount_gross": "$11,250.00"
+   },
+   {
+    "description": "BEVERAGES",
+    "amount_gross": "$525.00"
+   },
+   {
+    "description": "DENT RIDER",
+    "amount_gross": "$189.00"
+   },
+   {
+    "description": "SERVICE PERSONNEL (event extended)",
+    "amount_gross": "$7,814.50"
+   },
+   {
+    "description": "EVENT TRAVEL TIME",
+    "amount_gross": "$687.00"
+   },
+   {
+    "description": "EQUIPMENT",
+    "amount_gross": "$2,700.00"
+   },
+   {
+    "description": "DINNER SEATING",
+    "amount_gross": "$1,103.00"
+   },
+   {
+    "description": "LINENS",
+    "amount_gross": "$1,500.00"
+   },
+   {
+    "description": "FLOWERS",
+    "amount_gross": "$1,640.00"
+   },
+   {
+    "description": "SALES TAX",
+    "amount_gross": "$1,370.43"
+   },
+   {
+    "description": "ALCOHOLIC BEVERAGES",
+    "amount_gross": "$2,375.00"
+   },
+   {
+    "description": "DELIVERY/PICKUP",
+    "amount_gross": "$400.00"
+   }
+  ]
+ },
+ "docile/9ebdec30843146c584f0a713_g.pdf": {
+  "row_f1": 100.0,
+  "gold_rows": [
+   {
+    "date": "04/22/20"
+   },
+   {
+    "date": "04/23/20"
+   },
+   {
+    "date": "04/24/20"
+   },
+   {
+    "date": "04/27/20"
+   },
+   {
+    "date": "04/28/20"
+   }
+  ]
+ },
+ "docile/ecd1566f99f5422a88f09cba_g.pdf": {
+  "row_f1": 100.0,
+  "gold_rows": [
+   {
+    "description": "2001 Camel Biker Program Print Advertising"
+   },
+   {
+    "description": "Full page 4/c insertion in Jan/Feb 2001 issue of American Rider",
+    "amount_gross": "2,796.50"
+   },
+   {
+    "description": "15% comission ofbuy",
+    "amount_gross": "493.50"
+   }
+  ]
+ },
+ "docile/c3fb1ae263a34aab94da6f6e_m.pdf": {
+  "row_f1": 64.0,
+  "gold_rows": [
+   {
+    "description": "4-1 Large 5 point twisters - red, yellow, blue & green $350 per x 4",
+    "amount_gross": "$1400.00"
+   },
+   {
+    "description": "1-8'x10' Four Point White Twister",
+    "amount_gross": "$350.00"
+   },
+   {
+    "description": "LABOR AND SETUP:",
+    "amount_gross": "500.00"
+   },
+   {
+    "description": "TRUCKING:",
+    "amount_gross": "150.00"
+   },
+   {
+    "description": "RUSH CHARGE, 15%",
+    "amount_gross": "NA"
+   },
+   {
+    "description": "MD SALES TAX:",
+    "amount_gross": "87.50"
+   }
+  ]
+ },
+ "docile/b434fe4846e64ce48784453f_m.pdf": {
+  "row_f1": 66.7,
+  "gold_rows": [
+   {
+    "date": "04/12/00",
+    "amount_gross": "1,413.75"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "5,228.53"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "809.86"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "939.44"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "4,481.67"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "6,241.31"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "5,605.53"
+   },
+   {
+    "date": "04/12/00",
+    "amount_gross": "10,437.34"
+   },
+   {
+    "date": "06/01/00",
+    "amount_gross": "848.07"
+   }
+  ]
+ },
+ "docile/685f7be21127477583114af0_b.pdf": {
+  "row_f1": 0.0,
+  "gold_rows": [
+   {
+    "description": "Sample size:"
+   },
+   {
+    "description": "Number of Questions:"
+   },
+   {
+    "description": "Qualifiers:"
+   }
+  ]
+ }
+}

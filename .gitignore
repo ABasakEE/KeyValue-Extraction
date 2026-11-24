@@ -67,3 +67,6 @@ presentation_scripts/*
 
 # written into the repository root by src/train.py at the start of every run
 current_run.txt
+
+# DocILE documents are not redistributed until the dataset terms are confirmed (the demo examples exist locally only)
+demo_pdfs/tagger/docile/
