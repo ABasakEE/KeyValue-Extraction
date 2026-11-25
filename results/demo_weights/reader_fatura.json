@@ -1,0 +1,1365 @@
+{
+ "stats": {
+  "n_invoices": 500,
+  "reader_mean_f1": 91.1,
+  "k2_mean_f1": 66.3,
+  "k40_mean_f1": 99.8
+ },
+ "model": "Qwen3-VL-8B-Instruct, 4-bit nf4, prompt v2, one JSON answer per invoice (the format gate kept JSON), greedy; Kaggle T4 x 2",
+ "examples": [
+  {
+   "guid": "Template10_Instance131",
+   "template": "Template10",
+   "fold": 0,
+   "reader_f1": 100.0,
+   "k2_f1": 15.384615384615383,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 07-Jul-1993"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "Invoice number 8087-412"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 13-Aug-1997"
+    ],
+    [
+     "buyer",
+     20,
+     33,
+     "Buyer :Melinda Fowler 436 Catherine Corner Davisview, FM 54452 US Tel:+(008)693-8168 Email:uking@example.net Site:https://www.smith.info/"
+    ],
+    [
+     "total",
+     36,
+     40,
+     "TOTAL : 192.86 $"
+    ]
+   ],
+   "reader": [
+    [
+     "buyer",
+     20,
+     33,
+     "Buyer :Melinda Fowler 436 Catherine Corner Davisview, FM 54452 US Tel:+(008)693-8168 Email:uking@example.net Site:https://www.smith.info/"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 07-Jul-1993"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 13-Aug-1997"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "Invoice number 8087-412"
+    ],
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "total",
+     36,
+     40,
+     "TOTAL : 192.86 $"
+    ]
+   ],
+   "k2": [
+    [
+     "buyer",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "buyer",
+     20,
+     33,
+     "Buyer :Melinda Fowler 436 Catherine Corner Davisview, FM 54452 US Tel:+(008)693-8168 Email:uking@example.net Site:https://www.smith.info/"
+    ],
+    [
+     "title",
+     9,
+     10,
+     "Invoice"
+    ],
+    [
+     "title",
+     10,
+     11,
+     "Date:"
+    ],
+    [
+     "title",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "title",
+     16,
+     17,
+     "Due"
+    ]
+   ],
+   "k40": [
+    [
+     "buyer",
+     20,
+     33,
+     "Buyer :Melinda Fowler 436 Catherine Corner Davisview, FM 54452 US Tel:+(008)693-8168 Email:uking@example.net Site:https://www.smith.info/"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 07-Jul-1993"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 13-Aug-1997"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "Invoice number 8087-412"
+    ],
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "total",
+     36,
+     40,
+     "TOTAL : 192.86 $"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": \"Melinda Fowler 436 Catherine Corner Davisview, FM 54452 US\",\n  \"date\": \"07-Jul-1993 12|05\",\n  \"due_date\": \"13-Aug-1997 11|12\",\n  \"number\": \"8087-412 11|07\",\n  \"seller_address\": \"4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US 71|01\",\n  \"seller_name\": \"Mclean-Cochran 86|09\",\n  \"sub_total\": null,\n  \"title\": null,\n  \"total\": \"192.86 $ 62|66\"\n}"
+   ],
+   "why": "reader beats the K = 2 tagger (K = 40 right too)"
+  },
+  {
+   "guid": "Template10_Instance128",
+   "template": "Template10",
+   "fold": 0,
+   "reader_f1": 100.0,
+   "k2_f1": 16.666666666666664,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 02-Aug-2004"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "INVOICE # 9281-549"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 01-Feb-2009"
+    ],
+    [
+     "buyer",
+     20,
+     34,
+     "Buyer :Shawna Hernandez 24978 Stevens Ports New Angela, FM 48742 US Tel:+(275)722-2030 Email:jamesnathaniel@example.com Site:https://www.rivera.com/"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 498.21 EUR"
+    ]
+   ],
+   "reader": [
+    [
+     "buyer",
+     20,
+     34,
+     "Buyer :Shawna Hernandez 24978 Stevens Ports New Angela, FM 48742 US Tel:+(275)722-2030 Email:jamesnathaniel@example.com Site:https://www.rivera.com/"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 02-Aug-2004"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 01-Feb-2009"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "INVOICE # 9281-549"
+    ],
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 498.21 EUR"
+    ]
+   ],
+   "k2": [
+    [
+     "buyer",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "buyer",
+     20,
+     34,
+     "Buyer :Shawna Hernandez 24978 Stevens Ports New Angela, FM 48742 US Tel:+(275)722-2030 Email:jamesnathaniel@example.com Site:https://www.rivera.com/"
+    ],
+    [
+     "title",
+     10,
+     11,
+     "Date:"
+    ],
+    [
+     "title",
+     11,
+     13,
+     "02-Aug-2004 INVOICE"
+    ],
+    [
+     "title",
+     15,
+     16,
+     "Mclean-Cochran"
+    ]
+   ],
+   "k40": [
+    [
+     "buyer",
+     20,
+     34,
+     "Buyer :Shawna Hernandez 24978 Stevens Ports New Angela, FM 48742 US Tel:+(275)722-2030 Email:jamesnathaniel@example.com Site:https://www.rivera.com/"
+    ],
+    [
+     "date",
+     9,
+     12,
+     "Invoice Date: 02-Aug-2004"
+    ],
+    [
+     "due_date",
+     16,
+     20,
+     "Due Date : 01-Feb-2009"
+    ],
+    [
+     "number",
+     12,
+     15,
+     "INVOICE # 9281-549"
+    ],
+    [
+     "seller_address",
+     0,
+     9,
+     "Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US"
+    ],
+    [
+     "seller_name",
+     15,
+     16,
+     "Mclean-Cochran"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 498.21 EUR"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": \"Shawna Hernandez 24978 Stevens Ports New Angela, FM 48742 US\",\n  \"date\": \"02-Aug-2004 12|05\",\n  \"due_date\": \"01-Feb-2009 11|12\",\n  \"number\": \"INVOICE # 9281-549 10|07\",\n  \"seller_address\": \"Address:4894 Melanie Pass Apt. 742 Tammyland, SD 42587 US 71|01\",\n  \"seller_name\": \"Mclean-Cochran 86|09\",\n  \"sub_total\": null,\n  \"title\": null,\n  \"total\": \"TOTAL : 498.21 EUR 64|66\"\n}"
+   ],
+   "why": "reader beats the K = 2 tagger (K = 40 right too)"
+  },
+  {
+   "guid": "Template47_Instance106",
+   "template": "Template47",
+   "fold": 1,
+   "reader_f1": 100.0,
+   "k2_f1": 18.181818181818183,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "seller_name",
+     0,
+     4,
+     "Rogers, Olson and Sanders"
+    ],
+    [
+     "seller_address",
+     4,
+     14,
+     "Address:116 Smith Loop Apt. 882 East David, AL 55672 US"
+    ],
+    [
+     "title",
+     14,
+     15,
+     "INVOICE"
+    ],
+    [
+     "number",
+     15,
+     18,
+     "INVOICE # INV/44-76/038"
+    ],
+    [
+     "date",
+     21,
+     24,
+     "Invoice Date: 08-Feb-2003"
+    ],
+    [
+     "due_date",
+     24,
+     28,
+     "Due Date : 15-Mar-2014"
+    ],
+    [
+     "total",
+     28,
+     32,
+     "TOTAL : 330.56 USD"
+    ]
+   ],
+   "reader": [
+    [
+     "date",
+     21,
+     24,
+     "Invoice Date: 08-Feb-2003"
+    ],
+    [
+     "due_date",
+     24,
+     28,
+     "Due Date : 15-Mar-2014"
+    ],
+    [
+     "number",
+     15,
+     18,
+     "INVOICE # INV/44-76/038"
+    ],
+    [
+     "seller_address",
+     4,
+     14,
+     "Address:116 Smith Loop Apt. 882 East David, AL 55672 US"
+    ],
+    [
+     "seller_name",
+     0,
+     4,
+     "Rogers, Olson and Sanders"
+    ],
+    [
+     "title",
+     14,
+     15,
+     "INVOICE"
+    ],
+    [
+     "total",
+     28,
+     32,
+     "TOTAL : 330.56 USD"
+    ]
+   ],
+   "k2": [
+    [
+     "number",
+     14,
+     15,
+     "INVOICE"
+    ],
+    [
+     "seller_address",
+     4,
+     14,
+     "Address:116 Smith Loop Apt. 882 East David, AL 55672 US"
+    ],
+    [
+     "seller_address",
+     18,
+     28,
+     "PO Number :03 Invoice Date: 08-Feb-2003 Due Date : 15-Mar-2014"
+    ],
+    [
+     "sub_total",
+     28,
+     32,
+     "TOTAL : 330.56 USD"
+    ]
+   ],
+   "k40": [
+    [
+     "date",
+     21,
+     24,
+     "Invoice Date: 08-Feb-2003"
+    ],
+    [
+     "due_date",
+     24,
+     28,
+     "Due Date : 15-Mar-2014"
+    ],
+    [
+     "number",
+     15,
+     18,
+     "INVOICE # INV/44-76/038"
+    ],
+    [
+     "seller_address",
+     4,
+     14,
+     "Address:116 Smith Loop Apt. 882 East David, AL 55672 US"
+    ],
+    [
+     "seller_name",
+     0,
+     4,
+     "Rogers, Olson and Sanders"
+    ],
+    [
+     "title",
+     14,
+     15,
+     "INVOICE"
+    ],
+    [
+     "total",
+     28,
+     32,
+     "TOTAL : 330.56 USD"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": null,\n  \"date\": \"Invoice Date: 08-Feb-2003 18|30\",\n  \"due_date\": \"Due Date : 15-Mar-2014 17|32\",\n  \"number\": \"INVOICE # INV/44-76/038 18|26\",\n  \"seller_address\": \"Address:116 Smith Loop Apt. 882 East David, AL 55672 US 22|17\",\n  \"seller_name\": \"Rogers, Olson and Sanders 19|12\",\n  \"sub_total\": null,\n  \"title\": \"INVOICE 12|21\",\n  \"total\": \"TOTAL : 330.56 USD 63|51\"\n}"
+   ],
+   "why": "reader beats the K = 2 tagger (K = 40 right too)"
+  },
+  {
+   "guid": "Template31_Instance56",
+   "template": "Template31",
+   "fold": 4,
+   "reader_f1": 36.36363636363637,
+   "k2_f1": 61.53846153846153,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # INV/31-28/941"
+    ],
+    [
+     "date",
+     4,
+     6,
+     "Date: 21-Dec-1999"
+    ],
+    [
+     "buyer",
+     6,
+     19,
+     "Buyer :Christina Ruiz 500 Stephen Creek Robertfort, SC 11832 US Tel:+(703)030-0768 Email:matthewparker@example.com Site:http://sanchez.com/"
+    ],
+    [
+     "seller_address",
+     19,
+     29,
+     "Address:785 Kaiser Circles Suite 840 West Johnny, KS 33272 US"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 516.50 EUR"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 519.53 EUR"
+    ]
+   ],
+   "reader": [
+    [
+     "buyer",
+     4,
+     6,
+     "Date: 21-Dec-1999"
+    ],
+    [
+     "number",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 516.50 EUR"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 519.53 EUR"
+    ]
+   ],
+   "k2": [
+    [
+     "buyer",
+     6,
+     19,
+     "Buyer :Christina Ruiz 500 Stephen Creek Robertfort, SC 11832 US Tel:+(703)030-0768 Email:matthewparker@example.com Site:http://sanchez.com/"
+    ],
+    [
+     "seller_address",
+     19,
+     29,
+     "Address:785 Kaiser Circles Suite 840 West Johnny, KS 33272 US"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 516.50 EUR"
+    ],
+    [
+     "title",
+     3,
+     4,
+     "INV/31-28/941"
+    ],
+    [
+     "total",
+     33,
+     34,
+     "TAX:VAT"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 519.53 EUR"
+    ]
+   ],
+   "k40": [
+    [
+     "buyer",
+     6,
+     19,
+     "Buyer :Christina Ruiz 500 Stephen Creek Robertfort, SC 11832 US Tel:+(703)030-0768 Email:matthewparker@example.com Site:http://sanchez.com/"
+    ],
+    [
+     "date",
+     4,
+     6,
+     "Date: 21-Dec-1999"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # INV/31-28/941"
+    ],
+    [
+     "seller_address",
+     19,
+     29,
+     "Address:785 Kaiser Circles Suite 840 West Johnny, KS 33272 US"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 516.50 EUR"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     37,
+     41,
+     "TOTAL : 519.53 EUR"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": \"Christina Ruiz 500 Stephen Creek Robertfort, SC 11832 US 58|09\",\n  \"date\": \"Date: 21-Dec-1999 58|09\",\n  \"due_date\": null,\n  \"number\": \"INVOICE # INV/31-28/941 61|03\",\n  \"seller_address\": null,\n  \"seller_name\": null,\n  \"sub_total\": \"SUB_TOTAL : 516.50 EUR 77|63\",\n  \"title\": \"INVOICE 61|03\",\n  \"total\": \"TOTAL : 519.53 EUR 74|70\"\n}"
+   ],
+   "why": "K = 40 tagger beats the reader"
+  },
+  {
+   "guid": "Template29_Instance70",
+   "template": "Template29",
+   "fold": 2,
+   "reader_f1": 42.857142857142854,
+   "k2_f1": 66.66666666666666,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "seller_address",
+     1,
+     10,
+     "Address:03449 Andrade Hill Suite 722 Campbellville, PW 02320 US"
+    ],
+    [
+     "buyer",
+     11,
+     24,
+     "Buyer :Amy Rose 41145 Hill Parkway Parkbury, AZ 30375 US Tel:+(297)882-6452 Email:nnelson@example.org Site:https://smith.org/"
+    ],
+    [
+     "date",
+     24,
+     26,
+     "Date: 17-Nov-2013"
+    ],
+    [
+     "number",
+     26,
+     29,
+     "INVOICE ID INV35753355"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 700.46 USD"
+    ],
+    [
+     "total",
+     58,
+     62,
+     "TOTAL : 720.28 USD"
+    ]
+   ],
+   "reader": [
+    [
+     "buyer",
+     1,
+     10,
+     "Address:03449 Andrade Hill Suite 722 Campbellville, PW 02320 US"
+    ],
+    [
+     "date",
+     11,
+     24,
+     "Buyer :Amy Rose 41145 Hill Parkway Parkbury, AZ 30375 US Tel:+(297)882-6452 Email:nnelson@example.org Site:https://smith.org/"
+    ],
+    [
+     "number",
+     24,
+     26,
+     "Date: 17-Nov-2013"
+    ],
+    [
+     "seller_name",
+     10,
+     11,
+     "Email:choieric@example.net"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 700.46 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     58,
+     62,
+     "TOTAL : 720.28 USD"
+    ]
+   ],
+   "k2": [
+    [
+     "date",
+     24,
+     26,
+     "Date: 17-Nov-2013"
+    ],
+    [
+     "date",
+     26,
+     27,
+     "INVOICE"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 700.46 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     58,
+     62,
+     "TOTAL : 720.28 USD"
+    ]
+   ],
+   "k40": [
+    [
+     "buyer",
+     11,
+     24,
+     "Buyer :Amy Rose 41145 Hill Parkway Parkbury, AZ 30375 US Tel:+(297)882-6452 Email:nnelson@example.org Site:https://smith.org/"
+    ],
+    [
+     "date",
+     24,
+     26,
+     "Date: 17-Nov-2013"
+    ],
+    [
+     "number",
+     26,
+     29,
+     "INVOICE ID INV35753355"
+    ],
+    [
+     "seller_address",
+     1,
+     10,
+     "Address:03449 Andrade Hill Suite 722 Campbellville, PW 02320 US"
+    ],
+    [
+     "sub_total",
+     29,
+     33,
+     "SUB_TOTAL : 700.46 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     58,
+     62,
+     "TOTAL : 720.28 USD"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": \"Amy Rose 49|07\",\n  \"date\": \"17-Nov-2013 17|17\",\n  \"due_date\": null,\n  \"number\": \"INV35753355 74|13\",\n  \"seller_address\": \"03449 Andrade Hill Suite 722 Campbellville, PW 02320 US 49|07\",\n  \"seller_name\": \"choieric@example.net 54|11\",\n  \"sub_total\": \"700.46 USD 68|70\",\n  \"title\": \"INVOICE 51|01\",\n  \"total\": \"720.28 USD 65|80\"\n}"
+   ],
+   "why": "K = 40 tagger beats the reader"
+  },
+  {
+   "guid": "Template11_Instance46",
+   "template": "Template11",
+   "fold": 3,
+   "reader_f1": 100.0,
+   "k2_f1": 100.0,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "Invoice number 1218-350"
+    ],
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 09-Apr-1999"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 06-Jan-2001"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 1020.93 USD"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 1025.53 USD"
+    ]
+   ],
+   "reader": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 09-Apr-1999"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 06-Jan-2001"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "Invoice number 1218-350"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 1020.93 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 1025.53 USD"
+    ]
+   ],
+   "k2": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 09-Apr-1999"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 06-Jan-2001"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "Invoice number 1218-350"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 1020.93 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 1025.53 USD"
+    ]
+   ],
+   "k40": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 09-Apr-1999"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 06-Jan-2001"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "Invoice number 1218-350"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 1020.93 USD"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 1025.53 USD"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": null,\n  \"date\": \"Invoice Date: 09-Apr-1999 49|16\",\n  \"due_date\": \"Due Date : 06-Jan-2001 49|18\",\n  \"number\": \"Invoice number 1218-350 49|14\",\n  \"seller_address\": null,\n  \"seller_name\": null,\n  \"sub_total\": \"SUB_TOTAL : 1020.93 USD 61|66\",\n  \"title\": \"INVOICE 21|06\",\n  \"total\": \"TOTAL : 1025.53 USD 58|74\"\n}"
+   ],
+   "why": "all three right"
+  },
+  {
+   "guid": "Template11_Instance98",
+   "template": "Template11",
+   "fold": 3,
+   "reader_f1": 100.0,
+   "k2_f1": 100.0,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # 6360-051"
+    ],
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 25-Nov-2010"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 25-Sep-2010"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 542.20 $"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 556.53 $"
+    ]
+   ],
+   "reader": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 25-Nov-2010"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 25-Sep-2010"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # 6360-051"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 542.20 $"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 556.53 $"
+    ]
+   ],
+   "k2": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 25-Nov-2010"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 25-Sep-2010"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # 6360-051"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 542.20 $"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 556.53 $"
+    ]
+   ],
+   "k40": [
+    [
+     "date",
+     4,
+     7,
+     "Invoice Date: 25-Nov-2010"
+    ],
+    [
+     "due_date",
+     7,
+     11,
+     "Due Date : 25-Sep-2010"
+    ],
+    [
+     "number",
+     1,
+     4,
+     "INVOICE # 6360-051"
+    ],
+    [
+     "sub_total",
+     14,
+     18,
+     "SUB_TOTAL : 542.20 $"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     22,
+     26,
+     "TOTAL : 556.53 $"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": null,\n  \"date\": \"Invoice Date: 25-Nov-2010 49|16\",\n  \"due_date\": \"Due Date : 25-Sep-2010 49|18\",\n  \"number\": \"INVOICE # 6360-051 47|14\",\n  \"seller_address\": null,\n  \"seller_name\": null,\n  \"sub_total\": \"SUB_TOTAL : 542.20 $ 59|66\",\n  \"title\": \"INVOICE 21|06\",\n  \"total\": \"TOTAL : 556.53 $ 56|74\"\n}"
+   ],
+   "why": "all three right"
+  },
+  {
+   "guid": "Template3_Instance118",
+   "template": "Template3",
+   "fold": 1,
+   "reader_f1": 61.53846153846153,
+   "k2_f1": 20.0,
+   "k40_f1": 100.0,
+   "gold": [
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "seller_name",
+     1,
+     5,
+     "Kirk, Murphy and Daniels"
+    ],
+    [
+     "date",
+     5,
+     8,
+     "Invoice Date: 20-Jun-2021"
+    ],
+    [
+     "number",
+     8,
+     11,
+     "INVOICE ID 6Y7M8d-027"
+    ],
+    [
+     "due_date",
+     30,
+     34,
+     "Due Date : 11-Feb-2000"
+    ],
+    [
+     "total",
+     47,
+     51,
+     "TOTAL : 973.25 EUR"
+    ]
+   ],
+   "reader": [
+    [
+     "buyer",
+     14,
+     30,
+     "BILL_TO: Daniel Lee 3782 Lisa Plaza Apt. 990 Lake Albert, OR 52264 US Tel:+(481)476-7775 Email:muellerjacob@example.org Site:http://meza.com/"
+    ],
+    [
+     "date",
+     5,
+     8,
+     "Invoice Date: 20-Jun-2021"
+    ],
+    [
+     "due_date",
+     30,
+     34,
+     "Due Date : 11-Feb-2000"
+    ],
+    [
+     "number",
+     8,
+     11,
+     "INVOICE ID 6Y7M8d-027"
+    ],
+    [
+     "seller_address",
+     1,
+     5,
+     "Kirk, Murphy and Daniels"
+    ],
+    [
+     "sub_total",
+     47,
+     51,
+     "TOTAL : 973.25 EUR"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ]
+   ],
+   "k2": [
+    [
+     "date",
+     5,
+     8,
+     "Invoice Date: 20-Jun-2021"
+    ],
+    [
+     "number",
+     8,
+     14,
+     "INVOICE ID 6Y7M8d-027 PO Number :63"
+    ],
+    [
+     "seller_address",
+     30,
+     34,
+     "Due Date : 11-Feb-2000"
+    ],
+    [
+     "sub_total",
+     47,
+     51,
+     "TOTAL : 973.25 EUR"
+    ]
+   ],
+   "k40": [
+    [
+     "date",
+     5,
+     8,
+     "Invoice Date: 20-Jun-2021"
+    ],
+    [
+     "due_date",
+     30,
+     34,
+     "Due Date : 11-Feb-2000"
+    ],
+    [
+     "number",
+     8,
+     11,
+     "INVOICE ID 6Y7M8d-027"
+    ],
+    [
+     "seller_name",
+     1,
+     5,
+     "Kirk, Murphy and Daniels"
+    ],
+    [
+     "title",
+     0,
+     1,
+     "INVOICE"
+    ],
+    [
+     "total",
+     47,
+     51,
+     "TOTAL : 973.25 EUR"
+    ]
+   ],
+   "raw": [
+    "{\n  \"buyer\": \"Daniel Lee 47|31\",\n  \"date\": \"Invoice Date: 20-Jun-2021 83|14\",\n  \"due_date\": \"Due Date : 11-Feb-2000 42|46\",\n  \"number\": \"INVOICE ID 6Y7M8d-027 83|17\",\n  \"seller_address\": \"Kirk, Murphy and Daniels 12|08\",\n  \"seller_name\": \"Kirk, Murphy and Daniels 12|08\",\n  \"sub_total\": \"973.25 EUR 76|74\",\n  \"title\": \"INVOICE 47|02\",\n  \"total\": \"TOTAL : 973.25 EUR 76|74\"\n}"
+   ],
+   "why": "reader and K = 2 tagger both weak (K = 40 right)"
+  }
+ ]
+}

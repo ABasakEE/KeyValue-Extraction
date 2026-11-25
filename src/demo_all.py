@@ -46,7 +46,7 @@ VRDU_DIR = ROOT / "data" / "vrdu" / "registration-form" / "main"
 FATURA_DIR = ROOT / "data" / "fatura" / "raw" / "invoices_dataset_final"
 DOCILE_DIR = ROOT / "data" / "docile"
 XFUND_NAME = "XFUND forms (key-value linking)"
-READER_NAME = "Zero-shot reader: saved Qwen3-VL-8B outputs (VRDU)"
+READER_NAME = "Zero-shot reader: saved Qwen3-VL-8B outputs (VRDU and FATURA)"
 VRDU_NAME, FATURA_NAME, DOCILE_NAME = "VRDU registration forms", "FATURA invoices", "DocILE line items"
 
 # --------------------------------------------------------------------------------------------- texts that follow the dataset
@@ -80,8 +80,9 @@ INTRO = {
         "A vision-language model (**Qwen3-VL-8B, 4-bit**) reads the page image and the page's OCR lines (each with an id), is given the six field names with one-line descriptions, "
         "and must **copy the value and cite the line it came from**. Every answer is checked against the cited line (grounding) and becomes a span. **No form of any template was used to train it.**\n\n"
         "**These are preserved outputs, not a live run.** The 8B model needs a GPU (it ran on Kaggle T4s) and does not run on a laptop, so this tab replays its saved answers on "
-        "300 VRDU forms that nobody tuned on. The trained tagger's predictions (BROS Track 1, seed 13) are saved too, so you can compare them with the reader and with the gold.\n\n"
-        "**The point of this tab:** the two make different mistakes. The reader wins where the field's *wording* varies (`foreign_principle_name`, the registrant), BROS where position and span boundaries matter."),
+        "300 VRDU forms that nobody tuned on and on 500 FATURA invoices. The trained tagger's predictions (BROS Track 1, seed 13) are saved too, so you can compare them with the reader and with the gold.\n\n"
+        "**The point of this tab:** the two make different mistakes. On **VRDU** the reader wins where the field's *wording* varies (`foreign_principle_name`, the registrant), BROS where position and span boundaries matter. "
+        "On **FATURA** the reader scores about 91 whatever the number of training templates, while the tagger depends on it: 66 when trained on 2 templates, 99.8 on 40."),
     XFUND_NAME: (
         "## XFUND forms: entities and key-value links\n"
         "Forms in five languages. The model tags **questions, answers and headers** and a trained biaffine head links each **question to its answer** (red arrows). "
@@ -267,17 +268,22 @@ def curated(dataset_tag: str, key: str):
 ROLE = {"best": "good case", "typical": "typical case", "worst": "failure case"}
 
 
-def reader_data():
-    if "reader" not in _C:
+def reader_data(kind: str = "vrdu"):
+    if ("reader", kind) not in _C:
         import json
-        _C["reader"] = json.loads((W / "reader_vrdu.json").read_text(encoding="utf-8"))
-    return _C["reader"]
+        _C[("reader", kind)] = json.loads((W / f"reader_{kind}.json").read_text(encoding="utf-8"))
+    return _C[("reader", kind)]
 
 
 def example_choices(dataset: str, key: str):
     try:
         if dataset == READER_NAME:
-            return [(f"{e['template']}: {e['guid'][:40]} ({e['why']}; reader {e['reader_f1']:.0f}%, BROS {e['bros_f1']:.0f}% on this form)", e["guid"]) for e in reader_data()["examples"]]
+            vr = [(f"VRDU {e['template']}: {e['guid'][:36]} ({e['why']}; reader {e['reader_f1']:.0f}%, BROS {e['bros_f1']:.0f}%)", "vrdu::" + e["guid"]) for e in reader_data("vrdu")["examples"]]
+            fa = []
+            if (W / "reader_fatura.json").exists():
+                fa = [(f"FATURA {e['guid']} ({e['why']}; reader {e['reader_f1']:.0f}%, K = 40 {e['k40_f1']:.0f}%, K = 2 {e['k2_f1']:.0f}%)", "fatura::" + e["guid"])
+                      for e in reader_data("fatura")["examples"]]
+            return vr + fa
         cur = curated("vrdu", key) if dataset == VRDU_NAME else None
         if cur:
             kind = "unseen template" if key == "UTL" else "seen template"
@@ -539,8 +545,58 @@ If the value spans several lines, write one 'text identifier' per line. If the f
 ANSWER: """
 
 
+PROMPT_FATURA = """<Document>
+{every text block of the invoice, each followed by its id, e.g. "Date: 15-Jan-2014 09|05"}
+</Document>
+<Task>
+From the document, extract the values of the fields below. Every document line ends with its identifier (two numbers separated by |).
+Rules: 1. Write each value as the text copied exactly from ONE line, followed by that line's identifier, for example "Jane Q. Public 42|17".
+2. Copy only the value itself ... 3. A value that spans several lines is written as one 'text identifier' per line. 4. Use null for a field that does not occur.
+Field descriptions: {one line per field: buyer, date, due_date, number, seller_address, seller_name, sub_total, title, total}
+Answer with this JSON object: {"buyer": "<text> <identifier>" or null, ... }
+</Task>
+<Extraction>"""
+
+
+def run_reader_fatura(name):
+    import json
+    ent = next(e for e in reader_data("fatura")["examples"] if e["guid"] == name)
+    ex, pages, _ = load_example(FATURA_NAME, name)
+    colors = field_colors(FATURA_NAME)
+    tup = lambda spans: [(f, a, b) for f, a, b, _ in spans]
+    gold = set(tup(ent["gold"]))
+    shown = []
+    for label, spans in (("Zero-shot reader (Qwen3-VL-8B, saved)", ent["reader"]), ("BROS trained on 40 templates (saved, seed 13)", ent["k40"]), ("BROS trained on 2 templates (saved, seed 13)", ent["k2"])):
+        shown.append((draw(pages, ex, tup(spans), gold, colors)[0], label))
+    raw = {}
+    for r in ent["raw"]:
+        try:
+            raw = json.loads(r[r.index("{"):r.rindex("}") + 1])
+        except Exception:
+            raw = {"(unparsed answer)": r[:80]}
+    txt = lambda spans: {f: t for f, _, _, t in spans}
+    r_t, a_t, b_t, g_t = txt(ent["reader"]), txt(ent["k40"]), txt(ent["k2"]), txt(ent["gold"])
+    right = lambda spans, f: "yes" if any(ff == f and (ff, a, b) in gold for ff, a, b, _ in spans) else "no"
+    recs = []
+    for f in sorted(set(r_t) | set(a_t) | set(b_t) | set(g_t) | {k for k, v in raw.items() if v}):
+        recs.append({"Field": f, "Reader's raw answer (text, cited block)": str(raw.get(f) or "(null)")[:70], "Reader span": r_t.get(f, "")[:50], "K = 40 span": a_t.get(f, "")[:50], "K = 2 span": b_t.get(f, "")[:50],
+                     "Gold": g_t.get(f, "")[:50], "Reader right": right(ent["reader"], f), "K = 40 right": right(ent["k40"], f), "K = 2 right": right(ent["k2"], f)})
+    st = reader_data("fatura")["stats"]
+    lines = ["**Qwen3-VL-8B (4-bit), prompt v2, one JSON answer per invoice, greedy.** On the 500 FATURA confirm invoices the reader scores about 91.7 F1 whatever the number of seen templates, "
+             "while BROS goes from 32.5 (1 template) to 99.9 (40): the reader wins up to about 2 templates, ties at 5 and loses from 10.", "",
+             f"**This invoice:** reader {ent['reader_f1']:.0f}% F1, BROS K = 40 {ent['k40_f1']:.0f}%, BROS K = 2 {ent['k2_f1']:.0f}% ({ent['why']}). "
+             f"Per-invoice means over the {st['n_invoices']} invoices: reader {st['reader_mean_f1']}%, K = 40 {st['k40_mean_f1']}%, K = 2 {st['k2_mean_f1']}%.",
+             "**Source of these outputs:** " + reader_data("fatura")["model"] + ".", "",
+             "The invoice's template was held out of the BROS models shown (the fold that holds it out). FATURA is synthetic and its text blocks are the annotations (perfect OCR), so both systems are favoured.", "",
+             "<details><summary>The prompt the reader was given (one call per invoice, JSON answer)</summary>\n\n```\n" + PROMPT_FATURA + "\n```\n</details>"]
+    return shown, pd.DataFrame(recs), "\n\n".join(lines), legend_md(FATURA_NAME), pd.DataFrame()
+
+
 def run_reader(example):
-    ent = next(e for e in reader_data()["examples"] if e["guid"] == example)
+    if example.startswith("fatura::"):
+        return run_reader_fatura(example.split("::", 1)[1])
+    example = example.split("::", 1)[-1]
+    ent = next(e for e in reader_data("vrdu")["examples"] if e["guid"] == example)
     by_guid, _, _ = vrdu_protocol()
     ex = by_guid[example]
     pages = render_pdf(VRDU_DIR / "pdfs" / example)
@@ -561,10 +617,10 @@ def run_reader(example):
         recs.append({"Field": f, "Reader's raw answer (page: text, cited line)": raw or "(NONE on every page)", "Reader span": r_t.get(f, ""), "BROS span": b_t.get(f, ""),
                      "Gold": g_t.get(f, ""), "Reader right": "yes" if any(ff == f and (ff, a, b) in gold for ff, a, b, _ in ent["reader"]) else "no",
                      "BROS right": "yes" if any(ff == f and (ff, a, b) in gold for ff, a, b, _ in ent["bros"]) else "no"})
-    st = reader_data()["stats"]
+    st = reader_data("vrdu")["stats"]
     lines = [MODELS[READER_NAME][0]["text"], "", f"**This form:** reader {ent['reader_f1']:.0f}% F1, BROS {ent['bros_f1']:.0f}% ({ent['why']}). "
              f"Over all {st['n_docs']} forms the per-form mean is {st['reader_mean_f1']}% for the reader and {st['bros_seed13_mean_f1']}% for BROS seed 13.",
-             "**Source of these outputs:** " + reader_data()["model"] + ".", "", NOTES[READER_NAME], "",
+             "**Source of these outputs:** " + reader_data("vrdu")["model"] + ".", "", NOTES[READER_NAME], "",
              "<details><summary>The exact prompt the reader was given (one call per page and field)</summary>\n\n```\n" + PROMPT_V2 + "\n```\n</details>"]
     return shown, pd.DataFrame(recs), "\n\n".join(lines), legend_md(READER_NAME), pd.DataFrame()
 
