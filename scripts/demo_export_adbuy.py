@@ -1,4 +1,4 @@
-"""Ad-Buy line-item examples for demo_pdfs/tagger/adbuy: good (_g, row F1 >= 90) and medium (_m, 50 to 90) documents, from SAVED predictions.
+"""Ad-Buy line-item examples for demo_pdfs/tagger/adbuy: good (_g, row F1 >= 90), medium (_m, 50 to 90) and bad (_b, below 50) documents, from SAVED predictions.
 
     python scripts/demo_export_adbuy.py
 
@@ -39,13 +39,14 @@ def main() -> None:
     ok = [s for s in scored if 5 <= s["gold_rows"] <= 20 and s["pages"] <= 3 and s["words"] <= 1500]
     good = sorted([s for s in ok if s["f1"] >= 90], key=lambda s: -s["gold_rows"])
     medium = sorted([s for s in ok if 50 <= s["f1"] < 90], key=lambda s: s["f1"])
+    bad = sorted([s for s in scored if s["f1"] < 50 and 3 <= s["gold_rows"] <= 20 and s["pages"] <= 3 and s["words"] <= 1500], key=lambda s: s["f1"])
     pick = lambda xs, n: [xs[i] for i in sorted({round(k * (len(xs) - 1) / max(1, n - 1)) for k in range(n)})]
-    chosen = [(s, "g") for s in pick(good, 3)] + [(s, "m") for s in pick(medium, 3)]
+    chosen = [(s, "g") for s in pick(good, 3)] + [(s, "m") for s in pick(medium, 3)] + [(s, "b") for s in pick(bad, 2)]
     (OUT / "previews").mkdir(parents=True, exist_ok=True)
     readme = ["# demo_pdfs/tagger/adbuy: VRDU Ad-Buy line items (saved predictions, not a live model)", "",
               "Ad-Buy political-ad invoices (641 documents, dozens of templates, five line-item fields: channel, program description, start date, end date, amount). "
               f"The files are documents of templates the model did not train on: Track-1 BROS trained on 200 documents (`{RUN}`, training seed 13), cells grouped into rows by the anchor rule. "
-              "`_g` = row F1 on this document >= 90, `_m` = 50 to 90. Each PDF has a preview PNG in `previews/` with the predicted cells (coloured by field) and numbered rows; dashed blue boxes are gold cells that were missed.", "",
+              "`_g` = row F1 on this document >= 90, `_m` = 50 to 90, `_b` = below 50 (failure cases). Each PDF has a preview PNG in `previews/` with the predicted cells (coloured by field) and numbered rows; dashed blue boxes are gold cells that were missed.", "",
               "**Not live:** no Ad-Buy checkpoint was kept (`save_weights: false`), so `demo_all.py` cannot run these; train one with `notebooks/kaggle_adbuy_bros.ipynb` after setting `save_weights: true` if you need that. "
               "Over the 143 documents scored in every split this run averages "
               f"{sum(s['f1'] for s in scored) / len(scored):.0f}% per-document row F1 (the study's pooled figure for N = 200 is 85.7 over three splits).", "",

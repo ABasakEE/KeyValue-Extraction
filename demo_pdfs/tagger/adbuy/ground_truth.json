@@ -457,5 +457,132 @@
    }
   ],
   "run": "N200_SD0"
+ },
+ "4a299a7d-62bb-0861-a4e2-70060c7f5fed_b.pdf": {
+  "row_f1": 16.3,
+  "gold_rows": [
+   {
+    "sub_amount": "20.00",
+    "channel": "N M",
+    "program_desc": "DR . PHIL"
+   },
+   {
+    "sub_amount": "12.00",
+    "channel": "N M",
+    "program_desc": "DR . OZ"
+   },
+   {
+    "sub_amount": "24.00",
+    "channel": "N M",
+    "program_desc": "MOM"
+   },
+   {
+    "sub_amount": "24.00",
+    "program_desc": "MODERN FAMILY",
+    "channel": "N M"
+   },
+   {
+    "program_desc": "MODERN FAMILY",
+    "channel": "N M",
+    "sub_amount": "24,00"
+   },
+   {
+    "program_desc": "FOX 14 NEWS AT 9",
+    "channel": "N M",
+    "sub_amount": "50.00"
+   },
+   {
+    "program_desc": "HOW I MET YOUR MOTHE",
+    "channel": "M",
+    "sub_amount": "10.00"
+   },
+   {
+    "sub_amount": "10.00",
+    "program_desc": "HOW I MET YOUR MOTHE",
+    "channel": "N M"
+   },
+   {
+    "program_desc": "DEPUTY",
+    "channel": "M",
+    "sub_amount": "35.00"
+   }
+  ],
+  "run": "N200_SD0"
+ },
+ "494007-103012-murphy-invoice-3-13516266235434-_-pdf_b.pdf": {
+  "row_f1": 49.2,
+  "gold_rows": [
+   {
+    "sub_amount": "$ 625.00",
+    "program_start_date": "10/02/12",
+    "program_desc": "Today Show"
+   },
+   {
+    "program_start_date": "10/02/12",
+    "sub_amount": "$ 800.00",
+    "program_desc": "CHANNEL 11 NEWS - FIRST AT FIVE"
+   },
+   {
+    "program_start_date": "10/06/12",
+    "program_desc": "CHANNEL 11 SATURDAY MORN NEWS",
+    "sub_amount": "$ 250.00"
+   },
+   {
+    "program_start_date": "10/06/12",
+    "program_desc": "CHANNEL 11 SATURDAY MORN NEWS",
+    "sub_amount": "$ 275.00"
+   },
+   {
+    "program_start_date": "10/06/12",
+    "program_desc": "CHANNEL 11 NEWS",
+    "sub_amount": "$ 625.00"
+   },
+   {
+    "program_start_date": "10/06/12",
+    "program_desc": "CHANNEL 11 NEWS AT 11P",
+    "sub_amount": "$ 2100.00"
+   },
+   {
+    "program_start_date": "10/07/12",
+    "program_desc": "CHANNEL 11 SUNDAY MORN NEWS",
+    "sub_amount": "$ 250.00"
+   },
+   {
+    "program_start_date": "10/07/12",
+    "program_desc": "CHANNEL 11 SUNDAY MORN NEWS",
+    "sub_amount": "$ 275.00"
+   },
+   {
+    "program_start_date": "10/02/12",
+    "program_desc": "Parenthood 10-11P",
+    "sub_amount": "$ 2000.00"
+   },
+   {
+    "program_desc": "Channel 11 News 5am",
+    "program_start_date": "10/02/12",
+    "sub_amount": "$ 300.00"
+   },
+   {
+    "program_start_date": "10/02/12",
+    "sub_amount": "$ 800.00",
+    "program_desc": "CHANNEL 11 NEWS - FIRST AT FIVE"
+   },
+   {
+    "program_start_date": "10/02/12",
+    "program_desc": "Channel 11 News At 6pm M - F",
+    "sub_amount": "$ 1000.00"
+   },
+   {
+    "program_start_date": "10/07/12",
+    "program_desc": "CHANNEL 11 NEWS",
+    "sub_amount": "$ 675.00"
+   },
+   {
+    "program_start_date": "10/07/12",
+    "program_desc": "Cash Cab 12a",
+    "sub_amount": "$ 300.00"
+   }
+  ],
+  "run": "N200_SD0"
  }
 }
