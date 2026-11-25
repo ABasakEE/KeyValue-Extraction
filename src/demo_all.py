@@ -379,10 +379,11 @@ def row_links(spans, d, rows):
     return out
 
 
-def draw(pages, ex, spans, gold_spans, colors, rows=None, links=None):
+def draw(pages, ex, spans, gold_spans, colors, rows=None, links=None, label_once=False):
     out = [p.copy() for p in pages]
     font = _font(max(14, min(24, pages[0].width // 60)))
     pset = set(spans)
+    labelled: set = set()
     for typ, a, b in sorted(gold_spans - pset):            # missed gold: dashed blue
         pi = ex.page_ids[a] if ex.page_ids else 0
         if pi >= len(out):
@@ -403,7 +404,14 @@ def draw(pages, ex, spans, gold_spans, colors, rows=None, links=None):
         dr = ImageDraw.Draw(out[pi])
         for i in range(a, b):
             dr.rectangle([ex.boxes[i][0] * w / 1000, ex.boxes[i][1] * h / 1000, ex.boxes[i][2] * w / 1000, ex.boxes[i][3] * h / 1000], outline=color, width=3)
-        tag = _short(typ) + ("" if not gold_spans else (" ok" if (typ, a, b) in gold_spans else " wrong"))
+        if label_once:   # dense tables: name each field once per page, mark only wrong or missed cells afterwards
+            first = (pi, typ) not in labelled
+            labelled.add((pi, typ))
+            if not first and (typ, a, b) in gold_spans:
+                continue
+            tag = _short(typ) if first else _short(typ) + " wrong"
+        else:
+            tag = _short(typ) + ("" if not gold_spans else (" ok" if (typ, a, b) in gold_spans else " wrong"))
         x0, y0 = ex.boxes[a][0] * w / 1000, ex.boxes[a][1] * h / 1000
         tw = dr.textlength(tag, font=font)
         dr.rectangle([x0, max(0, y0 - font.size - 4), x0 + tw + 6, max(0, y0 - 2)], fill="white")
